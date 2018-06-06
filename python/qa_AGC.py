@@ -22,6 +22,7 @@
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 import ECSS_swig as ECSS
+import time
 
 class qa_AGC (gr_unittest.TestCase):
 
@@ -103,6 +104,35 @@ class qa_AGC (gr_unittest.TestCase):
         dst_data = dst1.data()
         self.assertComplexTuplesAlmostEqual(expected_result, dst_data, 4)
 
+    def test_002_t (self):
+        tb = self.tb
+
+        sampling_freq = 100
+        src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
+                                   sampling_freq * 0.10, 1)
+        dst1 = blocks.vector_sink_c()
+        head = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
+
+        agc = ECSS.AGC(1e-3, 1, 10, 1)
+
+        tb.connect(src1, head)
+        tb.connect(head, agc)
+        tb.connect(agc, dst1)
+
+        counter=0
+
+        self.tb.run ()
+
+        src1.set_amplitude(10)
+        start = time.time()
+        while counter >= 5:
+            if assertAlmostEqual(head, agc):
+                ++counter
+        end = time.time()
+        attack_time= end - start
+        dst_data = dst1.data()
+        self.assertLessEqual(attack_time, 1e-3)
+        print "attack time is: ", attack_time, "s"
 
 if __name__ == '__main__':
     gr_unittest.run(qa_AGC, "qa_AGC.xml")
