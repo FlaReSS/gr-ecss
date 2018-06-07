@@ -22,7 +22,7 @@
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 import ECSS_swig as ECSS
-import time
+import time, sys
 
 class qa_AGC (gr_unittest.TestCase):
 
@@ -109,7 +109,7 @@ class qa_AGC (gr_unittest.TestCase):
 
         sampling_freq = 100
         src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
-                                   sampling_freq * 0.10, 1)
+                                   sampling_freq * 0.10, 0)
         dst1 = blocks.vector_sink_c()
         head = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
 
@@ -123,16 +123,98 @@ class qa_AGC (gr_unittest.TestCase):
 
         self.tb.run ()
 
-        src1.set_amplitude(10)
+        src1.set_amplitude(100)
         start = time.time()
-        while counter >= 5:
+        while counter >= 3:
             if assertAlmostEqual(head, agc):
                 ++counter
+            else:
+                 counter=0
         end = time.time()
         attack_time= end - start
         dst_data = dst1.data()
         self.assertLessEqual(attack_time, 1e-3)
         print "attack time is: ", attack_time, "s"
+        f.write( "attack time is: "+ str(attack_time) + "s" )
+
+    def test_003_t (self):
+        tb = self.tb
+
+        sampling_freq = 1
+        src1 = analog.sig_source_c(sampling_freq, analog.GR_CONST_WAVE,
+                                   sampling_freq * 0.10, 0)
+        dst1 = blocks.vector_sink_c()
+        head = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
+
+        agc = ECSS.AGC(1, 1, 10, 1)
+
+        tb.connect(src1, head)
+        tb.connect(head, agc)
+        tb.connect(agc, dst1)
+
+        counter=0
+
+        self.tb.run ()
+
+        src1.set_amplitude(100)
+        start = time.time()
+        while counter >= 3:
+            if assertAlmostEqual(head, agc):
+                ++counter
+            else:
+                 counter=0
+        end = time.time()
+        attack_time= end - start
+        dst_data = dst1.data()
+        self.assertLessEqual(attack_time, 1e-3)
+        print "with step, attack time is: ", attack_time, "s"
+        f.write( "with step, attack time is: "+ str(attack_time) + "s" )
+
+    def test_004_t (self):
+        tb = self.tb
+
+        sampling_freq = 100
+
+        scr_er= analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
+                                   sampling_freq * 0.10, 10)
+
+
+        src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
+                                   sampling_freq * 0.10, 1)
+
+        dst_er = blocks.vector_sink_c()
+        dst1 = blocks.vector_sink_c()
+        head = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
+        head_er = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
+        agc = ECSS.AGC(0.001, 1, 10, 1)
+
+        tb.connect(src1, head)
+        tb.connect(head, agc)
+        tb.connect(agc, dst1)
+
+        tb.connect(scr_er, head_er)
+        tb.connect(head_er, dst_er)
+
+        self.tb.run ()
+
+        dst_data = dst1.data()
+        expected_result = dst_er.data()
+        diff = dst_er.data()
+
+        temp = [0 for x in range (len(dst_data))]
+        diff_real = [0 for x in range (len(dst_data))]
+        diff_imag = [0 for x in range (len(dst_data))]
+        for i in xrange (len(dst_data)):
+            diff_real[i]= abs(dst_data[i].real - expected_result[i].real)
+            diff_imag[i]= abs(dst_data[i].imag - expected_result[i].imag)
+            temp[i] = diff_real[i] + diff_imag[i]
+
+        index= temp.index(max(temp))
+        print "maximum absolute error is: (", diff_real[index], ") + j(", diff_imag[index],')'
+        print "average absolute error is: (", sum(diff_real)/len(diff_real) , ") + j(", sum(diff_imag)/len(diff_imag),')'
 
 if __name__ == '__main__':
+    log_file = 'log_file.txt'
+    f = open(log_file, "w")
     gr_unittest.run(qa_AGC, "qa_AGC.xml")
+    f.close()
