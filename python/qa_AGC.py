@@ -18,6 +18,7 @@
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
 #
+from pyunitreport import HTMLTestRunner
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
@@ -33,6 +34,8 @@ class qa_AGC (gr_unittest.TestCase):
         self.tb = None
 
     def test_001_t (self):
+        """ Test 1: expected resut given by GnuRadio"""
+        f.write("\n======================================================================")
         f.write( "\nTest 1: \n" )
         tb = self.tb
         expected_result = (
@@ -109,6 +112,7 @@ class qa_AGC (gr_unittest.TestCase):
 
 
     def test_002_t (self):
+        """ Test 2: attack time < 10ms, with sine signal"""
         f.write( "\nTest 2: \n" )
         tb = self.tb
 
@@ -141,10 +145,11 @@ class qa_AGC (gr_unittest.TestCase):
         attack_time= end - start
         dst_data = dst1.data()
         self.assertLessEqual(attack_time, 1e-3)
-        print "attack time is: ", attack_time, "s"
+        print " attack time is: ", attack_time, "s"
         f.write( "\tattack time is: "+ str(attack_time) + "s" )
 
     def test_003_t (self):
+        """ Test 3: attack time < 10ms, with step signal"""
         f.write( "\nTest 3: \n" )
         tb = self.tb
 
@@ -187,6 +192,7 @@ class qa_AGC (gr_unittest.TestCase):
 
 
     def test_004_t (self):
+        """ Test 4: maximum error < 1%"""
         f.write( "\nTest 4: \n" )
         tb = self.tb
 
@@ -242,5 +248,6 @@ if __name__ == '__main__':
     runner = gr_unittest.TextTestRunner(f)
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_AGC)
     runner.run(suite)
+    gr_unittest.main(testRunner=HTMLTestRunner(output='AGC'))
     gr_unittest.TestProgram(testRunner = runner)
     f.close()
