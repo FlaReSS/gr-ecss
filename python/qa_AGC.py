@@ -18,16 +18,19 @@
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
 #
-from pyunitreport import HTMLTestRunner
-
+import runner
+import os
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 import ECSS_swig as ECSS
-import time, sys
+import math, time, sys
+"""DESCRIZIONE 1111"""
 
 class qa_AGC (gr_unittest.TestCase):
+    """DESCRIZIONE 1"""
 
     def setUp (self):
+        """DESCRIZIONE 2"""
         self.tb = gr.top_block ()
 
     def tearDown (self):
@@ -35,8 +38,6 @@ class qa_AGC (gr_unittest.TestCase):
 
     def test_001_t (self):
         """ Test 1: expected resut given by GnuRadio"""
-        f.write("\n======================================================================")
-        f.write( "\nTest 1: \n" )
         tb = self.tb
         expected_result = (
             (100.000244140625+7.2191943445432116e-07j),
@@ -108,49 +109,104 @@ class qa_AGC (gr_unittest.TestCase):
         # check data
         dst_data = dst1.data()
         self.assertComplexTuplesAlmostEqual(expected_result, dst_data, 4)
+        print "\nTEST EXPECTED RESULTs"
+
+    # def test_002_t (self):
+    #     """ Test 2: attack time < 10ms, with sine signal"""
+    #     tb = self.tb
+    #
+    #     sampling_freq = 100
+    #     src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
+    #                                sampling_freq * 0.10, 1)
+    #     src2 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
+    #                                sampling_freq * 0.10, 10)
+    #     dst1 = blocks.vector_sink_c()
+    #     dst2 = blocks.vector_sink_c()
+    #     head = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
+    #     head2 = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
+    #
+    #     agc = ECSS.AGC(1e-3, 1, 10, 1)
+    #
+    #     #f.write( "\t parameters: \n" )
+    #
+    #     tb.connect(src1, head)
+    #     tb.connect(head, agc)
+    #     tb.connect(agc, dst1)
+    #
+    #     tb.connect(src2, head2)
+    #     tb.connect(head2, dst2)
+    #
+    #
+    #     self.tb.run ()
+    #
+    #     data_in = dst2.data()
+    #     data_out = dst1.data()
+    #
+    #     start=10
+    #     end=0
+    #     counter=0
+    #
+    #     for i in xrange (len(data_in)):
+    #         if i == start:
+    #             src1.set_amplitude(100)
+    #             counter=0
+    #         if i>3 and abs(data_out[i].real - data_in[i].real)<= 1 and abs(data_out[i].imag - data_in[i].imag)<= 1 :
+    #             ++counter
+    #         else:
+    #              counter=0
+    #         if counter == 3:
+    #             end = i
+    #
+    #     attack_time= (end - start)/sampling_freq
+    #     self.assertLessEqual(attack_time, 1e-3)
+    #     print "\nattack time is: ", attack_time, "s"
+
+        def test_002_t (self):
+            """ Test 2: attack time < 10ms, with sine signal"""
+            tb = self.tb
+
+            sampling_freq = 100
+            src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
+                                       sampling_freq * 0.10, 10)
+            dst1 = blocks.vector_sink_c()
+            dst2 = blocks.vector_sink_c()
+            head = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
+            head2 = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
+
+            agc = ECSS.AGC(1e-3, 1, 10, 1)
+
+            #f.write( "\t parameters: \n" )
+
+            tb.connect(src1, head)
+            tb.connect(head, agc)
+            tb.connect(agc, dst1)
+
+            tb.connect(src1, head2)
+            tb.connect(head2, dst2)
 
 
+            self.tb.run ()
 
-    def test_002_t (self):
-        """ Test 2: attack time < 10ms, with sine signal"""
-        f.write( "\nTest 2: \n" )
-        tb = self.tb
+            data_in = dst2.data()
+            data_out = dst1.data()
 
-        sampling_freq = 100
-        src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
-                                   sampling_freq * 0.10, 0)
-        dst1 = blocks.vector_sink_c()
-        head = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
+            end=0
+            counter=0
 
-        agc = ECSS.AGC(1e-3, 1, 10, 1)
+            for i in xrange (len(data_in)):
+                if abs(data_out[i].real - data_in[i].real)<= 0.001 and abs(data_out[i].imag - data_in[i].imag)<= 0.001 :
+                    ++counter
+                else:
+                     counter=0
+                if counter ==10:
+                    end = i
 
-        #f.write( "\t parameters: \n" )
-
-        tb.connect(src1, head)
-        tb.connect(head, agc)
-        tb.connect(agc, dst1)
-
-        counter=0
-
-        self.tb.run ()
-
-        src1.set_amplitude(100)
-        start = time.time()
-        while counter >= 3:
-            if assertAlmostEqual(head, agc):
-                ++counter
-            else:
-                 counter=0
-        end = time.time()
-        attack_time= end - start
-        dst_data = dst1.data()
-        self.assertLessEqual(attack_time, 1e-3)
-        print " attack time is: ", attack_time, "s"
-        f.write( "\tattack time is: "+ str(attack_time) + "s" )
+            attack_time= (end )/sampling_freq
+            self.assertLessEqual(attack_time, 1e-3)
+            print "\nattack time is: ", attack_time, "s"
 
     def test_003_t (self):
         """ Test 3: attack time < 10ms, with step signal"""
-        f.write( "\nTest 3: \n" )
         tb = self.tb
 
         sampling_freq = 1
@@ -181,9 +237,8 @@ class qa_AGC (gr_unittest.TestCase):
         end = time.time()
         attack_time= end - start
         dst_data = dst1.data()
-        self.assertLessEqual(attack_time, 1)
-        print "with step, attack time is: ", attack_time, "s"
-        f.write( "\t with step, attack time is: "+ str(attack_time) + "s" )
+        self.assertLessEqual(attack_time, -1)
+        print "\nwith step, attack time is: ", attack_time, "s"
         #
         # if assertAlmostEqual(attack_time, 0):
         #     f.write( "\n\nPASSED!!!!!!!!!!\n\n")
@@ -193,7 +248,6 @@ class qa_AGC (gr_unittest.TestCase):
 
     def test_004_t (self):
         """ Test 4: maximum error < 1%"""
-        f.write( "\nTest 4: \n" )
         tb = self.tb
 
         sampling_freq = 100
@@ -235,19 +289,15 @@ class qa_AGC (gr_unittest.TestCase):
             temp[i] = diff_real[i] + diff_imag[i]
 
         index= temp.index(max(temp))
-        print "maximum absolute error is: ("+ str( diff_real[index]) + ") + j("+ str(diff_imag[index]) +')'
-        f.write( "\t maximum absolute error is: ("+ str( diff_real[index]) + ") + j("+ str(diff_imag[index]) +')')
-        print "average absolute error is: ("+ str( sum(diff_real)/len(diff_real)) + ") + j("+ str( sum(diff_imag)/len(diff_imag)) +')\n'
-        f.write( "\n\t average absolute error is: ("+ str( sum(diff_real)/len(diff_real)) + ") + j("+ str( sum(diff_imag)/len(diff_imag)) +')')
+        print "\nmaximum absolute error is: ("+ str( diff_real[index]) + ") + j("+ str(diff_imag[index]) +')'
+        print "\naverage absolute error is: ("+ str( sum(diff_real)/len(diff_real)) + ") + j("+ str( sum(diff_imag)/len(diff_imag)) +')\n'
 
 if __name__ == '__main__':
-    log_file = '../../test log/qa_test_log.txt'
-    f = open(log_file, "w")
-    f.write( "This is the Log file of the GnuRadio's OOT block: AGC\n\n" )
-    f.write( "there are several tests, that will be repeated twice, as require gr_unittest\n\n" )
-    runner = gr_unittest.TextTestRunner(f)
+    """DESCRIZIONE MAIN"""
+    informations= []
+    informations.append(os.path.abspath("AGC.h"))
+    informations.append("TEST_C_2")
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_AGC)
-    runner.run(suite)
-    gr_unittest.main(testRunner=HTMLTestRunner(output='AGC'))
-    gr_unittest.TestProgram(testRunner = runner)
-    f.close()
+    runner = runner.HTMLTestRunner(output='AGC')
+    runner.run(suite, informations)
+    gr_unittest.TestProgram()
