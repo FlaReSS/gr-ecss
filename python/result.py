@@ -100,6 +100,7 @@ class _HtmlTestResult(_TextTestResult):
         self.elapsed_times = elapsed_times
         self.infoclass = _TestInfo
         self.path_Test= []
+        self.testcase_name= "NOT FOUND"
 
     def pass_info(self, l_path):
         self.path_Test = l_path
@@ -260,15 +261,102 @@ class _HtmlTestResult(_TextTestResult):
             status.append('Skip: {}'.format(skips))
         result = ', '.join(status)
 
-        hearders = {
-            "path_file": str(self.path_Test[0]),
-            "check_sum": str(self.path_Test[1]),
-            "start_time": str(start_time)[:19],
-            "duration": str(elapsed_time)[:7],
-            "status": result
-        }
+        current_dir = os.getcwd()
+        folders = current_dir.split("/")
+        class_name = folders[folders.index("build")-1].split("-")[1]
+
+        files_information = self.get_file_path_and_chechsum()
+        if len(files_information) == 8:
+            hearders = {
+                "header_file_path": files_information[0],
+                "checksum_header_file": files_information[1],
+                "header_impl_file_path": files_information[2],
+                "checksum_header_impl_file": files_information[3],
+                "cpp_impl_file_path": files_information[4],
+                "checksum_cpp_impl_file": files_information[5],
+                "test_file_path": files_information[6],
+                "checksum_test_file": files_information[7],
+                "is_python": "none",
+                "start_time": str(start_time)[:19],
+                "duration": str(elapsed_time)[:7],
+                "status": result
+            }
+        else:
+            hearders = {
+                "python_file_path": files_information[0],
+                "checksum_python_file": files_information[1],
+                "test_file_path": files_information[2],
+                "checksum_test_file": files_information[3],
+                "is_python": "yes",
+                "start_time": str(start_time)[:19],
+                "duration": str(elapsed_time)[:7],
+                "status": result
+            }
         total_runned_test = success + skips + errors + failures
         return hearders, total_runned_test
+
+    def get_file_path_and_chechsum(self):
+        """ Return the right path of the file and the checksum. The first assumption is that it is in C++"""
+        files_information = []
+        current_dir = os.getcwd()
+        folders = current_dir.split("/")
+        class_name = folders[folders.index("build")-1].split("-")[1]
+        class_dir = current_dir.split("gr-" + class_name)[0] + "gr-" + class_name
+        test_file_path = class_dir + "/python/qa_" + self.testcase_name + ".py"
+        if os.path.exists(test_file_path)== True:
+            checksum_test_file= "SOMETHING.... checksum_test_file"
+        else:
+            #test_file_path="NOT FOUND test_file_path!"
+            checksum_test_file= "NOT FOUND checksum_test_file!"
+
+        python_file_path = class_dir + "/python/" + self.testcase_name + ".py"
+        if os.path.exists(python_file_path)== True:
+            checksum_python_file= "SOMETHING.... checksum_python_file"
+            python_file= True
+        else:
+            python_file= None
+            python_file_path="NOT FOUND python_file_path!"
+            checksum_python_file= "NOT FOUND checksum_python_file!"
+
+            header_file_path = class_dir + "/include/ECSS/" + self.testcase_name + ".h" #DA CAMBIARE ECSS CON CLASS_NAME
+            if os.path.exists(header_file_path)== True:
+                checksum_header_file= "SOMETHING.... checksum_header_file"
+            else:
+                header_file_path="NOT FOUND header_file_path!"
+                checksum_header_file= "NOT FOUND checksum_header_file!"
+
+            header_impl_file_path = class_dir + "/lib/" + self.testcase_name + "_impl.h"
+            if os.path.exists(header_impl_file_path)== True:
+                checksum_header_impl_file= "SOMETHING.... checksum_header_impl_file"
+            else:
+                header_impl_file_path="NOT FOUND header_impl_file_path!"
+                checksum_header_impl_file= "NOT FOUNDchecksum_header_impl_file!"
+
+            cpp_impl_file_path = class_dir + "/lib/" + self.testcase_name + "_impl.cc"
+            if os.path.exists(cpp_impl_file_path)== True:
+                checksum_cpp_impl_file= "SOMETHING.... checksum_cpp_impl_file"
+            else:
+                cpp_impl_file_path="NOT FOUND cpp_impl_file_path!"
+                checksum_cpp_impl_file= "NOT FOUND checksum_cpp_impl_file!"
+
+
+        if python_file == None:
+            files_information.append(header_file_path)
+            files_information.append(checksum_header_file)
+            files_information.append(header_impl_file_path)
+            files_information.append(checksum_header_impl_file)
+            files_information.append(cpp_impl_file_path)
+            files_information.append(checksum_cpp_impl_file)
+            files_information.append(test_file_path)
+            files_information.append(checksum_test_file)
+        else:
+            files_information.append(python_file_path)
+            files_information.append(checksum_python_file)
+            files_information.append(test_file_path)
+            files_information.append(checksum_test_file)
+
+        return files_information
+
 
     def _test_method_name(self, test_id):
         """ Return a test name of the test id. """
@@ -312,12 +400,15 @@ class _HtmlTestResult(_TextTestResult):
 
     def _report_tests(self, test_class_name, tests, testRunner):
         """ Generate a html file for a given suite.  """
+
+        self.testcase_name = test_class_name.split("_")[2]
+
         report_name = testRunner.report_title
         start_time = testRunner.start_time
         elapsed_time = testRunner.time_taken
 
         report_headers, total_test = self.get_report_attributes(tests, start_time, elapsed_time)
-        testcase_name = test_class_name.split("_")[2]
+
         test_cases_list = []
 
         # Sort test by number if they have
@@ -328,7 +419,7 @@ class _HtmlTestResult(_TextTestResult):
 
         html_file = render_html(testRunner.template, title=report_name,
                                 headers=report_headers,
-                                testcase_name=testcase_name,
+                                testcase_name=self.testcase_name,
                                 description= "description.......................",
                                 tests_results=test_cases_list,
                                 total_tests=total_test)
@@ -352,7 +443,7 @@ class _HtmlTestResult(_TextTestResult):
     def generate_file(self, output, report_name, report):
         """ Generate the report file in the given path. """
         current_dir = os.getcwd()
-        dir_to = os.path.join(current_dir, 'reports', output)
+        dir_to = os.path.join(current_dir, output)
         if not os.path.exists(dir_to):
             os.makedirs(dir_to)
         path_file = os.path.join(dir_to, report_name)
