@@ -5,9 +5,8 @@ import time
 import traceback
 from unittest import TestResult, _TextTestResult
 from unittest.result import failfast
-
+import hashlib
 from jinja2 import Template
-
 
 DEFAULT_TEMPLATE = os.path.join(os.path.dirname(__file__), "template",
                                 "report_template.html")
@@ -77,8 +76,7 @@ class _TestInfo(object):
         return self.test_id
 
     def test_finished(self):
-        self.elapsed_time = \
-            self.test_result.stop_time - self.test_result.start_time
+        self.elapsed_time =  self.test_result.stop_time - self.test_result.start_time
 
     def get_description(self):
         return self.test_description
@@ -99,11 +97,7 @@ class _HtmlTestResult(_TextTestResult):
         self.callback = None
         self.elapsed_times = elapsed_times
         self.infoclass = _TestInfo
-        self.path_Test= []
         self.testcase_name= "NOT FOUND"
-
-    def pass_info(self, l_path):
-        self.path_Test = l_path
 
     def _prepare_callback(self, test_info, target_list, verbose_str,
                           short_str):
@@ -276,7 +270,7 @@ class _HtmlTestResult(_TextTestResult):
                 "checksum_cpp_impl_file": files_information[5],
                 "test_file_path": files_information[6],
                 "checksum_test_file": files_information[7],
-                "is_python": "none",
+                "is_python": "N",
                 "start_time": str(start_time)[:19],
                 "duration": str(elapsed_time)[:7],
                 "status": result
@@ -287,7 +281,7 @@ class _HtmlTestResult(_TextTestResult):
                 "checksum_python_file": files_information[1],
                 "test_file_path": files_information[2],
                 "checksum_test_file": files_information[3],
-                "is_python": "yes",
+                "is_python": "Y",
                 "start_time": str(start_time)[:19],
                 "duration": str(elapsed_time)[:7],
                 "status": result
@@ -296,7 +290,7 @@ class _HtmlTestResult(_TextTestResult):
         return hearders, total_runned_test
 
     def get_file_path_and_chechsum(self):
-        """ Return the right path of the file and the checksum. The first assumption is that it is in C++"""
+        """ Return the right path of the file and the checksum"""
         files_information = []
         current_dir = os.getcwd()
         folders = current_dir.split("/")
@@ -304,14 +298,14 @@ class _HtmlTestResult(_TextTestResult):
         class_dir = current_dir.split("gr-" + class_name)[0] + "gr-" + class_name
         test_file_path = class_dir + "/python/qa_" + self.testcase_name + ".py"
         if os.path.exists(test_file_path)== True:
-            checksum_test_file= "SOMETHING.... checksum_test_file"
+            checksum_test_file= self.checksum_generation(test_file_path)
         else:
-            #test_file_path="NOT FOUND test_file_path!"
+            test_file_path="NOT FOUND test_file_path!"
             checksum_test_file= "NOT FOUND checksum_test_file!"
 
         python_file_path = class_dir + "/python/" + self.testcase_name + ".py"
         if os.path.exists(python_file_path)== True:
-            checksum_python_file= "SOMETHING.... checksum_python_file"
+            checksum_python_file= self.checksum_generation(python_file_path)
             python_file= True
         else:
             python_file= None
@@ -320,21 +314,21 @@ class _HtmlTestResult(_TextTestResult):
 
             header_file_path = class_dir + "/include/ECSS/" + self.testcase_name + ".h" #DA CAMBIARE ECSS CON CLASS_NAME
             if os.path.exists(header_file_path)== True:
-                checksum_header_file= "SOMETHING.... checksum_header_file"
+                checksum_header_file= self.checksum_generation(header_file_path)
             else:
                 header_file_path="NOT FOUND header_file_path!"
                 checksum_header_file= "NOT FOUND checksum_header_file!"
 
             header_impl_file_path = class_dir + "/lib/" + self.testcase_name + "_impl.h"
             if os.path.exists(header_impl_file_path)== True:
-                checksum_header_impl_file= "SOMETHING.... checksum_header_impl_file"
+                checksum_header_impl_file= self.checksum_generation(header_impl_file_path)
             else:
                 header_impl_file_path="NOT FOUND header_impl_file_path!"
                 checksum_header_impl_file= "NOT FOUNDchecksum_header_impl_file!"
 
             cpp_impl_file_path = class_dir + "/lib/" + self.testcase_name + "_impl.cc"
             if os.path.exists(cpp_impl_file_path)== True:
-                checksum_cpp_impl_file= "SOMETHING.... checksum_cpp_impl_file"
+                checksum_cpp_impl_file= self.checksum_generation(cpp_impl_file_path)
             else:
                 cpp_impl_file_path="NOT FOUND cpp_impl_file_path!"
                 checksum_cpp_impl_file= "NOT FOUND checksum_cpp_impl_file!"
@@ -356,6 +350,14 @@ class _HtmlTestResult(_TextTestResult):
             files_information.append(checksum_test_file)
 
         return files_information
+
+    def checksum_generation(self, file):
+        """Return the CheckSum of a whole file"""
+        checksum_file = hashlib.md5()
+        with open(file, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                checksum_file.update(chunk)
+        return checksum_file.hexdigest()
 
 
     def _test_method_name(self, test_id):
@@ -401,7 +403,8 @@ class _HtmlTestResult(_TextTestResult):
     def _report_tests(self, test_class_name, tests, testRunner):
         """ Generate a html file for a given suite.  """
 
-        self.testcase_name = test_class_name.split("_")[2]
+        #temp_test_class = test_class_name.split('_')[2]
+        self.testcase_name = test_class_name.replace(".html","").replace("Test_qa_","")
 
         report_name = testRunner.report_title
         start_time = testRunner.start_time
@@ -420,7 +423,7 @@ class _HtmlTestResult(_TextTestResult):
         html_file = render_html(testRunner.template, title=report_name,
                                 headers=report_headers,
                                 testcase_name=self.testcase_name,
-                                description= "description.......................",
+                                description= "",
                                 tests_results=test_cases_list,
                                 total_tests=total_test)
         return html_file
@@ -432,8 +435,9 @@ class _HtmlTestResult(_TextTestResult):
         for testcase_class_name, all_tests in all_results.items():
 
             if testRunner.outsuffix:
-                testcase_class_name = "Test_{}_{}.html".format(testcase_class_name,
-                                                               testRunner.outsuffix)
+                # testcase_class_name = "Test_{}_{}.html".format(testcase_class_name,
+                #                                                testRunner.outsuffix)
+                testcase_class_name = "Test_{}.html".format(testcase_class_name)
 
             tests = self._report_tests(testcase_class_name, all_tests,
                                        testRunner)

@@ -37,7 +37,7 @@ class HTMLTestRunner(TextTestRunner):
         return self.resultclass(self.stream, self.descriptions, self.verbosity,
                                 self.elapsed_times)
 
-    def run(self, test, info):
+    def run(self, test):
         """ Runs the given testcase or testsuite. """
         try:
 
@@ -92,7 +92,6 @@ class HTMLTestRunner(TextTestRunner):
 
             self.stream.writeln()
             self.stream.writeln('Generating HTML reports... ')
-            result.pass_info(info)
             result.generate_reports(self)
         finally:
             pass

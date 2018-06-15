@@ -24,13 +24,9 @@ from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 import ECSS_swig as ECSS
 import math, time, sys
-"""DESCRIZIONE 1111"""
-
 class qa_AGC (gr_unittest.TestCase):
-    """DESCRIZIONE 1"""
 
     def setUp (self):
-        """DESCRIZIONE 2"""
         self.tb = gr.top_block ()
 
     def tearDown (self):
@@ -161,49 +157,49 @@ class qa_AGC (gr_unittest.TestCase):
     #     self.assertLessEqual(attack_time, 1e-3)
     #     print "\nattack time is: ", attack_time, "s"
 
-        def test_002_t (self):
-            """ Test 2: attack time < 10ms, with sine signal"""
-            tb = self.tb
+    def test_002_t (self):
+        """ Test 2: attack time < 10ms, with sine signal"""
+        tb = self.tb
 
-            sampling_freq = 100
-            src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
-                                       sampling_freq * 0.10, 10)
-            dst1 = blocks.vector_sink_c()
-            dst2 = blocks.vector_sink_c()
-            head = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
-            head2 = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
+        sampling_freq = 100
+        src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
+                                   sampling_freq * 0.10, 10)
+        dst1 = blocks.vector_sink_c()
+        dst2 = blocks.vector_sink_c()
+        head = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
+        head2 = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
 
-            agc = ECSS.AGC(1e-3, 1, 10, 1)
+        agc = ECSS.AGC(1e-3, 1, 10, 1)
 
-            #f.write( "\t parameters: \n" )
+        #f.write( "\t parameters: \n" )
 
-            tb.connect(src1, head)
-            tb.connect(head, agc)
-            tb.connect(agc, dst1)
+        tb.connect(src1, head)
+        tb.connect(head, agc)
+        tb.connect(agc, dst1)
 
-            tb.connect(src1, head2)
-            tb.connect(head2, dst2)
+        tb.connect(src1, head2)
+        tb.connect(head2, dst2)
 
 
-            self.tb.run ()
+        self.tb.run ()
 
-            data_in = dst2.data()
-            data_out = dst1.data()
+        data_in = dst2.data()
+        data_out = dst1.data()
 
-            end=0
-            counter=0
+        end=0
+        counter=0
 
-            for i in xrange (len(data_in)):
-                if abs(data_out[i].real - data_in[i].real)<= 0.001 and abs(data_out[i].imag - data_in[i].imag)<= 0.001 :
-                    ++counter
-                else:
-                     counter=0
-                if counter ==10:
-                    end = i
+        for i in xrange (len(data_in)):
+            if abs(data_out[i].real - data_in[i].real)<= 0.001 and abs(data_out[i].imag - data_in[i].imag)<= 0.001 :
+                ++counter
+            else:
+                 counter=0
+            if counter ==10:
+                end = i
 
-            attack_time= (end )/sampling_freq
-            self.assertLessEqual(attack_time, 1e-3)
-            print "\nattack time is: ", attack_time, "s"
+        attack_time= (end )/sampling_freq
+        self.assertLessEqual(attack_time, 1e-3)
+        print "\nattack time is: ", attack_time, "s"
 
     def test_003_t (self):
         """ Test 3: attack time < 10ms, with step signal"""
@@ -293,11 +289,7 @@ class qa_AGC (gr_unittest.TestCase):
         print "\naverage absolute error is: ("+ str( sum(diff_real)/len(diff_real)) + ") + j("+ str( sum(diff_imag)/len(diff_imag)) +')\n'
 
 if __name__ == '__main__':
-    """DESCRIZIONE MAIN"""
-    informations= []
-    informations.append(os.path.abspath("AGC.h"))
-    informations.append("TEST_C_2")
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_AGC)
-    runner = runner.HTMLTestRunner(output='AGC')
-    runner.run(suite, informations)
+    runner = runner.HTMLTestRunner(output='Results')
+    runner.run(suite)
     gr_unittest.TestProgram()
