@@ -1,5 +1,5 @@
 title: The ECSS OOT Module
-brief: Short description of gr-ECSS
+brief: Short description of gr-ecss
 tags: # Tags are arbitrary, but look at CGRAN what other authors are using
   - sdr
 author:
@@ -11,6 +11,6 @@ license:
 #website: <module_website> # If you have a separate project website, put it here
 #icon: <icon_url> # Put a URL to a square image here that will be used as an icon on CGRAN
 ---
-A longer, multi-line description of gr-ECSS.
+A longer, multi-line description of gr-ecss.
 You may use some *basic* Markdown here.
 If left empty, it will try to find a README file instead.

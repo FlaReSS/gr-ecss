@@ -23,10 +23,10 @@ This is the GNU Radio ECSS module. Place your Python package
 description here (python/__init__.py).
 '''
 
-# import swig generated symbols into the ECSS namespace
+# import swig generated symbols into the ecss namespace
 try:
 	# this might fail if the module is python-only
-	from ECSS_swig import *
+	from ecss_swig import *
 except ImportError:
 	pass
 

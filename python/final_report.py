@@ -23,6 +23,7 @@ def load_template(template):
     finally:
         if not file:
             with open(DEFAULT_TEMPLATE, "r") as f:
+
                 file = f.read()
         return file
 
@@ -41,7 +42,7 @@ class HtmlFinalTestResult():
         self.name = "Final_Report_Tests.pdf"
         self.title = "Final report tests for gr-ecss"
         self.description= "Here are appended all the test results processed automatically"
-        self.output = "Final Report"
+        self.output = "../Final Report"
         self.class_name =""
         self.testcase_class_name= ""
         self.path_file_final = ""

@@ -291,47 +291,57 @@ class _HtmlTestResult(_TextTestResult):
 
     def get_file_path_and_chechsum(self):
         """ Return the right path of the file and the checksum"""
-        files_information = []
+        files_information= []
         current_dir = os.getcwd()
         folders = current_dir.split("/")
-        class_name = folders[folders.index("build")-1].split("-")[1]
-        class_dir = current_dir.split("gr-" + class_name)[0] + "gr-" + class_name
-        test_file_path = class_dir + "/python/qa_" + self.testcase_name + ".py"
-        if os.path.exists(test_file_path)== True:
-            checksum_test_file= self.checksum_generation(test_file_path)
+        dir_found=None
+        for dir in folders:
+            if dir.find("gr-") >= 0:
+                dir_found=True
+                class_name = dir.split("-")[1]
+
+        if dir_found==True:
+            class_dir =  "gr-" + class_name
+            class_name = folders[folders.index("build")-1].split("-")[1]
+            class_dir = current_dir.split("gr-" + class_name)[0] + "gr-" + class_name
+            test_file_path = class_dir + "/python/qa_" + self.testcase_name + ".py"
+            if os.path.exists(test_file_path)== True:
+                checksum_test_file= self.checksum_generation(test_file_path)
+            else:
+                test_file_path="NOT FOUND test_file_path!"
+                checksum_test_file= "NOT FOUND checksum_test_file!"
+
+            python_file_path = class_dir + "/python/" + self.testcase_name + ".py"
+            if os.path.exists(python_file_path)== True:
+                checksum_python_file= self.checksum_generation(python_file_path)
+                python_file= True
+            else:
+                python_file= None
+                python_file_path="NOT FOUND python_file_path!"
+                checksum_python_file= "NOT FOUND checksum_python_file!"
+
+                header_file_path = class_dir + "/include/"+ class_name +"/" + self.testcase_name + ".h"
+                if os.path.exists(header_file_path)== True:
+                    checksum_header_file= self.checksum_generation(header_file_path)
+                else:
+                    header_file_path="NOT FOUND header_file_path!"
+                    checksum_header_file= "NOT FOUND checksum_header_file!"
+
+                header_impl_file_path = class_dir + "/lib/" + self.testcase_name + "_impl.h"
+                if os.path.exists(header_impl_file_path)== True:
+                    checksum_header_impl_file= self.checksum_generation(header_impl_file_path)
+                else:
+                    header_impl_file_path="NOT FOUND header_impl_file_path!"
+                    checksum_header_impl_file= "NOT FOUNDchecksum_header_impl_file!"
+
+                cpp_impl_file_path = class_dir + "/lib/" + self.testcase_name + "_impl.cc"
+                if os.path.exists(cpp_impl_file_path)== True:
+                    checksum_cpp_impl_file= self.checksum_generation(cpp_impl_file_path)
+                else:
+                    cpp_impl_file_path="NOT FOUND cpp_impl_file_path!"
+                    checksum_cpp_impl_file= "NOT FOUND checksum_cpp_impl_file!"
         else:
-            test_file_path="NOT FOUND test_file_path!"
-            checksum_test_file= "NOT FOUND checksum_test_file!"
-
-        python_file_path = class_dir + "/python/" + self.testcase_name + ".py"
-        if os.path.exists(python_file_path)== True:
-            checksum_python_file= self.checksum_generation(python_file_path)
-            python_file= True
-        else:
-            python_file= None
-            python_file_path="NOT FOUND python_file_path!"
-            checksum_python_file= "NOT FOUND checksum_python_file!"
-
-            header_file_path = class_dir + "/include/ECSS/" + self.testcase_name + ".h" #DA CAMBIARE ECSS CON CLASS_NAME
-            if os.path.exists(header_file_path)== True:
-                checksum_header_file= self.checksum_generation(header_file_path)
-            else:
-                header_file_path="NOT FOUND header_file_path!"
-                checksum_header_file= "NOT FOUND checksum_header_file!"
-
-            header_impl_file_path = class_dir + "/lib/" + self.testcase_name + "_impl.h"
-            if os.path.exists(header_impl_file_path)== True:
-                checksum_header_impl_file= self.checksum_generation(header_impl_file_path)
-            else:
-                header_impl_file_path="NOT FOUND header_impl_file_path!"
-                checksum_header_impl_file= "NOT FOUNDchecksum_header_impl_file!"
-
-            cpp_impl_file_path = class_dir + "/lib/" + self.testcase_name + "_impl.cc"
-            if os.path.exists(cpp_impl_file_path)== True:
-                checksum_cpp_impl_file= self.checksum_generation(cpp_impl_file_path)
-            else:
-                cpp_impl_file_path="NOT FOUND cpp_impl_file_path!"
-                checksum_cpp_impl_file= "NOT FOUND checksum_cpp_impl_file!"
+            print("CLASS NAME NOT FOUND!")
 
 
         if python_file == None:

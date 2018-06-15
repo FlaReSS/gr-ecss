@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<block>
+  <name>agc</name>
+  <key>ecss_agc</key>
+  <category>[ecss]</category>
+  <import>import ecss</import>
+  <make>ecss.agc($attack_time, $reference, $gain, $samp_rate)</make>
+
+
+  <callback>set_attack_time($attack_time)</callback>
+  <callback>set_samp_rate($samp_rate)</callback>
+  <callback>set_reference($reference)</callback>
+  <callback>set_gain($gain)</callback>
+  <!-- Make one 'param' node for every Parameter you want settable from the GUI.
+       Sub-nodes:
+       * name
+       * key (makes the value accessible as $keyname, e.g. in the make node)
+       * type -->
+  <param>
+    <name>attack time</name>
+    <key>attack_time</key>
+    <type>real</type>
+  </param>
+
+  <param>
+    <name>output reference</name>
+    <key>reference</key>
+    <type>real</type>
+  </param>
+
+  <param>
+    <name>minimum gain</name>
+    <key>gain</key>
+    <type>real</type>
+  </param>
+
+  <param>
+    <name>sample rate</name>
+    <key>samp_rate</key>
+    <type>int</type>
+  </param>
+
+  <!-- Make one 'sink' node per input. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+  <sink>
+    <name>in</name>
+    <type>complex</type>
+  </sink>
+
+  <!-- Make one 'source' node per output. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+  <source>
+    <name>out</name>
+    <type>complex</type>
+  </source>
+</block>
