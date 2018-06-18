@@ -19,5 +19,7 @@
 # Boston, MA 02110-1301, USA.
 
 install(FILES
-    ecss_agc.xml DESTINATION share/gnuradio/grc/blocks
+    ecss_agc.xml
+    ecss_spl_encoder.xml
+    ecss_spl_decoder.xml DESTINATION share/gnuradio/grc/blocks
 )

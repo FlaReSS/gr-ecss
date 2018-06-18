@@ -160,16 +160,19 @@ class qa_agc (gr_unittest.TestCase):
     def test_002_t (self):
         """ Test 2: attack time < 10ms, with sine signal"""
         tb = self.tb
-
-        sampling_freq = 100
+        reference=10
+        f_cut=50
+        input_amplitude=1
+        sampling_freq = 1000
         src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
-                                   sampling_freq * 0.10, 10)
+                                   sampling_freq * 0.10, 1)
+        #10 sample= 1 period
         dst1 = blocks.vector_sink_c()
         dst2 = blocks.vector_sink_c()
         head = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
         head2 = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
 
-        agc = ecss.agc(1e-3, 1, 10, 1)
+        agc = ecss.agc(f_cut, reference, 1, sampling_freq)
 
         #f.write( "\t parameters: \n" )
 
@@ -181,24 +184,24 @@ class qa_agc (gr_unittest.TestCase):
         tb.connect(head2, dst2)
 
 
-        self.tb.run ()
+        self.tb.run(500)
 
         data_in = dst2.data()
         data_out = dst1.data()
 
+        gain=reference/input_amplitude
         end=0
         counter=0
-
+        print("datain:\n")
         for i in xrange (len(data_in)):
-            if abs(data_out[i].real - data_in[i].real)<= 0.001 and abs(data_out[i].imag - data_in[i].imag)<= 0.001 :
-                ++counter
+            if abs(data_out[i].real - gain * data_in[i].real)<= 0.1:
+                counter += 1
             else:
                  counter=0
-            if counter ==10:
+            if counter == 50:
                 end = i
-
-        attack_time= (end )/sampling_freq
-        self.assertLessEqual(attack_time, 1e-3)
+        attack_time = (end - 49)/ (sampling_freq * 0.1)
+        self.assertLessEqual(attack_time, f_cut/sampling_freq)
         print "\nattack time is: ", attack_time, "s"
 
     def test_003_t (self):
