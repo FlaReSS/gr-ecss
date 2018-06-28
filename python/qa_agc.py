@@ -19,11 +19,10 @@
 # Boston, MA 02110-1301, USA.
 #
 import runner
-import os
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 import ecss_swig as ecss
-import math, time, sys
+import math, time
 class qa_agc (gr_unittest.TestCase):
 
     def setUp (self):
