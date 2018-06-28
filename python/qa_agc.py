@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright 2018 <+YOU OR YOUR COMPANY+>.
+# Copyright 2018 Antonio Miraglia - ISISpace .
 #
 # This is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -105,76 +105,25 @@ class qa_agc (gr_unittest.TestCase):
         # check data
         dst_data = dst1.data()
         self.assertComplexTuplesAlmostEqual(expected_result, dst_data, 4)
-        print "\nTEST EXPECTED RESULTs"
-
-    # def test_002_t (self):
-    #     """ Test 2: attack time < 10ms, with sine signal"""
-    #     tb = self.tb
-    #
-    #     sampling_freq = 100
-    #     src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
-    #                                sampling_freq * 0.10, 1)
-    #     src2 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
-    #                                sampling_freq * 0.10, 10)
-    #     dst1 = blocks.vector_sink_c()
-    #     dst2 = blocks.vector_sink_c()
-    #     head = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
-    #     head2 = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
-    #
-    #     agc = ecss.agc(1e-3, 1, 10, 1)
-    #
-    #     #f.write( "\t parameters: \n" )
-    #
-    #     tb.connect(src1, head)
-    #     tb.connect(head, agc)
-    #     tb.connect(agc, dst1)
-    #
-    #     tb.connect(src2, head2)
-    #     tb.connect(head2, dst2)
-    #
-    #
-    #     self.tb.run ()
-    #
-    #     data_in = dst2.data()
-    #     data_out = dst1.data()
-    #
-    #     start=10
-    #     end=0
-    #     counter=0
-    #
-    #     for i in xrange (len(data_in)):
-    #         if i == start:
-    #             src1.set_amplitude(100)
-    #             counter=0
-    #         if i>3 and abs(data_out[i].real - data_in[i].real)<= 1 and abs(data_out[i].imag - data_in[i].imag)<= 1 :
-    #             ++counter
-    #         else:
-    #              counter=0
-    #         if counter == 3:
-    #             end = i
-    #
-    #     attack_time= (end - start)/sampling_freq
-    #     self.assertLessEqual(attack_time, 1e-3)
-    #     print "\nattack time is: ", attack_time, "s"
 
     def test_002_t (self):
         """ Test 2: attack time < 10ms, with sine signal"""
         tb = self.tb
         reference=10
-        f_cut=50
+        f_cut=80
         input_amplitude=1
         sampling_freq = 1000
         src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
-                                   sampling_freq * 0.10, 1)
+                                   sampling_freq * 0.10, input_amplitude)
         #10 sample= 1 period
+
         dst1 = blocks.vector_sink_c()
         dst2 = blocks.vector_sink_c()
+
         head = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
         head2 = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
 
         agc = ecss.agc(f_cut, reference, 1, sampling_freq)
-
-        #f.write( "\t parameters: \n" )
 
         tb.connect(src1, head)
         tb.connect(head, agc)
@@ -192,58 +141,70 @@ class qa_agc (gr_unittest.TestCase):
         gain=reference/input_amplitude
         end=0
         counter=0
-        print("datain:\n")
         for i in xrange (len(data_in)):
-            if abs(data_out[i].real - gain * data_in[i].real)<= 0.1:
+            if abs(data_out[i].real - gain * data_in[i].real)<= (gain*0.1):
                 counter += 1
             else:
                  counter=0
-            if counter == 50:
+            if (counter == 10):
                 end = i
-        attack_time = (end - 49)/ (sampling_freq * 0.1)
-        self.assertLessEqual(attack_time, f_cut/sampling_freq)
+            elif ((i == len(data_in)-1) and (counter >=1)):
+                    end = i + (10 - counter)
+
+        attack_time =    (end - 9)/ (sampling_freq * 0.1)
+        time_unit = (f_cut *1.0 )/ (sampling_freq *1.0 )
+        self.assertLessEqual(attack_time, time_unit)
         print "\nattack time is: ", attack_time, "s"
 
     def test_003_t (self):
         """ Test 3: attack time < 10ms, with step signal"""
         tb = self.tb
-
-        sampling_freq = 1
+        reference=10
+        f_cut=80
+        input_amplitude=1
+        sampling_freq = 1000
         src1 = analog.sig_source_c(sampling_freq, analog.GR_CONST_WAVE,
-                                   sampling_freq * 0.10, 0)
+                                   sampling_freq * 0.10, input_amplitude)
+
         dst1 = blocks.vector_sink_c()
+        dst2 = blocks.vector_sink_c()
+
         head = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
+        head2 = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
 
-        agc = ecss.agc(1, 1, 10, 1)
-
-        #f.write( "\t parameters: \n" )
+        agc = ecss.agc(f_cut, reference, 1, sampling_freq)
 
         tb.connect(src1, head)
         tb.connect(head, agc)
         tb.connect(agc, dst1)
 
+        tb.connect(src1, head2)
+        tb.connect(head2, dst2)
+
+
+        self.tb.run(500)
+
+        data_in = dst2.data()
+        data_out = dst1.data()
+
+        gain=reference/input_amplitude
+        end=0
         counter=0
-
-        self.tb.run ()
-
-        src1.set_amplitude(100)
-        start = time.time()
-        while counter >= 3:
-            if assertAlmostEqual(head, agc):
-                ++counter
+        for i in xrange (len(data_in)):
+            #print data_out[i].real, "\t", data_out[i].imag
+            if abs(data_out[i].real - gain * data_in[i].real)<= (gain*0.1):
+                counter += 1
             else:
                  counter=0
-        end = time.time()
-        attack_time= end - start
-        dst_data = dst1.data()
-        self.assertLessEqual(attack_time, -1)
-        print "\nwith step, attack time is: ", attack_time, "s"
-        #
-        # if assertAlmostEqual(attack_time, 0):
-        #     f.write( "\n\nPASSED!!!!!!!!!!\n\n")
-        # else:
-        #     f.write( "\n\nFAILED!!!!!\n\n")
+            if (counter == 10):
+                end = i
+            elif ((i == len(data_in)-1) and (counter >=1)):
+                    end = i + (10 - counter)
 
+        attack_time =    (end - 9)/ (sampling_freq * 0.1)
+        time_unit = (f_cut *1.0 )/ (sampling_freq *1.0 )
+        self.assertLessEqual(attack_time, time_unit)
+        print "\nattack time is: ", attack_time, "s"
 
     def test_004_t (self):
         """ Test 4: maximum error < 1%"""
@@ -263,8 +224,6 @@ class qa_agc (gr_unittest.TestCase):
         head = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
         head_er = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
         agc = ecss.agc(0.001, 1, 10, 1)
-
-        #f.write( "\t parameters: \n" )
 
         tb.connect(src1, head)
         tb.connect(head, agc)
@@ -288,8 +247,8 @@ class qa_agc (gr_unittest.TestCase):
             temp[i] = diff_real[i] + diff_imag[i]
 
         index= temp.index(max(temp))
-        print "\nmaximum absolute error is: ("+ str( diff_real[index]) + ") + j("+ str(diff_imag[index]) +')'
-        print "\naverage absolute error is: ("+ str( sum(diff_real)/len(diff_real)) + ") + j("+ str( sum(diff_imag)/len(diff_imag)) +')\n'
+        print "\n-Maximum absolute error is: (%.3f) + j(%.3f); " % (diff_real[index], diff_imag[index])
+        print "\n-Average absolute error is: (%.3f) + j(%.3f)" % (sum(diff_real)/len(diff_real), sum(diff_imag)/len(diff_imag))
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_agc)
