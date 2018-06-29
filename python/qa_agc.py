@@ -23,6 +23,25 @@ from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 import ecss_swig as ecss
 import math, time
+
+
+def test_sine( tb, f_cut, sampling_freq, input_amplitude, reference):
+    src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
+                               sampling_freq * 0.10, input_amplitude)
+    #10 sample= 1 period
+    dst1 = blocks.vector_sink_c()
+    dst2 = blocks.vector_sink_c()
+    head = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
+    head2 = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
+    agc = ecss.agc(f_cut, reference, 1, sampling_freq)
+    tb.connect(src1, head)
+    tb.connect(head, agc)
+    tb.connect(agc, dst1)
+    tb.connect(src1, head2)
+    tb.connect(head2, dst2)
+    tb.run(500)
+    return dst2.data(), dst1.data()
+
 class qa_agc (gr_unittest.TestCase):
 
     def setUp (self):
@@ -106,54 +125,48 @@ class qa_agc (gr_unittest.TestCase):
         self.assertComplexTuplesAlmostEqual(expected_result, dst_data, 4)
 
     def test_002_t (self):
-        """ Test 2: attack time < 10ms, with sine signal"""
+        """ Test 2: maximum error < 1%"""
         tb = self.tb
-        reference=10
-        f_cut=80
-        input_amplitude=1
-        sampling_freq = 1000
+
+        sampling_freq = 100
+
+        scr_er= analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
+                                   sampling_freq * 0.10, 10)
+
+
         src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
-                                   sampling_freq * 0.10, input_amplitude)
-        #10 sample= 1 period
+                                   sampling_freq * 0.10, 1)
 
+        dst_er = blocks.vector_sink_c()
         dst1 = blocks.vector_sink_c()
-        dst2 = blocks.vector_sink_c()
-
         head = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
-        head2 = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
-
-        agc = ecss.agc(f_cut, reference, 1, sampling_freq)
+        head_er = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
+        agc = ecss.agc(0.001, 1, 10, 1)
 
         tb.connect(src1, head)
         tb.connect(head, agc)
         tb.connect(agc, dst1)
 
-        tb.connect(src1, head2)
-        tb.connect(head2, dst2)
+        tb.connect(scr_er, head_er)
+        tb.connect(head_er, dst_er)
 
+        self.tb.run ()
 
-        self.tb.run(500)
+        dst_data = dst1.data()
+        expected_result = dst_er.data()
+        diff = dst_er.data()
 
-        data_in = dst2.data()
-        data_out = dst1.data()
+        temp = [0 for x in range (len(dst_data))]
+        diff_real = [0 for x in range (len(dst_data))]
+        diff_imag = [0 for x in range (len(dst_data))]
+        for i in xrange (len(dst_data)):
+            diff_real[i]= abs(dst_data[i].real - expected_result[i].real)
+            diff_imag[i]= abs(dst_data[i].imag - expected_result[i].imag)
+            temp[i] = diff_real[i] + diff_imag[i]
 
-        gain=reference/input_amplitude
-        end=0
-        counter=0
-        for i in xrange (len(data_in)):
-            if abs(data_out[i].real - gain * data_in[i].real)<= (gain*0.1):
-                counter += 1
-            else:
-                 counter=0
-            if (counter == 10):
-                end = i
-            elif ((i == len(data_in)-1) and (counter >=1)):
-                    end = i + (10 - counter)
-
-        attack_time =    (end - 9)/ (sampling_freq * 0.1)
-        time_unit = (f_cut *1.0 )/ (sampling_freq *1.0 )
-        self.assertLessEqual(attack_time, time_unit)
-        print "\nattack time is: ", attack_time, "s"
+        index= temp.index(max(temp))
+        print "\n-Maximum absolute error is: (%.3f) + j(%.3f); " % (diff_real[index], diff_imag[index])
+        print "\n-Average absolute error is: (%.3f) + j(%.3f)" % (sum(diff_real)/len(diff_real), sum(diff_imag)/len(diff_imag))
 
     def test_003_t (self):
         """ Test 3: attack time < 10ms, with step signal"""
@@ -202,52 +215,174 @@ class qa_agc (gr_unittest.TestCase):
 
         attack_time =    (end - 9)/ (sampling_freq * 0.1)
         time_unit = (f_cut *1.0 )/ (sampling_freq *1.0 )
-        self.assertLessEqual(attack_time, time_unit)
+        self.assertLessEqual(attack_time, 0.3)
+        self.assertGreaterEqual(attack_time, 0.1)
         print "\nattack time is: ", attack_time, "s"
 
     def test_004_t (self):
-        """ Test 4: maximum error < 1%"""
+        """ Test 4: attack time < 10ms, with sine signal"""
         tb = self.tb
-
-        sampling_freq = 100
-
-        scr_er= analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
-                                   sampling_freq * 0.10, 10)
-
-
+        reference=10
+        f_cut=80
+        input_amplitude=1
+        sampling_freq = 1000
         src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
-                                   sampling_freq * 0.10, 1)
+                                   sampling_freq * 0.10, input_amplitude)
+        #10 sample= 1 period
 
-        dst_er = blocks.vector_sink_c()
         dst1 = blocks.vector_sink_c()
+        dst2 = blocks.vector_sink_c()
+
         head = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
-        head_er = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
-        agc = ecss.agc(0.001, 1, 10, 1)
+        head2 = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
+
+        agc = ecss.agc(f_cut, reference, 1, sampling_freq)
 
         tb.connect(src1, head)
         tb.connect(head, agc)
         tb.connect(agc, dst1)
 
-        tb.connect(scr_er, head_er)
-        tb.connect(head_er, dst_er)
+        tb.connect(src1, head2)
+        tb.connect(head2, dst2)
 
-        self.tb.run ()
 
-        dst_data = dst1.data()
-        expected_result = dst_er.data()
-        diff = dst_er.data()
+        self.tb.run(500)
 
-        temp = [0 for x in range (len(dst_data))]
-        diff_real = [0 for x in range (len(dst_data))]
-        diff_imag = [0 for x in range (len(dst_data))]
-        for i in xrange (len(dst_data)):
-            diff_real[i]= abs(dst_data[i].real - expected_result[i].real)
-            diff_imag[i]= abs(dst_data[i].imag - expected_result[i].imag)
-            temp[i] = diff_real[i] + diff_imag[i]
+        data_in = dst2.data()
+        data_out = dst1.data()
 
-        index= temp.index(max(temp))
-        print "\n-Maximum absolute error is: (%.3f) + j(%.3f); " % (diff_real[index], diff_imag[index])
-        print "\n-Average absolute error is: (%.3f) + j(%.3f)" % (sum(diff_real)/len(diff_real), sum(diff_imag)/len(diff_imag))
+        gain=reference/input_amplitude
+        end=0
+        counter=0
+        for i in xrange (len(data_in)):
+            if abs(data_out[i].real - gain * data_in[i].real)<= (gain*0.1):
+                counter += 1
+            else:
+                 counter=0
+            if (counter == 10):
+                end = i
+            elif ((i == len(data_in)-1) and (counter >=1)):
+                    end = i + (10 - counter)
+
+        attack_time =    (end - 9)/ (sampling_freq * 0.1)
+        time_unit = (f_cut *1.0 )/ (sampling_freq *1.0 )
+        self.assertLessEqual(attack_time, 0.3)
+        self.assertGreaterEqual(attack_time, 0.1)
+        print "\nattack time is: ", attack_time, "s"
+
+    def test_004b_t (self):
+        """ Test 4: attack time < 10ms, with sine signal of amplitude 1"""
+        reference=10
+        f_cut=80
+        input_amplitude=1
+        sampling_freq = 1000
+
+        data_in, data_out = test_sine( self.tb, f_cut, sampling_freq, input_amplitude, reference)
+
+        gain=reference/input_amplitude
+        end=0
+        counter=0
+        for i in xrange (len(data_in)):
+            if abs(data_out[i].real - gain * data_in[i].real)<= (gain*0.1):
+                counter += 1
+            else:
+                 counter=0
+            if (counter == 10):
+                end = i
+            elif ((i == len(data_in)-1) and (counter >=1)):
+                    end = i + (10 - counter)
+
+        attack_time =    (end - 9)/ (sampling_freq * 0.1)
+        time_unit = (f_cut *1.0 )/ (sampling_freq *1.0 )
+        self.assertLessEqual(attack_time, 0.3)
+        self.assertGreaterEqual(attack_time, 0.1)
+        print "\nattack time is: ", attack_time, "s"
+
+    def test_005_t (self):
+        """ Test 5: attack time < 10ms, with sine signal of amplitude 5"""
+        reference=10
+        f_cut=80
+        input_amplitude=5
+        sampling_freq = 1000
+
+        data_in, data_out = test_sine( self.tb, f_cut, sampling_freq, input_amplitude, reference)
+
+        gain=reference/input_amplitude
+        end=0
+        counter=0
+        for i in xrange (len(data_in)):
+            if abs(data_out[i].real - gain * data_in[i].real)<= (gain*0.1):
+                counter += 1
+            else:
+                 counter=0
+            if (counter == 10):
+                end = i
+            elif ((i == len(data_in)-1) and (counter >=1)):
+                    end = i + (10 - counter)
+
+        attack_time =    (end - 9)/ (sampling_freq * 0.1)
+        time_unit = (f_cut *1.0 )/ (sampling_freq *1.0 )
+        self.assertLessEqual(attack_time, 0.3)
+        self.assertGreaterEqual(attack_time, 0.1)
+        print "\nattack time is: ", attack_time, "s"
+
+    def test_006_t (self):
+        """ Test 6: attack time < 10ms, with sine signal of amplitude 10"""
+        reference=10
+        f_cut=80
+        input_amplitude=10
+        sampling_freq = 1000
+
+        data_in, data_out = test_sine( self.tb, f_cut, sampling_freq, input_amplitude, reference)
+
+        gain=reference/input_amplitude
+        end=0
+        counter=0
+        for i in xrange (len(data_in)):
+            if abs(data_out[i].real - gain * data_in[i].real)<= (gain*0.1):
+                counter += 1
+            else:
+                 counter=0
+            if (counter == 10):
+                end = i
+            elif ((i == len(data_in)-1) and (counter >=1)):
+                    end = i + (10 - counter)
+
+        attack_time =    (end - 9)/ (sampling_freq * 0.1)
+        time_unit = (f_cut *1.0 )/ (sampling_freq *1.0 )
+        self.assertLessEqual(attack_time, 0.3)
+        self.assertGreaterEqual(attack_time, 0.1)
+        print "\nattack time is: ", attack_time, "s"
+
+    def test_007_t (self):
+        """ Test 7: attack time < 10ms, with sine signal of amplitude 10, reference 5"""
+        reference=5
+        f_cut=80
+        input_amplitude=10
+        sampling_freq = 1000
+
+        data_in, data_out = test_sine( self.tb, f_cut, sampling_freq, input_amplitude, reference)
+
+        gain=reference/input_amplitude
+        end=0
+        counter=0
+        for i in xrange (len(data_in)):
+            if abs(data_out[i].real - gain * data_in[i].real)<= (gain*0.1):
+                counter += 1
+            else:
+                 counter=0
+            if (counter == 10):
+                end = i
+            elif ((i == len(data_in)-1) and (counter >=1)):
+                    end = i + (10 - counter)
+
+        attack_time =    (end - 9)/ (sampling_freq * 0.1)
+        time_unit = (f_cut *1.0 )/ (sampling_freq *1.0 )
+        self.assertLessEqual(attack_time, 0.3)
+        self.assertGreaterEqual(attack_time, 0.1)
+        print "\nattack time is: ", attack_time, "s"
+
+
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_agc)
