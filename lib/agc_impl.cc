@@ -24,6 +24,7 @@
 
 #include <gnuradio/io_signature.h>
 #include "agc_impl.h"
+#include <math.h>
 
 #define MAX_GAIN 65536
 
@@ -70,8 +71,8 @@ namespace gr {
           float rate= d_attack_time / d_samp_rate;
 
           for(int i = 0; i < noutput_items; i++) {
-              out[i]= in[i] *rate * d_gain;
-              d_gain +=  (d_reference / std::sqrt(out[i].real()*out[i].real() + out[i].imag()*out[i].imag()));
+              out[i]= in[i] * exp(d_gain*rate);
+              d_gain +=  log(d_reference) - log (std::sqrt(out[i].real()*out[i].real() + out[i].imag()*out[i].imag()));
               if(MAX_GAIN > 0.0 && d_gain > MAX_GAIN) {
                   d_gain = MAX_GAIN;
               }
