@@ -125,7 +125,7 @@ class qa_agc (gr_unittest.TestCase):
         self.assertComplexTuplesAlmostEqual(expected_result, dst_data, 4)
 
     def test_002_t (self):
-        """ Test 2: maximum error < 5%, with sine signal"""
+        """ Test 2: maximum error < 5%\; with sine signal"""
 
         """measurement of the error with a input sine signal"""
         tb = self.tb
@@ -181,8 +181,8 @@ class qa_agc (gr_unittest.TestCase):
         print "\n-Maximum absolute rms error percentage is: %.3f%%;\n-Average absolute rms error percentage is: %.3f%%" \
         % (temp[index]*100 , sum(temp)/(len(temp)-(sampling_freq * 0.1 * 0.5))*100)
 
-    def test_002b_t (self):
-        """ Test 2b: maximum error < 5%, with step signal"""
+    def test_002_t_1 (self):
+        """ Test 2b: maximum error < 5%; with step signal"""
 
         """measurement of the error with a input sine signal"""
         tb = self.tb
@@ -272,7 +272,7 @@ class qa_agc (gr_unittest.TestCase):
         data_out = dst1.data()
 
         #ideal gain
-        gain=reference/input_amplitude
+        gain=reference*1.0/input_amplitude
 
         end=0
         counter=0
@@ -297,7 +297,7 @@ class qa_agc (gr_unittest.TestCase):
         print "\n-Attack time is: %.3fs" % attack_time
 
     def test_004_t (self):
-        """ Test 4: attack time evaluation, with step signal of amplitude 5 and reference 10"""
+        """ Test 4: attack time evaluation; with step signal of amplitude 5 and reference 10"""
 
         tb = self.tb
         reference=10
@@ -330,7 +330,7 @@ class qa_agc (gr_unittest.TestCase):
         data_out = dst1.data()
 
         #ideal gain
-        gain=reference/input_amplitude
+        gain=reference*1.0/input_amplitude
 
         end=0
         counter=0
@@ -353,7 +353,7 @@ class qa_agc (gr_unittest.TestCase):
         print "\n-Attack time is: %.3fs" % attack_time
 
     def test_005_t (self):
-        """ Test 5: attack time evaluation, with step signal of amplitude 10 and reference 10"""
+        """ Test 5: attack time evaluation; with step signal of amplitude 10 and reference 10"""
 
         tb = self.tb
         reference=10
@@ -386,7 +386,7 @@ class qa_agc (gr_unittest.TestCase):
         data_out = dst1.data()
 
         #ideal gain
-        gain=reference/input_amplitude
+        gain=reference*1.0/input_amplitude
 
         end=0
         counter=0
@@ -409,7 +409,7 @@ class qa_agc (gr_unittest.TestCase):
         print "\n-Attack time is: %.3fs" % attack_time
 
     def test_006_t (self):
-        """ Test 6: attack time evaluation, with step signal of amplitude 10 and reference 5"""
+        """ Test 6: attack time evaluation; with step signal of amplitude 10 and reference 5"""
 
         tb = self.tb
         reference=5
@@ -442,30 +442,29 @@ class qa_agc (gr_unittest.TestCase):
         data_out = dst1.data()
 
         #ideal gain
-        gain=reference/input_amplitude
+        gain=reference*1.0/input_amplitude
 
         end=0
         counter=0
         for i in xrange (len(data_in)):
-            #print data_out[i].real, "\t", data_out[i].imag
-            if abs(data_out[i].real - gain * data_in[i].real)<= (gain * data_in[i].real * 0.05):
+            if abs(data_out[i].real - gain * data_in[i].real)<= (0.5 * data_in[i].real * 0.05):
                 counter += 1
             else:
                  counter=0
+
             if (counter == 10):
                 end = i
 
             elif ((i == len(data_in)-1) and (counter >=1)):
                     end = i + (10 - counter)
-
-        attack_time =    (end - 9)/ (sampling_freq * 0.1)
-        time_unit = (f_cut *1.0 )/ (sampling_freq *1.0 )
+        attack_time = (end - 9) / (sampling_freq * 0.1)
+        time_unit = (f_cut * 1.0 ) / (sampling_freq * 1.0 )
         self.assertLessEqual(attack_time, 0.3)
         self.assertGreaterEqual(attack_time, 0.1)
         print "\n-Attack time is: %.3fs" % attack_time
 
     def test_007_t (self):
-        """ Test 7: attack time evaluation, with sine signal of amplitude 1 and reference 10"""
+        """ Test 7: attack time evaluation; with sine signal of amplitude 1 and reference 10"""
 
         tb = self.tb
         reference=10
@@ -497,7 +496,7 @@ class qa_agc (gr_unittest.TestCase):
         data_in = dst2.data()
         data_out = dst1.data()
 
-        gain=reference/input_amplitude
+        gain=reference*1.0/input_amplitude
         end=0
         counter=0
         for i in xrange (len(data_in)):
@@ -517,7 +516,7 @@ class qa_agc (gr_unittest.TestCase):
         print "\n-Attack time is: %.3fs" % attack_time
 
     def test_008_t (self):
-        """ Test 8: attack time evaluation, with sine signal of amplitude 5 and reference 10"""
+        """ Test 8: attack time evaluation; with sine signal of amplitude 5 and reference 10"""
 
         tb = self.tb
         reference=10
@@ -549,7 +548,7 @@ class qa_agc (gr_unittest.TestCase):
         data_in = dst2.data()
         data_out = dst1.data()
 
-        gain=reference/input_amplitude
+        gain=reference*1.0/input_amplitude
         end=0
         counter=0
         for i in xrange (len(data_in)):
@@ -569,7 +568,7 @@ class qa_agc (gr_unittest.TestCase):
         print "\n-Attack time is: %.3fs" % attack_time
 
     def test_009_t (self):
-        """ Test 9: attack time evaluation, with sine signal of amplitude 10 and reference 10"""
+        """ Test 9: attack time evaluation; with sine signal of amplitude 10 and reference 10"""
 
         tb = self.tb
         reference=10
@@ -601,7 +600,7 @@ class qa_agc (gr_unittest.TestCase):
         data_in = dst2.data()
         data_out = dst1.data()
 
-        gain=reference/input_amplitude
+        gain=reference*1.0/input_amplitude
         end=0
         counter=0
         for i in xrange (len(data_in)):
@@ -621,7 +620,7 @@ class qa_agc (gr_unittest.TestCase):
         print "\n-Attack time is: %.3fs" % attack_time
 
     def test_0010_t (self):
-        """ Test 10: attack time evaluation, with sine signal of amplitude 10 and reference 5"""
+        """ Test 10: attack time evaluation; with sine signal of amplitude 10 and reference 5"""
 
         tb = self.tb
         reference=5
@@ -653,7 +652,7 @@ class qa_agc (gr_unittest.TestCase):
         data_in = dst2.data()
         data_out = dst1.data()
 
-        gain=reference/input_amplitude
+        gain=reference*1.0/input_amplitude
         end=0
         counter=0
         for i in xrange (len(data_in)):
