@@ -61,7 +61,7 @@ class _TestInfo(object):
         self.stdout = test_result._stdout_data
         self.stderr = test_result._stderr_data
 
-        self.test_description = self.test_result.getDescription(test_method)
+        self.test_description = self.test_result.getDescription(test_method).replace(";", ";<br />")
         self.test_exception_info = (
             '' if outcome in (self.SUCCESS, self.SKIP)
             else self.test_result._exc_info_to_string(
@@ -381,7 +381,12 @@ class _HtmlTestResult(_TextTestResult):
         test_description = testCase.test_description
         desc = test_description or test_name
 
-        stack= testCase.stdout.decode('latin-1') + testCase.stderr.decode('latin-1')
+        if (testCase.stdout.decode('latin-1').startswith("\n") == True):
+            out_messages = testCase.stdout.decode('latin-1').replace("\n", "" , 1)
+        else:
+            out_messages = testCase.stdout.decode('latin-1')
+
+        stack= out_messages.replace("\n", "<br />") + testCase.stderr.decode('latin-1')
 
 
         status = ('success', 'danger', 'warning', 'info')[testCase.outcome-1]
