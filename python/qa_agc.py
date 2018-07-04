@@ -3,21 +3,7 @@
 #
 # Copyright 2018 Antonio Miraglia - ISISpace .
 #
-# This is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3, or (at your option)
-# any later version.
-#
-# This software is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this software; see the file COPYING.  If not, write to
-# the Free Software Foundation, Inc., 51 Franklin Street,
-# Boston, MA 02110-1301, USA.
-#
+
 import runner
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
@@ -25,15 +11,42 @@ import ecss_swig as ecss
 import math, time
 
 
+def error_evaluation (data_out, expected_result, sampling_freq, attack_time_ms):
+    """this function evaluates the absolute rms error between the output data and the expected results.
+    Attack_time_ms is the stimated attack time expressed in ms (must be integer).
+    Indeed, the error is evaluated considering the values after that time."""
+
+    #frequency = sampling_freq / 10
+    error_percentage = [0 for x in range (len(data_out) - sampling_freq * attack_time_ms / 1000 )]
+    diff_real = [0 for x in range (len(data_out))]
+    diff_imag = [0 for x in range (len(data_out))]
+
+    for i in xrange (len(data_out)):
+        rms_expected = math.sqrt(expected_result[i].real * expected_result[i].real + expected_result[i].imag * expected_result[i].imag)
+        rms_out = math.sqrt(data_out[i].real*data_out[i].real + data_out[i].imag*data_out[i].imag)
+
+        #considering only the values after the maximum settling time allowed (0.03s)
+        if (i >= sampling_freq * attack_time_ms / 1000):
+            error_percentage[i- sampling_freq  * attack_time_ms / 1000] = abs((rms_out - rms_expected) / rms_expected)
+
+    return error_percentage
+
 def time_evaluation(data_in, data_out, sampling_freq, gain):
+    """this function evaluates the attack/settling time comparing the output data and the expected results.
+    Attack_time is evaluated from from zero and the instant in which a succession of 10 "data almost equal" has been found.
+    Indeed, are consider "data almost equal" if the difference between the output data rms value of the agc and the expected results (in rms)
+    there is a difference of less than or equal to 5%.
+    The expected result are evaluated as the ideal gain (between the reference signal and the input amplitude of the signal)
+    multiplied by the input data provided to the agc"""
+
     end=0
     counter=0
     for i in xrange (len(data_in)):
         rms_in = math.sqrt(data_in[i].real * data_in[i].real + data_in[i].imag * data_in[i].imag)
         rms_out = math.sqrt(data_out[i].real*data_out[i].real + data_out[i].imag*data_out[i].imag)
-
+        expected_result = gain * rms_in
         # settling/attac time 5%
-        if ( abs(rms_out - gain * rms_in) <= abs(gain * rms_in * 0.05) ):
+        if ( abs(rms_out - expected_result) <= abs(expected_result* 0.05) ):
         #if abs(data_out[i].real - gain * data_in[i].real)<= (gain * data_in[i].real * 0.05):
             counter += 1
         else:
@@ -177,28 +190,19 @@ class qa_agc (gr_unittest.TestCase):
 
         self.tb.run(500)
 
-        dst_data = dst1.data()
+        data_out = dst1.data()
         expected_result = dst_er.data()
 
-        #considering only the values after the maximum settling time allowed (0.5s)
-        temp = [0 for x in range (len(dst_data) - sampling_freq * 3 / 1000)]
-        diff_real = [0 for x in range (len(dst_data))]
-        diff_imag = [0 for x in range (len(dst_data))]
-        for i in xrange (len(dst_data)):
-            diff_real[i]= abs((dst_data[i].real - expected_result[i].real) / expected_result[i].real)
-            diff_imag[i]= abs((dst_data[i].imag - expected_result[i].imag) / expected_result[i].real)
+        #considering only the values after the maximum settling time allowed (0.03s)
+        error_percentage = error_evaluation (data_out, expected_result, sampling_freq, 3)
 
-            #considering only the values after the maximum settling time allowed (0.03s)
-            if (i >= sampling_freq * 3 / 1000):
-                temp[i- sampling_freq * 3 / 1000] = math.sqrt(diff_real[i]*diff_real[i] + diff_imag[i]*diff_imag[i])
+        index= error_percentage.index(max(error_percentage))
 
-        index= temp.index(max(temp))
-
-        self.assertLessEqual(temp[index], 0.05)
+        self.assertLessEqual(error_percentage[index], 0.05)
         # print "\n-Maximum absolute error percentage is: (%.3f) + j(%.3f); " % (diff_real[index]*100, diff_imag[index]*100)
         # print "\n-Average absolute error percentage is: (%.3f) + j(%.3f)" % ((sum(diff_real)/len(diff_real))*100, (sum(diff_imag)/len(diff_imag))*100)
-        print "\n-Maximum absolute rms error percentage is: %.3f%%;\n-Average absolute rms error percentage is: %.3f%%" \
-        % (temp[index]*100 , sum(temp)/(len(temp)-(sampling_freq * 0.1 * 0.5))*100)
+        print "\n-Maximum absolute rms error percentage is: %.3f%%;\n-Average absolute rms error percentage is: %.3f%% " \
+        % (error_percentage[index]*100 ,(sum(error_percentage)/(len(error_percentage)))*100)
 
     def test_002_t_1 (self):
         """ Test 2b: maximum error < 5%; with step signal"""
@@ -233,28 +237,19 @@ class qa_agc (gr_unittest.TestCase):
 
         self.tb.run(500)
 
-        dst_data = dst1.data()
+        data_out = dst1.data()
         expected_result = dst_er.data()
 
         #considering only the values after the maximum settling time allowed (0.03s)
-        temp = [0 for x in range (len(dst_data) - sampling_freq * 3 / 1000)]
-        diff_real = [0 for x in range (len(dst_data))]
-        diff_imag = [0 for x in range (len(dst_data))]
-        for i in xrange (len(dst_data)):
-            diff_real[i]= abs((dst_data[i].real - expected_result[i].real) / expected_result[i].real)
-            diff_imag[i]= abs((dst_data[i].imag - expected_result[i].imag) / expected_result[i].real)
+        error_percentage = error_evaluation (data_out, expected_result, sampling_freq, 3)
 
-            #considering only the values after the maximum settling time allowed (0.5s)
-            if (i >= sampling_freq * 3 / 1000):
-                temp[i- sampling_freq * 3 / 1000] = math.sqrt(diff_real[i]*diff_real[i] + diff_imag[i]*diff_imag[i])
+        index= error_percentage.index(max(error_percentage))
 
-        index= temp.index(max(temp))
-
-        self.assertLessEqual(temp[index], 0.05)
+        self.assertLessEqual(error_percentage[index], 0.05)
         # print "\n-Maximum absolute error percentage is: (%.3f) + j(%.3f); " % (diff_real[index]*100, diff_imag[index]*100)
         # print "\n-Average absolute error percentage is: (%.3f) + j(%.3f)" % ((sum(diff_real)/len(diff_real))*100, (sum(diff_imag)/len(diff_imag))*100)
         print "\n-Maximum absolute rms error percentage is: %.3f%%;\n-Average absolute rms error percentage is: %.3f%% " \
-        % (temp[index]*100 ,(sum(temp)/(len(temp)-(sampling_freq * 0.1 * 0.5)))*100)
+        % (error_percentage[index]*100 ,(sum(error_percentage)/(len(error_percentage)))*100)
 
     def test_003_t (self):
         """ Test 3: attack time evaluation; with step signal of amplitude 1 and reference 10"""
