@@ -61,7 +61,7 @@ class _TestInfo(object):
         self.stdout = test_result._stdout_data
         self.stderr = test_result._stderr_data
 
-        self.test_description = self.test_result.getDescription(test_method).replace(";", ";<br />")
+        self.test_description = self.test_result.getDescription(test_method)
         self.test_exception_info = (
             '' if outcome in (self.SUCCESS, self.SKIP)
             else self.test_result._exc_info_to_string(
@@ -378,7 +378,7 @@ class _HtmlTestResult(_TextTestResult):
         """ Return a list with test name or desciption, status and error
             msg if fail or skip. """
         test_name = self._test_method_name(testCase.test_id)
-        test_description = testCase.test_description
+        test_description = testCase.test_description.replace(";", ";<br />")
         desc = test_description or test_name
 
         if (testCase.stdout.decode('latin-1').startswith("\n") == True):
