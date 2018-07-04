@@ -25,22 +25,42 @@ import ecss_swig as ecss
 import math, time
 
 
-def test_sine( tb, f_cut, sampling_freq, input_amplitude, reference):
-    src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
-                               sampling_freq * 0.10, input_amplitude)
-    #10 sample= 1 period
-    dst1 = blocks.vector_sink_c()
-    dst2 = blocks.vector_sink_c()
-    head = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
-    head2 = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
-    agc = ecss.agc(f_cut, reference, 1, sampling_freq)
-    tb.connect(src1, head)
-    tb.connect(head, agc)
-    tb.connect(agc, dst1)
-    tb.connect(src1, head2)
-    tb.connect(head2, dst2)
-    tb.run(500)
-    return dst2.data(), dst1.data()
+def time_evaluation(data_in, data_out, sampling_freq, gain):
+    end=0
+    counter=0
+    for i in xrange (len(data_in)):
+        rms_in = math.sqrt(data_in[i].real * data_in[i].real + data_in[i].imag * data_in[i].imag)
+        rms_out = math.sqrt(data_out[i].real*data_out[i].real + data_out[i].imag*data_out[i].imag)
+
+        # settling/attac time 5%
+        if ( abs(rms_out - gain * rms_in) <= abs(gain * rms_in * 0.05) ):
+        #if abs(data_out[i].real - gain * data_in[i].real)<= (gain * data_in[i].real * 0.05):
+            counter += 1
+        else:
+             counter=0
+        if (counter == 10):
+            end = i
+        elif ((i == len(data_in)-1) and (counter >=1)):
+                end = i + (10 - counter)
+    return (end - 9)/ (sampling_freq * 0.1)
+
+# def test_sine( tb, f_cut, sampling_freq, input_amplitude, reference):
+#     src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
+#                                sampling_freq * 0.10, input_amplitude)
+#     #10 sample= 1 period
+#     dst1 = blocks.vector_sink_c()
+#     dst2 = blocks.vector_sink_c()
+#     head = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
+#     head2 = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
+#     agc = ecss.agc(f_cut, reference, 1, sampling_freq)
+#     tb.connect(src1, head)
+#     tb.connect(head, agc)
+#     tb.connect(agc, dst1)
+#     tb.connect(src1, head2)
+#     tb.connect(head2, dst2)
+#     tb.run(500)
+#     return dst2.data(), dst1.data()
+
 
 class qa_agc (gr_unittest.TestCase):
 
@@ -166,8 +186,7 @@ class qa_agc (gr_unittest.TestCase):
         diff_imag = [0 for x in range (len(dst_data))]
         for i in xrange (len(dst_data)):
             diff_real[i]= abs((dst_data[i].real - expected_result[i].real) / expected_result[i].real)
-            diff_imag[i]= 0
-            #diff_imag[i]= abs((dst_data[i].imag - expected_result[i].imag) / expected_result[i].real)
+            diff_imag[i]= abs((dst_data[i].imag - expected_result[i].imag) / expected_result[i].real)
 
             #considering only the values after the maximum settling time allowed (0.5s)
             if (i >= sampling_freq * 5 / 100):
@@ -223,7 +242,6 @@ class qa_agc (gr_unittest.TestCase):
         diff_imag = [0 for x in range (len(dst_data))]
         for i in xrange (len(dst_data)):
             diff_real[i]= abs((dst_data[i].real - expected_result[i].real) / expected_result[i].real)
-            #diff_imag[i]= 0
             diff_imag[i]= abs((dst_data[i].imag - expected_result[i].imag) / expected_result[i].real)
 
             #considering only the values after the maximum settling time allowed (0.5s)
@@ -242,9 +260,9 @@ class qa_agc (gr_unittest.TestCase):
         """ Test 3: attack time evaluation; with step signal of amplitude 1 and reference 10"""
 
         tb = self.tb
-        reference=10
-        f_cut=80
-        input_amplitude=1
+        reference=10.0
+        f_cut=50.0
+        input_amplitude=1.0
         sampling_freq = 1000
 
         src1 = analog.sig_source_c(sampling_freq, analog.GR_CONST_WAVE,
@@ -272,37 +290,22 @@ class qa_agc (gr_unittest.TestCase):
         data_out = dst1.data()
 
         #ideal gain
-        gain=reference*1.0/input_amplitude
+        gain=reference/input_amplitude
 
-        end=0
-        counter=0
-        for i in xrange (len(data_in)):
-            #print data_out[i].real, "\t", data_out[i].imag
-
-            #settling time 5%
-            if abs(data_out[i].real - gain * data_in[i].real)<= (gain * data_in[i].real * 0.05):
-                counter += 1
-            else:
-                 counter=0
-            if (counter == 10):
-                end = i
-
-            elif ((i == len(data_in)-1) and (counter >=1)):
-                    end = i + (10 - counter)
-
-        attack_time =    (end - 9)/ (sampling_freq * 0.1)
+        attack_time =  time_evaluation(data_in, data_out, sampling_freq, gain)
         time_unit = (f_cut *1.0 )/ (sampling_freq *1.0 )
-        self.assertLessEqual(attack_time, 0.3)
-        self.assertGreaterEqual(attack_time, 0.1)
+
+        # self.assertLessEqual(attack_time, 0.03)
+        # self.assertGreaterEqual(attack_time, 0.1)
         print "\n-Attack time is: %.3fs" % attack_time
 
     def test_004_t (self):
         """ Test 4: attack time evaluation; with step signal of amplitude 5 and reference 10"""
 
         tb = self.tb
-        reference=10
-        f_cut=80
-        input_amplitude=5
+        reference=10.0
+        f_cut=50.0
+        input_amplitude=5.0
         sampling_freq = 1000
 
         src1 = analog.sig_source_c(sampling_freq, analog.GR_CONST_WAVE,
@@ -330,35 +333,22 @@ class qa_agc (gr_unittest.TestCase):
         data_out = dst1.data()
 
         #ideal gain
-        gain=reference*1.0/input_amplitude
+        gain=reference/input_amplitude
 
-        end=0
-        counter=0
-        for i in xrange (len(data_in)):
-            #print data_out[i].real, "\t", data_out[i].imag
-            if abs(data_out[i].real - gain * data_in[i].real)<= (gain * data_in[i].real * 0.05):
-                counter += 1
-            else:
-                 counter=0
-            if (counter == 10):
-                end = i
-
-            elif ((i == len(data_in)-1) and (counter >=1)):
-                    end = i + (10 - counter)
-
-        attack_time =    (end - 9)/ (sampling_freq * 0.1)
+        attack_time =  time_evaluation(data_in, data_out, sampling_freq, gain)
         time_unit = (f_cut *1.0 )/ (sampling_freq *1.0 )
-        self.assertLessEqual(attack_time, 0.3)
-        self.assertGreaterEqual(attack_time, 0.1)
+
+        self.assertLessEqual(attack_time, 0.03)
+        self.assertGreaterEqual(attack_time, 0.01)
         print "\n-Attack time is: %.3fs" % attack_time
 
     def test_005_t (self):
         """ Test 5: attack time evaluation; with step signal of amplitude 10 and reference 10"""
 
         tb = self.tb
-        reference=10
-        f_cut=80
-        input_amplitude=10
+        reference=10.0
+        f_cut=50.0
+        input_amplitude=10.0
         sampling_freq = 1000
 
         src1 = analog.sig_source_c(sampling_freq, analog.GR_CONST_WAVE,
@@ -386,35 +376,22 @@ class qa_agc (gr_unittest.TestCase):
         data_out = dst1.data()
 
         #ideal gain
-        gain=reference*1.0/input_amplitude
+        gain=reference/input_amplitude
 
-        end=0
-        counter=0
-        for i in xrange (len(data_in)):
-            #print data_out[i].real, "\t", data_out[i].imag
-            if abs(data_out[i].real - gain * data_in[i].real)<= (gain * data_in[i].real * 0.05):
-                counter += 1
-            else:
-                 counter=0
-            if (counter == 10):
-                end = i
-
-            elif ((i == len(data_in)-1) and (counter >=1)):
-                    end = i + (10 - counter)
-
-        attack_time =    (end - 9)/ (sampling_freq * 0.1)
+        attack_time =  time_evaluation(data_in, data_out, sampling_freq, gain)
         time_unit = (f_cut *1.0 )/ (sampling_freq *1.0 )
-        self.assertLessEqual(attack_time, 0.3)
-        self.assertGreaterEqual(attack_time, 0.1)
+
+        self.assertLessEqual(attack_time, 0.03)
+        self.assertGreaterEqual(attack_time, 0.01)
         print "\n-Attack time is: %.3fs" % attack_time
 
     def test_006_t (self):
         """ Test 6: attack time evaluation; with step signal of amplitude 10 and reference 5"""
 
         tb = self.tb
-        reference=5
-        f_cut=80
-        input_amplitude=10
+        reference=5.0
+        f_cut=50.0
+        input_amplitude=10.0
         sampling_freq = 1000
 
         src1 = analog.sig_source_c(sampling_freq, analog.GR_CONST_WAVE,
@@ -442,34 +419,22 @@ class qa_agc (gr_unittest.TestCase):
         data_out = dst1.data()
 
         #ideal gain
-        gain=reference*1.0/input_amplitude
+        gain=reference/input_amplitude
 
-        end=0
-        counter=0
-        for i in xrange (len(data_in)):
-            if abs(data_out[i].real - gain * data_in[i].real)<= (0.5 * data_in[i].real * 0.05):
-                counter += 1
-            else:
-                 counter=0
+        attack_time =  time_evaluation(data_in, data_out, sampling_freq, gain)
+        time_unit = (f_cut *1.0 )/ (sampling_freq *1.0 )
 
-            if (counter == 10):
-                end = i
-
-            elif ((i == len(data_in)-1) and (counter >=1)):
-                    end = i + (10 - counter)
-        attack_time = (end - 9) / (sampling_freq * 0.1)
-        time_unit = (f_cut * 1.0 ) / (sampling_freq * 1.0 )
-        self.assertLessEqual(attack_time, 0.3)
-        self.assertGreaterEqual(attack_time, 0.1)
+        self.assertLessEqual(attack_time, 0.03)
+        self.assertGreaterEqual(attack_time, 0.01)
         print "\n-Attack time is: %.3fs" % attack_time
 
     def test_007_t (self):
         """ Test 7: attack time evaluation; with sine signal of amplitude 1 and reference 10"""
 
         tb = self.tb
-        reference=10
-        f_cut=80
-        input_amplitude=1
+        reference=10.0
+        f_cut=50.0
+        input_amplitude=1.0
         sampling_freq = 1000
         src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
                                    sampling_freq * 0.10, input_amplitude)
@@ -496,32 +461,22 @@ class qa_agc (gr_unittest.TestCase):
         data_in = dst2.data()
         data_out = dst1.data()
 
-        gain=reference*1.0/input_amplitude
-        end=0
-        counter=0
-        for i in xrange (len(data_in)):
-            if abs(data_out[i].real - gain * data_in[i].real)<= (gain * data_in[i].real * 0.05):
-                counter += 1
-            else:
-                 counter=0
-            if (counter == 10):
-                end = i
-            elif ((i == len(data_in)-1) and (counter >=1)):
-                    end = i + (10 - counter)
+        gain=reference/input_amplitude
 
-        attack_time =    (end - 9)/ (sampling_freq * 0.1)
+        attack_time =  time_evaluation(data_in, data_out, sampling_freq, gain)
         time_unit = (f_cut *1.0 )/ (sampling_freq *1.0 )
-        self.assertLessEqual(attack_time, 0.3)
-        self.assertGreaterEqual(attack_time, 0.1)
+
+        self.assertLessEqual(attack_time, 0.03)
+        self.assertGreaterEqual(attack_time, 0.01)
         print "\n-Attack time is: %.3fs" % attack_time
 
     def test_008_t (self):
         """ Test 8: attack time evaluation; with sine signal of amplitude 5 and reference 10"""
 
         tb = self.tb
-        reference=10
-        f_cut=80
-        input_amplitude=5
+        reference=10.0
+        f_cut=50.0
+        input_amplitude=5.0
         sampling_freq = 1000
         src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
                                    sampling_freq * 0.10, input_amplitude)
@@ -548,37 +503,27 @@ class qa_agc (gr_unittest.TestCase):
         data_in = dst2.data()
         data_out = dst1.data()
 
-        gain=reference*1.0/input_amplitude
-        end=0
-        counter=0
-        for i in xrange (len(data_in)):
-            if abs(data_out[i].real - gain * data_in[i].real)<= (gain * data_in[i].real * 0.05):
-                counter += 1
-            else:
-                 counter=0
-            if (counter == 10):
-                end = i
-            elif ((i == len(data_in)-1) and (counter >=1)):
-                    end = i + (10 - counter)
+        gain=reference/input_amplitude
 
-        attack_time =    (end - 9)/ (sampling_freq * 0.1)
+        attack_time =  time_evaluation(data_in, data_out, sampling_freq, gain)
         time_unit = (f_cut *1.0 )/ (sampling_freq *1.0 )
-        self.assertLessEqual(attack_time, 0.3)
-        self.assertGreaterEqual(attack_time, 0.1)
+
+        self.assertLessEqual(attack_time, 0.03)
+        self.assertGreaterEqual(attack_time, 0.01)
         print "\n-Attack time is: %.3fs" % attack_time
 
     def test_009_t (self):
         """ Test 9: attack time evaluation; with sine signal of amplitude 10 and reference 10"""
 
         tb = self.tb
-        reference=10
-        f_cut=80
-        input_amplitude=1
+        reference=10.0
+        f_cut=50.0
+        input_amplitude=1.0
         sampling_freq = 1000
         src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
                                    sampling_freq * 0.10, input_amplitude)
-        #10 sample= 1 period
 
+        #10 sample= 1 period
         dst1 = blocks.vector_sink_c()
         dst2 = blocks.vector_sink_c()
 
@@ -594,38 +539,27 @@ class qa_agc (gr_unittest.TestCase):
         tb.connect(src1, head2)
         tb.connect(head2, dst2)
 
-
         self.tb.run(500)
 
         data_in = dst2.data()
         data_out = dst1.data()
 
-        gain=reference*1.0/input_amplitude
-        end=0
-        counter=0
-        for i in xrange (len(data_in)):
-            if abs(data_out[i].real - gain * data_in[i].real)<= (gain * data_in[i].real * 0.05):
-                counter += 1
-            else:
-                 counter=0
-            if (counter == 10):
-                end = i
-            elif ((i == len(data_in)-1) and (counter >=1)):
-                    end = i + (10 - counter)
+        gain=reference/input_amplitude
 
-        attack_time =    (end - 9)/ (sampling_freq * 0.1)
+        attack_time =  time_evaluation(data_in, data_out, sampling_freq, gain)
         time_unit = (f_cut *1.0 )/ (sampling_freq *1.0 )
-        self.assertLessEqual(attack_time, 0.3)
-        self.assertGreaterEqual(attack_time, 0.1)
+
+        self.assertLessEqual(attack_time, 0.03)
+        self.assertGreaterEqual(attack_time, 0.01)
         print "\n-Attack time is: %.3fs" % attack_time
 
     def test_0010_t (self):
         """ Test 10: attack time evaluation; with sine signal of amplitude 10 and reference 5"""
 
         tb = self.tb
-        reference=5
-        f_cut=80
-        input_amplitude=10
+        reference=5.0
+        f_cut=50.0
+        input_amplitude=10.0
         sampling_freq = 1000
         src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
                                    sampling_freq * 0.10, input_amplitude)
@@ -652,23 +586,13 @@ class qa_agc (gr_unittest.TestCase):
         data_in = dst2.data()
         data_out = dst1.data()
 
-        gain=reference*1.0/input_amplitude
-        end=0
-        counter=0
-        for i in xrange (len(data_in)):
-            if abs(data_out[i].real - gain * data_in[i].real)<= (gain * data_in[i].real * 0.05):
-                counter += 1
-            else:
-                 counter=0
-            if (counter == 10):
-                end = i
-            elif ((i == len(data_in)-1) and (counter >=1)):
-                    end = i + (10 - counter)
+        gain=reference/input_amplitude
 
-        attack_time =    (end - 9)/ (sampling_freq * 0.1)
+        attack_time =  time_evaluation(data_in, data_out, sampling_freq, gain)
         time_unit = (f_cut *1.0 )/ (sampling_freq *1.0 )
-        self.assertLessEqual(attack_time, 0.3)
-        self.assertGreaterEqual(attack_time, 0.1)
+
+        self.assertLessEqual(attack_time, 0.03)
+        self.assertGreaterEqual(attack_time, 0.01)
         print "\n-Attack time is: %.3fs" % attack_time
 
 
