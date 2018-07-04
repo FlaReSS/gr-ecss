@@ -145,7 +145,7 @@ class qa_agc (gr_unittest.TestCase):
         self.assertComplexTuplesAlmostEqual(expected_result, dst_data, 4)
 
     def test_002_t (self):
-        """ Test 2: maximum error < 5%\; with sine signal"""
+        """ Test 2: maximum error < 5%; with sine signal"""
 
         """measurement of the error with a input sine signal"""
         tb = self.tb
@@ -181,16 +181,16 @@ class qa_agc (gr_unittest.TestCase):
         expected_result = dst_er.data()
 
         #considering only the values after the maximum settling time allowed (0.5s)
-        temp = [0 for x in range (len(dst_data) - sampling_freq * 5 / 100)]
+        temp = [0 for x in range (len(dst_data) - sampling_freq * 3 / 1000)]
         diff_real = [0 for x in range (len(dst_data))]
         diff_imag = [0 for x in range (len(dst_data))]
         for i in xrange (len(dst_data)):
             diff_real[i]= abs((dst_data[i].real - expected_result[i].real) / expected_result[i].real)
             diff_imag[i]= abs((dst_data[i].imag - expected_result[i].imag) / expected_result[i].real)
 
-            #considering only the values after the maximum settling time allowed (0.5s)
-            if (i >= sampling_freq * 5 / 100):
-                temp[i- sampling_freq * 5 / 100] = math.sqrt(diff_real[i]*diff_real[i] + diff_imag[i]*diff_imag[i])
+            #considering only the values after the maximum settling time allowed (0.03s)
+            if (i >= sampling_freq * 3 / 1000):
+                temp[i- sampling_freq * 3 / 1000] = math.sqrt(diff_real[i]*diff_real[i] + diff_imag[i]*diff_imag[i])
 
         index= temp.index(max(temp))
 
@@ -236,8 +236,8 @@ class qa_agc (gr_unittest.TestCase):
         dst_data = dst1.data()
         expected_result = dst_er.data()
 
-        #considering only the values after the maximum settling time allowed (0.5s)
-        temp = [0 for x in range (len(dst_data) - sampling_freq * 5 / 100)]
+        #considering only the values after the maximum settling time allowed (0.03s)
+        temp = [0 for x in range (len(dst_data) - sampling_freq * 3 / 1000)]
         diff_real = [0 for x in range (len(dst_data))]
         diff_imag = [0 for x in range (len(dst_data))]
         for i in xrange (len(dst_data)):
@@ -245,8 +245,8 @@ class qa_agc (gr_unittest.TestCase):
             diff_imag[i]= abs((dst_data[i].imag - expected_result[i].imag) / expected_result[i].real)
 
             #considering only the values after the maximum settling time allowed (0.5s)
-            if (i >= sampling_freq * 5 / 100):
-                temp[i- sampling_freq * 5 / 100] = math.sqrt(diff_real[i]*diff_real[i] + diff_imag[i]*diff_imag[i])
+            if (i >= sampling_freq * 3 / 1000):
+                temp[i- sampling_freq * 3 / 1000] = math.sqrt(diff_real[i]*diff_real[i] + diff_imag[i]*diff_imag[i])
 
         index= temp.index(max(temp))
 
