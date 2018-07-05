@@ -68,11 +68,13 @@ namespace gr {
     {
           const gr_complex *in = (const gr_complex*)input_items[0];
           gr_complex *out = (gr_complex*)output_items[0];
-          float rate= d_attack_time / d_samp_rate;
+          float rate= d_attack_time * d_samp_rate;
 
           for(int i = 0; i < noutput_items; i++) {
-              out[i]= in[i] * exp(d_gain*rate);
-              d_gain +=  log(d_reference) - log (std::sqrt(out[i].real()*out[i].real() + out[i].imag()*out[i].imag()));
+              out[i]= in[i] * std::exp(d_gain);
+              d_gain +=   rate * (std::log(d_reference) - std::log (std::sqrt(out[i].real()*out[i].real() + out[i].imag()*out[i].imag())));
+              // out[i] = in[i] * d_gain ;
+              // d_gain +=  rate * (d_reference - std::sqrt(out[i].real()*out[i].real() + out[i].imag()*out[i].imag()));
               if(MAX_GAIN > 0.0 && d_gain > MAX_GAIN) {
                   d_gain = MAX_GAIN;
               }
