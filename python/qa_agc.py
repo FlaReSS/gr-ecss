@@ -8,9 +8,10 @@ from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 import ecss_swig as ecss
 import runner
-import math, time
+import math, time, datetime, os
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 # def error_evaluation (data_out, expected_result, sampling_freq, attack_time_ms):
 #     """this function evaluates the absolute rms error between the output data and the expected results.
@@ -31,31 +32,83 @@ import matplotlib.pyplot as plt
 #
 #     return error_percentage
 
+def generate_pdf(name_test, fig):
+    current_dir = os.getcwd()
+    dir_to = os.path.join(current_dir, 'Graphs')
+    if not os.path.exists(dir_to):
+        os.makedirs(dir_to)
+    with PdfPages(dir_to + '/' + name_test.split('.')[0] + "_graphs.pdf") as pdf:
+        d = pdf.infodict()
+        d['Title'] = name_test.replace('.','-')
+        d['Author'] = 'Antonio Miraglia - ISISpace'
+        d['Subject'] = 'Self generated file with all graphs of the test'
+        d['Keywords'] = name_test.split('.')[0] +''+ name_test.split('.')[1]
+        d['CreationDate'] = datetime.datetime.today()
+        d['ModDate'] = datetime.datetime.today()
 
-def plot(d1, d2, t):
+        fig_size = [21 / 2.54, 29.7 / 2.54] # width in inches & height in inches
+        fig.set_size_inches(fig_size)
+
+        pdf.savefig(fig)  # saves the current figure into a pdf page
+        pdf.attach_note("")  # you can add a pdf note to
+        plt.close()
+
+
+def plot(name_test, d1, d2, d3, d4, t, reference, error, zero, settling_time):
     # Create some mock data
     data1 = np.asarray(d1)
     data2 = np.asarray(d2)
+    data3 = np.asarray(d3)
+    data4 = np.asarray(d4)
     time = np.asarray(t)
-    fig, ax1 = plt.subplots()
 
-    color = 'red'
-    ax1.set_xlabel('time (s)')
-    ax1.set_ylabel('amplitude', color=color)
-    ax1.plot(time, data1, color=color)
-    ax1.tick_params(axis='y', labelcolor=color)
+    #fig, (ax1, ax3) = plt.subplots()
+    fig, (ax1, ax3) = plt.subplots(2, sharey=True)
+
+    ax1.set_xlabel('Time [s]')
+    ax1.set_ylabel('Amplitude [V]', color='r')
+    ax1.set_title("Output",  fontsize=20)
+    ax1.plot(time, data1, color='r', scalex=True, scaley=True)
+    l2 = ax1.axvspan(xmin = (zero + 0.01), xmax = (zero + 0.03), color='m', alpha= 0.1)
+    l3 = ax1.axvline(x = (zero + settling_time), color='m', linewidth=2, linestyle='--')
+    ax1.text(0.99,0.01,"Settling time: " + str(settling_time) + "s", horizontalalignment='right', verticalalignment='bottom',color='m',transform=ax1.transAxes)
+    ax1.tick_params(axis='y', labelcolor='red')
+    ax1.grid(True)
+
 
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
 
-    color = 'blue'
-    ax2.set_ylabel('Root mean square', color=color)  # we already handled the x-label with ax1
-    ax2.plot(time, data2, color=color)
-    ax2.tick_params(axis='y', labelcolor=color)
+    ax2.set_ylabel('Root Mean Square [Vrms]', color='b')  # we already handled the x-label with ax1
+    ax2.plot(time, data2, color='b', scalex=True, scaley=True)
+    l1 = ax2.axhspan(ymin=(reference - error * reference), ymax=(reference + error * reference), color='c', alpha= 0.1)
+    ax2.tick_params(axis='y', labelcolor='blue')
 
+
+
+    ax3.set_xlabel('Time [s]')
+    ax3.set_ylabel('Amplitude [V]', color='r')
+    ax3.set_title("Input", fontsize=20)
+    ax3.plot(time, data3, color='r', scalex=True, scaley=True)
+    ax3.tick_params(axis='y', labelcolor='red')
+    ax3.grid(True)
+
+    ax4 = ax3.twinx()  # instantiate a second axes that shares the same x-axis
+
+    ax4.set_ylabel('Root Mean Square [Vrms]', color='b')  # we already handled the x-label with ax1
+    ax4.plot(time, data4, color='b', scalex=True, scaley=True)
+    ax4.tick_params(axis='y', labelcolor='blue')
+
+
+    fig.suptitle(name_test.split('.')[1], fontsize=30)
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
-    plt.show()
+    fig.subplots_adjust(hspace=0.35, top=0.85, bottom=0.15)
+    plt.legend((l1, l2, l3), ('error range', 'settling time range', 'settling time'), loc='lower center', bbox_to_anchor=(0.5, -0.5), fancybox=True, shadow=True, ncol=3)
+    #plt.show()
+    generate_pdf(name_test, fig)
 
-def transient_evaluation(data_in, data_out, reference, sampling_freq, error, start, time_error_measure):
+
+
+def transient_evaluation(name_test,data_in, data_out, reference, sampling_freq, error, start, time_error_measure):
     """this function evaluates the attack/settling time comparing the output data and the expected results.
     Attack_time is evaluated from from zero and the instant in which a succession of 10 "data almost equal" has been found.
     Indeed, are consider "data almost equal" if the difference between the output data rms value of the agc and the expected results (in rms)
@@ -70,18 +123,22 @@ def transient_evaluation(data_in, data_out, reference, sampling_freq, error, sta
     end = 0
     stable_start = False
     time = []
-    data1 = []
-    data2 = []
+    out_real = []
+    out_rms = []
+    in_real = []
+    in_rms = []
 
     for i in reversed(xrange (len(data_in))):
         rms_in = math.sqrt(data_in[i].real * data_in[i].real + data_in[i].imag * data_in[i].imag)
         rms_out = math.sqrt(data_out[i].real*data_out[i].real + data_out[i].imag*data_out[i].imag)
         #print  rms_in,',',rms_out,';'
 
-        if (i >= 1800 and i <=2400):
-            time.append(i * sampling_freq)
-            data1.append(data_out[i].real)
-            data2.append(rms_out)
+        if ((i >= (start - sampling_freq * 0.01 + 1)) and (i <= (start + sampling_freq * 0.05))):
+            time.append(i*1.0 / sampling_freq)
+            out_real.append(data_out[i].real)
+            out_rms.append(rms_out)
+            in_real.append(data_in[i].real)
+            in_rms.append(rms_in)
 
         # error: error/range considered for the settling time
         if ((abs(rms_out - reference) >= abs(reference * error)) and (i >= start)):
@@ -101,12 +158,12 @@ def transient_evaluation(data_in, data_out, reference, sampling_freq, error, sta
 
     # if ((stable_start == True) and (abs(reference * error) >= (sum(error_percentage_start) / (len(error_percentage_start)))*100))):
     #     stable_start == True
-
     print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",(end - start)
-    plot(data1, data2, time)
     settling_time = (end - start) / (sampling_freq)
     error_percentage_mean_start = sum(error_percentage_start) / (len(error_percentage_start))*100
     error_percentage_mean_end = sum(error_percentage_end) / (len(error_percentage_end))*100
+
+    plot(name_test, out_real, out_rms, in_real, in_rms, time, reference, error, start *1.0 / sampling_freq, settling_time)
 
     return settling_time, stable_start, error_percentage_mean_start, error_percentage_mean_end
 
@@ -308,6 +365,7 @@ class qa_agc (gr_unittest.TestCase):
         """ Test 3: attack time evaluation; with step signal of amplitude 1 and reference 10"""
 
         tb = self.tb
+        name_test = self.id().split("__main__.")[1]
         reference = 10.0
         attack_time = 0.02
         input_amplitude = 0.5
@@ -353,7 +411,7 @@ class qa_agc (gr_unittest.TestCase):
         data_out = dst_agc.data()
 
 
-        settling_time_measured, stable_start, error_percentage_mean_start, error_percentage_mean_end  = transient_evaluation(data_in, data_out, reference, sampling_freq, 0.05, N/2, 0.5)
+        settling_time_measured, stable_start, error_percentage_mean_start, error_percentage_mean_end  = transient_evaluation(name_test, data_in, data_out, reference, sampling_freq, 0.05, N/2, 0.5)
 
         self.assertLessEqual(settling_time_measured, 0.03)
         self.assertGreaterEqual(settling_time_measured, 0.01)
@@ -666,4 +724,4 @@ if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_agc)
     runner = runner.HTMLTestRunner(output='Results')
     runner.run(suite)
-    gr_unittest.TestProgram()
+    #gr_unittest.TestProgram()
