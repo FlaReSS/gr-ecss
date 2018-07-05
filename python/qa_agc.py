@@ -4,11 +4,13 @@
 # Copyright 2018 Antonio Miraglia - ISISpace .
 #
 
-import runner
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 import ecss_swig as ecss
+import runner
 import math, time
+import numpy as np
+import matplotlib.pyplot as plt
 
 # def error_evaluation (data_out, expected_result, sampling_freq, attack_time_ms):
 #     """this function evaluates the absolute rms error between the output data and the expected results.
@@ -29,6 +31,30 @@ import math, time
 #
 #     return error_percentage
 
+
+def plot(d1, d2, t):
+    # Create some mock data
+    data1 = np.asarray(d1)
+    data2 = np.asarray(d2)
+    time = np.asarray(t)
+    fig, ax1 = plt.subplots()
+
+    color = 'red'
+    ax1.set_xlabel('time (s)')
+    ax1.set_ylabel('amplitude', color=color)
+    ax1.plot(time, data1, color=color)
+    ax1.tick_params(axis='y', labelcolor=color)
+
+    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+
+    color = 'blue'
+    ax2.set_ylabel('Root mean square', color=color)  # we already handled the x-label with ax1
+    ax2.plot(time, data2, color=color)
+    ax2.tick_params(axis='y', labelcolor=color)
+
+    fig.tight_layout()  # otherwise the right y-label is slightly clipped
+    plt.show()
+
 def transient_evaluation(data_in, data_out, reference, sampling_freq, error, start, time_error_measure):
     """this function evaluates the attack/settling time comparing the output data and the expected results.
     Attack_time is evaluated from from zero and the instant in which a succession of 10 "data almost equal" has been found.
@@ -43,11 +69,19 @@ def transient_evaluation(data_in, data_out, reference, sampling_freq, error, sta
     error_percentage_end = []
     end = 0
     stable_start = False
+    time = []
+    data1 = []
+    data2 = []
 
     for i in reversed(xrange (len(data_in))):
         rms_in = math.sqrt(data_in[i].real * data_in[i].real + data_in[i].imag * data_in[i].imag)
         rms_out = math.sqrt(data_out[i].real*data_out[i].real + data_out[i].imag*data_out[i].imag)
         #print  rms_in,',',rms_out,';'
+
+        if (i >= 1800 and i <=2400):
+            time.append(i * sampling_freq)
+            data1.append(data_out[i].real)
+            data2.append(rms_out)
 
         # error: error/range considered for the settling time
         if ((abs(rms_out - reference) >= abs(reference * error)) and (i >= start)):
@@ -69,6 +103,7 @@ def transient_evaluation(data_in, data_out, reference, sampling_freq, error, sta
     #     stable_start == True
 
     print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",(end - start)
+    plot(data1, data2, time)
     settling_time = (end - start) / (sampling_freq)
     error_percentage_mean_start = sum(error_percentage_start) / (len(error_percentage_start))*100
     error_percentage_mean_end = sum(error_percentage_end) / (len(error_percentage_end))*100
@@ -297,7 +332,7 @@ class qa_agc (gr_unittest.TestCase):
 
         head = blocks.head(gr.sizeof_gr_complex, int (N))
 
-        agc = ecss.agc(attack_time, reference, 1, sampling_freq)
+        agc = ecss.agc(0.1, reference, 1, 1)
 
         tb.connect(src_square, (float_to_complex, 0))
         tb.connect(src_square, multiply_const)
