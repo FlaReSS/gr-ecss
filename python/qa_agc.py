@@ -48,6 +48,17 @@ class pdf_class(object):
             d['CreationDate'] = datetime.datetime(2009, 11, 13)
             d['ModDate'] = datetime.datetime.today()
 
+class test_parameters:
+    def __init__(self):
+        reference = 10.0
+        settling_time = 0.02
+        input_amplitude = 0.5
+        sampling_freq = 10000
+        freq_sine = sampling_freq / 10
+        freq_square = 1 / (20 * settling_time)
+        N = sampling_freq / freq_square
+
+
 def plot(name_test, d1, d2, d3, d4, t, reference, error, zero, settling_time, pdf):
     """this function create a defined graph with the data inputs"""
 
@@ -94,7 +105,7 @@ def plot(name_test, d1, d2, d3, d4, t, reference, error, zero, settling_time, pd
     fig.subplots_adjust(hspace=0.35, top=0.85, bottom=0.15)
     plt.legend((l1, l2, l3), ('error range', 'settling time range', 'settling time'), loc='lower center', bbox_to_anchor=(0.5, -0.5), fancybox=True, shadow=True, ncol=3)
 
-    plt.show()
+    #plt.show()
     pdf.add_to_pdf(fig)
 
 def transient_evaluation(name_test,data_in, data_out, reference, sampling_freq, error, start, time_error_measure, pdf):
@@ -209,6 +220,7 @@ class qa_agc (gr_unittest.TestCase):
     def tearDown (self):
         self.tb = None
         self.pdf.finalize_pdf()
+
     #
     # def test_001_t (self):
     #     """ Test 1: expected resut given by GnuRadio"""
@@ -378,8 +390,7 @@ class qa_agc (gr_unittest.TestCase):
     #     print "\n-Maximum absolute rms error percentage is: %.3f%%;\n-Average absolute rms error percentage is: %.3f%% " \
     #     % (error_percentage[index]*100 ,(sum(error_percentage)/(len(error_percentage)))*100)
 
-    def test_003_t (self):
-        """ Test 3: attack time evaluation; with step signal of amplitude 1 and reference 10"""
+    def general_test (self):
 
         tb = self.tb
         name_test = self.id().split("__main__.")[1]
@@ -404,6 +415,13 @@ class qa_agc (gr_unittest.TestCase):
         print "\n-Settling time: %.3fs" % settling_time_measured
         print "\n-Output error after swing: %.3f%" % error_percentage_mean_start
         print "\n-Output error before swing: %.3fs" % error_percentage_mean_end
+
+
+    for i in range(0, 3):
+        name_test = "test_" + str(i)
+        local_test = setattr(gr_unittest.TestCase, name_test, general_test)
+        local_test
+
 
     #
     # def test_004_t (self):
