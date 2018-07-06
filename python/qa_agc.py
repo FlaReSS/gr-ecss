@@ -31,30 +31,43 @@ from matplotlib.backends.backend_pdf import PdfPages
 #             error_percentage[i- sampling_freq  * attack_time_ms / 1000] = abs((rms_out - rms_expected) / rms_expected)
 #
 #     return error_percentage
+class pdf_class(object):
+    """this class can print a single pdf for all the tests"""
 
-def generate_pdf(name_test, fig):
-    current_dir = os.getcwd()
-    dir_to = os.path.join(current_dir, 'Graphs')
-    if not os.path.exists(dir_to):
-        os.makedirs(dir_to)
-    with PdfPages(dir_to + '/' + name_test.split('.')[0] + "_graphs.pdf") as pdf:
-        d = pdf.infodict()
-        d['Title'] = name_test.replace('.','-')
-        d['Author'] = 'Antonio Miraglia - ISISpace'
-        d['Subject'] = 'Self generated file with all graphs of the test'
-        d['Keywords'] = name_test.split('.')[0] +''+ name_test.split('.')[1]
-        d['CreationDate'] = datetime.datetime.today()
-        d['ModDate'] = datetime.datetime.today()
+    def __init__(self, name_test='test'):
+        current_dir = os.getcwd()
+        dir_to = os.path.join(current_dir, 'Graphs')
+
+        if not os.path.exists(dir_to):
+            os.makedirs(dir_to)
+
+        self.graphs_list = []
+        self.name_complete = dir_to + '/' + name_test.split('.')[0] + "_graphs.pdf"
+
+    def add_to_pdf(self, fig):
+        """this function can add a new element/page to the list of pages"""
 
         fig_size = [21 / 2.54, 29.7 / 2.54] # width in inches & height in inches
         fig.set_size_inches(fig_size)
+        self.graphs_list.append(fig)
 
-        pdf.savefig(fig)  # saves the current figure into a pdf page
-        pdf.attach_note("")  # you can add a pdf note to
-        plt.close()
+    def finalize_pdf(self):
+        """this function print the final version of the pdf with all the pages"""
+
+        with PdfPages(self.name_complete) as pdf:
+            for graph in self.graphs_list:
+                pdf.savefig(graph)   #write the figures for that list
+
+            d = pdf.infodict()
+            d['Title'] = 'Multipage PDF Example'
+            d['Author'] = u'Jouni K. Sepp\xe4nen'
+            d['Subject'] = 'How to create a multipage pdf file and set its metadata'
+            d['Keywords'] = 'PdfPages multipage keywords author title subject'
+            d['CreationDate'] = datetime.datetime(2009, 11, 13)
+            d['ModDate'] = datetime.datetime.today()
 
 
-def plot(name_test, d1, d2, d3, d4, t, reference, error, zero, settling_time):
+def plot(name_test, d1, d2, d3, d4, t, reference, error, zero, settling_time, pdf):
     # Create some mock data
     data1 = np.asarray(d1)
     data2 = np.asarray(d2)
@@ -62,7 +75,6 @@ def plot(name_test, d1, d2, d3, d4, t, reference, error, zero, settling_time):
     data4 = np.asarray(d4)
     time = np.asarray(t)
 
-    #fig, (ax1, ax3) = plt.subplots()
     fig, (ax1, ax3) = plt.subplots(2, sharey=True)
 
     ax1.set_xlabel('Time [s]')
@@ -75,15 +87,12 @@ def plot(name_test, d1, d2, d3, d4, t, reference, error, zero, settling_time):
     ax1.tick_params(axis='y', labelcolor='red')
     ax1.grid(True)
 
-
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
 
     ax2.set_ylabel('Root Mean Square [Vrms]', color='b')  # we already handled the x-label with ax1
     ax2.plot(time, data2, color='b', scalex=True, scaley=True)
     l1 = ax2.axhspan(ymin=(reference - error * reference), ymax=(reference + error * reference), color='c', alpha= 0.1)
     ax2.tick_params(axis='y', labelcolor='blue')
-
-
 
     ax3.set_xlabel('Time [s]')
     ax3.set_ylabel('Amplitude [V]', color='r')
@@ -98,17 +107,16 @@ def plot(name_test, d1, d2, d3, d4, t, reference, error, zero, settling_time):
     ax4.plot(time, data4, color='b', scalex=True, scaley=True)
     ax4.tick_params(axis='y', labelcolor='blue')
 
-
     fig.suptitle(name_test.split('.')[1], fontsize=30)
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
     fig.subplots_adjust(hspace=0.35, top=0.85, bottom=0.15)
     plt.legend((l1, l2, l3), ('error range', 'settling time range', 'settling time'), loc='lower center', bbox_to_anchor=(0.5, -0.5), fancybox=True, shadow=True, ncol=3)
-    #plt.show()
-    generate_pdf(name_test, fig)
+
+    plt.show()
+    pdf.add_to_pdf(fig)
 
 
-
-def transient_evaluation(name_test,data_in, data_out, reference, sampling_freq, error, start, time_error_measure):
+def transient_evaluation(name_test,data_in, data_out, reference, sampling_freq, error, start, time_error_measure, pdf):
     """this function evaluates the attack/settling time comparing the output data and the expected results.
     Attack_time is evaluated from from zero and the instant in which a succession of 10 "data almost equal" has been found.
     Indeed, are consider "data almost equal" if the difference between the output data rms value of the agc and the expected results (in rms)
@@ -121,6 +129,7 @@ def transient_evaluation(name_test,data_in, data_out, reference, sampling_freq, 
     error_percentage_start = []
     error_percentage_end = []
     end = 0
+    found = False
     stable_start = False
     time = []
     out_real = []
@@ -133,6 +142,7 @@ def transient_evaluation(name_test,data_in, data_out, reference, sampling_freq, 
         rms_out = math.sqrt(data_out[i].real*data_out[i].real + data_out[i].imag*data_out[i].imag)
         #print  rms_in,',',rms_out,';'
 
+        #for the graphs
         if ((i >= (start - sampling_freq * 0.01 + 1)) and (i <= (start + sampling_freq * 0.05))):
             time.append(i*1.0 / sampling_freq)
             out_real.append(data_out[i].real)
@@ -141,7 +151,8 @@ def transient_evaluation(name_test,data_in, data_out, reference, sampling_freq, 
             in_rms.append(rms_in)
 
         # error: error/range considered for the settling time
-        if ((abs(rms_out - reference) >= abs(reference * error)) and (i >= start)):
+        if ((abs(rms_out - reference) >= abs(reference * error)) and (i >= start) and (found == False)):
+            found = True
             end = i
 
         # error percentage after the settling time up to the end
@@ -156,14 +167,15 @@ def transient_evaluation(name_test,data_in, data_out, reference, sampling_freq, 
         if ((i <= (start - 1)) and (i >= start - sampling_freq * time_error_measure)) :
             error_percentage_start.append(abs((rms_out - reference) / reference))
 
-    # if ((stable_start == True) and (abs(reference * error) >= (sum(error_percentage_start) / (len(error_percentage_start)))*100))):
-    #     stable_start == True
-    print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",(end - start)
+    #thus, both the last value before the start and the average have to be between the error range
+    if ((stable_start == True) and (abs(reference * error) >= (sum(error_percentage_start) / (len(error_percentage_start)))*100))):
+         stable_start == True
+
     settling_time = (end - start) / (sampling_freq)
     error_percentage_mean_start = sum(error_percentage_start) / (len(error_percentage_start))*100
     error_percentage_mean_end = sum(error_percentage_end) / (len(error_percentage_end))*100
 
-    plot(name_test, out_real, out_rms, in_real, in_rms, time, reference, error, start *1.0 / sampling_freq, settling_time)
+    plot(name_test, out_real, out_rms, in_real, in_rms, time, reference, error, start *1.0 / sampling_freq, settling_time, pdf)
 
     return settling_time, stable_start, error_percentage_mean_start, error_percentage_mean_end
 
@@ -189,9 +201,11 @@ class qa_agc (gr_unittest.TestCase):
 
     def setUp (self):
         self.tb = gr.top_block ()
+        self.pdf = pdf_class(self.id().split(".")[1])
 
     def tearDown (self):
         self.tb = None
+        self.pdf.finalize_pdf()
     #
     # def test_001_t (self):
     #     """ Test 1: expected resut given by GnuRadio"""
@@ -411,7 +425,7 @@ class qa_agc (gr_unittest.TestCase):
         data_out = dst_agc.data()
 
 
-        settling_time_measured, stable_start, error_percentage_mean_start, error_percentage_mean_end  = transient_evaluation(name_test, data_in, data_out, reference, sampling_freq, 0.05, N/2, 0.5)
+        settling_time_measured, stable_start, error_percentage_mean_start, error_percentage_mean_end  = transient_evaluation(name_test, data_in, data_out, reference, sampling_freq, 0.05, N/2, 0.5, self.pdf)
 
         self.assertLessEqual(settling_time_measured, 0.03)
         self.assertGreaterEqual(settling_time_measured, 0.01)
