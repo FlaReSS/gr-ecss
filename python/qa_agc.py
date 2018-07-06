@@ -8,13 +8,15 @@ from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 import ecss_swig as ecss
 import runner
-import math, time, datetime, os
+import math, time, datetime, os, abc
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 class pdf_class(object):
     """this class can print a single pdf for all the tests"""
+
+    graphs_list = []
 
     def __init__(self, name_test='test'):
         current_dir = os.getcwd()
@@ -23,7 +25,6 @@ class pdf_class(object):
         if not os.path.exists(dir_to):
             os.makedirs(dir_to)
 
-        self.graphs_list = []
         self.name_complete = dir_to + '/' + name_test.split('.')[0] + "_graphs.pdf"
 
     def add_to_pdf(self, fig):
@@ -31,13 +32,13 @@ class pdf_class(object):
 
         fig_size = [21 / 2.54, 29.7 / 2.54] # width in inches & height in inches
         fig.set_size_inches(fig_size)
-        self.graphs_list.append(fig)
+        pdf_class.graphs_list.append(fig)
 
     def finalize_pdf(self):
         """this function print the final version of the pdf with all the pages"""
 
         with PdfPages(self.name_complete) as pdf:
-            for graph in self.graphs_list:
+            for graph in pdf_class.graphs_list:
                 pdf.savefig(graph)   #write the figures for that list
 
             d = pdf.infodict()
@@ -392,6 +393,8 @@ class qa_agc (gr_unittest.TestCase):
 
     def general_test (self):
 
+        self.descriptions = "Changing the docstring works !"
+
         tb = self.tb
         name_test = self.id().split("__main__.")[1]
         reference = 10.0
@@ -416,11 +419,9 @@ class qa_agc (gr_unittest.TestCase):
         print "\n-Output error after swing: %.3f%" % error_percentage_mean_start
         print "\n-Output error before swing: %.3fs" % error_percentage_mean_end
 
-
     for i in range(0, 3):
         name_test = "test_" + str(i)
         local_test = setattr(gr_unittest.TestCase, name_test, general_test)
-        local_test
 
 
     #
