@@ -48,9 +48,9 @@ class pdf_class(object):
             d['CreationDate'] = datetime.datetime(2009, 11, 13)
             d['ModDate'] = datetime.datetime.today()
 
-
 def plot(name_test, d1, d2, d3, d4, t, reference, error, zero, settling_time, pdf):
-    # Create some mock data
+    """this function create a defined graph with the data inputs"""
+
     data1 = np.asarray(d1)
     data2 = np.asarray(d2)
     data3 = np.asarray(d3)
@@ -96,7 +96,6 @@ def plot(name_test, d1, d2, d3, d4, t, reference, error, zero, settling_time, pd
 
     plt.show()
     pdf.add_to_pdf(fig)
-
 
 def transient_evaluation(name_test,data_in, data_out, reference, sampling_freq, error, start, time_error_measure, pdf):
     """this function evaluates the attack/settling time comparing the output data and the expected results.
@@ -162,6 +161,8 @@ def transient_evaluation(name_test,data_in, data_out, reference, sampling_freq, 
     return settling_time, stable_start, error_percentage_mean_start, error_percentage_mean_end
 
 def test_sine(self, tb, sampling_freq, freq_sine, freq_square, input_amplitude, N, reference, settling_time):
+    """this function run the defined test, for easier understanding"""
+
     src_sine = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
                                freq_sine, 1)
 
@@ -198,7 +199,6 @@ def test_sine(self, tb, sampling_freq, freq_sine, freq_square, input_amplitude, 
     data_in = dst_source.data()
     data_out = dst_agc.data()
     return data_in, data_out
-
 
 class qa_agc (gr_unittest.TestCase):
 
