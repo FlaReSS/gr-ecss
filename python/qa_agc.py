@@ -13,24 +13,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-# def error_evaluation (data_out, expected_result, sampling_freq, attack_time_ms):
-#     """this function evaluates the absolute rms error between the output data and the expected results.
-#     Attack_time_ms is the stimated attack time expressed in ms (must be integer).
-#     Indeed, the error is evaluated considering the values after that time."""
-#
-#     #frequency = sampling_freq / 10
-#     error_percentage = [0 for x in range (len(data_out) - sampling_freq * attack_time_ms / 1000 )]
-#     diff_real = [0 for x in range (len(data_out))]
-#     diff_imag = [0 for x in range (len(data_out))]
-#
-#     for i in xrange (len(data_out)):
-#         rms_expected = math.sqrt(expected_result[i].real * expected_result[i].real + expected_result[i].imag * expected_result[i].imag)
-#         rms_out = math.sqrt(data_out[i].real*data_out[i].real + data_out[i].imag*data_out[i].imag)
-#         #considering only the values after the maximum settling time allowed (0.03s)
-#         if (i >= sampling_freq * attack_time_ms / 1000):
-#             error_percentage[i- sampling_freq  * attack_time_ms / 1000] = abs((rms_out - rms_expected) / rms_expected)
-#
-#     return error_percentage
 class pdf_class(object):
     """this class can print a single pdf for all the tests"""
 
@@ -168,7 +150,7 @@ def transient_evaluation(name_test,data_in, data_out, reference, sampling_freq, 
             error_percentage_start.append(abs((rms_out - reference) / reference))
 
     #thus, both the last value before the start and the average have to be between the error range
-    if ((stable_start == True) and (abs(reference * error) >= (sum(error_percentage_start) / (len(error_percentage_start)))*100))):
+    if ((stable_start == True) and (abs(reference * error) >= (sum(error_percentage_start) / (len(error_percentage_start)))*100)):
          stable_start == True
 
     settling_time = (end - start) / (sampling_freq)
@@ -179,22 +161,43 @@ def transient_evaluation(name_test,data_in, data_out, reference, sampling_freq, 
 
     return settling_time, stable_start, error_percentage_mean_start, error_percentage_mean_end
 
-# def test_sine( tb, f_cut, sampling_freq, input_amplitude, reference):
-#     src1 = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
-#                                sampling_freq * 0.10, input_amplitude)
-#     #10 sample= 1 period
-#     dst1 = blocks.vector_sink_c()
-#     dst2 = blocks.vector_sink_c()
-#     head = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
-#     head2 = blocks.head(gr.sizeof_gr_complex, int (5*sampling_freq * 0.10))
-#     agc = ecss.agc(f_cut, reference, 1, sampling_freq)
-#     tb.connect(src1, head)
-#     tb.connect(head, agc)
-#     tb.connect(agc, dst1)
-#     tb.connect(src1, head2)
-#     tb.connect(head2, dst2)
-#     tb.run(500)
-#     return dst2.data(), dst1.data()
+def test_sine(self, tb, sampling_freq, freq_sine, freq_square, input_amplitude, N, reference, settling_time):
+    src_sine = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
+                               freq_sine, 1)
+
+    src_square = analog.sig_source_f(sampling_freq, analog.GR_SQR_WAVE,
+                               freq_square, input_amplitude, input_amplitude )
+
+    multiply_const = blocks.multiply_const_ff(-1)
+    multiply_complex = blocks.multiply_cc()
+
+    dst_agc = blocks.vector_sink_c()
+    dst_source = blocks.vector_sink_c()
+
+    float_to_complex = blocks.float_to_complex()
+
+    head = blocks.head(gr.sizeof_gr_complex, int (N))
+
+    agc = ecss.agc(0.1, reference, 1, 1)
+
+    tb.connect(src_square, (float_to_complex, 0))
+    tb.connect(src_square, multiply_const)
+    tb.connect(multiply_const, (float_to_complex, 1))
+
+    tb.connect(src_sine, (multiply_complex, 0))
+    tb.connect(float_to_complex, (multiply_complex, 1))
+
+    tb.connect(multiply_complex, head)
+    tb.connect(head, agc)
+    tb.connect(agc, dst_agc)
+
+    tb.connect(head, dst_source)
+
+    self.tb.run()
+
+    data_in = dst_source.data()
+    data_out = dst_agc.data()
+    return data_in, data_out
 
 
 class qa_agc (gr_unittest.TestCase):
@@ -381,51 +384,17 @@ class qa_agc (gr_unittest.TestCase):
         tb = self.tb
         name_test = self.id().split("__main__.")[1]
         reference = 10.0
-        attack_time = 0.02
+        settling_time = 0.02
         input_amplitude = 0.5
         sampling_freq = 10000
         freq_sine = sampling_freq / 10
-        freq_square = 1 / (20 * attack_time)
+        freq_square = 1 / (20 * settling_time)
         N = sampling_freq / freq_square
 
-        src_sine = analog.sig_source_c(sampling_freq, analog.GR_SIN_WAVE,
-                                   freq_sine, 1)
+        data_in, data_out = test_sine(self, tb, sampling_freq, freq_sine, freq_square, input_amplitude, N, reference, settling_time)
 
-        src_square = analog.sig_source_f(sampling_freq, analog.GR_SQR_WAVE,
-                                   freq_square, input_amplitude, input_amplitude )
-
-        multiply_const = blocks.multiply_const_ff(-1)
-        multiply_complex = blocks.multiply_cc()
-
-        dst_agc = blocks.vector_sink_c()
-        dst_source = blocks.vector_sink_c()
-
-        float_to_complex = blocks.float_to_complex()
-
-        head = blocks.head(gr.sizeof_gr_complex, int (N))
-
-        agc = ecss.agc(0.1, reference, 1, 1)
-
-        tb.connect(src_square, (float_to_complex, 0))
-        tb.connect(src_square, multiply_const)
-        tb.connect(multiply_const, (float_to_complex, 1))
-
-        tb.connect(src_sine, (multiply_complex, 0))
-        tb.connect(float_to_complex, (multiply_complex, 1))
-
-        tb.connect(multiply_complex, head)
-        tb.connect(head, agc)
-        tb.connect(agc, dst_agc)
-
-        tb.connect(head, dst_source)
-
-        self.tb.run()
-
-        data_in = dst_source.data()
-        data_out = dst_agc.data()
-
-
-        settling_time_measured, stable_start, error_percentage_mean_start, error_percentage_mean_end  = transient_evaluation(name_test, data_in, data_out, reference, sampling_freq, 0.05, N/2, 0.5, self.pdf)
+        settling_time_measured, stable_start, error_percentage_mean_start, error_percentage_mean_end  = transient_evaluation(name_test,
+                data_in, data_out, reference, sampling_freq, 0.05, N/2, 0.5, self.pdf)
 
         self.assertLessEqual(settling_time_measured, 0.03)
         self.assertGreaterEqual(settling_time_measured, 0.01)
