@@ -146,18 +146,18 @@ def transient_evaluation(name_test,data_in, data_out, data, error, time_error_me
         rms_out = math.sqrt(data_out[i].real*data_out[i].real + data_out[i].imag*data_out[i].imag)
         #print  rms_in,',',rms_out,';'
 
+        # error: error/range considered for the settling time
+        if ((abs(rms_out - data.reference) >= abs(data.reference * error)) and (i >= start) and (found == False)):
+            found = True
+            end = i
+
         #for the graphs
-        if ((i >= (start - data.sampling_freq * 0.01 + 1)) and (i <= (start + data.sampling_freq * 0.05))):
+        if ((i >= (start - data.sampling_freq * 0.01 + 1)) and ((i <= (start - 1 + data.sampling_freq * 0.05)) or (found == True))):
             time.append(i*1.0 / data.sampling_freq)
             out_real.append(data_out[i].real)
             out_rms.append(rms_out)
             in_real.append(data_in[i].real)
             in_rms.append(rms_in)
-
-        # error: error/range considered for the settling time
-        if ((abs(rms_out - data.reference) >= abs(data.reference * error)) and (i >= start) and (found == False)):
-            found = True
-            end = i
 
         # error percentage after the settling time up to the end
         if ( i >= (len(data_in) - data.sampling_freq * time_error_measure)):
@@ -202,8 +202,8 @@ def test_sine(self, tb, data):
 
     head = blocks.head(gr.sizeof_gr_complex, int (data.N))
 
-    agc = ecss.agc(0.01, data.reference, 1, 1)
-    # agc = ecss.agc(data.settling_time, data.reference, 1, data.sampling_freq)
+    # agc = ecss.agc(0.01, data.reference, 1, 1)
+    agc = ecss.agc(data.settling_time, data.reference, 1, data.sampling_freq)
 
     tb.connect(src_square, (float_to_complex, 0))
     tb.connect(src_square, multiply_const)
@@ -226,19 +226,19 @@ def test_sine(self, tb, data):
 
 class qa_agc (gr_unittest.TestCase):
 
+    #numeber of tests generated in the cycle
+    NUM_TESTS = 10
+
     global_self = gr_unittest.TestCase
     data = []
-
 
     def setUp (global_self):
         global_self.tb = gr.top_block ()
         global_self.pdf = Pdf_class(global_self.id().split(".")[1])
 
-
     def tearDown (global_self):
         global_self.tb = None
         global_self.pdf.finalize_pdf()
-
 
     #
     # def test_001_t (self):
@@ -410,6 +410,7 @@ class qa_agc (gr_unittest.TestCase):
     #     % (error_percentage[index]*100 ,(sum(error_percentage)/(len(error_percentage)))*100)
 
     def general_test (global_self):
+        #general template for the test. Will be used that template with different parameters
 
         tb = global_self.tb
         name_test = global_self.id().split("__main__.")[1]
@@ -427,7 +428,7 @@ class qa_agc (gr_unittest.TestCase):
                 data_in, data_out, data, error, time_error_measure, global_self.pdf)
 
         global_self.assertLessEqual(settling_time_measured, 0.03)
-        global_self.assertGreaterEqual(settling_time_measured, 0.0)
+        global_self.assertGreaterEqual(settling_time_measured, 0.01)
         # global_self.assertEqual(stable_start, True)
         # global_self.assertLessEqual(error_percentage_mean_start, error * 100)
         # global_self.assertLessEqual(error_percentage_mean_end, error * 100)
@@ -435,17 +436,38 @@ class qa_agc (gr_unittest.TestCase):
         print "-Output error after swing: %.3f%%" % error_percentage_mean_start
         print "-Output error before swing: %.3f%%" % error_percentage_mean_end
 
-    for i in range(0, 5):
-        name_test = "test_" + str(i)
+    def update_data(global_self,index, max_index, max_reference, min_settling_time, max_settling_time, max_input_amplitude):
+        """this function will insert the parameters for the test"""
+
         data_test = Test_parameters()
-        data_test.reference = 5.0 + i
-        data_test.settling_time = 0.01
-        data_test.input_amplitude = 0.4 + i / 10
-        data_test.sampling_freq = 12000
+        if (index < (max_index / 2)):
+            data_test.reference = (max_reference * 2 / max_index) * (2 * int(index / 2) + 1)
+        else:
+            data_test.reference = (2 * max_reference) - (max_reference *2 / max_index) * (2 * int(index / 2) + 1)
+
+
+        if (index % 2 == 0):
+            data_test.settling_time = min_settling_time
+        else:
+            data_test.settling_time = max_settling_time
+
+        if (index < (max_index / 2)):
+            data_test.input_amplitude = (max_input_amplitude * 2 / max_index) * (index + 1)
+        else:
+            data_test.input_amplitude = max_input_amplitude
+
+        data_test.sampling_freq = 10000
         data_test.update_parameters()
+        return data_test
+
+
+
+    #for cycle that generate (from general_test()) several different tests
+    for i in range(0, NUM_TESTS):
+        name_test = "test_" + str(i)
+        data_test = update_data(global_self, i, NUM_TESTS, max_reference= 10.0, min_settling_time= 0.01, max_settling_time= 0.03 , max_input_amplitude= 14.142)
         data.append(data_test)
         local_test = setattr(global_self, name_test, general_test)
-
 
     #
     # def test_004_t (self):
