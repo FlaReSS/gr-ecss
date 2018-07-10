@@ -8,8 +8,10 @@ from unittest.result import failfast
 import hashlib
 from jinja2 import Template
 
-DEFAULT_TEMPLATE = os.path.join(os.path.dirname(__file__), "template",
-                                "report_template.html")
+DEFAULT_TEMPLATE_1 = os.path.join(os.path.dirname(__file__), "template",
+                                "report_template_1.html")
+DEFAULT_TEMPLATE_2 = os.path.join(os.path.dirname(__file__), "template",
+                                "report_template_2.html")
 
 
 def load_template(template):
@@ -25,8 +27,12 @@ def load_template(template):
               "Loading Default Template", sep="\n")
     finally:
         if not file:
-            with open(DEFAULT_TEMPLATE, "r") as f:
-                file = f.read()
+            if (template == 'DEFAULT_TEMPLATE_2'):
+                with open(DEFAULT_TEMPLATE_2, "r") as f:
+                    file = f.read()
+            else :
+                with open(DEFAULT_TEMPLATE_1, "r") as f:
+                    file = f.read()
         return file
 
 
@@ -58,7 +64,7 @@ class _TestInfo(object):
         self.outcome = outcome
         self.elapsed_time = 0
         self.err = err
-        self.stdout = test_result._stdout_data
+        self.stdout, self.parameters = self.test_result.getOutputs(test_result)
         self.stderr = test_result._stderr_data
 
         self.test_description = self.test_result.getDescription(test_method)
@@ -118,6 +124,17 @@ class _HtmlTestResult(_TextTestResult):
             elif self.dots:
                 self.stream.write(short_str)
         self.callback = callback
+
+    def getOutputs(self, test):
+        """ Return the test outputs of the test, and check if there are parameters. """
+        outputs = test._stdout_data
+        if outputs.startswith("\p"):
+            parameters = (outputs.split("\p"))[1].split("\p")[0]
+            outputs = outputs.split("\p")[2]
+            return outputs, parameters
+        else:
+            parameters = ""
+            return outputs, parameters
 
     def getDescription(self, test):
         """ Return the test description if not have test name. """
@@ -386,8 +403,8 @@ class _HtmlTestResult(_TextTestResult):
         else:
             out_messages = testCase.stdout.decode('latin-1')
 
+        param = testCase.parameters.decode('latin-1')
         stack= out_messages.replace("\n", "<br />") + testCase.stderr.decode('latin-1')
-
 
         status = ('success', 'danger', 'warning', 'info')[testCase.outcome-1]
 
@@ -398,7 +415,7 @@ class _HtmlTestResult(_TextTestResult):
         else:
             error_message = testCase.err
 
-        return test_cases_list.append([desc, stack, status, error_type, error_message])
+        return test_cases_list.append([desc, param, stack, status, error_type, error_message])
 
     def get_test_number(self, test):
         """ Return the number of a test case or 0. """
