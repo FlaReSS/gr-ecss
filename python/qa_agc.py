@@ -66,8 +66,8 @@ class Test_parameters:
         self.N = self.sampling_freq / self.freq_square
 
     def get_parameters(self):
-        string = "\p Aref= %.1f, t_settlig= %.3f, Ain_max= %.1f, Ain_minx= %.1f,f_samp= %.1f, f_in_sine= %.1f \p" \
-            %(self.reference, self.settling_time, self.input_amplitude_max, self.input_amplitude_min, self.sampling_freq, self.freq_sine)
+        string = "\p Aref= %.1f, t_settlig= %.3f, Ain_max_rms= %.2f, Ain_min_rms= %.2f,f_samp= %.1f, f_in_sine= %.1f \p" \
+            %(self.reference, self.settling_time, (self.input_amplitude_max), (self.input_amplitude_min), self.sampling_freq, self.freq_sine)
         return string
 
 
@@ -176,6 +176,10 @@ def transient_evaluation(name_test,data_in, data_out, data, error, time_error_me
     if ((stable_start == True) and (abs(data.reference * error) >= (sum(error_percentage_start) / (len(error_percentage_start)))*100)):
          stable_start == True
 
+    #to avoid negative results
+    if (found == False):
+        end = start
+
     settling_time = (end - start) / (data.sampling_freq)
     error_percentage_mean_start = (sum(error_percentage_start) / len(error_percentage_start))*100
     error_percentage_mean_end = (sum(error_percentage_end) / len(error_percentage_end))*100
@@ -191,7 +195,7 @@ def test_sine(self, tb, data):
                                data.freq_sine, 1)
 
     src_square = analog.sig_source_f(data.sampling_freq, analog.GR_SQR_WAVE,
-                               data.freq_square, (data.input_amplitude_max - data.input_amplitude_min), ((data.input_amplitude_max + data.input_amplitude_min) / 2 ) )
+                               data.freq_square, ((data.input_amplitude_max - data.input_amplitude_min) / math.sqrt(2)), (data.input_amplitude_min / math.sqrt(2)) )
 
     multiply_const = blocks.multiply_const_ff(-1)
     multiply_complex = blocks.multiply_cc()
@@ -228,7 +232,7 @@ def test_sine(self, tb, data):
 class qa_agc (gr_unittest.TestCase):
 
     #numeber of tests generated in the cycle (should be used a number whose square root is an even integer)
-    NUM_TESTS = 64
+    NUM_TESTS = 16
 
     global_self = gr_unittest.TestCase
     data = []
@@ -418,7 +422,7 @@ class qa_agc (gr_unittest.TestCase):
         number_test = int(name_test.split("test_")[1])
         data = global_self.data[number_test]
 
-        time_error_measure = 0.5
+        time_error_measure = 0.1
         error = 0.05
 
         print data.get_parameters()
@@ -433,18 +437,22 @@ class qa_agc (gr_unittest.TestCase):
         # global_self.assertEqual(stable_start, True)
         # global_self.assertLessEqual(error_percentage_mean_start, error * 100)
         # global_self.assertLessEqual(error_percentage_mean_end, error * 100)
-        print "-Settling time: %.3fs" % settling_time_measured
+        print "-Settling time: %.5fs" % settling_time_measured
         print "-Output error after swing: %.3f%%" % error_percentage_mean_start
         print "-Output error before swing: %.3f%%" % error_percentage_mean_end
 
     def update_data(global_self,index, max_index, max_reference, min_settling_time, max_settling_time, max_input_amplitude_max, max_input_amplitude_min):
         """this function will insert the parameters for the test"""
 
-        sqrt_max_index = int(math.sqrt(max_index))
+        sqrt_max_index = math.sqrt(max_index)
 
-        index2 = (index / 2) / sqrt_max_index
+        # index2 = (index / 2) / sqrt_max_index
+        #
+        # index1 = (index / 2) - (index2 * sqrt_max_index)
 
-        index1 = (index / 2) - (index2 * sqrt_max_index)
+        index2 = int(index / sqrt_max_index)
+
+        index1 = (index) - int(index2 * sqrt_max_index)
 
         data_test = Test_parameters()
         data_test.input_amplitude_min = (max_input_amplitude_min / sqrt_max_index * (index1 + 1))
@@ -452,17 +460,29 @@ class qa_agc (gr_unittest.TestCase):
 
 
         if (index < (max_index / 2 )):
-            data_test.reference = ((max_reference * 2) / sqrt_max_index) * (2 * index2 + 1)
+            data_test.reference = ((max_reference * 2) / sqrt_max_index) * ( index2 + 1)
         else:
-            data_test.reference = (2 * max_reference) - ((max_reference *2 / sqrt_max_index) * (2 * index2 + 1))
+            data_test.reference = (2 * max_reference) - ((max_reference *2 / sqrt_max_index) * ( index2 + 1))
+            if (data_test.reference == 0):
+                data_test.reference = 0.1
 
+        # if (index % 2 == 0):
+        #     data_test.settling_time = min_settling_time
+        # else:
+        #     data_test.settling_time = max_settling_time
 
-        if (index % 2 == 0):
-            data_test.settling_time = min_settling_time
-        else:
-            data_test.settling_time = max_settling_time
+        data_test.settling_time = 0.02
 
         data_test.input_amplitude_max = (max_input_amplitude_max / sqrt_max_index) * (index2 + 1)
+
+        #to avoid a small step
+        if ((data_test.input_amplitude_max - data_test.input_amplitude_min) <= (data_test.input_amplitude_max / sqrt_max_index)):
+            if (data_test.input_amplitude_max >= data_test.input_amplitude_min):
+                data_test.input_amplitude_max = data_test.input_amplitude_max + (data_test.input_amplitude_max / (sqrt_max_index ))
+                data_test.input_amplitude_min = data_test.input_amplitude_min - (data_test.input_amplitude_min / (sqrt_max_index ))
+            else:
+                data_test.input_amplitude_max = data_test.input_amplitude_max - (data_test.input_amplitude_max / (sqrt_max_index ))
+                data_test.input_amplitude_min = data_test.input_amplitude_min + (data_test.input_amplitude_min / (sqrt_max_index ))
 
         data_test.sampling_freq = 10000
         data_test.update_parameters()
@@ -474,7 +494,7 @@ class qa_agc (gr_unittest.TestCase):
     #for cycle that generate (from general_test()) several different tests
     for i in range(0, NUM_TESTS):
         name_test = "test_" + '{0:03}'.format(i)
-        data_test = update_data(global_self, i, NUM_TESTS, max_reference= 10.0, min_settling_time= 0.01, max_settling_time= 0.03 , max_input_amplitude_max= 14.142, max_input_amplitude_min= 14.142)
+        data_test = update_data(global_self, i, NUM_TESTS, max_reference= 200.0, min_settling_time= 0.01, max_settling_time= 0.03 , max_input_amplitude_max= 150.0, max_input_amplitude_min= 100.0)
         data.append(data_test)
         local_test = setattr(global_self, name_test, general_test)
 

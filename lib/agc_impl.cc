@@ -68,7 +68,7 @@ namespace gr {
     {
           const gr_complex *in = (const gr_complex*)input_items[0];
           gr_complex *out = (gr_complex*)output_items[0];
-          float rate= (1 / (d_samp_rate * d_attack_time / 2.65));
+          float rate= (2.95 / (d_samp_rate * d_attack_time));
 
           for(int i = 0; i < noutput_items; i++) {
               out[i]= in[i] * std::exp(d_gain);
