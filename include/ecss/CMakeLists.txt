@@ -24,5 +24,5 @@
 install(FILES
     api.h
     agc.h
-    DESTINATION include/ecss
+    pll.h DESTINATION include/ecss
 )

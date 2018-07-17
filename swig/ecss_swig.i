@@ -9,9 +9,12 @@
 
 %{
 #include "ecss/agc.h"
+#include "ecss/pll.h"
 %}
 
 
 %include "ecss/agc.h"
 GR_SWIG_BLOCK_MAGIC2(ecss, agc);
 
+%include "ecss/pll.h"
+GR_SWIG_BLOCK_MAGIC2(ecss, pll);

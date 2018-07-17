@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<block>
+  <name>pll</name>
+  <key>ecss_pll</key>
+  <category>[ecss]</category>
+  <import>import ecss</import>
+  <make>ecss.pll($enable, $order, $N, $Coeff_1, $Coeff_2, $Coeff_3, $Coeff_4, $max_freq, $min_freq)</make>
+  <callback>set_enable($enable)</callback>
+  <callback>set_order($order)</callback>
+  <callback>set_N($N)</callback>
+  <callback>set_coeff1($Coeff_1)</callback>
+  <callback>set_coeff2($Coeff_2)</callback>
+  <callback>set_coeff3($Coeff_3)</callback>
+  <callback>set_coeff4($Coeff_4)</callback>
+  <callback>set_max_freq($max_freq)</callback>
+  <callback>set_min_freq($min_freq)</callback>
+
+  <param>
+    <name>enable</name>
+    <key>enable</key>
+    <type>int</type>
+  </param>
+  <param>
+    <name>order</name>
+    <key>order</key>
+    <type>int</type>
+  </param>
+  <param>
+    <name>N of bits</name>
+    <key>N</key>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Coeff 1</name>
+    <key>Coeff_1</key>
+    <type>real</type>
+  </param>
+  <param>
+    <name>Coeff 2</name>
+    <key>Coeff_2</key>
+    <type>real</type>
+  </param>
+  <param>
+    <name>Coeff 3</name>
+    <key>Coeff_3</key>
+    <type>real</type>
+  </param>
+  <param>
+    <name>Coeff 4</name>
+    <key>Coeff_4</key>
+    <type>real</type>
+  </param>
+  <param>
+    <name>Max Freq</name>
+    <key>max_freq</key>
+    <type>real</type>
+  </param>
+  <param>
+    <name>Min Freq</name>
+    <key>min_freq</key>
+    <type>real</type>
+  </param>
+
+
+  <sink>
+    <name>in</name>
+    <type>complex</type>
+  </sink>
+
+  <source>
+    <name>out</name>
+    <type>complex</type>
+  </source>
+
+  <source>
+    <name>freq</name>
+    <type>float</type>
+    <optional>1</optional>
+  </source>
+
+  <source>
+    <name>err</name>
+    <type>float</type>
+    <optional>1</optional>
+  </source>
+
+  <source>
+    <name>phase</name>
+    <type>float</type>
+    <optional>1</optional>
+  </source>
+
+  </block>
