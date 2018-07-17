@@ -33,4 +33,5 @@ except ImportError:
 # import any pure python here
 from spl_encoder import spl_encoder
 from spl_decoder import spl_decoder
+from selector import selector
 #

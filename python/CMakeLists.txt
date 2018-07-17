@@ -33,7 +33,8 @@ GR_PYTHON_INSTALL(
     FILES
     __init__.py
     spl_encoder.py
-    spl_decoder.py DESTINATION ${GR_PYTHON_DIR}/ecss
+    spl_decoder.py
+    selector.py DESTINATION ${GR_PYTHON_DIR}/ecss
 )
 
 ########################################################################
@@ -46,3 +47,4 @@ set(GR_TEST_PYTHON_DIRS ${CMAKE_BINARY_DIR}/swig)
 GR_ADD_TEST(qa_agc ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_agc.py)
 GR_ADD_TEST(qa_spl_encoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_spl_encoder.py)
 GR_ADD_TEST(qa_spl_decoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_spl_decoder.py)
+GR_ADD_TEST(qa_selector ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_selector.py)

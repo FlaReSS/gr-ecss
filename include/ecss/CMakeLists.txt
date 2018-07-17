@@ -23,5 +23,6 @@
 ########################################################################
 install(FILES
     api.h
-    agc.h DESTINATION include/ecss
+    agc.h
+    DESTINATION include/ecss
 )
