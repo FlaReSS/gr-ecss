@@ -79,13 +79,13 @@
   </source>
 
   <source>
-    <name>err</name>
-    <type>float</type>
+    <name>phase accumulator</name>
+    <type>int</type>
     <optional>1</optional>
   </source>
 
   <source>
-    <name>phase</name>
+    <name>phase error</name>
     <type>float</type>
     <optional>1</optional>
   </source>

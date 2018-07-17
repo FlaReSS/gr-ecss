@@ -34,13 +34,16 @@ namespace gr {
        int d_order;
        double d_phase, d_freq;
        double d_acceleration, d_acceleration_temp;
-       double filter_out;
+       double filter_out, d_integer_phase_normalized;
+       long long int d_integer_phase;
        double d_max_freq, d_min_freq;
        double d_damping, d_loop_bw;
        double d_alpha, d_beta, d_gamma, d_zeta;
 
        double mod_2pi(double in);
-       double phase_detector(gr_complex sample, double ref_phase);
+
+       void NCO_normalization(long long int d_integer_phase);
+       double phase_detector(gr_complex sample);
        double magnitude(gr_complex sample);
 
     public:
@@ -70,7 +73,9 @@ namespace gr {
        /*! \brief Advance the control loop based on the current gain
         *  settings and the inputted error signal.
         */
-       void advance_loop(double error);
+      void accumulator (double filter_out);
+
+      void advance_loop(double error);
 
        /*! \brief Keep the phase between -2pi and 2pi.
         *

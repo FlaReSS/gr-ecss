@@ -33,7 +33,7 @@ namespace gr {
   namespace ecss {
 
     #ifndef M_TWOPI
-    #define M_TWOPI (2.0f*M_PI)
+    #define M_TWOPI (2.0*M_PI)
     #endif
 
     pll::sptr
@@ -52,7 +52,7 @@ namespace gr {
       : gr::sync_block("pll",
             gr::io_signature::make(1, 1, sizeof(gr_complex)),
             gr::io_signature::makev(1, 4, iosig)),
-            d_enable(enable), d_order(order), d_N(N),
+            d_enable(enable), d_order(order), d_N(N), d_integer_phase(0), d_integer_phase_normalized(0),
             d_phase(0), d_freq(0), d_max_freq(max_freq), d_min_freq(min_freq),
             d_acceleration(0), d_acceleration_temp(0),
             d_alpha(Coeff_1), d_beta(Coeff_2), d_gamma(Coeff_3), d_zeta(Coeff_4)
@@ -90,19 +90,17 @@ namespace gr {
     }
 
     double
-    pll_impl::phase_detector(gr_complex sample, double ref_phase)
+    pll_impl::phase_detector(gr_complex sample)
     {
       double sample_phase;
-      //  sample_phase = atan2(sample.imag(),sample.real());
-      sample_phase = gr::fast_atan2f(sample.imag(),sample.real());
-      return mod_2pi(sample_phase-ref_phase);
+      sample_phase = atan2(sample.imag(),sample.real());
+      return mod_2pi(sample_phase);
     }
 
     double
     pll_impl::magnitude(gr_complex sample)
     {
       double sample_magn;
-      //  sample_phase = atan2(sample.imag(),sample.real());
       sample_magn = sqrt(sample.imag()*sample.imag() + sample.real()*sample.real());
       return sample_magn;
     }
@@ -113,10 +111,10 @@ namespace gr {
               gr_vector_const_void_star &input_items,
               gr_vector_void_star &output_items)
     {
-      const gr_complex *iptr = (gr_complex*)input_items[0];
-      gr_complex *optr = (gr_complex*)output_items[0];
+      const gr_complex *input = (gr_complex*)input_items[0];
+      gr_complex *output = (gr_complex*)output_items[0];
       float *frq =(float*)output_items[1];
-      float *phase_difference =(float*)output_items[2];
+      long long int *phase_accumulator =(long long int*)output_items[2];
       float *phase_out =(float*)output_items[3];
 
       double module;
@@ -124,18 +122,21 @@ namespace gr {
       float t_imag, t_real;
 
       for(int i = 0; i < noutput_items; i++) {
+          phase_accumulator[i] = d_integer_phase;
+          phase_out[i] = d_integer_phase_normalized;
+          gr::sincosf(d_integer_phase_normalized, &t_imag, &t_real);
+          output[i] = input[i] * gr_complex(t_real, -t_imag);
 
-          gr::sincosf(d_phase, &t_imag, &t_real);
-          optr[i] = iptr[i] * gr_complex(t_real, -t_imag);
-          phase_out[i] = d_phase;
-          phase_difference[i] = filter_out;
+          error = phase_detector(output[i]);
 
-          error = phase_detector(iptr[i], d_phase);
+          //phase_out[i] = error;
 
           advance_loop(error);
+          accumulator(filter_out);
+          NCO_normalization(d_integer_phase);
           phase_wrap();
           frequency_limit();
-          *frq++ = d_freq;
+          frq[i] = d_freq;
 
       }
       return noutput_items;
@@ -167,18 +168,30 @@ namespace gr {
     {
       d_acceleration_temp = d_acceleration_temp + d_gamma * error;
       d_acceleration= d_acceleration + d_acceleration_temp;
-      d_freq = d_freq + d_beta * error;
+      d_freq = d_zeta * d_freq + d_beta * error;
       filter_out = d_acceleration + d_freq + d_alpha * error;
-      d_phase = d_phase + filter_out;
       }
+
+    void
+    pll_impl::accumulator(double filter_out)
+    {
+      d_integer_phase += (long long int)(filter_out * pow (2.0, (64 - d_N)));
+      }
+
+    void
+    pll_impl::NCO_normalization(long long int d_integer_phase)
+    {
+      d_integer_phase_normalized = (((double)(d_integer_phase)) / pow(2, (64 - d_N))) * M_TWOPI;
+      }
+
 
     void
     pll_impl::phase_wrap()
     {
-      while(d_phase>M_TWOPI)
-        d_phase -= M_TWOPI;
-      while(d_phase<-M_TWOPI)
-        d_phase += M_TWOPI;
+      while(d_integer_phase_normalized > M_TWOPI)
+        d_integer_phase_normalized -= M_TWOPI;
+      while(d_integer_phase_normalized <- M_TWOPI)
+        d_integer_phase_normalized += M_TWOPI;
     }
 
     void
