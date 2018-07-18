@@ -61,15 +61,15 @@ namespace gr {
             d_damping = sqrtf(2.0f)/2.0f;
 
             // Set the bandwidth, which will then call update_gains()
-            set_enable(enable);
-            set_order(order);
-            set_N(N);
             set_coeff1(Coeff_1);
             set_coeff2(Coeff_2);
             set_coeff3(Coeff_3);
             set_coeff4(Coeff_4);
             set_max_freq(max_freq);
             set_min_freq(min_freq);
+            set_enable(enable);
+            set_order(order);
+            set_N(N);
           }
 
     /*
@@ -122,28 +122,33 @@ namespace gr {
       float t_imag, t_real;
 
       for(int i = 0; i < noutput_items; i++) {
-          phase_accumulator[i] = d_integer_phase;
-          phase_out[i] = d_integer_phase_normalized;
-          gr::sincosf(d_integer_phase_normalized, &t_imag, &t_real);
-          output[i] = input[i] * gr_complex(t_real, -t_imag);
 
-          error = phase_detector(output[i]);
+        if (d_enable > 0)
+         {
+            phase_accumulator[i] = d_integer_phase;
+            frq[i] = d_integer_phase_normalized;
+            gr::sincosf(d_integer_phase_normalized, &t_imag, &t_real);
+            output[i] = input[i] * gr_complex(t_real, -t_imag);
 
-          //phase_out[i] = error;
+            error = phase_detector(output[i]);
 
-          advance_loop(error);
-          accumulator(filter_out);
-          NCO_normalization(d_integer_phase);
-          phase_wrap();
-          frequency_limit();
-          frq[i] = d_freq;
+            phase_out[i] = error;
+
+            advance_loop(error);
+            accumulator(filter_out);
+            NCO_normalization(d_integer_phase);
+            phase_wrap();
+            frequency_limit();
+        }
 
       }
       return noutput_items;
     }
+
     void
     pll_impl::update_gains()
     {
+      //test
       static double temp_coeff1;
       static double temp_coeff2;
       static double temp_coeff3;
@@ -166,9 +171,17 @@ namespace gr {
     void
     pll_impl::advance_loop(double error)
     {
-      d_acceleration_temp = d_acceleration_temp + d_gamma * error;
-      d_acceleration= d_acceleration + d_acceleration_temp;
-      d_freq = d_zeta * d_freq + d_beta * error;
+      if (d_order == 3)
+      {
+          d_acceleration_temp = d_acceleration_temp + d_gamma * error;
+          d_acceleration= d_acceleration + d_acceleration_temp;
+          d_freq = d_freq + d_beta * error;
+      }
+      else
+      {
+          d_acceleration = 0;
+          d_freq = d_zeta * d_freq + d_beta * error;
+      }
       filter_out = d_acceleration + d_freq + d_alpha * error;
       }
 
@@ -210,19 +223,28 @@ namespace gr {
     void
     pll_impl::set_enable(int enable)
     {
-     d_enable = enable;
+      if(enable < 0 || enable > 1) {
+        throw std::out_of_range ("pll: invalid order. Must be 0 or 1");
+      }
+      d_enable = enable;
     }
 
     void
     pll_impl::set_order(int order)
     {
-     d_order = order;
+      if(order < 2 || order > 3) {
+        throw std::out_of_range ("pll: invalid order. Must be 2 or 3");
+      }
+      d_order = order;
     }
 
     void
     pll_impl::set_N(int N)
     {
-     d_N = N;
+      if(N < 0 || N > 63) {
+        throw std::out_of_range ("pll: invalid number of bits. Must be in [0, 63].");
+      }
+      d_N = N;
     }
 
      void

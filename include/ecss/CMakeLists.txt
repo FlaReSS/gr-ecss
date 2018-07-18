@@ -24,5 +24,7 @@
 install(FILES
     api.h
     agc.h
-    pll.h DESTINATION include/ecss
+    pll.h
+    selector_cc.h
+    selector_ff.h DESTINATION include/ecss
 )

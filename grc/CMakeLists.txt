@@ -21,6 +21,6 @@ install(FILES
     ecss_agc.xml
     ecss_spl_encoder.xml
     ecss_spl_decoder.xml
-    ecss_selector.xml
-    ecss_pll.xml DESTINATION share/gnuradio/grc/blocks
+    ecss_pll.xml
+    ecss_selector.xml DESTINATION share/gnuradio/grc/blocks
 )

@@ -19,8 +19,8 @@
  */
 
 
-#ifndef INCLUDED_ECSS_AGC_H
-#define INCLUDED_ECSS_AGC_H
+#ifndef INCLUDED_ECSS_SELECTOR_FF_H
+#define INCLUDED_ECSS_SELECTOR_FF_H
 
 #include <ecss/api.h>
 #include <gnuradio/sync_block.h>
@@ -33,32 +33,26 @@ namespace gr {
      * \ingroup ecss
      *
      */
-    class ECSS_API agc : virtual public gr::sync_block
+    class ECSS_API selector_ff : virtual public gr::sync_block
     {
      public:
-      typedef boost::shared_ptr<agc> sptr;
+      typedef boost::shared_ptr<selector_ff> sptr;
 
       /*!
-       * \brief Return a shared_ptr to a new instance of ecss::agc.
+       * \brief Return a shared_ptr to a new instance of ecss::selector_ff.
        *
-       * To avoid accidental use of raw pointers, ecss::agc's
+       * To avoid accidental use of raw pointers, ecss::selector_ff's
        * constructor is in a private implementation
-       * class. ecss::agc::make is the public interface for
+       * class. ecss::selector_ff::make is the public interface for
        * creating new instances.
        */
-      static sptr make(float attack_time, float reference, float gain, int samp_rate);
+      static sptr make(int select, int n_inputs, int n_outputs);
 
-      virtual float attack_time() const=0;
-      virtual float samp_rate() const=0;
-      virtual float reference() const=0;
-      virtual float gain() const=0;
-      virtual void set_attack_time(float attack_time)=0;
-      virtual void set_samp_rate(float samp_rate)=0;
-      virtual void set_reference(float reference)=0;
-      virtual void set_gain(float gain)=0;
+      virtual int get_select() const=0;
+      virtual void set_select(int select)=0;
     };
 
   } // namespace ecss
 } // namespace gr
 
-#endif /* INCLUDED_ECSS_AGC_H */
+#endif /* INCLUDED_ECSS_SELECTOR_FF_H */
