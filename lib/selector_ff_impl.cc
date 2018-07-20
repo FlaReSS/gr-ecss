@@ -64,7 +64,17 @@ namespace gr {
         gr_vector_const_void_star &input_items,
         gr_vector_void_star &output_items)
     {
-      int out_sel, in_sel;
+
+      for(int i = 0; i < noutput_items; i++) {
+          sel_evaluation();
+          const float *in = (const float *) input_items[in_sel];
+          float *out = (float *) output_items[out_sel];
+          out[i]= in[i];
+      }
+      return noutput_items;
+    }
+
+    void selector_ff_impl::sel_evaluation(){
       if ( d_n_inputs > 1)
       {
         out_sel = 0;
@@ -75,14 +85,6 @@ namespace gr {
         out_sel = d_select;
         in_sel = 0;
       }
-
-      const float *in = (const float *) input_items[in_sel];
-      float *out = (float *) output_items[out_sel];
-
-      for(int i = 0; i < noutput_items; i++) {
-          out[i]= in[i];
-      }
-      return noutput_items;
     }
 
     int selector_ff_impl::get_select() const   { return d_select;  }

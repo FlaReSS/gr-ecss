@@ -23,8 +23,7 @@ def load_template(template):
             with open(template, "r") as f:
                 file = f.read()
     except Exception as err:
-        print("Error: Your Template wasn't loaded", err,
-              "Loading Default Template", sep="\n")
+        print("Loading Default Template", sep="\n")
     finally:
         if not file:
             if (template == 'DEFAULT_TEMPLATE_2'):
@@ -391,7 +390,7 @@ class _HtmlTestResult(_TextTestResult):
         """ Return a test name of the test id. """
         return test_id.split('.')[-1]
 
-    def _report_testcase(self, testCase, test_cases_list):
+    def _report_testcase(self, testCase, test_cases_list, template):
         """ Return a list with test name or desciption, status and error
             msg if fail or skip. """
         test_name = self._test_method_name(testCase.test_id)
@@ -414,8 +413,10 @@ class _HtmlTestResult(_TextTestResult):
             error_message = testCase.err[1]
         else:
             error_message = testCase.err
-
-        return test_cases_list.append([desc, param, stack, status, error_type, error_message])
+        if(template == DEFAULT_TEMPLATE_2):
+            return test_cases_list.append([desc, param, stack, status, error_type, error_message])
+        else:
+            return test_cases_list.append([desc, stack, status, error_type, error_message])
 
     def get_test_number(self, test):
         """ Return the number of a test case or 0. """
@@ -450,7 +451,7 @@ class _HtmlTestResult(_TextTestResult):
         tests = self.sort_test_list(tests)
 
         for test in tests:
-            self._report_testcase(test, test_cases_list)
+            self._report_testcase(test, test_cases_list, testRunner.template)
 
         html_file = render_html(testRunner.template, title=report_name,
                                 headers=report_headers,

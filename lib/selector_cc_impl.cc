@@ -44,7 +44,7 @@ namespace gr {
      * The private constructor
      */
     selector_cc_impl::selector_cc_impl(int select, int n_inputs, int n_outputs)
-      : gr::sync_block("selector_cc",
+      : gr::block("selector_cc",
               gr::io_signature::make(0, n_inputs, sizeof(gr_complex)),
               gr::io_signature::make(0, n_outputs, sizeof(gr_complex))),
               d_select(select), d_n_inputs(n_inputs), d_n_outputs(n_outputs)
@@ -60,11 +60,46 @@ namespace gr {
     }
 
     int
-    selector_cc_impl::work(int noutput_items,
-        gr_vector_const_void_star &input_items,
-        gr_vector_void_star &output_items)
+    selector_cc_impl::general_work (int noutput_items,
+                       gr_vector_int &ninput_items,
+                       gr_vector_const_void_star &input_items,
+                       gr_vector_void_star &output_items)
     {
-      int out_sel, in_sel;
+      const gr_complex *in[d_n_inputs];
+      gr_complex *out[d_n_outputs];
+
+      for(int x = 0; x < d_n_inputs; x++) {
+        in[x] = (const gr_complex *) input_items[x];
+      }
+      for(int y = 0; y < d_n_outputs;y++) {
+        out[y] = (gr_complex *) output_items[y];
+      }
+
+
+      for(int i = 0; i < noutput_items; i++) {
+            sel_evaluation();
+            out[out_sel][i]= in[in_sel][i];
+      }
+
+      for(int z = 0; z < d_n_inputs; z++) {
+        if (z == in_sel )
+          consume(z,noutput_items);
+        else
+          consume(z,0);
+      }
+
+      for(int w = 0; w < d_n_outputs; w++) {
+        if (w != out_sel )
+          produce(w,0);
+        else
+          produce(w,noutput_items);
+      }
+
+      return WORK_CALLED_PRODUCE;
+    }
+
+    void selector_cc_impl::sel_evaluation(){
+      static int temp = 0;
       if ( d_n_inputs > 1)
       {
         out_sel = 0;
@@ -75,14 +110,11 @@ namespace gr {
         out_sel = d_select;
         in_sel = 0;
       }
-
-      const gr_complex *in = (const gr_complex *) input_items[in_sel];
-      gr_complex *out = (gr_complex *) output_items[out_sel];
-
-      for(int i = 0; i < noutput_items; i++) {
-          out[i]= in[i];
-      }
-      return noutput_items;
+      //
+      // if (temp != d_select){
+      //   std::cout<<"select is: "<<d_select<<std::endl;
+      //   temp = d_select;
+      // }
     }
 
     int selector_cc_impl::get_select() const   { return d_select;  }

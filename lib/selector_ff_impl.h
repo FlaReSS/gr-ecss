@@ -32,6 +32,7 @@ namespace gr {
       int d_select;
       int d_n_inputs;
       int d_n_outputs;
+      int out_sel, in_sel;
 
      public:
       selector_ff_impl(int select, int n_inputs, int n_outputs);
@@ -42,6 +43,7 @@ namespace gr {
          gr_vector_const_void_star &input_items,
          gr_vector_void_star &output_items);
 
+     void sel_evaluation();
      int get_select() const;
      void set_select(int select);
     };

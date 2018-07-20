@@ -23,7 +23,7 @@
 #define INCLUDED_ECSS_SELECTOR_CC_H
 
 #include <ecss/api.h>
-#include <gnuradio/sync_block.h>
+#include <gnuradio/block.h>
 
 namespace gr {
   namespace ecss {
@@ -33,7 +33,7 @@ namespace gr {
      * \ingroup ecss
      *
      */
-    class ECSS_API selector_cc : virtual public gr::sync_block
+    class ECSS_API selector_cc : virtual public gr::block
     {
      public:
       typedef boost::shared_ptr<selector_cc> sptr;
