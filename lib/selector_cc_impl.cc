@@ -75,24 +75,23 @@ namespace gr {
         out[y] = (gr_complex *) output_items[y];
       }
 
-
+      sel_evaluation();
       for(int i = 0; i < noutput_items; i++) {
-            sel_evaluation();
             out[out_sel][i]= in[in_sel][i];
       }
 
       for(int z = 0; z < d_n_inputs; z++) {
-        if (z == in_sel )
-          consume(z,noutput_items);
-        else
-          consume(z,0);
+        //if (z == in_sel )
+          consume(z, noutput_items);
+        //else
+          //consume(z, 0);
       }
 
       for(int w = 0; w < d_n_outputs; w++) {
         if (w != out_sel )
-          produce(w,0);
+          produce(w, 0);
         else
-          produce(w,noutput_items);
+          produce(w, noutput_items);
       }
 
       return WORK_CALLED_PRODUCE;
