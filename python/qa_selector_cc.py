@@ -14,8 +14,87 @@ class qa_selector_cc (gr_unittest.TestCase):
     def tearDown (self):
         self.tb = None
 
+    # def test_000_t (self):
+    #     """test 0: mux version with 2 inputs"""
+    #
+    #     tb = self.tb
+    #
+    #     # Variables
+    #     samp_rate = 512
+    #     N = 4096
+    #
+    #     # Blocks
+    #     ecss_selector = ecss.selector_cc(0, 2, 1)
+    #
+    #     def _probe_func_probe():
+    #         time.sleep(0.5)
+    #         while True:
+    #             try:
+    #                 if (ecss_selector.get_select() == 0):
+    #                     ecss_selector.set_select(1)
+    #             except AttributeError:
+    #                 pass
+    #             time.sleep(1.0)
+    #
+    #     _probe_func_thread = threading.Thread(target=_probe_func_probe)
+    #     _probe_func_thread.daemon = True
+    #
+    #     throttle0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate, True)
+    #     throttle1 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate, True)
+    #     dst_in0 = blocks.vector_sink_c()
+    #     dst_in1 = blocks.vector_sink_c()
+    #     dst_out = blocks.vector_sink_c()
+    #     head0 = blocks.head(gr.sizeof_gr_complex, N)
+    #     head1 = blocks.head(gr.sizeof_gr_complex, N)
+    #     sig_source0 = analog.sig_source_c(samp_rate,analog.GR_SAW_WAVE, 0.125 , 10, 0)
+    #     sig_source1 = analog.sig_source_c(samp_rate,analog.GR_SAW_WAVE, 0.125 , -10, -1)
+    #
+    #     sig_source0.set_max_noutput_items (samp_rate)
+    #     sig_source1.set_max_noutput_items (samp_rate)
+    #     # sig_source0.set_max_output_buffer (samp_rate)
+    #     # sig_source1.set_max_output_buffer (samp_rate)
+    #
+    #     # Connections
+    #     tb.connect(sig_source0,throttle0)
+    #     tb.connect(sig_source1,throttle1)
+    #     tb.connect(throttle0, head0)
+    #     tb.connect(throttle1, head1)
+    #     tb.connect(head0, dst_in0)
+    #     tb.connect(head1, dst_in1)
+    #     tb.connect(head0, (ecss_selector, 0))
+    #     tb.connect(head1, (ecss_selector, 1))
+    #     tb.connect(ecss_selector, dst_out)
+    #
+    #     _probe_func_thread.start()
+    #     tb.run()
+    #
+    #     data_in_0 = dst_in0.data()
+    #     data_in_1 = dst_in1.data()
+    #     data_out = dst_out.data()
+    #
+    #     # Checking
+    #     lost_items = 0
+    #     N_sel0 = 0
+    #     N_sel1 = 0
+    #     N_out = len(data_out)
+    #
+    #     for i in xrange(N):
+    #         if (data_out[i] == data_in_0[i]):
+    #                 N_sel0 += 1
+    #         elif (data_out[i] == data_in_1[(i)]):
+    #             N_sel1 += 1
+    #         else:
+    #             lost_items += 1
+    #
+    #     self.assertGreater(N_sel0, 0)
+    #     self.assertGreater(N_sel1, 0)
+    #     self.assertGreaterEqual(lost_items, 0)
+    #
+    #     print "- Items outputted from in0: ", N_sel0
+    #     print "- Items outputted from in1: ", N_sel1
+
     def test_001_t (self):
-        """test 1: mux version with 2 inputs"""
+        """test 1: mux version with 3 inputs"""
 
         tb = self.tb
 
@@ -24,7 +103,7 @@ class qa_selector_cc (gr_unittest.TestCase):
         N = 4096
 
         # Blocks
-        ecss_selector = ecss.selector_cc(0, 2, 1)
+        ecss_selector = ecss.selector_cc(0, 3, 1)
 
         def _probe_func_probe():
             time.sleep(0.5)
@@ -32,6 +111,9 @@ class qa_selector_cc (gr_unittest.TestCase):
                 try:
                     if (ecss_selector.get_select() == 0):
                         ecss_selector.set_select(1)
+                        time.sleep(1.0)
+                    if (ecss_selector.get_select() == 1):
+                        ecss_selector.set_select(2)
                 except AttributeError:
                     pass
                 time.sleep(1.0)
@@ -41,13 +123,17 @@ class qa_selector_cc (gr_unittest.TestCase):
 
         throttle0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate, True)
         throttle1 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate, True)
+        throttle2 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate, True)
         dst_in0 = blocks.vector_sink_c()
         dst_in1 = blocks.vector_sink_c()
+        dst_in2 = blocks.vector_sink_c()
         dst_out = blocks.vector_sink_c()
         head0 = blocks.head(gr.sizeof_gr_complex, N)
         head1 = blocks.head(gr.sizeof_gr_complex, N)
+        head2 = blocks.head(gr.sizeof_gr_complex, N)
         sig_source0 = analog.sig_source_c(samp_rate,analog.GR_SAW_WAVE, 0.125 , 10, 0)
-        sig_source1 = analog.sig_source_c(samp_rate,analog.GR_SAW_WAVE, 0.125 , -10, -1)
+        sig_source1 = analog.sig_source_c(samp_rate,analog.GR_SAW_WAVE, 0.125 , 10, 11)
+        sig_source2 = analog.sig_source_c(samp_rate,analog.GR_SAW_WAVE, 0.125 , -10, -1)
 
         sig_source0.set_max_noutput_items (samp_rate)
         sig_source1.set_max_noutput_items (samp_rate)
@@ -57,12 +143,16 @@ class qa_selector_cc (gr_unittest.TestCase):
         # Connections
         tb.connect(sig_source0,throttle0)
         tb.connect(sig_source1,throttle1)
+        tb.connect(sig_source2,throttle2)
         tb.connect(throttle0, head0)
         tb.connect(throttle1, head1)
+        tb.connect(throttle2, head2)
         tb.connect(head0, dst_in0)
         tb.connect(head1, dst_in1)
+        tb.connect(head2, dst_in2)
         tb.connect(head0, (ecss_selector, 0))
         tb.connect(head1, (ecss_selector, 1))
+        tb.connect(head2, (ecss_selector, 2))
         tb.connect(ecss_selector, dst_out)
 
         _probe_func_thread.start()
@@ -70,13 +160,14 @@ class qa_selector_cc (gr_unittest.TestCase):
 
         data_in_0 = dst_in0.data()
         data_in_1 = dst_in1.data()
+        data_in_2 = dst_in2.data()
         data_out = dst_out.data()
 
         # Checking
         lost_items = 0
         N_sel0 = 0
         N_sel1 = 0
-        in_0_used_first = False
+        N_sel2 = 0
         N_out = len(data_out)
 
         for i in xrange(N):
@@ -84,15 +175,19 @@ class qa_selector_cc (gr_unittest.TestCase):
                     N_sel0 += 1
             elif (data_out[i] == data_in_1[(i)]):
                 N_sel1 += 1
+            elif (data_out[i] == data_in_2[(i)]):
+                N_sel2 += 1
             else:
                 lost_items += 1
 
         self.assertGreater(N_sel0, 0)
         self.assertGreater(N_sel1, 0)
+        self.assertGreater(N_sel2, 0)
         self.assertGreaterEqual(lost_items, 0)
 
         print "- Items outputted from in0: ", N_sel0
         print "- Items outputted from in1: ", N_sel1
+        print "- Items outputted from in2: ", N_sel2
 
     # def test_002_t (self):
     #     """test 2: demux version with 2 outputs"""
