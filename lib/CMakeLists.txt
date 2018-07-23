@@ -28,8 +28,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 list(APPEND ecss_sources
     agc_impl.cc
     pll_impl.cc
-    selector_cc_impl.cc
-    selector_ff_impl.cc )
+    )
 
 set(ecss_sources "${ecss_sources}" PARENT_SCOPE)
 if(NOT ecss_sources)
