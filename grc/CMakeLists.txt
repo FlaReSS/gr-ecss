@@ -22,5 +22,5 @@ install(FILES
     ecss_spl_encoder.xml
     ecss_spl_decoder.xml
     ecss_pll.xml
-    DESTINATION share/gnuradio/grc/blocks
+    ecss_coherent_phase_modulator.xml DESTINATION share/gnuradio/grc/blocks
 )

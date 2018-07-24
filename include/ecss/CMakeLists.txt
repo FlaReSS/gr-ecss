@@ -25,5 +25,5 @@ install(FILES
     api.h
     agc.h
     pll.h
-    DESTINATION include/ecss
+    coherent_phase_modulator.h DESTINATION include/ecss
 )

@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<block>
+  <name>coherent phase modulator</name>
+  <key>ecss_coherent_phase_modulator</key>
+  <category>[ecss]</category>
+  <import>import ecss</import>
+  <make>ecss.coherent_phase_modulator($N, $n_inputs)</make>
+  <!-- Make one 'param' node for every Parameter you want settable from the GUI.
+       Sub-nodes:
+       * name
+       * key (makes the value accessible as $keyname, e.g. in the make node)
+       * type -->
+  <param>
+    <name>number of bits</name>
+    <key>N</key>
+    <type>int</type>
+  </param>
+  <param>
+    <name>number of inputs</name>
+    <key>n_inputs</key>
+    <type>int</type>
+  </param>
+
+  <check>$n_inputs &gt;= 1</check>
+  <check>$N &gt;= 1 and $N &lt;= 64</check>
+
+  <sink>
+    <name>phase accumulator input</name>
+    <type>s64</type>
+  </sink>
+
+  <sink>
+    <name>in</name>
+    <type>f64</type>
+    <nports>($n_inputs - 1)</nports>
+    <hide>#if int($n_inputs()) == 1 then 'all' else ''#</hide>
+  </sink>
+
+  <source>
+    <name>out</name>
+    <type>complex</type>
+  </source>
+  <doc>
+    This block generates a complex output signal modulated in phase by inputs.
+    All the inputs are added each other in order to get the final phase value which
+    will be the output signal phase.
+
+    That block evaluates In-phase and Quadrature components through sine and cosine
+    functions of the final phase value evaluated.
+
+    Furthermore, this block allows to reduce the accuracy of the mathematics in d_order
+    to simulate better a real behavior.
+
+    Finally, this block is designed for work together with a custom PLL designed
+    present in the ecss module of OOT. So, the first input (phase accumulator input)
+    must to be the phase accumulator output of that PLL.
+  </doc>
+</block>

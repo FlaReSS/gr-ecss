@@ -28,7 +28,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 list(APPEND ecss_sources
     agc_impl.cc
     pll_impl.cc
-    )
+    coherent_phase_modulator_impl.cc )
 
 set(ecss_sources "${ecss_sources}" PARENT_SCOPE)
 if(NOT ecss_sources)
