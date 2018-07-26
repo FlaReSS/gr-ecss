@@ -22,18 +22,12 @@
   </param>
 
   <check>$n_inputs &gt;= 1</check>
-  <check>$N &gt;= 1 and $N &lt;= 64</check>
-
-  <sink>
-    <name>phase accumulator input</name>
-    <type>s64</type>
-  </sink>
+  <check>$N &gt;= 1 and $N &lt;= 52</check>
 
   <sink>
     <name>in</name>
-    <type>f64</type>
-    <nports>($n_inputs - 1)</nports>
-    <hide>#if int($n_inputs()) == 1 then 'all' else ''#</hide>
+    <type>s64</type>
+    <nports>$n_inputs</nports>
   </sink>
 
   <source>
@@ -42,17 +36,12 @@
   </source>
   <doc>
     This block generates a complex output signal modulated in phase by inputs.
-    All the inputs are added each other in order to get the final phase value which
-    will be the output signal phase.
+    All the inputs are added each other in order to get the final phase value which will be the output signal phase.
 
-    That block evaluates In-phase and Quadrature components through sine and cosine
-    functions of the final phase value evaluated.
+    That block evaluates In-phase and Quadrature components through sine and cosine functions of the final phase value evaluated.
 
-    Furthermore, this block allows to reduce the accuracy of the mathematics in d_order
-    to simulate better a real behavior.
+    Furthermore, this block allows to reduce the accuracy of the mathematics in d_order to simulate better a real behavior.
 
-    Finally, this block is designed for work together with a custom PLL designed
-    present in the ecss module of OOT. So, the first input (phase accumulator input)
-    must to be the phase accumulator output of that PLL.
+    Finally, this block is designed for work together with a custom PLL designed present in the ecss module of OOT. So, the first input (phase accumulator input) must to be the phase accumulator output of that PLL.
   </doc>
 </block>

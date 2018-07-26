@@ -58,7 +58,7 @@ namespace gr {
             d_alpha(Coeff_1), d_beta(Coeff_2), d_gamma(Coeff_3), d_zeta(Coeff_4)
           {
             // Set the damping factor for a critically damped system
-            d_damping = sqrtf(2.0f)/2.0f;
+            d_damping = sqrtf(2.0)/2.0;
 
             // Set the bandwidth, which will then call update_gains()
             set_coeff1(Coeff_1);

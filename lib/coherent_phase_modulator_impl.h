@@ -40,8 +40,8 @@ namespace gr {
          gr_vector_const_void_star &input_items,
          gr_vector_void_star &output_items);
 
-      uint64_t  double_to_integer(double double_value);
-      double NCO_normalization(uint64_t d_integer_phase);
+      int64_t  double_to_integer(double double_value);
+      double NCO_normalization(int64_t d_integer_phase);
       double phase_wrap(double);
       double twopi_normalization(double phase);
     };

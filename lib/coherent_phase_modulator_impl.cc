@@ -44,8 +44,8 @@ namespace gr {
 
     coherent_phase_modulator_impl::coherent_phase_modulator_impl(int N, int n_inputs)
       : gr::sync_block("coherent_phase_modulator",
-              gr::io_signature::make2 (0, n_inputs,  sizeof(uint64_t),  sizeof(double)),
-              gr::io_signature::make(0, 1, sizeof(gr_complex))),
+              gr::io_signature::make (1, n_inputs,  sizeof(int64_t)),
+              gr::io_signature::make(1, 1, sizeof(gr_complex))),
               d_N(N), d_n_inputs(n_inputs)
     {}
 
@@ -57,43 +57,42 @@ namespace gr {
         gr_vector_const_void_star &input_items,
         gr_vector_void_star &output_items)
     {
-      uint64_t *phase_pll = (uint64_t *) input_items[0];
-      const double *in[d_n_inputs - 1];
+      const int64_t *in[d_n_inputs];
       gr_complex *out = (gr_complex *) output_items[0];
 
       double integer_phase_normalized;
-      uint64_t integer_phase;
-      float oi, oq;
+      int64_t integer_phase;
+      double oi, oq;
 
-      for(int x = 0; x < (d_n_inputs - 1); x++) {
-        in[x] = (const double *) input_items[x + 1];
+      for(int x = 0; x < d_n_inputs; x++) {
+        in[x] = (const int64_t *) input_items[x];
       }
 
       for(int i = 0; i < noutput_items; i++) {
-        integer_phase = phase_pll[i];
+        integer_phase = 0;
 
-        for(int y = 0; y < (d_n_inputs - 1); y++) {
-          integer_phase += double_to_integer( twopi_normalization( phase_wrap( in[y][i] )));
+        for(int y = 0; y < d_n_inputs; y++) {
+          integer_phase += in[y][i];
         }
 
         integer_phase_normalized = NCO_normalization(integer_phase);
-        gr::sincosf(integer_phase_normalized, &oq, &oi);
-        out[i] = gr_complex(oi, oq);
+        gr::sincos(integer_phase_normalized, &oq, &oi);
+        out[i] = gr_complex((float) oi, (float) oq);
       }
 
       return noutput_items;
     }
 
-    uint64_t
+    int64_t
     coherent_phase_modulator_impl::double_to_integer(double double_value)
     {
-      return (uint64_t)(double_value * pow (2, (64 - d_N)));
-      }
+      return (int64_t)(double_value * pow (2, (63 - d_N)));
+    }
 
     double
-    coherent_phase_modulator_impl::NCO_normalization(uint64_t d_integer_phase)
+    coherent_phase_modulator_impl::NCO_normalization(int64_t d_integer_phase)
     {
-      return (((double)(d_integer_phase / pow(2, (64 - d_N)))) * M_TWOPI);
+      return (((double)(d_integer_phase / pow(2, (63 - d_N)))) * M_TWOPI);
     }
 
     double
