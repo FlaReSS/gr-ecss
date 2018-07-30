@@ -92,7 +92,8 @@ namespace gr {
     double
     coherent_phase_modulator_impl::NCO_normalization(int64_t d_integer_phase)
     {
-      return (((double)(d_integer_phase / pow(2, (63 - d_N)))) * M_TWOPI);
+      double temp_denormalization = (double)(d_integer_phase / pow(2, (63 - d_N)));
+      return temp_denormalization * M_TWOPI;
     }
 
     double

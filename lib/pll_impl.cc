@@ -37,28 +37,28 @@ namespace gr {
     #endif
 
     pll::sptr
-    pll::make(int enable, int order, int N, double Coeff_1, double Coeff_2, double Coeff_3, double Coeff_4, float max_freq, float min_freq)
+    pll::make(int samp_rate, int enable, int order, int N, double Coeff_1, double Coeff_2, double Coeff_3, double Coeff_4, float max_freq, float min_freq)
     {
       return gnuradio::get_initial_sptr
-        (new pll_impl(enable, order, N, Coeff_1, Coeff_2, Coeff_3, Coeff_4, max_freq, min_freq));
+        (new pll_impl(samp_rate, enable, order, N, Coeff_1, Coeff_2, Coeff_3, Coeff_4, max_freq, min_freq));
     }
 
     /*
      * The private constructor
      */
-    static int ios[] = {sizeof(gr_complex), sizeof(float), sizeof(float), sizeof(float)};
+    static int ios[] = {sizeof(gr_complex), sizeof(float), sizeof(float), sizeof(int64_t)};
     static std::vector<int> iosig(ios, ios+sizeof(ios)/sizeof(int));
-    pll_impl::pll_impl(int enable, int order, int N, double Coeff_1, double Coeff_2, double Coeff_3, double Coeff_4, float max_freq, float min_freq)
-      : gr::sync_block("pll",
+    pll_impl::pll_impl(int samp_rate, int enable, int order, int N, double Coeff_1, double Coeff_2, double Coeff_3, double Coeff_4, float max_freq, float min_freq)
+      : gr::block("pll",
             gr::io_signature::make(1, 1, sizeof(gr_complex)),
-            gr::io_signature::makev(1, 4, iosig)),
-            d_enable(enable), d_order(order), d_N(N), d_integer_phase(0), d_integer_phase_normalized(0),
+            gr::io_signature::makev(4, 4, iosig)),
+            d_enable(enable), d_order(order), d_N(N), d_integer_phase(0), d_integer_phase_denormalized(0),
             d_phase(0), d_freq(0), d_max_freq(max_freq), d_min_freq(min_freq),
-            d_acceleration(0), d_acceleration_temp(0),
+            d_acceleration(0), d_acceleration_temp(0), d_samp_rate(samp_rate),
             d_alpha(Coeff_1), d_beta(Coeff_2), d_gamma(Coeff_3), d_zeta(Coeff_4)
           {
             // Set the damping factor for a critically damped system
-            d_damping = sqrtf(2.0)/2.0;
+            d_damping = sqrt(2.0)/2.0;
 
             // Set the bandwidth, which will then call update_gains()
             set_coeff1(Coeff_1);
@@ -81,7 +81,7 @@ namespace gr {
     double
     pll_impl::mod_2pi(double in)
     {
-      if(in > M_PI)
+      if(in >= M_PI)
           return in - M_TWOPI;
       else if(in < -M_PI)
           return in + M_TWOPI;
@@ -90,15 +90,16 @@ namespace gr {
     }
 
     double
-    pll_impl::phase_detector(gr_complex sample)
+    pll_impl::phase_detector(gr_complexd sample)
     {
       double sample_phase;
       sample_phase = atan2(sample.imag(),sample.real());
-      return mod_2pi(sample_phase);
+      // return mod_2pi(sample_phase);
+      return sample_phase;
     }
 
     double
-    pll_impl::magnitude(gr_complex sample)
+    pll_impl::magnitude(gr_complexd sample)
     {
       double sample_magn;
       sample_magn = sqrt(sample.imag()*sample.imag() + sample.real()*sample.real());
@@ -107,42 +108,61 @@ namespace gr {
 
 
     int
-    pll_impl::work(int noutput_items,
-              gr_vector_const_void_star &input_items,
-              gr_vector_void_star &output_items)
+    pll_impl::general_work(int noutput_items,
+                       gr_vector_int &ninput_items,
+                       gr_vector_const_void_star &input_items,
+                       gr_vector_void_star &output_items)
     {
       const gr_complex *input = (gr_complex*)input_items[0];
       gr_complex *output = (gr_complex*)output_items[0];
       float *frq =(float*)output_items[1];
-      long long int *phase_accumulator =(long long int*)output_items[2];
-      float *phase_out =(float*)output_items[3];
+      float *phase_out =(float*)output_items[2];
+      int64_t *phase_accumulator =(int64_t*)output_items[3];
 
+      gr_complexd feedback;
       double module;
-      double error;
-      float t_imag, t_real;
+      double error, filter_out;
+      double t_imag, t_real;
 
       for(int i = 0; i < noutput_items; i++) {
 
         if (d_enable > 0)
          {
             phase_accumulator[i] = d_integer_phase;
-            frq[i] = d_integer_phase_normalized;
-            gr::sincosf(d_integer_phase_normalized, &t_imag, &t_real);
-            output[i] = input[i] * gr_complex(t_real, -t_imag);
-
-            error = phase_detector(output[i]);
+            gr::sincos(d_integer_phase_denormalized, &t_imag, &t_real);
+            feedback = (gr_complexd) input[i] * gr_complexd(t_real, -t_imag);
+            output[i] = (gr_complex) feedback;
+            error = phase_detector(feedback);
 
             phase_out[i] = error;
 
-            advance_loop(error);
+            filter_out = advance_loop(error);
             accumulator(filter_out);
-            NCO_normalization(d_integer_phase);
-            phase_wrap();
-            frequency_limit();
-        }
+
+            //frequency_limit();
+            frq[i] = filter_out * d_samp_rate / M_PI;
+
+            NCO_denormalization();
+
+
+
+            consume(0, noutput_items);
+            produce(0, noutput_items);
+            produce(1, noutput_items);
+            produce(2, noutput_items);
+            produce(3, noutput_items);
+          }
+        else
+          {
+            consume(0, noutput_items);
+            produce(0, 0);
+            produce(1, 0);
+            produce(2, 0);
+            produce(3, 0);
+          }
 
       }
-      return noutput_items;
+      return WORK_CALLED_PRODUCE;
     }
 
     void
@@ -168,7 +188,7 @@ namespace gr {
 
     }
 
-    void
+    double
     pll_impl::advance_loop(double error)
     {
       if (d_order == 3)
@@ -182,38 +202,41 @@ namespace gr {
           d_acceleration = 0;
           d_freq = d_zeta * d_freq + d_beta * error;
       }
-      filter_out = d_acceleration + d_freq + d_alpha * error;
-      }
+      return d_acceleration + d_freq + d_alpha * error;
+    }
 
     void
     pll_impl::accumulator(double filter_out)
     {
-      d_integer_phase += (long long int)(filter_out * pow (2.0, (64 - d_N)));
+      double filter_out_norm = mod_2pi(filter_out) / M_PI;
+      d_integer_phase += (int64_t)(filter_out_norm * pow (2.0, (64 - d_N)));
       }
 
     void
-    pll_impl::NCO_normalization(long long int d_integer_phase)
+    pll_impl::NCO_denormalization()
     {
-      d_integer_phase_normalized = (((double)(d_integer_phase)) / pow(2, (64 - d_N))) * M_TWOPI;
+      double temp_denormalization = (double)(d_integer_phase / pow(2, (63 - d_N)));
+      d_integer_phase_denormalized = temp_denormalization * M_PI;
       }
 
 
-    void
-    pll_impl::phase_wrap()
+    double
+    pll_impl::phase_wrap(double phase)
     {
-      while(d_integer_phase_normalized > M_TWOPI)
-        d_integer_phase_normalized -= M_TWOPI;
-      while(d_integer_phase_normalized <- M_TWOPI)
-        d_integer_phase_normalized += M_TWOPI;
+      while(phase >= M_TWOPI)
+        phase -= M_TWOPI;
+      while(phase < 0)
+        phase += M_TWOPI;
+      return phase;
     }
 
     void
     pll_impl::frequency_limit()
     {
-      if(d_freq > d_max_freq)
-        d_freq = d_max_freq;
-      else if(d_freq < d_min_freq)
-        d_freq = d_min_freq;
+      // if(d_freq > d_max_freq)
+      //   d_freq = d_max_freq;
+      // else if(d_freq < d_min_freq)
+      //   d_freq = d_min_freq;
     }
 
     /*******************************************************************

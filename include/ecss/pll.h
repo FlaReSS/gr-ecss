@@ -22,7 +22,7 @@
 #define INCLUDED_ECSS_PLL_H
 
 #include <ecss/api.h>
-#include <gnuradio/sync_block.h>
+#include <gnuradio/block.h>
 
 namespace gr {
   namespace ecss {
@@ -32,7 +32,7 @@ namespace gr {
      * \ingroup ecss
      *
      */
-    class ECSS_API pll : virtual public gr::sync_block
+    class ECSS_API pll : virtual public gr::block
     {
      public:
       typedef boost::shared_ptr<pll> sptr;
@@ -45,7 +45,7 @@ namespace gr {
        * class. ecss::pll::make is the public interface for
        * creating new instances.
        */
-      static sptr make(int enable, int order, int N, double Coeff_1, double Coeff_2, double Coeff_3, double Coeff_4, float max_freq, float min_freq);
+      static sptr make(int samp_rate, int enable, int order, int N, double Coeff_1, double Coeff_2, double Coeff_3, double Coeff_4, float max_freq, float min_freq);
 
       virtual void set_enable(int enable) = 0;
       virtual void set_order(int order) = 0;

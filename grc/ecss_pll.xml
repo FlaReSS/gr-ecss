@@ -4,7 +4,7 @@
   <key>ecss_pll</key>
   <category>[ecss]</category>
   <import>import ecss</import>
-  <make>ecss.pll($enable, $order, $N, $Coeff_1, $Coeff_2, $Coeff_3, $Coeff_4, $max_freq, $min_freq)</make>
+  <make>ecss.pll($samp_rate, $enable, $order, $N, $Coeff_1, $Coeff_2, $Coeff_3, $Coeff_4, $max_freq, $min_freq)</make>
   <callback>set_enable($enable)</callback>
   <callback>set_order($order)</callback>
   <callback>set_N($N)</callback>
@@ -18,6 +18,11 @@
   <param>
     <name>enable</name>
     <key>enable</key>
+    <type>int</type>
+  </param>
+  <param>
+    <name>sample rate</name>
+    <key>samp_rate</key>
     <type>int</type>
   </param>
   <param>
@@ -79,14 +84,14 @@
   </source>
 
   <source>
-    <name>phase accumulator</name>
-    <type>int</type>
+    <name>phase error</name>
+    <type>float</type>
     <optional>1</optional>
   </source>
 
   <source>
-    <name>phase error</name>
-    <type>float</type>
+    <name>phase accumulator</name>
+    <type>s64</type>
     <optional>1</optional>
   </source>
 
