@@ -37,6 +37,7 @@ namespace gr {
        double d_acceleration, d_acceleration_temp;
        double d_integer_phase_denormalized;
        int64_t d_integer_phase;
+       double  precision;
        double d_max_freq, d_min_freq;
        double d_damping, d_loop_bw;
        double d_alpha, d_beta, d_gamma, d_zeta;

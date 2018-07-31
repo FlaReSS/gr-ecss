@@ -28,6 +28,9 @@
 #include <gnuradio/math.h>
 #include <stdexcept>
 #include "pll_impl.h"
+//debug
+#include <iostream>
+#include <fstream>
 
 namespace gr {
   namespace ecss {
@@ -94,8 +97,8 @@ namespace gr {
     {
       double sample_phase;
       sample_phase = atan2(sample.imag(),sample.real());
-      // return mod_2pi(sample_phase);
-      return sample_phase;
+      return mod_2pi(sample_phase);
+      //return sample_phase;
     }
 
     double
@@ -131,7 +134,8 @@ namespace gr {
             phase_accumulator[i] = d_integer_phase;
             gr::sincos(d_integer_phase_denormalized, &t_imag, &t_real);
             feedback = (gr_complexd) input[i] * gr_complexd(t_real, -t_imag);
-            output[i] = (gr_complex) feedback;
+            // output[i] = (gr_complex) feedback;
+            output[i] = (gr_complex) gr_complexd(t_real, -t_imag);
             error = phase_detector(feedback);
 
             phase_out[i] = error;
@@ -140,7 +144,7 @@ namespace gr {
             accumulator(filter_out);
 
             //frequency_limit();
-            frq[i] = filter_out * d_samp_rate / M_PI;
+            frq[i] = (d_acceleration + d_freq) * d_samp_rate / M_TWOPI;
 
             NCO_denormalization();
 
@@ -208,14 +212,21 @@ namespace gr {
     void
     pll_impl::accumulator(double filter_out)
     {
-      double filter_out_norm = mod_2pi(filter_out) / M_PI;
-      d_integer_phase += (int64_t)(filter_out_norm * pow (2.0, (64 - d_N)));
+      // double filter_out_norm = mod_2pi(filter_out) / M_PI;
+      double filter_out_norm = filter_out / M_PI;
+      int64_t temp_integer_phase = (int64_t)(filter_out_norm / precision);
+      // std::ofstream myfile;
+      // myfile.open ("data_accumulator.txt", std::ios::out | std::ios::app);
+      // myfile << temp_integer_phase<<"\n";
+      d_integer_phase += (temp_integer_phase << (64 - d_N)) ;
+
       }
 
     void
     pll_impl::NCO_denormalization()
     {
-      double temp_denormalization = (double)(d_integer_phase / pow(2, (63 - d_N)));
+      int64_t temp_integer_phase = (d_integer_phase >> (64 - d_N));
+      double temp_denormalization = (double)(temp_integer_phase * precision);
       d_integer_phase_denormalized = temp_denormalization * M_PI;
       }
 
@@ -268,6 +279,7 @@ namespace gr {
         throw std::out_of_range ("pll: invalid number of bits. Must be in [0, 63].");
       }
       d_N = N;
+      precision = pow(2,(- (N - 1)));
     }
 
      void
@@ -286,6 +298,12 @@ namespace gr {
         throw std::out_of_range ("pll: invalid coefficient 2. Must be in [0,1].");
       }
       d_beta = beta;
+            //
+            // d_loop_bw = 0.035;
+            // d_damping = sqrt(2.0)/2.0;
+            // double denom = (1.0 + 2.0*d_damping*d_loop_bw + d_loop_bw*d_loop_bw);
+            // d_alpha = (4*d_damping*d_loop_bw) / denom;
+            // d_beta = (4*d_loop_bw*d_loop_bw) / denom;
     }
 
     void
@@ -304,6 +322,7 @@ namespace gr {
         throw std::out_of_range ("pll: invalid coefficient 4. Must be in [0,1]. (suggested very small)");
       }
       d_zeta = zeta;
+
     }
 
     void
