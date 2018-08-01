@@ -52,7 +52,7 @@ namespace gr {
     static int ios[] = {sizeof(gr_complex), sizeof(float), sizeof(float), sizeof(int64_t)};
     static std::vector<int> iosig(ios, ios+sizeof(ios)/sizeof(int));
     pll_impl::pll_impl(int samp_rate, int enable, int order, int N, double Coeff_1, double Coeff_2, double Coeff_3, double Coeff_4, float max_freq, float min_freq)
-      : gr::block("pll",
+      : gr::sync_block("pll",
             gr::io_signature::make(1, 1, sizeof(gr_complex)),
             gr::io_signature::makev(4, 4, iosig)),
             d_enable(enable), d_order(order), d_N(N), d_integer_phase(0), d_integer_phase_denormalized(0),
@@ -116,10 +116,9 @@ namespace gr {
 
 
     int
-    pll_impl::general_work (int noutput_items,
-                       gr_vector_int &ninput_items,
-                       gr_vector_const_void_star &input_items,
-                       gr_vector_void_star &output_items)
+    pll_impl::work(int noutput_items,
+                           gr_vector_const_void_star &input_items,
+                           gr_vector_void_star &output_items)
     {
       const gr_complex *input = (gr_complex*)input_items[0];
       gr_complex *output = (gr_complex*)output_items[0];
@@ -132,45 +131,36 @@ namespace gr {
       double error, filter_out;
       double t_imag, t_real;
 
-      if (d_enable > 0)
-       {
-        for(int i = 0; i < noutput_items; i++) {
+      for(int i = 0; i < noutput_items; i++) {
+        if (d_enable == 1)
+         {
+            phase_accumulator[i] = d_integer_phase;
+            gr::sincos(d_integer_phase_denormalized, &t_imag, &t_real);
+            feedback = (gr_complexd) input[i] * gr_complexd(t_real, -t_imag);
+            output[i] = (gr_complex) feedback;
+            // output[i] = (gr_complex) gr_complexd(t_real, -t_imag);
+            error = phase_detector(feedback);
 
-              phase_accumulator[i] = d_integer_phase;
-              gr::sincos(d_integer_phase_denormalized, &t_imag, &t_real);
-              feedback = (gr_complexd) input[i] * gr_complexd(t_real, -t_imag);
-              output[i] = (gr_complex) feedback;
-              // output[i] = (gr_complex) gr_complexd(t_real, -t_imag);
-              error = phase_detector(feedback);
+            phase_out[i] = error;
 
-              phase_out[i] = error;
+            filter_out = advance_loop(error);
+            accumulator(filter_out);
 
-              filter_out = advance_loop(error);
-              accumulator(filter_out);
+            //frequency_limit();
+            frq[i] = (d_acceleration + d_freq) * d_samp_rate / M_TWOPI;
+            //frq[i] = (float) d_integer_phase_denormalized;
 
-              //frequency_limit();
-              frq[i] = (d_acceleration + d_freq) * d_samp_rate / M_TWOPI;
-              //frq[i] = (float) d_integer_phase_denormalized;
-
-              NCO_denormalization();
-            }
-
-            consume(0, noutput_items);
-            produce(0, noutput_items);
-            produce(1, noutput_items);
-            produce(2, noutput_items);
-            produce(3, noutput_items);
-        }
-      else
-        {
-          consume(0, noutput_items);
-          produce(0, 0);
-          produce(1, 0);
-          produce(2, 0);
-          produce(3, 0);
-        }
-
-      return WORK_CALLED_PRODUCE;
+            NCO_denormalization();
+          }
+          else
+          {
+              output[i] = 0;
+              phase_out[i] = 0;
+              frq[i] = 0;
+              phase_accumulator[i] = 0;
+          }
+      }
+      return noutput_items;
     }
 
     void
@@ -279,16 +269,18 @@ namespace gr {
     void
     pll_impl::set_enable(int enable)
     {
-      if(enable < 0 || enable > 1) {
-        throw std::out_of_range ("pll: invalid order. Must be 0 or 1");
+      if(enable != 0 && enable != 1) {
+        throw std::out_of_range ("pll: invalid enable value. Must be 0 or 1");
       }
+
       d_enable = enable;
+      std::cout << "enable:" <<d_enable<<'\n';
     }
 
     void
     pll_impl::set_order(int order)
     {
-      if(order < 2 || order > 3) {
+      if(order != 2 && order != 3) {
         throw std::out_of_range ("pll: invalid order. Must be 2 or 3");
       }
       d_order = order;

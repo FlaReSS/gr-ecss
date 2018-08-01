@@ -52,10 +52,9 @@ namespace gr {
       pll_impl(int samp_rate, int enable, int order, int N, double Coeff_1, double Coeff_2, double Coeff_3, double Coeff_4, float max_freq, float min_freq);
       ~pll_impl();
 
-      int general_work (int noutput_items,
-                         gr_vector_int &ninput_items,
-                         gr_vector_const_void_star &input_items,
-                         gr_vector_void_star &output_items);
+      int work(int noutput_items,
+                             gr_vector_const_void_star &input_items,
+                             gr_vector_void_star &output_items);
 
       void set_enable(int enable);
 
