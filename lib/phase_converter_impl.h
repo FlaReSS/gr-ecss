@@ -18,33 +18,36 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef INCLUDED_ECSS_COHERENT_PHASE_MODULATOR_IMPL_H
-#define INCLUDED_ECSS_COHERENT_PHASE_MODULATOR_IMPL_H
+#ifndef INCLUDED_ECSS_PHASE_CONVERTER_IMPL_H
+#define INCLUDED_ECSS_PHASE_CONVERTER_IMPL_H
 
-#include <ecss/coherent_phase_modulator.h>
+#include <ecss/phase_converter.h>
 
 namespace gr {
   namespace ecss {
 
-    class coherent_phase_modulator_impl : public coherent_phase_modulator
+    class phase_converter_impl : public phase_converter
     {
      private:
-      int d_N;
-      int d_n_inputs;
       double precision;
+      int d_N;
 
      public:
-      coherent_phase_modulator_impl(int N, int n_inputs);
-      ~coherent_phase_modulator_impl();
+      phase_converter_impl(int N);
+      ~phase_converter_impl();
 
+      // Where all the action really happens
       int work(int noutput_items,
          gr_vector_const_void_star &input_items,
          gr_vector_void_star &output_items);
 
-      double NCO_denormalization(int64_t step_phase);
+      double phase_wrap(double);
+      int64_t double_to_integer(double double_value);
+      double normalization(double phase);
+
     };
 
   } // namespace ecss
 } // namespace gr
 
-#endif /* INCLUDED_ECSS_COHERENT_PHASE_MODULATOR_IMPL_H */
+#endif /* INCLUDED_ECSS_PHASE_CONVERTER_IMPL_H */

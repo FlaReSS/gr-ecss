@@ -85,11 +85,6 @@ namespace gr {
       return noutput_items;
     }
 
-    int64_t
-    coherent_phase_modulator_impl::double_to_integer(double double_value)
-    {
-      return (int64_t)(double_value / precision);
-    }
 
     double
     coherent_phase_modulator_impl::NCO_denormalization(int64_t step_phase)
@@ -97,22 +92,6 @@ namespace gr {
       int64_t temp_integer_phase = (step_phase >> (64 - d_N));
       double temp_denormalization = (double)(temp_integer_phase * precision);
       return temp_denormalization * M_PI;
-    }
-
-    double
-    coherent_phase_modulator_impl::phase_wrap(double phase)
-    {
-      while(phase > M_PI)
-        phase -= M_TWOPI;
-      while(phase <= -M_PI)
-        phase += M_TWOPI;
-      return phase;
-    }
-
-    double
-    coherent_phase_modulator_impl::twopi_normalization(double phase)
-    {
-      return phase / M_PI;
     }
 
   } /* namespace ecss */

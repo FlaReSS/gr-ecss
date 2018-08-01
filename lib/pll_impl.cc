@@ -139,8 +139,8 @@ namespace gr {
               phase_accumulator[i] = d_integer_phase;
               gr::sincos(d_integer_phase_denormalized, &t_imag, &t_real);
               feedback = (gr_complexd) input[i] * gr_complexd(t_real, -t_imag);
-              // output[i] = (gr_complex) feedback;
-              output[i] = (gr_complex) gr_complexd(t_real, -t_imag);
+              output[i] = (gr_complex) feedback;
+              // output[i] = (gr_complex) gr_complexd(t_real, -t_imag);
               error = phase_detector(feedback);
 
               phase_out[i] = error;
