@@ -52,7 +52,7 @@ namespace gr {
     static int ios[] = {sizeof(gr_complex), sizeof(float), sizeof(float), sizeof(int64_t)};
     static std::vector<int> iosig(ios, ios+sizeof(ios)/sizeof(int));
     pll_impl::pll_impl(int samp_rate, int enable, int order, int N, double Coeff_1, double Coeff_2, double Coeff_3, double Coeff_4, float max_freq, float min_freq)
-      : gr::block("pll",
+      : gr::sync_block("pll",
             gr::io_signature::make(1, 1, sizeof(gr_complex)),
             gr::io_signature::makev(4, 4, iosig)),
             d_enable(enable), d_order(order), d_N(N), d_integer_phase(0), d_integer_phase_denormalized(0),
@@ -97,8 +97,8 @@ namespace gr {
     {
       double sample_phase;
       sample_phase = atan2(sample.imag(),sample.real());
-      return mod_2pi(sample_phase);
-      //return sample_phase;
+      //return mod_2pi(sample_phase);
+      return sample_phase;
     }
 
     double
@@ -111,10 +111,9 @@ namespace gr {
 
 
     int
-    pll_impl::general_work(int noutput_items,
-                       gr_vector_int &ninput_items,
-                       gr_vector_const_void_star &input_items,
-                       gr_vector_void_star &output_items)
+    pll_impl::work(int noutput_items,
+        gr_vector_const_void_star &input_items,
+        gr_vector_void_star &output_items)
     {
       const gr_complex *input = (gr_complex*)input_items[0];
       gr_complex *output = (gr_complex*)output_items[0];
@@ -129,8 +128,8 @@ namespace gr {
 
       for(int i = 0; i < noutput_items; i++) {
 
-        if (d_enable > 0)
-         {
+        // if (d_enable > 0)
+        //  {
             phase_accumulator[i] = d_integer_phase;
             gr::sincos(d_integer_phase_denormalized, &t_imag, &t_real);
             feedback = (gr_complexd) input[i] * gr_complexd(t_real, -t_imag);
@@ -138,35 +137,38 @@ namespace gr {
             output[i] = (gr_complex) gr_complexd(t_real, -t_imag);
             error = phase_detector(feedback);
 
-            phase_out[i] = error;
+            //phase_out[i] = error;
+            phase_out[i] = var_debug;
 
             filter_out = advance_loop(error);
-            accumulator(filter_out);
+            // accumulator(filter_out);
+            accumulator(0.1);
 
             //frequency_limit();
-            frq[i] = (d_acceleration + d_freq) * d_samp_rate / M_TWOPI;
+            // frq[i] = (d_acceleration + d_freq) * d_samp_rate / M_TWOPI;    //debug
+            frq[i] = (float) d_integer_phase_denormalized;
 
             NCO_denormalization();
 
 
 
-            consume(0, noutput_items);
-            produce(0, noutput_items);
-            produce(1, noutput_items);
-            produce(2, noutput_items);
-            produce(3, noutput_items);
-          }
-        else
-          {
-            consume(0, noutput_items);
-            produce(0, 0);
-            produce(1, 0);
-            produce(2, 0);
-            produce(3, 0);
-          }
+        //     consume(0, noutput_items);
+        //     produce(0, noutput_items);
+        //     produce(1, noutput_items);
+        //     produce(2, noutput_items);
+        //     produce(3, noutput_items);
+        //   }
+        // else
+        //   {
+        //     consume(0, noutput_items);
+        //     produce(0, 0);
+        //     produce(1, 0);
+        //     produce(2, 0);
+        //     produce(3, 0);
+        //   }
 
       }
-      return WORK_CALLED_PRODUCE;
+      return noutput_items;
     }
 
     void
@@ -212,14 +214,25 @@ namespace gr {
     void
     pll_impl::accumulator(double filter_out)
     {
-      // double filter_out_norm = mod_2pi(filter_out) / M_PI;
-      double filter_out_norm = filter_out / M_PI;
+      double filter_out_norm = phase_wrap(filter_out) / M_PI;
+      // double filter_out_norm = filter_out / M_PI;
       int64_t temp_integer_phase = (int64_t)(filter_out_norm / precision);
-      // std::ofstream myfile;
-      // myfile.open ("data_accumulator.txt", std::ios::out | std::ios::app);
-      // myfile << temp_integer_phase<<"\n";
+      // std::fstream fs1;
       d_integer_phase += (temp_integer_phase << (64 - d_N)) ;
+      // if ((d_integer_phase <= temp_debug ) &&(d_integer_phase > -8900000000000000000 && temp_debug < 8900000000000000000)) {
+      //   fs1.open ("test.txt", std::fstream::in | std::fstream::out | std::fstream::app);
+      //   fs1 <<d_integer_phase<< ";\n";
+      //   fs1 <<temp_debug<< ";\n\n";
+      // }
+      // temp_debug = d_integer_phase;
 
+      // d_integer_phase += (temp_integer_phase) ;
+      // if(d_integer_phase >= max_int)
+      //     d_integer_phase -= max_int;
+      // else if(d_integer_phase < -max_int)
+      //     d_integer_phase += max_int;
+      //
+      // var_debug = (float) d_integer_phase;
       }
 
     void
@@ -227,16 +240,24 @@ namespace gr {
     {
       int64_t temp_integer_phase = (d_integer_phase >> (64 - d_N));
       double temp_denormalization = (double)(temp_integer_phase * precision);
+      //  double temp_denormalization = (double)(d_integer_phase * precision);
       d_integer_phase_denormalized = temp_denormalization * M_PI;
+      // std::fstream fs2;
+      // if ((d_integer_phase_denormalized <= var_debug ) &&(d_integer_phase_denormalized > -3.05 && var_debug < 3.05)) {
+      //   fs2.open ("test_nco.txt", std::fstream::in | std::fstream::out | std::fstream::app);
+      //   fs2 <<d_integer_phase_denormalized<< ";\n";
+      //   fs2 <<var_debug<< ";\n\n";
+      // }
+      // var_debug = d_integer_phase_denormalized;
       }
 
 
     double
     pll_impl::phase_wrap(double phase)
     {
-      while(phase >= M_TWOPI)
+      while(phase > M_PI)
         phase -= M_TWOPI;
-      while(phase < 0)
+      while(phase <= -M_PI)
         phase += M_TWOPI;
       return phase;
     }
@@ -280,6 +301,7 @@ namespace gr {
       }
       d_N = N;
       precision = pow(2,(- (N - 1)));
+      max_int = pow(2, d_N);
     }
 
      void

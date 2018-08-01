@@ -22,7 +22,7 @@
 #define INCLUDED_ECSS_PLL_H
 
 #include <ecss/api.h>
-#include <gnuradio/block.h>
+#include <gnuradio/sync_block.h>
 
 namespace gr {
   namespace ecss {
@@ -32,7 +32,7 @@ namespace gr {
      * \ingroup ecss
      *
      */
-    class ECSS_API pll : virtual public gr::block
+    class ECSS_API pll : virtual public gr::sync_block
     {
      public:
       typedef boost::shared_ptr<pll> sptr;
