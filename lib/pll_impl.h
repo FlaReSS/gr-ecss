@@ -61,8 +61,6 @@ namespace gr {
 
       void set_order(int order);
 
-      void set_N(int N);
-
        /*! \brief Update the system gains from the loop bandwidth and damping factor.
         *
         * \details
@@ -222,46 +220,44 @@ namespace gr {
 
       int get_order() const;
 
-      int get_N() const;
+      double get_coeff1() const;
 
-       double get_coeff1() const;
+      /*!
+      * \brief Returns the loop gain beta.
+      */
+      double get_coeff2() const;
 
-       /*!
-        * \brief Returns the loop gain beta.
-        */
-       double get_coeff2() const;
+      /*!
+      * \brief Get the control loop's frequency estimate.
+      */
 
-       /*!
-        * \brief Get the control loop's frequency estimate.
-        */
+      double get_coeff3() const;
 
-       double get_coeff3() const;
+      /*!
+      * \brief Get the control loop's frequency estimate.
+      */
 
-       /*!
-        * \brief Get the control loop's frequency estimate.
-        */
+      double get_coeff4() const;
 
-       double get_coeff4() const;
+      /*!
+       * \brief Get the control loop's frequency estimate.
+       */
+      float get_frequency() const;
 
-        /*!
-         * \brief Get the control loop's frequency estimate.
-         */
-       float get_frequency() const;
+      /*!
+      * \brief Get the control loop's phase estimate.
+      */
+      float get_phase() const;
 
-       /*!
-        * \brief Get the control loop's phase estimate.
-        */
-       float get_phase() const;
+      /*!
+      * \brief Get the control loop's maximum frequency.
+      */
+      float get_max_freq() const;
 
-       /*!
-        * \brief Get the control loop's maximum frequency.
-        */
-       float get_max_freq() const;
-
-       /*!
-        * \brief Get the control loop's minimum frequency.
-        */
-       float get_min_freq() const;
+      /*!
+      * \brief Get the control loop's minimum frequency.
+      */
+      float get_min_freq() const;
       };
 
 

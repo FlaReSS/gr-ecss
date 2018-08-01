@@ -49,7 +49,6 @@ namespace gr {
 
       virtual void set_enable(int enable) = 0;
       virtual void set_order(int order) = 0;
-      virtual void set_N(int N) = 0;
 
       virtual void set_coeff1(double alpha) = 0;
       virtual void set_coeff2(double beta) = 0;
@@ -62,7 +61,6 @@ namespace gr {
 
       virtual int get_enable() const = 0;
       virtual int get_order() const = 0;
-      virtual int get_N() const = 0;
 
       virtual double get_coeff1() const = 0;
       virtual double get_coeff2() const = 0;

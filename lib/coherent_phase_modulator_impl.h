@@ -31,6 +31,7 @@ namespace gr {
      private:
       int d_N;
       int d_n_inputs;
+      double precision;
 
      public:
       coherent_phase_modulator_impl(int N, int n_inputs);
@@ -41,7 +42,7 @@ namespace gr {
          gr_vector_void_star &output_items);
 
       int64_t double_to_integer(double double_value);
-      double NCO_normalization(int64_t d_integer_phase);
+      double NCO_denormalization(int64_t step_phase);
       double phase_wrap(double);
       double twopi_normalization(double phase);
     };

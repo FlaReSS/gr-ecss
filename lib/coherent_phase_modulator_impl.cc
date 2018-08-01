@@ -47,7 +47,9 @@ namespace gr {
               gr::io_signature::make (1, n_inputs,  sizeof(int64_t)),
               gr::io_signature::make(1, 1, sizeof(gr_complex))),
               d_N(N), d_n_inputs(n_inputs)
-    {}
+    {
+      precision = pow(2,(- (N - 1)));
+    }
 
     coherent_phase_modulator_impl::~coherent_phase_modulator_impl()
     {}
@@ -75,7 +77,7 @@ namespace gr {
           integer_phase += in[y][i];
         }
 
-        integer_phase_normalized = NCO_normalization(integer_phase);
+        integer_phase_normalized = NCO_denormalization(integer_phase);
         gr::sincos(integer_phase_normalized, &oq, &oi);
         out[i] = gr_complex((float) oi, (float) oq);
       }
@@ -86,22 +88,23 @@ namespace gr {
     int64_t
     coherent_phase_modulator_impl::double_to_integer(double double_value)
     {
-      return (int64_t)(double_value * pow (2, (63 - d_N)));
+      return (int64_t)(double_value / precision);
     }
 
     double
-    coherent_phase_modulator_impl::NCO_normalization(int64_t d_integer_phase)
+    coherent_phase_modulator_impl::NCO_denormalization(int64_t step_phase)
     {
-      double temp_denormalization = (double)(d_integer_phase / pow(2, (63 - d_N)));
-      return temp_denormalization * M_TWOPI;
+      int64_t temp_integer_phase = (step_phase >> (64 - d_N));
+      double temp_denormalization = (double)(temp_integer_phase * precision);
+      return temp_denormalization * M_PI;
     }
 
     double
     coherent_phase_modulator_impl::phase_wrap(double phase)
     {
-      while(phase >= M_TWOPI)
+      while(phase > M_PI)
         phase -= M_TWOPI;
-      while(phase < 0)
+      while(phase <= -M_PI)
         phase += M_TWOPI;
       return phase;
     }
@@ -109,7 +112,7 @@ namespace gr {
     double
     coherent_phase_modulator_impl::twopi_normalization(double phase)
     {
-      return phase / M_TWOPI;
+      return phase / M_PI;
     }
 
   } /* namespace ecss */

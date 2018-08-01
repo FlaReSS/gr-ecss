@@ -63,6 +63,12 @@ namespace gr {
             // Set the damping factor for a critically damped system
             d_damping = sqrt(2.0)/2.0;
 
+            if(N < 0 || N > 52) {
+              throw std::out_of_range ("pll: invalid number of bits. Must be in [0, 52].");
+            }
+            d_N = N;
+
+            precision = pow(2,(- (N - 1)));
             // Set the bandwidth, which will then call update_gains()
             set_coeff1(Coeff_1);
             set_coeff2(Coeff_2);
@@ -72,7 +78,6 @@ namespace gr {
             set_min_freq(min_freq);
             set_enable(enable);
             set_order(order);
-            set_N(N);
           }
 
     /*
@@ -289,17 +294,8 @@ namespace gr {
       d_order = order;
     }
 
-    void
-    pll_impl::set_N(int N)
-    {
-      if(N < 0 || N > 52) {
-        throw std::out_of_range ("pll: invalid number of bits. Must be in [0, 52].");
-      }
-      d_N = N;
-      precision = pow(2,(- (N - 1)));
-    }
 
-     void
+    void
     pll_impl::set_coeff1(double alpha)
     {
       if(alpha < 0 || alpha > 1.0) {
@@ -389,12 +385,6 @@ namespace gr {
     pll_impl::get_order() const
     {
      return d_order;
-    }
-
-    int
-    pll_impl::get_N() const
-    {
-     return d_N;
     }
 
 

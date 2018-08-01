@@ -36,12 +36,12 @@
   </source>
   <doc>
     This block generates a complex output signal modulated in phase by inputs.
-    All the inputs are added each other in order to get the final phase value which will be the output signal phase.
+    All the int64 inputs are added each other in order to get the final phase value which will be the output signal phase.
 
     That block evaluates In-phase and Quadrature components through sine and cosine functions of the final phase value evaluated.
 
-    Furthermore, this block allows to reduce the accuracy of the mathematics in d_order to simulate better a real behavior.
+    Furthermore, this block allows to reduce the accuracy (setting the number of bits N) of the mathematics in order to simulate properly a real behavior.
 
-    Finally, this block is designed for work together with a custom PLL designed present in the ecss module of OOT. So, the first input (phase accumulator input) must to be the phase accumulator output of that PLL.
+    Finally, this block is designed for work together with a custom PLL designed present in the ecss module of OOT.
   </doc>
 </block>
