@@ -28,19 +28,21 @@ namespace gr {
 
     class pll_impl : public pll
     {
-     private:
+    public:
        int d_N;
        int d_enable;
        int d_samp_rate;
        int d_order;
-       double d_phase, d_freq;
-       double d_acceleration, d_acceleration_temp;
+       // double d_phase, d_freq;
+       // double d_acceleration, d_acceleration_temp;
        double d_integer_phase_denormalized;
        int64_t d_integer_phase;
        double  precision;
-       double d_max_freq, d_min_freq;
+       // double d_max_freq, d_min_freq;
        double d_damping, d_loop_bw;
        double d_alpha, d_beta, d_gamma, d_zeta;
+       double branch_3_par, branch_2_3_par, branch_2_3;
+       double branch_2_3_max, branch_2_3_min;
 
        double mod_2pi(double in);
 
@@ -48,13 +50,16 @@ namespace gr {
        double phase_detector(gr_complexd sample);
        double magnitude(gr_complexd sample);
 
-    public:
+
       pll_impl(int samp_rate, int enable, int order, int N, double Coeff_1, double Coeff_2, double Coeff_3, double Coeff_4, float max_freq, float min_freq);
       ~pll_impl();
 
-      int work(int noutput_items,
-                             gr_vector_const_void_star &input_items,
-                             gr_vector_void_star &output_items);
+      void forecast(int noutput_items, gr_vector_int &ninput_items_required);
+
+      int general_work (int noutput_items,
+                         gr_vector_int &ninput_items,
+                         gr_vector_const_void_star &input_items,
+                         gr_vector_void_star &output_items);
 
       void set_enable(int enable);
 

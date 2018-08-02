@@ -39,6 +39,7 @@ namespace gr {
     #define M_TWOPI (2.0*M_PI)
     #endif
 
+
     pll::sptr
     pll::make(int samp_rate, int enable, int order, int N, double Coeff_1, double Coeff_2, double Coeff_3, double Coeff_4, float max_freq, float min_freq)
     {
@@ -52,12 +53,13 @@ namespace gr {
     static int ios[] = {sizeof(gr_complex), sizeof(float), sizeof(float), sizeof(int64_t)};
     static std::vector<int> iosig(ios, ios+sizeof(ios)/sizeof(int));
     pll_impl::pll_impl(int samp_rate, int enable, int order, int N, double Coeff_1, double Coeff_2, double Coeff_3, double Coeff_4, float max_freq, float min_freq)
-      : gr::sync_block("pll",
+      : gr::block("pll",
             gr::io_signature::make(1, 1, sizeof(gr_complex)),
             gr::io_signature::makev(4, 4, iosig)),
             d_enable(enable), d_order(order), d_N(N), d_integer_phase(0), d_integer_phase_denormalized(0),
-            d_phase(0), d_freq(0), d_max_freq(max_freq), d_min_freq(min_freq),
-            d_acceleration(0), d_acceleration_temp(0), d_samp_rate(samp_rate),
+            branch_2_3_max(max_freq / d_samp_rate * M_TWOPI), branch_2_3_min(min_freq / d_samp_rate * M_TWOPI),
+            // d_acceleration(0), d_acceleration_temp(0), d_phase(0), d_freq(0),
+            branch_3_par(0), branch_2_3_par(0), branch_2_3(0), d_samp_rate(samp_rate),
             d_alpha(Coeff_1), d_beta(Coeff_2), d_gamma(Coeff_3), d_zeta(Coeff_4)
           {
             // Set the damping factor for a critically damped system
@@ -114,11 +116,20 @@ namespace gr {
       return sample_magn;
     }
 
+    void
+    pll_impl::forecast(int noutput_items, gr_vector_int &ninput_items_required)
+    {
+      // unsigned ninputs = ninput_items_required.size ();
+      // for(unsigned i = 0; i < ninputs; i++)
+      ninput_items_required[0] = d_enable * noutput_items;
+    }
+
 
     int
-    pll_impl::work(int noutput_items,
-                           gr_vector_const_void_star &input_items,
-                           gr_vector_void_star &output_items)
+    pll_impl::general_work (int noutput_items,
+                       gr_vector_int &ninput_items,
+                       gr_vector_const_void_star &input_items,
+                       gr_vector_void_star &output_items)
     {
       const gr_complex *input = (gr_complex*)input_items[0];
       gr_complex *output = (gr_complex*)output_items[0];
@@ -130,10 +141,9 @@ namespace gr {
       double module;
       double error, filter_out;
       double t_imag, t_real;
-
-      for(int i = 0; i < noutput_items; i++) {
-        if (d_enable == 1)
-         {
+      if (d_enable == 1)
+       {
+         for(int i = 0; i < noutput_items; i++) {
             phase_accumulator[i] = d_integer_phase;
             gr::sincos(d_integer_phase_denormalized, &t_imag, &t_real);
             feedback = (gr_complexd) input[i] * gr_complexd(t_real, -t_imag);
@@ -147,20 +157,25 @@ namespace gr {
             accumulator(filter_out);
 
             //frequency_limit();
-            frq[i] = (d_acceleration + d_freq) * d_samp_rate / M_TWOPI;
+            frq[i] = branch_2_3 * d_samp_rate / M_TWOPI;
             //frq[i] = (float) d_integer_phase_denormalized;
 
             NCO_denormalization();
           }
-          else
-          {
-              output[i] = 0;
-              phase_out[i] = 0;
-              frq[i] = 0;
-              phase_accumulator[i] = 0;
-          }
+        this->produce( 0, noutput_items);
+        this->produce( 1, noutput_items);
+        this->produce( 2, noutput_items);
+        this->produce( 3, noutput_items);
       }
-      return noutput_items;
+      else{
+        this->produce( 0, 0);
+        this->produce( 1, 0);
+        this->produce( 2, 0);
+        this->produce( 3, 0);
+      }
+      this->consume_each( noutput_items);
+
+      return WORK_CALLED_PRODUCE;
     }
 
     void
@@ -189,18 +204,31 @@ namespace gr {
     double
     pll_impl::advance_loop(double error)
     {
+      // if (d_order == 3)
+      // {
+      //     d_acceleration_temp = d_acceleration_temp + d_gamma * error;
+      //     d_acceleration= d_acceleration + d_acceleration_temp;
+      //     d_freq = d_freq + d_beta * error;
+      // }
+      // else
+      // {
+      //     d_acceleration = 0;
+      //     d_freq = d_zeta * d_freq + d_beta * error;
+      // }
+      // return d_acceleration + d_freq + d_alpha * error;
       if (d_order == 3)
       {
-          d_acceleration_temp = d_acceleration_temp + d_gamma * error;
-          d_acceleration= d_acceleration + d_acceleration_temp;
-          d_freq = d_freq + d_beta * error;
+          branch_3_par += d_gamma * error;
+          branch_2_3_par = d_beta * error + branch_3_par;
+          branch_2_3 += branch_2_3_par;
       }
       else
       {
-          d_acceleration = 0;
-          d_freq = d_zeta * d_freq + d_beta * error;
+          branch_3_par = 0;
+          branch_2_3_par = d_beta * error + branch_3_par;
+          branch_2_3 += branch_2_3_par;
       }
-      return d_acceleration + d_freq + d_alpha * error;
+      return branch_2_3 + d_alpha * error;
     }
 
     void
@@ -256,10 +284,10 @@ namespace gr {
     void
     pll_impl::frequency_limit()
     {
-      // if(d_freq > d_max_freq)
-      //   d_freq = d_max_freq;
-      // else if(d_freq < d_min_freq)
-      //   d_freq = d_min_freq;
+      if(branch_2_3 > branch_2_3_max)
+        branch_2_3 = branch_2_3_max;
+      else if(branch_2_3 < branch_2_3_min)
+        branch_2_3 = branch_2_3_min;
     }
 
     /*******************************************************************
@@ -333,34 +361,33 @@ namespace gr {
     void
     pll_impl::set_frequency(float freq)
     {
-      if(freq > d_max_freq)
-        d_freq = d_min_freq;
-      else if(freq < d_min_freq)
-        d_freq = d_max_freq;
-      else
-        d_freq = freq;
+      branch_2_3 = freq / d_samp_rate * M_TWOPI;
+      if(branch_2_3 > branch_2_3_max)
+        branch_2_3 = branch_2_3_max;
+      else if(branch_2_3 < branch_2_3_min)
+        branch_2_3 = branch_2_3_min;
     }
 
     void
     pll_impl::set_phase(float phase)
     {
-      d_phase = phase;
-      while(d_phase>M_TWOPI)
-        d_phase -= M_TWOPI;
-      while(d_phase<-M_TWOPI)
-        d_phase += M_TWOPI;
+      d_integer_phase_denormalized = (double) phase;
+      while(d_integer_phase_denormalized>=M_PI)
+        d_integer_phase_denormalized -= M_PI;
+      while(d_integer_phase_denormalized<-M_PI)
+        d_integer_phase_denormalized += M_TWOPI;
     }
 
     void
     pll_impl::set_max_freq(float freq)
     {
-      d_max_freq = freq;
+      branch_2_3_max = freq / d_samp_rate * M_TWOPI;
     }
 
     void
     pll_impl::set_min_freq(float freq)
     {
-      d_min_freq = freq;
+      branch_2_3_min = freq / d_samp_rate * M_TWOPI;
     }
 
     /*******************************************************************
@@ -407,25 +434,25 @@ namespace gr {
     float
     pll_impl::get_frequency() const
     {
-      return d_freq;
+      return branch_2_3 * d_samp_rate / M_TWOPI;
     }
 
     float
     pll_impl::get_phase() const
     {
-      return d_phase;
+      return (float)d_integer_phase_denormalized;
     }
 
     float
     pll_impl::get_max_freq() const
     {
-      return d_max_freq;
+      return branch_2_3_max * d_samp_rate / M_TWOPI;
     }
 
     float
     pll_impl::get_min_freq() const
     {
-      return d_min_freq;
+      return branch_2_3_min * d_samp_rate / M_TWOPI;
     }
 
   } /* namespace ecss */
