@@ -110,7 +110,7 @@ namespace gr {
         * method in case another way is desired as this is fairly
         * heavy-handed.
         */
-       void frequency_limit();
+       double frequency_limit(double step);
 
        /*******************************************************************
         * SET FUNCTIONS

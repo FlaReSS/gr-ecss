@@ -138,8 +138,8 @@ namespace gr {
       int64_t *phase_accumulator =(int64_t*)output_items[3];
 
       gr_complexd feedback;
-      double module;
-      double error, filter_out;
+      double module, error;
+      double filter_out, filter_out_limited;
       double t_imag, t_real;
       if (d_enable == 1)
        {
@@ -154,12 +154,14 @@ namespace gr {
             phase_out[i] = error;
 
             filter_out = advance_loop(error);
-            accumulator(filter_out);
+
 
             //frequency_limit();
             frq[i] = branch_2_3 * d_samp_rate / M_TWOPI;
             //frq[i] = (float) d_integer_phase_denormalized;
+            filter_out_limited = frequency_limit(filter_out);
 
+            accumulator(filter_out_limited);
             NCO_denormalization();
           }
         this->produce( 0, noutput_items);
@@ -281,13 +283,15 @@ namespace gr {
       return phase;
     }
 
-    void
-    pll_impl::frequency_limit()
+    double
+    pll_impl::frequency_limit(double step)
     {
       if(branch_2_3 > branch_2_3_max)
-        branch_2_3 = branch_2_3_max;
+        return branch_2_3_max;
       else if(branch_2_3 < branch_2_3_min)
-        branch_2_3 = branch_2_3_min;
+            return branch_2_3_min;
+          else
+            return step;
     }
 
     /*******************************************************************
