@@ -227,8 +227,7 @@ namespace gr {
       else
       {
           branch_3_par = 0;
-          branch_2_3_par = d_beta * error + branch_3_par;
-          branch_2_3 += branch_2_3_par;
+          branch_2_3 = d_zeta * branch_2_3 + d_beta * error ;
       }
       return branch_2_3 + d_alpha * error;
     }

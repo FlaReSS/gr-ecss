@@ -26,5 +26,6 @@ install(FILES
     agc.h
     pll.h
     coherent_phase_modulator.h
-    phase_converter.h DESTINATION include/ecss
+    phase_converter.h
+    variables_loop_filter.h DESTINATION include/ecss
 )

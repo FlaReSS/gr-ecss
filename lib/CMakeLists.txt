@@ -29,7 +29,8 @@ list(APPEND ecss_sources
     agc_impl.cc
     pll_impl.cc
     coherent_phase_modulator_impl.cc
-    phase_converter_impl.cc )
+    phase_converter_impl.cc
+    variables_loop_filter.cc )
 
 set(ecss_sources "${ecss_sources}" PARENT_SCOPE)
 if(NOT ecss_sources)

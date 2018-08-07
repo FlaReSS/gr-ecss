@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<block>
+  <name>variables loop filter</name>
+  <key>variables_loop_filter</key>
+  <category>[ecss]</category>
+  <import>import ecss</import>
+
+  <!-- <var_make>self.coeff1_2 = ecss.get_coeff1_2()</var_make> -->
+  <!-- <var_make>self.coeff2_2 = ecss.get_coeff2_2()</var_make>
+  <var_make>self.coeff1_3 = ecss.get_coeff1_3()</var_make>
+  <var_make>self.coeff2_3 = ecss.get_coeff2_3()</var_make>
+  <var_make>self.coeff3_3 = ecss.get_coeff3_3()</var_make> -->
+  <!-- <var_make>self.coeff1_2 = coeff1_2 = $index_m
+self.coeff2_2 = coeff2_2 = $index_m
+self.coeff1_3 = coeff1_3 = $index_m
+self.coeff2_2 = coeff2_3 = $index_m
+self.coeff3_3 = coeff3_3 = $index_m</var_make>
+	<make></make> -->
+  <!-- <make>ecss.variables_loop_filter($index_m, $natural_freq, $damping, $samp_rate)</make> -->
+
+  <var_make>
+self.$(id) = $(id) = ecss.variables_loop_filter($index_m, $natural_freq, $damping, $samp_rate)
+  </var_make>
+  <var_value>get_coeff1_3()</var_value>
+  <make></make>
+
+
+
+  <!-- <callback>set_index_m($index_m)</callback> -->
+  <!-- <callback>set_natural_freq($natural_freq)</callback>
+  <callback>set_damping($damping)</callback>
+  <callback>set_samp_rate($samp_rate)</callback> -->
+
+  <!-- <param>
+		<name>ID coeff1_2</name>
+		<key>coeff1_2</key>
+		<value>coeff1_2</value>
+		<type>string</type>
+	</param>
+  <param>
+    <name>ID coeff2_2</name>
+    <key>coeff2_2</key>
+    <value>coeff2_2</value>
+    <type>string</type>
+  </param>
+  <param>
+    <name>ID coeff1_3</name>
+    <key>coeff1_3</key>
+    <value>coeff1_3</value>
+    <type>string</type>
+  </param>
+  <param>
+    <name>ID coeff2_3</name>
+    <key>coeff2_3</key>
+    <value>coeff2_3</value>
+    <type>string</type>
+  </param>
+  <param>
+    <name>ID coeff3_3</name>
+    <key>coeff3_3</key>
+    <value>coeff3_3</value>
+    <type>string</type>
+  </param> -->
+
+  <param>
+    <name>natural frequency</name>
+    <key>natural_freq</key>
+    <type>real</type>
+  </param>
+  <param>
+    <name>damping</name>
+    <key>damping</key>
+    <type>real</type>
+  </param>
+  <param>
+    <name>index m</name>
+    <key>index_m</key>
+    <type>int</type>
+  </param>
+  <param>
+    <name>sampling rate</name>
+    <key>samp_rate</key>
+    <type>int</type>
+  </param>
+</block>
