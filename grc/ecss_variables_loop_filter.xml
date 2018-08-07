@@ -6,16 +6,46 @@
   <import>from ecss import variables_loop_filter</import>
 
   <var_make>
-self.$(id) = $(id) = variables_loop_filter.get_coeff1_2($index_m, $natural_freq, $damping, $samp_rate)
+self.$(id) = $(id) = variables_loop_filter.get_$(type.fcn)($index_m, $natural_freq, $damping, $samp_rate)
   </var_make>
-  <var_value>variables_loop_filter.get_coeff1_2($index_m, $natural_freq, $damping, $samp_rate)</var_value>
+  <var_value>variables_loop_filter.get_$(type.fcn)($index_m, $natural_freq, $damping, $samp_rate)</var_value>
   <make></make>
 
 
-  <!-- <callback>pll = variables_loop_filter.get_coeff1_2($index_m, $natural_freq, $damping, $samp_rate)</callback> -->
-  <!-- <callback>set_natural_freq($natural_freq)</callback>
+  <!-- <callback>set_index_m($index_m)</callback>
+  <callback>set_natural_freq($natural_freq)</callback>
   <callback>set_damping($damping)</callback>
   <callback>set_samp_rate($samp_rate)</callback> -->
+  <param>
+    <name>Coefficient</name>
+    <key>type</key>
+    <type>enum</type>
+    <option>
+			<name>C1 for 2nd order filter</name>
+      <key>coeff1_2</key>
+			<opt>fcn:coeff1_2</opt>
+		</option>
+    <option>
+			<name>C2 for 2nd order filter</name>
+      <key>coeff2_2</key>
+			<opt>fcn:coeff2_2</opt>
+		</option>
+    <option>
+			<name>C1 for 3nd order filter</name>
+      <key>coeff1_3</key>
+			<opt>fcn:coeff1_3</opt>
+		</option>
+    <option>
+      <name>C2 for 3nd order filter</name>
+      <key>coeff2_3</key>
+      <opt>fcn:coeff2_3</opt>
+    </option>
+    <option>
+      <name>C3 for 3nd order filter</name>
+      <key>coeff3_3</key>
+      <opt>fcn:coeff3_3</opt>
+    </option>
+	</param>
 
 
   <param>
@@ -38,4 +68,11 @@ self.$(id) = $(id) = variables_loop_filter.get_coeff1_2($index_m, $natural_freq,
     <key>samp_rate</key>
     <type>int</type>
   </param>
+  <doc>
+This block evaluates the coefficients for the ecss pll.
+
+Tips:
+- notice that GnuRadio allows to create one variable for each block, so will be necessary to insert several variable blocks.
+- Gnuradio does not allow the callback function for variables. This means that to change in real time the coefficients of pll, you can create several variables for each Coefficient, and choose the wanted one with another block (i.e. chooser block).
+  </doc>
 </block>

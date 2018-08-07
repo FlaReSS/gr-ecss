@@ -141,7 +141,7 @@ namespace gr {
       double module, error;
       double filter_out, filter_out_limited;
       double t_imag, t_real;
-      std::cout << "alpha: " <<d_alpha << '\n';
+
       if (d_enable == 1)
        {
          for(int i = 0; i < noutput_items; i++) {

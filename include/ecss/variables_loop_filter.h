@@ -34,22 +34,10 @@ namespace gr {
     {
       private:
         //coefficients initilizated with loop bandwidth = 0.035
-        // double coeff1_2,coeff1_3;
-        // double coeff2_2,coeff2_3;
-        // double coeff3_3;
-        //
-        // double omega, loop_bw;
-        // float damp;
-        // int m, samp;
-
 
       public:
         // variables_loop_filter();
         // ~variables_loop_filter();
-        // void set_index_m(int index_m);
-        // void set_natural_freq(float natural_freq);
-        // void set_damping(float damping);
-        // void set_samp_rate(int samp_rate);
 
         static double get_coeff1_2(int m, float n_freq, float damp, int samp);
         static double get_coeff2_2(int m, float n_freq, float damp, int samp) ;
