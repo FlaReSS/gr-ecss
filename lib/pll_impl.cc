@@ -41,10 +41,10 @@ namespace gr {
 
 
     pll::sptr
-    pll::make(int samp_rate, int enable, int order, int N, double Coeff_1, double Coeff_2, double Coeff_3, double Coeff_4, float max_freq, float min_freq)
+    pll::make(int samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float max_freq, float min_freq)
     {
       return gnuradio::get_initial_sptr
-        (new pll_impl(samp_rate, enable, order, N, Coeff_1, Coeff_2, Coeff_3, Coeff_4, max_freq, min_freq));
+        (new pll_impl(samp_rate, order, N, Coeff1_2, Coeff2_2, Coeff4_2, Coeff1_3, Coeff2_3, Coeff3_3, max_freq, min_freq));
     }
 
     /*
@@ -52,33 +52,30 @@ namespace gr {
      */
     static int ios[] = {sizeof(gr_complex), sizeof(float), sizeof(float), sizeof(int64_t)};
     static std::vector<int> iosig(ios, ios+sizeof(ios)/sizeof(int));
-    pll_impl::pll_impl(int samp_rate, int enable, int order, int N, double Coeff_1, double Coeff_2, double Coeff_3, double Coeff_4, float max_freq, float min_freq)
-      : gr::block("pll",
+    pll_impl::pll_impl(int samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float max_freq, float min_freq)
+      : gr::sync_block("pll",
             gr::io_signature::make(1, 1, sizeof(gr_complex)),
             gr::io_signature::makev(4, 4, iosig)),
-            d_enable(enable), d_order(order), d_N(N), d_integer_phase(0), d_integer_phase_denormalized(0),
+            d_order(order), d_N(N), d_integer_phase(0), d_integer_phase_denormalized(0),
             branch_2_3_max(max_freq / d_samp_rate * M_TWOPI), branch_2_3_min(min_freq / d_samp_rate * M_TWOPI),
-            // d_acceleration(0), d_acceleration_temp(0), d_phase(0), d_freq(0),
             branch_3_par(0), branch_2_3_par(0), branch_2_3(0), d_samp_rate(samp_rate),
-            d_alpha(Coeff_1), d_beta(Coeff_2), d_gamma(Coeff_3), d_zeta(Coeff_4)
+            d_Coeff1_2(Coeff1_2), d_Coeff2_2(Coeff2_2), d_Coeff4_2(Coeff4_2),
+            d_Coeff1_3(Coeff1_3), d_Coeff2_3(Coeff2_3), d_Coeff3_3(Coeff3_3)
           {
-            // Set the damping factor for a critically damped system
-            d_damping = sqrt(2.0)/2.0;
-
             if(N < 0 || N > 52) {
               throw std::out_of_range ("pll: invalid number of bits. Must be in [0, 52].");
             }
             d_N = N;
-
             precision = pow(2,(- (N - 1)));
             // Set the bandwidth, which will then call update_gains()
-            set_coeff1(Coeff_1);
-            set_coeff2(Coeff_2);
-            set_coeff3(Coeff_3);
-            set_coeff4(Coeff_4);
+            set_Coeff1_2(Coeff1_2);
+            set_Coeff2_2(Coeff2_2);
+            set_Coeff4_2(Coeff4_2);
+            set_Coeff1_3(Coeff1_3);
+            set_Coeff2_3(Coeff2_3);
+            set_Coeff3_3(Coeff3_3);
             set_max_freq(max_freq);
             set_min_freq(min_freq);
-            set_enable(enable);
             set_order(order);
           }
 
@@ -116,18 +113,8 @@ namespace gr {
       return sample_magn;
     }
 
-    void
-    pll_impl::forecast(int noutput_items, gr_vector_int &ninput_items_required)
-    {
-      // unsigned ninputs = ninput_items_required.size ();
-      // for(unsigned i = 0; i < ninputs; i++)
-      ninput_items_required[0] = d_enable * noutput_items;
-    }
-
-
     int
-    pll_impl::general_work (int noutput_items,
-                       gr_vector_int &ninput_items,
+    pll_impl::work (int noutput_items,
                        gr_vector_const_void_star &input_items,
                        gr_vector_void_star &output_items)
     {
@@ -142,119 +129,52 @@ namespace gr {
       double filter_out, filter_out_limited;
       double t_imag, t_real;
 
-      if (d_enable == 1)
-       {
-         for(int i = 0; i < noutput_items; i++) {
-            phase_accumulator[i] = d_integer_phase;
-            gr::sincos(d_integer_phase_denormalized, &t_imag, &t_real);
-            feedback = (gr_complexd) input[i] * gr_complexd(t_real, -t_imag);
-            output[i] = (gr_complex) feedback;
-            // output[i] = (gr_complex) gr_complexd(t_real, -t_imag);
-            error = phase_detector(feedback);
+     for(int i = 0; i < noutput_items; i++) {
+        phase_accumulator[i] = d_integer_phase;
+        gr::sincos(d_integer_phase_denormalized, &t_imag, &t_real);
+        feedback = (gr_complexd) input[i] * gr_complexd(t_real, -t_imag);
+        output[i] = (gr_complex) feedback;
+        // output[i] = (gr_complex) gr_complexd(t_real, -t_imag);
+        error = phase_detector(feedback);
 
-            phase_out[i] = error;
+        phase_out[i] = error;
+        filter_out = advance_loop(error);
 
-            filter_out = advance_loop(error);
+        //frequency_limit();
+        frq[i] = branch_2_3 * d_samp_rate / M_TWOPI;
+        //frq[i] = (float) d_integer_phase_denormalized;
+        filter_out_limited = frequency_limit(filter_out);
 
-
-            //frequency_limit();
-            frq[i] = branch_2_3 * d_samp_rate / M_TWOPI;
-            //frq[i] = (float) d_integer_phase_denormalized;
-            filter_out_limited = frequency_limit(filter_out);
-
-            accumulator(filter_out_limited);
-            NCO_denormalization();
-          }
-        this->produce( 0, noutput_items);
-        this->produce( 1, noutput_items);
-        this->produce( 2, noutput_items);
-        this->produce( 3, noutput_items);
+        accumulator(filter_out_limited);
+        NCO_denormalization();
       }
-      else{
-        this->produce( 0, 0);
-        this->produce( 1, 0);
-        this->produce( 2, 0);
-        this->produce( 3, 0);
-      }
-      this->consume_each( noutput_items);
-
-      return WORK_CALLED_PRODUCE;
-    }
-
-    void
-    pll_impl::update_gains()
-    {
-      //test
-      static double temp_coeff1;
-      static double temp_coeff2;
-      static double temp_coeff3;
-      static double temp_coeff4;
-      //float denom = (1.0 + 2.0*d_damping*d_loop_bw + d_loop_bw*d_loop_bw);
-      //d_alpha = (4*d_damping*d_loop_bw) / denom;
-      // = (4*d_loop_bw*d_loop_bw) / denom;
-
-      if (temp_coeff1!=d_alpha || temp_coeff2!=d_beta  )
-      {
-        std::cout << "Coeff_1: "<<d_alpha<<"\t Coeff_2: "<<d_beta<<"\t Coeff_3: "<<d_gamma<<"\t Coeff_4: "<<d_zeta<< "\n\n";
-      }
-      temp_coeff1 = d_alpha;
-      temp_coeff2 = d_beta;
-      temp_coeff3 = d_gamma;
-      temp_coeff4 = d_zeta;
-
+      return noutput_items;
     }
 
     double
     pll_impl::advance_loop(double error)
     {
-      // if (d_order == 3)
-      // {
-      //     d_acceleration_temp = d_acceleration_temp + d_gamma * error;
-      //     d_acceleration= d_acceleration + d_acceleration_temp;
-      //     d_freq = d_freq + d_beta * error;
-      // }
-      // else
-      // {
-      //     d_acceleration = 0;
-      //     d_freq = d_zeta * d_freq + d_beta * error;
-      // }
-      // return d_acceleration + d_freq + d_alpha * error;
       if (d_order == 3)
       {
-          branch_3_par += d_gamma * error;
-          branch_2_3_par = d_beta * error + branch_3_par;
+          branch_3_par += d_Coeff3_3 * error;
+          branch_2_3_par = d_Coeff2_3 * error + branch_3_par;
           branch_2_3 += branch_2_3_par;
+          return branch_2_3 + d_Coeff1_3 * error;
       }
       else
       {
           branch_3_par = 0;
-          branch_2_3 = d_zeta * branch_2_3 + d_beta * error ;
+          branch_2_3 = d_Coeff4_2 * branch_2_3 + d_Coeff2_2 * error ;
+          return branch_2_3 + d_Coeff1_2 * error;
       }
-      return branch_2_3 + d_alpha * error;
     }
 
     void
     pll_impl::accumulator(double step_phase)
     {
       double filter_out_norm = step_phase / M_PI;
-      // double filter_out_norm = filter_out / M_PI;
       int64_t temp_integer_phase = (int64_t)(filter_out_norm / precision);
-      // std::fstream fs1;
       d_integer_phase += (temp_integer_phase << (64 - d_N)) ;
-      // if ((d_integer_phase <= temp_debug ) &&(d_integer_phase > -8900000000000000000 && temp_debug < 8900000000000000000)) {
-      //   fs1.open ("test.txt", std::fstream::in | std::fstream::out | std::fstream::app);
-      //   fs1 <<d_integer_phase<< ";\n";
-      //   fs1 <<temp_debug<< ";\n\n";
-      // }
-      // temp_debug = d_integer_phase;
-
-      // d_integer_phase += (temp_integer_phase) ;
-      // if(d_integer_phase >= max_int)
-      //     d_integer_phase -= max_int;
-      // else if(d_integer_phase < -max_int)
-      //     d_integer_phase += max_int;
-      //
-      // var_debug = (float) d_integer_phase;
       }
 
     void
@@ -263,13 +183,6 @@ namespace gr {
       int64_t temp_integer_phase = (d_integer_phase >> (64 - d_N));
       double temp_denormalization = (double)(temp_integer_phase * precision);
       d_integer_phase_denormalized = temp_denormalization * M_PI;
-      // std::fstream fs2;
-      // if ((d_integer_phase_denormalized <= var_debug ) &&(d_integer_phase_denormalized > -3.05 && var_debug < 3.05)) {
-      //   fs2.open ("test_nco.txt", std::fstream::in | std::fstream::out | std::fstream::app);
-      //   fs2 <<d_integer_phase_denormalized<< ";\n";
-      //   fs2 <<var_debug<< ";\n\n";
-      // }
-      // var_debug = d_integer_phase_denormalized;
       }
 
 
@@ -299,17 +212,6 @@ namespace gr {
      *******************************************************************/
 
     void
-    pll_impl::set_enable(int enable)
-    {
-      if(enable != 0 && enable != 1) {
-        throw std::out_of_range ("pll: invalid enable value. Must be 0 or 1");
-      }
-
-      d_enable = enable;
-      std::cout << "enable:" <<d_enable<<'\n';
-    }
-
-    void
     pll_impl::set_order(int order)
     {
       if(order != 2 && order != 3) {
@@ -320,47 +222,62 @@ namespace gr {
 
 
     void
-    pll_impl::set_coeff1(double alpha)
+    pll_impl::set_Coeff1_2(double Coeff1_2)
     {
-      if(alpha < 0 || alpha > 1.0) {
-        throw std::out_of_range ("pll: invalid coefficient 1. Must be in [0,1].");
+      if(Coeff1_2 < 0 || Coeff1_2 > 1.0) {
+        throw std::out_of_range ("pll: invalid coefficient 1 for 2nd order. Must be in [0,1].");
       }
-      d_alpha = alpha;
+      d_Coeff1_2 = Coeff1_2;
     }
 
     void
-    pll_impl::set_coeff2(double beta)
+    pll_impl::set_Coeff2_2(double Coeff2_2)
     {
-      if(beta < 0 || beta > 1.0) {
-        throw std::out_of_range ("pll: invalid coefficient 2. Must be in [0,1].");
+      if(Coeff2_2 < 0 || Coeff2_2 > 1.0) {
+        throw std::out_of_range ("pll: invalid coefficient 2 for 2nd order. Must be in [0,1].");
       }
-      d_beta = beta;
-      //
-      // d_loop_bw = 0.035;
-      // d_damping = sqrt(2.0)/2.0;
-      // double denom = (1.0 + 2.0*d_damping*d_loop_bw + d_loop_bw*d_loop_bw);
-      // d_alpha = (4*d_damping*d_loop_bw) / denom;
-      // d_beta = (4*d_loop_bw*d_loop_bw) / denom;
+      d_Coeff2_2 = Coeff2_2;
     }
 
     void
-    pll_impl::set_coeff3(double gamma)
+    pll_impl::set_Coeff4_2(double Coeff4_2)
     {
-      if(gamma < 0 || gamma > 1.0) {
-        throw std::out_of_range ("pll: invalid coefficient 3. Must be in [0,1].");
+      if(Coeff4_2 < 0 || Coeff4_2 > 1.0) {
+        throw std::out_of_range ("pll: invalid coefficient 4 for 2nd order. Must be in [0,1].");
       }
-      d_gamma = gamma;
+      d_Coeff4_2 = Coeff4_2;
     }
 
     void
-    pll_impl::set_coeff4(double zeta)
+    pll_impl::set_Coeff1_3(double Coeff1_3)
     {
-      if(zeta < 0 || zeta > 1.0) {
-        throw std::out_of_range ("pll: invalid coefficient 4. Must be in [0,1]. (suggested very small)");
+      if(Coeff1_3 < 0 || Coeff1_3 > 1.0) {
+        throw std::out_of_range ("pll: invalid coefficient 1 for 3rd order. Must be in [0,1]. (suggested very small)");
       }
-      d_zeta = zeta;
+      d_Coeff1_3 = Coeff1_3;
 
     }
+
+    void
+    pll_impl::set_Coeff2_3(double Coeff2_3)
+    {
+      if(Coeff2_3 < 0 || Coeff2_3 > 1.0) {
+        throw std::out_of_range ("pll: invalid coefficient 2 for 3rd order. Must be in [0,1]. (suggested very small)");
+      }
+      d_Coeff2_3 = Coeff2_3;
+
+    }
+
+    void
+    pll_impl::set_Coeff3_3(double Coeff3_3)
+    {
+      if(Coeff3_3 < 0 || Coeff3_3 > 1.0) {
+        throw std::out_of_range ("pll: invalid coefficient 3 for 3rd order. Must be in [0,1]. (suggested very small)");
+      }
+      d_Coeff3_3 = Coeff3_3;
+
+    }
+
 
     void
     pll_impl::set_frequency(float freq)
@@ -399,12 +316,6 @@ namespace gr {
      *******************************************************************/
 
     int
-    pll_impl::get_enable() const
-    {
-     return d_enable;
-    }
-
-    int
     pll_impl::get_order() const
     {
      return d_order;
@@ -412,27 +323,39 @@ namespace gr {
 
 
     double
-    pll_impl::get_coeff1() const
+    pll_impl::get_Coeff1_2() const
     {
-      return d_alpha;
+      return d_Coeff1_2;
     }
 
     double
-    pll_impl::get_coeff2() const
+    pll_impl::get_Coeff2_2() const
     {
-      return d_beta;
+      return d_Coeff2_2;
     }
 
     double
-    pll_impl::get_coeff3() const
+    pll_impl::get_Coeff4_2() const
     {
-      return d_gamma;
+      return d_Coeff4_2;
     }
 
     double
-    pll_impl::get_coeff4() const
+    pll_impl::get_Coeff1_3() const
     {
-      return d_zeta;
+      return d_Coeff1_3;
+    }
+
+    double
+    pll_impl::get_Coeff2_3() const
+    {
+      return d_Coeff2_3;
+    }
+
+    double
+    pll_impl::get_Coeff3_3() const
+    {
+      return d_Coeff3_3;
     }
 
     float

@@ -31,17 +31,17 @@ self.$(id) = $(id) = variables_loop_filter.get_$(type.fcn)($index_m, $natural_fr
 			<opt>fcn:coeff2_2</opt>
 		</option>
     <option>
-			<name>C1 for 3nd order filter</name>
+			<name>C1 for 3rd order filter</name>
       <key>coeff1_3</key>
 			<opt>fcn:coeff1_3</opt>
 		</option>
     <option>
-      <name>C2 for 3nd order filter</name>
+      <name>C2 for 3rd order filter</name>
       <key>coeff2_3</key>
       <opt>fcn:coeff2_3</opt>
     </option>
     <option>
-      <name>C3 for 3nd order filter</name>
+      <name>C3 for 3rd order filter</name>
       <key>coeff3_3</key>
       <opt>fcn:coeff3_3</opt>
     </option>

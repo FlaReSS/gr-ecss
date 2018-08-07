@@ -30,17 +30,13 @@ namespace gr {
     {
     public:
        int d_N;
-       int d_enable;
        int d_samp_rate;
        int d_order;
-       // double d_phase, d_freq;
-       // double d_acceleration, d_acceleration_temp;
-       double d_integer_phase_denormalized;
        int64_t d_integer_phase;
+       double d_integer_phase_denormalized;
        double  precision;
-       // double d_max_freq, d_min_freq;
-       double d_damping, d_loop_bw;
-       double d_alpha, d_beta, d_gamma, d_zeta;
+       double d_Coeff1_2, d_Coeff2_2, d_Coeff4_2;
+       double d_Coeff1_3, d_Coeff2_3, d_Coeff3_3;
        double branch_3_par, branch_2_3_par, branch_2_3;
        double branch_2_3_max, branch_2_3_min;
 
@@ -51,29 +47,14 @@ namespace gr {
        double magnitude(gr_complexd sample);
 
 
-      pll_impl(int samp_rate, int enable, int order, int N, double Coeff_1, double Coeff_2, double Coeff_3, double Coeff_4, float max_freq, float min_freq);
+      pll_impl(int samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float max_freq, float min_freq);
       ~pll_impl();
 
-      void forecast(int noutput_items, gr_vector_int &ninput_items_required);
-
-      int general_work (int noutput_items,
-                         gr_vector_int &ninput_items,
-                         gr_vector_const_void_star &input_items,
-                         gr_vector_void_star &output_items);
-
-      void set_enable(int enable);
+      int work (int noutput_items,
+               gr_vector_const_void_star &input_items,
+               gr_vector_void_star &output_items);
 
       void set_order(int order);
-
-       /*! \brief Update the system gains from the loop bandwidth and damping factor.
-        *
-        * \details
-        * This function updates the system gains based on the loop
-        * bandwidth and damping factor of the system. These two
-        * factors can be set separately through their own set
-        * functions.
-        */
-      void update_gains();
 
        /*! \brief Advance the control loop based on the current gain
         *  settings and the inputted error signal.
@@ -128,7 +109,7 @@ namespace gr {
          * \param beta    (float) new beta gain
          */
 
-       void set_coeff1(double alpha);
+       void set_Coeff1_2(double Coeff1_2);
 
        /*!
         * \brief Set the loop gain beta.
@@ -141,7 +122,7 @@ namespace gr {
         *
         * \param beta    (float) new beta gain
         */
-       void set_coeff2(double beta);
+       void set_Coeff2_2(double Coeff2_2);
 
        /*!
         * \brief Set the control loop's frequency.
@@ -154,7 +135,7 @@ namespace gr {
         *
         * \param freq    (float) new frequency
         */
-        void set_coeff3(double gamma);
+        void set_Coeff4_2(double Coeff4_2);
 
         /*!
          * \brief Set the control loop's frequency.
@@ -167,7 +148,33 @@ namespace gr {
          *
          * \param freq    (float) new frequency
          */
-         void set_coeff4(double zeta);
+       void set_Coeff1_3(double Coeff1_3);
+
+       /*!
+        * \brief Set the control loop's frequency.
+        *
+        * \details
+        * Sets the control loop's frequency. While this is normally
+        * updated by the inner loop of the algorithm, it could be
+        * useful to manually initialize, set, or reset this under
+        * certain circumstances.
+        *
+        * \param freq    (float) new frequency
+        */
+        void set_Coeff2_3(double Coeff2_3);
+
+        /*!
+         * \brief Set the control loop's frequency.
+         *
+         * \details
+         * Sets the control loop's frequency. While this is normally
+         * updated by the inner loop of the algorithm, it could be
+         * useful to manually initialize, set, or reset this under
+         * certain circumstances.
+         *
+         * \param freq    (float) new frequency
+         */
+        void set_Coeff3_3(double Coeff3_3);
 
         /*!
          * \brief Set the control loop's frequency.
@@ -220,28 +227,38 @@ namespace gr {
         * GET FUNCTIONS
         *******************************************************************/
 
-      int get_enable() const;
-
       int get_order() const;
 
-      double get_coeff1() const;
+      double get_Coeff1_2() const;
 
       /*!
       * \brief Returns the loop gain beta.
       */
-      double get_coeff2() const;
+      double get_Coeff2_2() const;
 
       /*!
       * \brief Get the control loop's frequency estimate.
       */
 
-      double get_coeff3() const;
+      double get_Coeff4_2() const;
 
       /*!
       * \brief Get the control loop's frequency estimate.
       */
 
-      double get_coeff4() const;
+      double get_Coeff1_3() const;
+
+      /*!
+      * \brief Get the control loop's frequency estimate.
+      */
+
+      double get_Coeff2_3() const;
+
+      /*!
+      * \brief Get the control loop's frequency estimate.
+      */
+
+      double get_Coeff3_3() const;
 
       /*!
        * \brief Get the control loop's frequency estimate.

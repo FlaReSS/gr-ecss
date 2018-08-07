@@ -22,7 +22,7 @@
 #define INCLUDED_ECSS_PLL_H
 
 #include <ecss/api.h>
-#include <gnuradio/block.h>
+#include <gnuradio/sync_block.h>
 
 namespace gr {
   namespace ecss {
@@ -32,7 +32,7 @@ namespace gr {
      * \ingroup ecss
      *
      */
-    class ECSS_API pll : virtual public gr::block
+    class ECSS_API pll : virtual public gr::sync_block
     {
      public:
       typedef boost::shared_ptr<pll> sptr;
@@ -45,27 +45,29 @@ namespace gr {
        * class. ecss::pll::make is the public interface for
        * creating new instances.
        */
-      static sptr make(int samp_rate, int enable, int order, int N, double Coeff_1, double Coeff_2, double Coeff_3, double Coeff_4, float max_freq, float min_freq);
+      static sptr make(int samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float max_freq, float min_freq);
 
-      virtual void set_enable(int enable) = 0;
+
       virtual void set_order(int order) = 0;
 
-      virtual void set_coeff1(double alpha) = 0;
-      virtual void set_coeff2(double beta) = 0;
-      virtual void set_coeff3(double gamma) = 0;
-      virtual void set_coeff4(double zeta) = 0;
+      virtual void set_Coeff1_2(double Coeff1_2) = 0;
+      virtual void set_Coeff2_2(double Coeff2_2) = 0;
+      virtual void set_Coeff4_2(double Coeff4_2) = 0;
+      virtual void set_Coeff1_3(double Coeff1_3) = 0;
+      virtual void set_Coeff2_3(double Coeff2_3) = 0;
+      virtual void set_Coeff3_3(double Coeff3_3) = 0;
       virtual void set_frequency(float freq) = 0;
       virtual void set_phase(float phase) = 0;
       virtual void set_min_freq(float freq) = 0;
       virtual void set_max_freq(float freq) = 0;
 
-      virtual int get_enable() const = 0;
       virtual int get_order() const = 0;
-
-      virtual double get_coeff1() const = 0;
-      virtual double get_coeff2() const = 0;
-      virtual double get_coeff3() const = 0;
-      virtual double get_coeff4() const = 0;
+      virtual double get_Coeff1_2() const = 0;
+      virtual double get_Coeff2_2() const = 0;
+      virtual double get_Coeff4_2() const = 0;
+      virtual double get_Coeff1_3() const = 0;
+      virtual double get_Coeff2_3() const = 0;
+      virtual double get_Coeff3_3() const = 0;
       virtual float get_frequency() const = 0;
       virtual float get_phase() const = 0;
       virtual float get_min_freq() const = 0;
