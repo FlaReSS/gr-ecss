@@ -34,29 +34,28 @@ namespace gr {
     {
       private:
         //coefficients initilizated with loop bandwidth = 0.035
-        double coeff1_2,coeff1_3;
-        double coeff2_2,coeff2_3;
-        double coeff3_3;
-
-        double omega, loop_bw;
-        float damp;
-        int m, samp;
-
-        void evaluation();
+        // double coeff1_2,coeff1_3;
+        // double coeff2_2,coeff2_3;
+        // double coeff3_3;
+        //
+        // double omega, loop_bw;
+        // float damp;
+        // int m, samp;
 
 
       public:
-        variables_loop_filter(int index_m, float natural_freq, float damping, int samp_rate);
-        ~variables_loop_filter();
-        virtual void set_index_m(int index_m) = 0;
-        virtual void set_natural_freq(float natural_freq) = 0;
-        virtual void set_damping(float damping) = 0;
-        virtual void set_samp_rate(int samp_rate) = 0;
-        virtual double get_coeff1_2() const = 0;
-        virtual double get_coeff2_2() const = 0;
-        virtual double get_coeff1_3() const = 0;
-        virtual double get_coeff2_3() const = 0;
-        virtual double get_coeff3_3() const = 0;
+        // variables_loop_filter();
+        // ~variables_loop_filter();
+        // void set_index_m(int index_m);
+        // void set_natural_freq(float natural_freq);
+        // void set_damping(float damping);
+        // void set_samp_rate(int samp_rate);
+
+        static double get_coeff1_2(int m, float n_freq, float damp, int samp);
+        static double get_coeff2_2(int m, float n_freq, float damp, int samp) ;
+        static double get_coeff1_3(int m, float n_freq, float damp, int samp) ;
+        static double get_coeff2_3(int m, float n_freq, float damp, int samp) ;
+        static double get_coeff3_3(int m, float n_freq, float damp, int samp) ;
     };
   } // namespace ecss
 } // namespace gr
