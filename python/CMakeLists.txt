@@ -50,3 +50,4 @@ GR_ADD_TEST(qa_spl_decoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_s
 GR_ADD_TEST(qa_pll ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_pll.py)
 GR_ADD_TEST(qa_coherent_phase_modulator ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_coherent_phase_modulator.py)
 GR_ADD_TEST(qa_phase_converter ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_phase_converter.py)
+GR_ADD_TEST(qa_signal_search ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_signal_search.py)

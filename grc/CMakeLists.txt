@@ -24,5 +24,6 @@ install(FILES
     ecss_pll.xml
     ecss_coherent_phase_modulator.xml
     ecss_phase_converter.xml
-    ecss_variables_loop_filter.xml DESTINATION share/gnuradio/grc/blocks
+    ecss_variables_loop_filter.xml
+    ecss_signal_search.xml DESTINATION share/gnuradio/grc/blocks
 )

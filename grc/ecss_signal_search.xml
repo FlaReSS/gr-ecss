@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<block>
+  <name>signal_search</name>
+  <key>ecss_signal_search</key>
+  <category>[ecss]</category>
+  <import>import ecss</import>
+  <make>ecss.signal_search($freq_central, $bandwidth, $freq_cutoff, $threshold, $samp_rate)</make>
+  <!-- Make one 'param' node for every Parameter you want settable from the GUI.
+       Sub-nodes:
+       * name
+       * key (makes the value accessible as $keyname, e.g. in the make node)
+       * type -->
+  <param>
+    <name>freq_central</name>
+    <key>freq_central</key>
+    <type>real</type>
+  </param>
+  <param>
+    <name>bandwidth</name>
+    <key>bandwidth</key>
+    <type>real</type>
+  </param>
+  <param>
+    <name>freq_cutoff</name>
+    <key>freq_cutoff</key>
+    <type>real</type>
+  </param>
+  <param>
+    <name>threshold</name>
+    <key>threshold</key>
+    <type>real</type>
+  </param>
+  <param>
+    <name>samp_rate</name>
+    <key>samp_rate</key>
+    <type>int</type>
+  </param>
+
+
+  <!-- Make one 'sink' node per input. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+  <sink>
+    <name>in</name>
+    <type>complex</type>
+  </sink>
+
+  <!-- Make one 'source' node per output. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+  <source>
+    <name>out</name>
+    <type>complex</type>
+  </source>
+</block>

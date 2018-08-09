@@ -13,6 +13,7 @@
 #include "ecss/coherent_phase_modulator.h"
 #include "ecss/phase_converter.h"
 #include "ecss/variables_loop_filter.h"
+#include "ecss/signal_search.h"
 %}
 
 
@@ -27,3 +28,5 @@ GR_SWIG_BLOCK_MAGIC2(ecss, coherent_phase_modulator);
 %include "ecss/phase_converter.h"
 GR_SWIG_BLOCK_MAGIC2(ecss, phase_converter);
 %include "ecss/variables_loop_filter.h"
+%include "ecss/signal_search.h"
+GR_SWIG_BLOCK_MAGIC2(ecss, signal_search);
