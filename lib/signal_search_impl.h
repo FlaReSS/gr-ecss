@@ -23,8 +23,9 @@
 
 #include <ecss/signal_search.h>
 #include <gnuradio/filter/single_pole_iir.h>
-// #include <gnuradio/filter/fir_filter_ccc.h>
-// #include <gnuradio/filter/firdes.h>
+#include <gnuradio/filter/fir_filter.h>
+#include <gnuradio/filter/firdes.h>
+// #include <gnuradio/types.h>
 #include <vector>
 
 namespace gr {
@@ -42,6 +43,7 @@ namespace gr {
       // filter::fir_filter_ccc d_band_pass;
       filter::single_pole_iir<float,float,float> d_iir;
       // std::vector<gr_complex> d_new_taps;
+      filter::kernel::fir_filter_ccf *d_band_pass;
       std::vector<float> taps();
 
 

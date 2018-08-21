@@ -24,7 +24,7 @@
 
 #include <gnuradio/io_signature.h>
 #include "signal_search_impl.h"
-#include <gnuradio/filter/firdes.h>
+// #include <volk/volk.h>
 
 namespace gr {
   namespace ecss {
@@ -45,13 +45,17 @@ namespace gr {
               gr::io_signature::make(1, 1, sizeof(gr_complex))),
               d_freq_central(freq_central), d_bandwidth(bandwidth),
               d_freq_cutoff(freq_cutoff), d_threshold(threshold), d_samp_rate(samp_rate)
-    {}
+    {
+        // d_band_pass= new filter::kernel::fir_filter_ccf(1, filter::firdes::band_pass(1, samp_rate, 0.01, 1000, 10, filter::firdes::WIN_HAMMING, 6.76));
+    }
 
     /*
      * Our virtual destructor.
      */
     signal_search_impl::~signal_search_impl()
-    {}
+    {
+      // delete d_band_pass;
+    }
 
     void
     signal_search_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
@@ -74,12 +78,15 @@ namespace gr {
       //   std::cout << d_new_taps[j] << '\n';
       // }
 
-      std::vector<float> tap = taps();
+      // std::vector<float> tap = taps();
 
       for(int i = 0; i < noutput_items; i++) {
+        // out[i] = in[i];
+      	// double mag_sqrd = in[i].real()*in[i].real() + in[i].imag()*in[i].imag();
+      	// d_iir.filter(mag_sqrd);	// computed for side effect: prev_output()
+
+        // out[i] = d_band_pass->filter(&in[i]);
         out[i] = in[i];
-      	double mag_sqrd = in[i].real()*in[i].real() + in[i].imag()*in[i].imag();
-      	d_iir.filter(mag_sqrd);	// computed for side effect: prev_output()
       }
 
       // if (d_iir.prev_output() >= d_threshold) {
@@ -89,7 +96,6 @@ namespace gr {
       // }
 
       consume_each (noutput_items);
-
       // Tell runtime system how many output items we produced.
       return noutput_items;
     }
@@ -134,8 +140,13 @@ namespace gr {
     std::vector<float>
     signal_search_impl::taps(){
 
-
-      return gr::filter::firdes::root_raised_cosine(1.0, 1000, 10, .115, 279);
+      std::vector<float> debug;
+      debug.push_back(1);
+      debug.push_back(1);
+      debug.push_back(1);
+      debug.push_back(1);
+      // return gr::filter::firdes::root_raised_cosine(1.0, 1000, 2, 0.115, 279);
+      return debug;
     }
   } /* namespace ecss */
 } /* namespace gr */

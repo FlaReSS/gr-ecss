@@ -56,8 +56,7 @@ namespace gr {
 
       void set_order(int order);
 
-       /*! \brief Advance the control loop based on the current gain
-        *  settings and the inputted error signal.
+       /*! \brief
         */
       void accumulator (double filter_out);
 
