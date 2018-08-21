@@ -46,7 +46,7 @@ namespace gr {
               d_freq_central(freq_central), d_bandwidth(bandwidth),
               d_freq_cutoff(freq_cutoff), d_threshold(threshold), d_samp_rate(samp_rate)
     {
-        // d_band_pass= new filter::kernel::fir_filter_ccf(1, filter::firdes::band_pass(1, samp_rate, 0.01, 1000, 10, filter::firdes::WIN_HAMMING, 6.76));
+        d_band_pass= new filter::kernel::fir_filter_ccf(1, filter::firdes::band_pass(1, samp_rate, 0.01, 1000, 10, filter::firdes::WIN_HAMMING, 6.76));
     }
 
     /*
@@ -85,8 +85,8 @@ namespace gr {
       	// double mag_sqrd = in[i].real()*in[i].real() + in[i].imag()*in[i].imag();
       	// d_iir.filter(mag_sqrd);	// computed for side effect: prev_output()
 
-        // out[i] = d_band_pass->filter(&in[i]);
-        out[i] = in[i];
+        out[i] = d_band_pass->filter(&in[i]);
+
       }
 
       // if (d_iir.prev_output() >= d_threshold) {
