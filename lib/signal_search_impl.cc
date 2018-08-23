@@ -44,9 +44,22 @@ namespace gr {
               gr::io_signature::make(1, 1, sizeof(gr_complex)),
               gr::io_signature::make(1, 1, sizeof(gr_complex))),
               d_freq_central(freq_central), d_bandwidth(bandwidth),
-              d_freq_cutoff(freq_cutoff), d_threshold(threshold), d_samp_rate(samp_rate)
+              d_freq_cutoff(freq_cutoff), d_threshold(threshold), d_samp_rate(samp_rate),
+              d_iir_bdf1(M_PI * freq_cutoff / samp_rate), d_iir_bdf2(M_PI * freq_cutoff / samp_rate), d_iir_bdf3(M_PI * freq_cutoff / samp_rate)
     {
-        d_band_pass= new filter::kernel::fir_filter_ccf(1, filter::firdes::band_pass(1, samp_rate, 0.01, 1000, 10, filter::firdes::WIN_HAMMING, 6.76));
+      first = true;
+
+      d_band_pass_filter_1= new filter::kernel::fir_filter_ccc(1, filter::firdes::complex_band_pass(1, samp_rate, (freq_central - bandwidth / 2), (freq_central + bandwidth / 2) , (bandwidth / 10), filter::firdes::WIN_HAMMING, 6.76));
+      d_band_pass_filter_2= new filter::kernel::fir_filter_ccc(1, filter::firdes::complex_band_pass(1, samp_rate, (freq_central + bandwidth / 2), (freq_central + 3 * bandwidth / 2), (bandwidth / 10), filter::firdes::WIN_HAMMING, 6.76));
+      d_band_pass_filter_3= new filter::kernel::fir_filter_ccc(1, filter::firdes::complex_band_pass(1, samp_rate, (freq_central - 3 * bandwidth / 2), (freq_central - bandwidth / 2), (bandwidth / 10), filter::firdes::WIN_HAMMING, 6.76));
+
+      d_iir_bdf1.reset();
+      d_iir_bdf2.reset();
+      d_iir_bdf3.reset();
+
+      std::cout << "ntaps bpf1: " << d_band_pass_filter_1 -> ntaps()<<'\n';
+      //reset();
+
     }
 
     /*
@@ -54,13 +67,15 @@ namespace gr {
      */
     signal_search_impl::~signal_search_impl()
     {
-      // delete d_band_pass;
+      delete d_band_pass_filter_1;
+      delete d_band_pass_filter_2;
+      delete d_band_pass_filter_3;
     }
 
     void
     signal_search_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
     {
-      /* <+forecast+> e.g. ninput_items_required[0] = noutput_items */
+      ninput_items_required[0] = noutput_items;
     }
 
     int
@@ -71,33 +86,54 @@ namespace gr {
     {
       const gr_complex *in = (const gr_complex *) input_items[0];
       gr_complex *out = (gr_complex *) output_items[0];
-
-      // d_new_taps = gr::filter::firdes::complex_band_pass(1, d_samp_rate, (d_freq_central - d_bandwidth / 2), (d_freq_central + d_bandwidth / 2), (d_bandwidth / 10));
-      // std::vector<float> taps = filter::firdes::low_pass(1.0, 96000, 5000.0, 100.0);
-      // for (size_t j = 0; j < d_new_taps.size(); j++) {
-      //   std::cout << d_new_taps[j] << '\n';
-      // }
-
-      // std::vector<float> tap = taps();
+      int j = 0;
 
       for(int i = 0; i < noutput_items; i++) {
-        // out[i] = in[i];
-      	// double mag_sqrd = in[i].real()*in[i].real() + in[i].imag()*in[i].imag();
-      	// d_iir.filter(mag_sqrd);	// computed for side effect: prev_output()
 
-        out[i] = d_band_pass->filter(&in[i]);
+        gr_complex bf1_out = d_band_pass_filter_1->filter(&in[i]);
+        gr_complex bf2_out = d_band_pass_filter_2->filter(&in[i]);
+        gr_complex bf3_out = d_band_pass_filter_3->filter(&in[i]);
+
+        double mag_sqrd_bdf1 = bf1_out.real()*bf1_out.real() + bf1_out.imag()*bf1_out.imag();
+        double mag_sqrd_bdf2 = bf2_out.real()*bf2_out.real() + bf2_out.imag()*bf2_out.imag();
+        double mag_sqrd_bdf3 = bf3_out.real()*bf3_out.real() + bf3_out.imag()*bf3_out.imag();
+
+        d_iir_bdf1.filter(mag_sqrd_bdf1);	// computed for side effect: prev_output()
+        d_iir_bdf2.filter(mag_sqrd_bdf2);	// computed for side effect: prev_output()
+        d_iir_bdf3.filter(mag_sqrd_bdf3);	// computed for side effect: prev_output()
+
+        if (d_iir_bdf1.prev_output() > ((d_iir_bdf2.prev_output() + d_iir_bdf3.prev_output()) / 2 + d_threshold)) {
+          out[j]= in[i];
+          if(first == true){
+            add_item_tag(0, // Port number
+                 nitems_written(0) + j, // Offset
+                 pmt::mp("reset"), // Key
+                 pmt::from_bool(true) // Value
+                );
+            first = false;
+          }
+          j++;
+        }
+        else{
+          first = true;
+        }
+
+        // else{
+        //   std::cout << "in[i]: " << in[i] << '\n';
+        //   std::cout << "bf1_out: " << bf1_out << '\n';
+        //   std::cout << "bf2_out: " << bf2_out << '\n';
+        //   std::cout << "bf3_out: " << bf3_out << '\n';
+        //   std::cout << "d_iir_bdf1: " << d_iir_bdf1.prev_output() << '\n';
+        //   std::cout << "d_iir_bdf2: " << d_iir_bdf2.prev_output() << '\n';
+        //   std::cout << "d_iir_bdf3: " << d_iir_bdf3.prev_output() << '\n';
+        // }
 
       }
-
-      // if (d_iir.prev_output() >= d_threshold) {
-      //   /* code */
-      // } else {
-      //   /* code */
-      // }
+      // std::cout << "noutput_items expected: " << noutput_items << '\n';
+      // std::cout << "noutput_items outputted" << j << '\n';
 
       consume_each (noutput_items);
-      // Tell runtime system how many output items we produced.
-      return noutput_items;
+      return j;
     }
 
 
@@ -135,18 +171,19 @@ namespace gr {
     }
 
     void
-    signal_search_impl::reset() {}
+    signal_search_impl::reset() {
 
-    std::vector<float>
-    signal_search_impl::taps(){
+      gr_complex in0 = gr_complex(0,0);
+      const gr_complex *in =  (const gr_complex *) &in0;
+      gr_complex temp;
 
-      std::vector<float> debug;
-      debug.push_back(1);
-      debug.push_back(1);
-      debug.push_back(1);
-      debug.push_back(1);
-      // return gr::filter::firdes::root_raised_cosine(1.0, 1000, 2, 0.115, 279);
-      return debug;
+      for (size_t i = 0; i < (d_band_pass_filter_1 -> ntaps()); i++) {
+        temp = d_band_pass_filter_1->filter( &in[0] );
+        temp = d_band_pass_filter_2->filter( &in[0] );
+        temp = d_band_pass_filter_3->filter( &in[0] );
+      }
+      std::cout << "sono alla fine del reset" << '\n';
     }
+
   } /* namespace ecss */
 } /* namespace gr */

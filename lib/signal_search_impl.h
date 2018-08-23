@@ -34,6 +34,7 @@ namespace gr {
     class signal_search_impl : public signal_search
     {
      private:
+      bool first;
       int d_samp_rate;
       float d_threshold;
       float d_bandwidth;
@@ -41,10 +42,13 @@ namespace gr {
       float d_freq_central;
       // filter::firdes d_firdes;
       // filter::fir_filter_ccc d_band_pass;
-      filter::single_pole_iir<float,float,float> d_iir;
+      filter::single_pole_iir<float,float,float> d_iir_bdf1;
+      filter::single_pole_iir<float,float,float> d_iir_bdf2;
+      filter::single_pole_iir<float,float,float> d_iir_bdf3;
       // std::vector<gr_complex> d_new_taps;
-      filter::kernel::fir_filter_ccf *d_band_pass;
-      std::vector<float> taps();
+      filter::kernel::fir_filter_ccc *d_band_pass_filter_1;
+      filter::kernel::fir_filter_ccc *d_band_pass_filter_2;
+      filter::kernel::fir_filter_ccc *d_band_pass_filter_3;
 
 
      public:
