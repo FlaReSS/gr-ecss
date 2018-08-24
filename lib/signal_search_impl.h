@@ -23,9 +23,8 @@
 
 #include <ecss/signal_search.h>
 #include <gnuradio/filter/single_pole_iir.h>
-#include <gnuradio/filter/fir_filter.h>
 #include <gnuradio/filter/firdes.h>
-// #include <gnuradio/types.h>
+#include <gnuradio/fft/fft.h>
 #include <vector>
 
 namespace gr {
@@ -40,19 +39,44 @@ namespace gr {
       float d_bandwidth;
       float d_freq_cutoff;
       float d_freq_central;
+      float central_band_mean, central_band_avg;
+      float right_band_mean, right_band_avg;
+      float left_band_mean, left_band_avg;
+      int d_fftsize;
+      int d_fftsize_half;
+      int bw_items;
+      int central_first_items;
+      int left_first_items;
+      int right_first_items;
+      filter::firdes::win_type d_wintype;
+      std::vector<float> d_window;
       // filter::firdes d_firdes;
       // filter::fir_filter_ccc d_band_pass;
-      filter::single_pole_iir<float,float,float> d_iir_bdf1;
-      filter::single_pole_iir<float,float,float> d_iir_bdf2;
-      filter::single_pole_iir<float,float,float> d_iir_bdf3;
+      filter::single_pole_iir<float,float,float> d_iir_central;
+      filter::single_pole_iir<float,float,float> d_iir_left;
+      filter::single_pole_iir<float,float,float> d_iir_right;
       // std::vector<gr_complex> d_new_taps;
-      filter::kernel::fir_filter_ccc *d_band_pass_filter_1;
-      filter::kernel::fir_filter_ccc *d_band_pass_filter_2;
-      filter::kernel::fir_filter_ccc *d_band_pass_filter_3;
+      fft::fft_complex *d_fft;
+      gr_complex* d_residbuf;
+      double* d_magbuf;
+      double* d_pdu_magbuf;
+      float* central_band;
+      float* central_band_acc;
+      float* right_band;
+      float* right_band_acc;
+      float* left_band;
+      float* left_band_acc;
+      float* d_tmpbuf;
+      float *d_fbuf;
+
+
+      void fft(float *data_out, const gr_complex *data_in, int size);
+      void buildwindow();
+      void items_eval();
 
 
      public:
-      signal_search_impl(float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate);
+      signal_search_impl(int fftsize, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate);
       ~signal_search_impl();
 
       // Where all the action really happens

@@ -51,7 +51,7 @@ namespace gr {
        * \param threshold_db Threshold for muting.
        * \param alpha Gain parameter for the running average filter.
        */
-      static sptr make(float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate);
+      static sptr make(int fftsize, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate);
 
       virtual float get_freq_central() const = 0;
       virtual float get_bandwidth() const = 0;
