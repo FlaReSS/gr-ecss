@@ -28,9 +28,7 @@
 #include <gnuradio/math.h>
 #include <stdexcept>
 #include "pll_impl.h"
-//debug
-#include <iostream>
-#include <fstream>
+
 
 namespace gr {
   namespace ecss {
@@ -129,7 +127,37 @@ namespace gr {
       double filter_out, filter_out_limited;
       double t_imag, t_real;
 
-     for(int i = 0; i < noutput_items; i++) {
+      std::vector<tag_t> tags;
+
+      get_tags_in_window( // Note the different method name
+          tags, // Tags will be saved here
+          0, // Port 0
+          0, // Start of range (relative to nitems_read(0))
+          noutput_items, // End of relative range
+          pmt::mp("reset") // Optional: Only find tags with key "my_tag_key"
+      );
+
+      if (tags.size()>0) { //debug
+        std::cout << "tags size: " << tags.size() << '\n';
+        std::cout << "tags[0] offset: " << tags[0].offset - nitems_read(0) << '\n';
+        std::cout << "tags[0] value: " << tags[0].value << '\n';
+      }
+
+      for(int i = 0; i < noutput_items; i++) {
+
+       // get_tags_in_window( // Note the different method name
+       //     tags, // Tags will be saved here
+       //     0, // Port 0
+       //     i, // Start of range (relative to nitems_read(0))
+       //     (i + 1), // End of relative range
+       //     pmt::mp("reset") // Optional: Only find tags with key "my_tag_key"
+       // );
+
+       // if (tags.size() > 0) {
+       //   std::cout << tags[0]. << '\n';
+       // }
+
+
         phase_accumulator[i] = d_integer_phase;
         gr::sincos(d_integer_phase_denormalized, &t_imag, &t_real);
         feedback = (gr_complexd) input[i] * gr_complexd(t_real, -t_imag);

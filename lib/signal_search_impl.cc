@@ -110,23 +110,24 @@ namespace gr {
                  pmt::mp("reset"), // Key
                  pmt::from_bool(true) // Value
                 );
+            // std::cout << "signal search tag offset: "<< j << '\n'; //debug
             first = false;
           }
           j++;
         }
         else{
           first = true;
-        }
+        // }
 
         // else{
-        //   std::cout << "in[i]: " << in[i] << '\n';
-        //   std::cout << "bf1_out: " << bf1_out << '\n';
-        //   std::cout << "bf2_out: " << bf2_out << '\n';
-        //   std::cout << "bf3_out: " << bf3_out << '\n';
-        //   std::cout << "d_iir_bdf1: " << d_iir_bdf1.prev_output() << '\n';
-        //   std::cout << "d_iir_bdf2: " << d_iir_bdf2.prev_output() << '\n';
-        //   std::cout << "d_iir_bdf3: " << d_iir_bdf3.prev_output() << '\n';
-        // }
+          std::cout << "in[i]: " << in[i] << '\n';
+          std::cout << "bf1_out: " << bf1_out << '\n';
+          std::cout << "bf2_out: " << bf2_out << '\n';
+          std::cout << "bf3_out: " << bf3_out << '\n';
+          std::cout << "d_iir_bdf1: " << d_iir_bdf1.prev_output() << '\n';
+          std::cout << "d_iir_bdf2: " << d_iir_bdf2.prev_output() << '\n';
+          std::cout << "d_iir_bdf3: " << d_iir_bdf3.prev_output() << '\n';
+        }
 
       }
       // std::cout << "noutput_items expected: " << noutput_items << '\n';
@@ -173,9 +174,17 @@ namespace gr {
     void
     signal_search_impl::reset() {
 
-      gr_complex in0 = gr_complex(0,0);
-      const gr_complex *in =  (const gr_complex *) &in0;
       gr_complex temp;
+      gr_complex in0 = gr_complex(0,0);
+      const gr_complex *in;
+      in =  &in0;
+
+      // std::cout << "in0:    \t" << in0 << '\n';
+      // std::cout << "&in0:   \t" << &in0 << '\n';
+      // std::cout << "in:     \t" << in << '\n';
+      // std::cout << "&in[0]: \t" << &in[0] << '\n';
+      // std::cout << "*in:    \t" << *in << '\n';
+      // std::cout << "&in:    \t" << &in << '\n';
 
       for (size_t i = 0; i < (d_band_pass_filter_1 -> ntaps()); i++) {
         temp = d_band_pass_filter_1->filter( &in[0] );

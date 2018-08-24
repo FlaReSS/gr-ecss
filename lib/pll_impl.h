@@ -29,202 +29,215 @@ namespace gr {
     class pll_impl : public pll
     {
     public:
-       int d_N;
-       int d_samp_rate;
-       int d_order;
-       int64_t d_integer_phase;
-       double d_integer_phase_denormalized;
-       double  precision;
-       double d_Coeff1_2, d_Coeff2_2, d_Coeff4_2;
-       double d_Coeff1_3, d_Coeff2_3, d_Coeff3_3;
-       double branch_3_par, branch_2_3_par, branch_2_3;
-       double branch_2_3_max, branch_2_3_min;
+      int d_N;
+      int d_samp_rate;
+      int d_order;
+      int64_t d_integer_phase;
+      double d_integer_phase_denormalized;
+      double  precision;
+      double d_Coeff1_2, d_Coeff2_2, d_Coeff4_2;
+      double d_Coeff1_3, d_Coeff2_3, d_Coeff3_3;
+      double branch_3_par, branch_2_3_par, branch_2_3;
+      double branch_2_3_max, branch_2_3_min;
 
-       double mod_2pi(double in);
+      double mod_2pi(double in);
 
-       void NCO_denormalization();
-       double phase_detector(gr_complexd sample);
-       double magnitude(gr_complexd sample);
+      void NCO_denormalization();
+      double phase_detector(gr_complexd sample);
+      double magnitude(gr_complexd sample);
 
 
       pll_impl(int samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float max_freq, float min_freq);
       ~pll_impl();
 
       int work (int noutput_items,
-               gr_vector_const_void_star &input_items,
-               gr_vector_void_star &output_items);
+             gr_vector_const_void_star &input_items,
+             gr_vector_void_star &output_items);
 
-      void set_order(int order);
-
-       /*! \brief
-        */
+      /*! \brief
+      */
       void accumulator (double filter_out);
 
+      /*! \brief Evaluate the Loop filter output.
+      *
+      * \details
+      * This function evaluate the output of the PLL loop filter. This function can
+      * evaluate the output for 2nd order or 3rd order loop filter. It uses the global
+      * variable d_order to choose the order of the filter.
+      *
+      * This function uses the global variables d_Coeff3_3, d_Coeff2_3, d_Coeff1_3, d_Coeff4_2
+      * d_Coeff2_2, d_Coeff1_2 to evaluate the output in according with the order of the filter.
+      */
       double advance_loop(double error);
 
-       /*! \brief Keep the phase between -2pi and 2pi.
-        *
-        * \details
-        * This function keeps the phase between -2pi and 2pi. If the
-        * phase is greater than 2pi by d, it wraps around to be -2pi+d;
-        * similarly if it is less than -2pi by d, it wraps around to
-        * 2pi-d.
-        *
-        * This function should be called after advance_loop to keep the
-        * phase in a good operating region. It is set as a separate
-        * method in case another way is desired as this is fairly
-        * heavy-handed.
-        */
-       double phase_wrap(double phase);
+      /*! \brief Keep the phase in the range [-pi, pi).
+      *
+      * \details
+      * This function keeps the phase between -pi and pi. If the
+      * phase is greater than pi by d, it wraps around to be -pi+d;
+      * similarly if it is less than -pi by d, it wraps around to
+      * pi-d.
+      */
+      double phase_wrap(double phase);
 
-       /*! \brief Keep the frequency between d_min_freq and d_max_freq.
-        *
-        * \details
-        * This function keeps the frequency between d_min_freq and
-        * d_max_freq. If the frequency is greater than d_max_freq, it
-        * is set to d_max_freq.  If the frequency is less than
-        * d_min_freq, it is set to d_min_freq.
-        *
-        * This function should be called after advance_loop to keep the
-        * frequency in the specified region. It is set as a separate
-        * method in case another way is desired as this is fairly
-        * heavy-handed.
-        */
-       double frequency_limit(double step);
+      /*! \brief Keep the frequency between d_min_freq and d_max_freq.
+      *
+      * \details
+      * Specifically, this function works with the phase steps. Thus,
+      * keeps the steps of branch_2_3 (so, the integrated parts of the
+      * loop filter) between branch_2_3_max and branch_2_3_min.
+      * If the step is greater than branch_2_3_max, it
+      * is set to branch_2_3_max.  If the frequency is less than
+      * branch_2_3_min, it is set to branch_2_3_min.
+      *
+      * \param step    (double) new step limited
+      */
+      double frequency_limit(double step);
 
-       /*******************************************************************
-        * SET FUNCTIONS
-        *******************************************************************/
+      /*******************************************************************
+      * SET FUNCTIONS
+      *******************************************************************/
 
-        /*!
-         * \brief Set the loop gain beta.
-         *
-         * \details
-         * Sets the loop filter's alpha gain parameter.
-         *
-         * This value should really only be set by adjusting the loop
-         * bandwidth and damping factor.
-         *
-         * \param beta    (float) new beta gain
-         */
+      /*!
+       * \brief Set the loop filter order.
+       *
+       * \details
+       * Sets the loop filter's order.
+       *
+       * This value should really only be set by adjusting the loop
+       * bandwidth and damping factor.
+       *
+       * \param order    (int) new loop filer order
+       */
+      void set_order(int order);
 
-       void set_Coeff1_2(double Coeff1_2);
+      /*!
+       * \brief Set the loop gain beta.
+       *
+       * \details
+       * Sets the loop filter's alpha gain parameter.
+       *
+       * This value should really only be set by adjusting the loop
+       * bandwidth and damping factor.
+       *
+       * \param beta    (float) new beta gain
+       */
+      void set_Coeff1_2(double Coeff1_2);
 
-       /*!
-        * \brief Set the loop gain beta.
-        *
-        * \details
-        * Sets the loop filter's beta gain parameter.
-        *
-        * This value should really only be set by adjusting the loop
-        * bandwidth and damping factor.
-        *
-        * \param beta    (float) new beta gain
-        */
-       void set_Coeff2_2(double Coeff2_2);
+      /*!
+      * \brief Set the loop gain beta.
+      *
+      * \details
+      * Sets the loop filter's beta gain parameter.
+      *
+      * This value should really only be set by adjusting the loop
+      * bandwidth and damping factor.
+      *
+      * \param beta    (float) new beta gain
+      */
+      void set_Coeff2_2(double Coeff2_2);
 
-       /*!
-        * \brief Set the control loop's frequency.
-        *
-        * \details
-        * Sets the control loop's frequency. While this is normally
-        * updated by the inner loop of the algorithm, it could be
-        * useful to manually initialize, set, or reset this under
-        * certain circumstances.
-        *
-        * \param freq    (float) new frequency
-        */
-        void set_Coeff4_2(double Coeff4_2);
+      /*!
+      * \brief Set the control loop's frequency.
+      *
+      * \details
+      * Sets the control loop's frequency. While this is normally
+      * updated by the inner loop of the algorithm, it could be
+      * useful to manually initialize, set, or reset this under
+      * certain circumstances.
+      *
+      * \param freq    (float) new frequency
+      */
+      void set_Coeff4_2(double Coeff4_2);
 
-        /*!
-         * \brief Set the control loop's frequency.
-         *
-         * \details
-         * Sets the control loop's frequency. While this is normally
-         * updated by the inner loop of the algorithm, it could be
-         * useful to manually initialize, set, or reset this under
-         * certain circumstances.
-         *
-         * \param freq    (float) new frequency
-         */
-       void set_Coeff1_3(double Coeff1_3);
+      /*!
+       * \brief Set the control loop's frequency.
+       *
+       * \details
+       * Sets the control loop's frequency. While this is normally
+       * updated by the inner loop of the algorithm, it could be
+       * useful to manually initialize, set, or reset this under
+       * certain circumstances.
+       *
+       * \param freq    (float) new frequency
+       */
+      void set_Coeff1_3(double Coeff1_3);
 
-       /*!
-        * \brief Set the control loop's frequency.
-        *
-        * \details
-        * Sets the control loop's frequency. While this is normally
-        * updated by the inner loop of the algorithm, it could be
-        * useful to manually initialize, set, or reset this under
-        * certain circumstances.
-        *
-        * \param freq    (float) new frequency
-        */
-        void set_Coeff2_3(double Coeff2_3);
+      /*!
+      * \brief Set the control loop's frequency.
+      *
+      * \details
+      * Sets the control loop's frequency. While this is normally
+      * updated by the inner loop of the algorithm, it could be
+      * useful to manually initialize, set, or reset this under
+      * certain circumstances.
+      *
+      * \param freq    (float) new frequency
+      */
+      void set_Coeff2_3(double Coeff2_3);
 
-        /*!
-         * \brief Set the control loop's frequency.
-         *
-         * \details
-         * Sets the control loop's frequency. While this is normally
-         * updated by the inner loop of the algorithm, it could be
-         * useful to manually initialize, set, or reset this under
-         * certain circumstances.
-         *
-         * \param freq    (float) new frequency
-         */
-        void set_Coeff3_3(double Coeff3_3);
+      /*!
+       * \brief Set the control loop's frequency.
+       *
+       * \details
+       * Sets the control loop's frequency. While this is normally
+       * updated by the inner loop of the algorithm, it could be
+       * useful to manually initialize, set, or reset this under
+       * certain circumstances.
+       *
+       * \param freq    (float) new frequency
+       */
+      void set_Coeff3_3(double Coeff3_3);
 
-        /*!
-         * \brief Set the control loop's frequency.
-         *
-         * \details
-         * Sets the control loop's frequency. While this is normally
-         * updated by the inner loop of the algorithm, it could be
-         * useful to manually initialize, set, or reset this under
-         * certain circumstances.
-         *
-         * \param freq    (float) new frequency
-         */
+      /*!
+       * \brief Set the control loop's frequency.
+       *
+       * \details
+       * Sets the control loop's frequency. While this is normally
+       * updated by the inner loop of the algorithm, it could be
+       * useful to manually initialize, set, or reset this under
+       * certain circumstances.
+       *
+       * \param freq    (float) new frequency
+       */
+      void set_frequency(float freq);
 
-       void set_frequency(float freq);
+      /*!
+      * \brief Set the control loop's phase.
+      *
+      * \details
+      * Sets the control loop's phase. While this is normally
+      * updated by the inner loop of the algorithm, it could be
+      * useful to manually initialize, set, or reset this under
+      * certain circumstances.
+      *
+      * \param phase    (float) new phase
+      */
+      void set_phase(float phase);
 
-       /*!
-        * \brief Set the control loop's phase.
-        *
-        * \details
-        * Sets the control loop's phase. While this is normally
-        * updated by the inner loop of the algorithm, it could be
-        * useful to manually initialize, set, or reset this under
-        * certain circumstances.
-        *
-        * \param phase    (float) new phase
-        */
-       void set_phase(float phase);
+      /*!
+      * \brief Set the control loop's maximum frequency.
+      *
+      * \details
+      * Set the maximum frequency the control loop can track.
+      *
+      * \param freq    (float) new max frequency
+      */
+      void set_max_freq(float freq);
 
-       /*!
-        * \brief Set the control loop's maximum frequency.
-        *
-        * \details
-        * Set the maximum frequency the control loop can track.
-        *
-        * \param freq    (float) new max frequency
-        */
-       void set_max_freq(float freq);
+      /*!
+      * \brief Set the control loop's minimum frequency.
+      *
+      * \details
+      * Set the minimum frequency the control loop can track.
+      *
+      * \param freq    (float) new min frequency
+      */
+      void set_min_freq(float freq);
 
-       /*!
-        * \brief Set the control loop's minimum frequency.
-        *
-        * \details
-        * Set the minimum frequency the control loop can track.
-        *
-        * \param freq    (float) new min frequency
-        */
-       void set_min_freq(float freq);
-
-       /*******************************************************************
-        * GET FUNCTIONS
-        *******************************************************************/
+      /*******************************************************************
+      * GET FUNCTIONS
+      *******************************************************************/
 
       int get_order() const;
 
@@ -238,30 +251,26 @@ namespace gr {
       /*!
       * \brief Get the control loop's frequency estimate.
       */
-
       double get_Coeff4_2() const;
 
       /*!
       * \brief Get the control loop's frequency estimate.
       */
-
       double get_Coeff1_3() const;
 
       /*!
       * \brief Get the control loop's frequency estimate.
       */
-
       double get_Coeff2_3() const;
 
       /*!
       * \brief Get the control loop's frequency estimate.
       */
-
       double get_Coeff3_3() const;
 
       /*!
-       * \brief Get the control loop's frequency estimate.
-       */
+      * \brief Get the control loop's frequency estimate.
+      */
       float get_frequency() const;
 
       /*!
