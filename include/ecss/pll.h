@@ -56,7 +56,7 @@ namespace gr {
         * \param max_freq maximum value of frequency that PLL can catch.
         * \param min_freq minimum value of frequency that PLL can catchl.
        */
-      static sptr make(int samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float max_freq, float min_freq);
+      static sptr make(int samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float freq_central, float bw);
 
 
       virtual void set_order(int order) = 0;
@@ -69,8 +69,8 @@ namespace gr {
       virtual void set_Coeff3_3(double Coeff3_3) = 0;
       virtual void set_frequency(float freq) = 0;
       virtual void set_phase(float phase) = 0;
-      virtual void set_min_freq(float freq) = 0;
-      virtual void set_max_freq(float freq) = 0;
+      virtual void set_freq_central(float freq) = 0;
+      virtual void set_bw(float bw) = 0;
 
       virtual int get_order() const = 0;
       virtual double get_Coeff1_2() const = 0;
@@ -81,8 +81,8 @@ namespace gr {
       virtual double get_Coeff3_3() const = 0;
       virtual float get_frequency() const = 0;
       virtual float get_phase() const = 0;
-      virtual float get_min_freq() const = 0;
-      virtual float get_max_freq() const = 0;
+      virtual float get_freq_central() const = 0;
+      virtual float get_bw() const = 0;
     };
 
   } // namespace ecss

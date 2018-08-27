@@ -39,10 +39,10 @@ namespace gr {
 
 
     pll::sptr
-    pll::make(int samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float max_freq, float min_freq)
+    pll::make(int samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float freq_central, float bw)
     {
       return gnuradio::get_initial_sptr
-        (new pll_impl(samp_rate, order, N, Coeff1_2, Coeff2_2, Coeff4_2, Coeff1_3, Coeff2_3, Coeff3_3, max_freq, min_freq));
+        (new pll_impl(samp_rate, order, N, Coeff1_2, Coeff2_2, Coeff4_2, Coeff1_3, Coeff2_3, Coeff3_3, freq_central, bw));
     }
 
     /*
@@ -50,30 +50,24 @@ namespace gr {
      */
     static int ios[] = {sizeof(gr_complex), sizeof(float), sizeof(float), sizeof(int64_t)};
     static std::vector<int> iosig(ios, ios+sizeof(ios)/sizeof(int));
-    pll_impl::pll_impl(int samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float max_freq, float min_freq)
+    pll_impl::pll_impl(int samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float freq_central, float bw)
       : gr::sync_block("pll",
             gr::io_signature::make(1, 1, sizeof(gr_complex)),
             gr::io_signature::makev(4, 4, iosig)),
             d_order(order), d_N(N), d_integer_phase(0), d_integer_phase_denormalized(0),
-            branch_2_3_max(max_freq / d_samp_rate * M_TWOPI), branch_2_3_min(min_freq / d_samp_rate * M_TWOPI),
+            branch_2_3_max((freq_central / d_samp_rate * M_TWOPI) + bw), branch_2_3_min((freq_central / d_samp_rate * M_TWOPI) - bw),
             branch_3_par(0), branch_2_3_par(0), branch_2_3(0), d_samp_rate(samp_rate),
             d_Coeff1_2(Coeff1_2), d_Coeff2_2(Coeff2_2), d_Coeff4_2(Coeff4_2),
-            d_Coeff1_3(Coeff1_3), d_Coeff2_3(Coeff2_3), d_Coeff3_3(Coeff3_3)
+            d_Coeff1_3(Coeff1_3), d_Coeff2_3(Coeff2_3), d_Coeff3_3(Coeff3_3),
+            d_freq_central(freq_central), d_bw(bw)
           {
-            if(N < 0 || N > 52) {
-              throw std::out_of_range ("pll: invalid number of bits. Must be in [0, 52].");
-            }
-            d_N = N;
-            precision = pow(2,(- (N - 1)));
-            // Set the bandwidth, which will then call update_gains()
+            set_N(N);
             set_Coeff1_2(Coeff1_2);
             set_Coeff2_2(Coeff2_2);
             set_Coeff4_2(Coeff4_2);
             set_Coeff1_3(Coeff1_3);
             set_Coeff2_3(Coeff2_3);
             set_Coeff3_3(Coeff3_3);
-            set_max_freq(max_freq);
-            set_min_freq(min_freq);
             set_order(order);
           }
 
@@ -81,7 +75,7 @@ namespace gr {
      * Our virtual destructor.
      */
     pll_impl::~pll_impl()
-    {    }
+    {}
 
     double
     pll_impl::mod_2pi(double in)
@@ -129,13 +123,13 @@ namespace gr {
 
       std::vector<tag_t> tags;
 
-      get_tags_in_window( // Note the different method name
-          tags, // Tags will be saved here
-          0, // Port 0
-          0, // Start of range (relative to nitems_read(0))
-          noutput_items, // End of relative range
-          pmt::mp("reset") // Optional: Only find tags with key "my_tag_key"
-      );
+      // get_tags_in_window( // Note the different method name
+      //     tags, // Tags will be saved here
+      //     0, // Port 0
+      //     0, // Start of range (relative to nitems_read(0))
+      //     noutput_items, // End of relative range
+      //     pmt::mp("reset") // Optional: Only find tags with key "my_tag_key"
+      // );
 
       if (tags.size()>0) { //debug
         std::cout << "tags size: " << tags.size() << '\n';
@@ -145,18 +139,17 @@ namespace gr {
 
       for(int i = 0; i < noutput_items; i++) {
 
-       // get_tags_in_window( // Note the different method name
-       //     tags, // Tags will be saved here
-       //     0, // Port 0
-       //     i, // Start of range (relative to nitems_read(0))
-       //     (i + 1), // End of relative range
-       //     pmt::mp("reset") // Optional: Only find tags with key "my_tag_key"
-       // );
+         get_tags_in_window( // Note the different method name
+             tags, // Tags will be saved here
+             0, // Port 0
+             i, // Start of range (relative to nitems_read(0))
+             (i + 1), // End of relative range
+             pmt::mp("reset") // Optional: Only find tags with key "my_tag_key"
+         );
 
-       // if (tags.size() > 0) {
-       //   std::cout << tags[0]. << '\n';
-       // }
-
+         // if (tags.size() > 0) {
+         //   std::cout << tags[0]. << '\n';
+         // }
 
         phase_accumulator[i] = d_integer_phase;
         gr::sincos(d_integer_phase_denormalized, &t_imag, &t_real);
@@ -238,6 +231,16 @@ namespace gr {
     /*******************************************************************
      * SET FUNCTIONS
      *******************************************************************/
+
+    void
+    pll_impl::set_N(int N)
+    {
+      if(N < 0 || N > 52) {
+        throw std::out_of_range ("pll: invalid number of bits. Must be in [0, 52].");
+      }
+      d_N = N;
+      precision = pow(2,(- (N - 1)));
+    }
 
     void
     pll_impl::set_order(int order)
@@ -328,15 +331,19 @@ namespace gr {
     }
 
     void
-    pll_impl::set_max_freq(float freq)
+    pll_impl::set_freq_central(float freq)
     {
-      branch_2_3_max = freq / d_samp_rate * M_TWOPI;
+      d_freq_central = freq;
+      branch_2_3_max = (freq / d_samp_rate * M_TWOPI) + d_bw;
+      branch_2_3_min = (freq / d_samp_rate * M_TWOPI) - d_bw;
     }
 
     void
-    pll_impl::set_min_freq(float freq)
+    pll_impl::set_bw(float bw)
     {
-      branch_2_3_min = freq / d_samp_rate * M_TWOPI;
+      d_bw = bw;
+      branch_2_3_max = (d_freq_central / d_samp_rate * M_TWOPI) + bw;
+      branch_2_3_min = (d_freq_central / d_samp_rate * M_TWOPI) - bw;
     }
 
     /*******************************************************************
@@ -399,15 +406,15 @@ namespace gr {
     }
 
     float
-    pll_impl::get_max_freq() const
+    pll_impl::get_freq_central() const
     {
-      return branch_2_3_max * d_samp_rate / M_TWOPI;
+      return d_freq_central;
     }
 
     float
-    pll_impl::get_min_freq() const
+    pll_impl::get_bw() const
     {
-      return branch_2_3_min * d_samp_rate / M_TWOPI;
+      return d_bw;
     }
 
   } /* namespace ecss */

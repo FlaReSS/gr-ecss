@@ -4,7 +4,7 @@
   <key>ecss_pll</key>
   <category>[ecss]</category>
   <import>import ecss</import>
-  <make>ecss.pll($samp_rate, $order, $N, $Coeff1_2, $Coeff2_2, $Coeff4_2, $Coeff1_3, $Coeff2_3, $Coeff3_3, $max_freq, $min_freq)</make>
+  <make>ecss.pll($samp_rate, $order, $N, $Coeff1_2, $Coeff2_2, $Coeff4_2, $Coeff1_3, $Coeff2_3, $Coeff3_3, $freq_central, $bw)</make>
   <callback>set_order($order)</callback>
   <callback>set_Coeff1_2($Coeff1_2)</callback>
   <callback>set_Coeff2_2($Coeff2_2)</callback>
@@ -12,8 +12,8 @@
   <callback>set_Coeff1_3($Coeff1_3)</callback>
   <callback>set_Coeff2_3($Coeff_3)</callback>
   <callback>set_Coeff3_3($Coeff3_3)</callback>
-  <callback>set_max_freq($max_freq)</callback>
-  <callback>set_min_freq($min_freq)</callback>
+  <callback>set_fre_central($freq_central)</callback>
+  <callback>set_bw($bw)</callback>
   <param>
     <name>sample rate</name>
     <key>samp_rate</key>
@@ -60,13 +60,13 @@
     <type>real</type>
   </param>
   <param>
-    <name>Max Freq</name>
-    <key>max_freq</key>
+    <name>Frequecy central</name>
+    <key>freq_central</key>
     <type>real</type>
   </param>
   <param>
-    <name>Min Freq</name>
-    <key>min_freq</key>
+    <name>Bandwidth</name>
+    <key>bw</key>
     <type>real</type>
   </param>
 

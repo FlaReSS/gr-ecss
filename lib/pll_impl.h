@@ -34,10 +34,11 @@ namespace gr {
       int d_order;
       int64_t d_integer_phase;
       double d_integer_phase_denormalized;
-      double  precision;
+      double precision;
       double d_Coeff1_2, d_Coeff2_2, d_Coeff4_2;
       double d_Coeff1_3, d_Coeff2_3, d_Coeff3_3;
       double branch_3_par, branch_2_3_par, branch_2_3;
+      double d_freq_central, d_bw;
       double branch_2_3_max, branch_2_3_min;
 
       double mod_2pi(double in);
@@ -47,7 +48,7 @@ namespace gr {
       double magnitude(gr_complexd sample);
 
 
-      pll_impl(int samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float max_freq, float min_freq);
+      pll_impl(int samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float freq_central, float bw);
       ~pll_impl();
 
       int work (int noutput_items,
@@ -97,6 +98,17 @@ namespace gr {
       /*******************************************************************
       * SET FUNCTIONS
       *******************************************************************/
+      /*!
+       * \brief Set the precision of the PLL.
+       *
+       * \details
+       * Sets the internal number of bits.
+       *
+       * This value is set only at the start
+       *
+       * \param order    (int) new number of bits
+       */
+      void set_N(int N);
 
       /*!
        * \brief Set the loop filter order.
@@ -223,7 +235,7 @@ namespace gr {
       *
       * \param freq    (float) new max frequency
       */
-      void set_max_freq(float freq);
+      void set_freq_central(float freq);
 
       /*!
       * \brief Set the control loop's minimum frequency.
@@ -233,7 +245,7 @@ namespace gr {
       *
       * \param freq    (float) new min frequency
       */
-      void set_min_freq(float freq);
+      void set_bw(float bw);
 
       /*******************************************************************
       * GET FUNCTIONS
@@ -281,12 +293,12 @@ namespace gr {
       /*!
       * \brief Get the control loop's maximum frequency.
       */
-      float get_max_freq() const;
+      float get_freq_central() const;
 
       /*!
       * \brief Get the control loop's minimum frequency.
       */
-      float get_min_freq() const;
+      float get_bw() const;
       };
 
 

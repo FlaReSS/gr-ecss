@@ -123,9 +123,9 @@ namespace gr {
 
         fft(d_fbuf, d_residbuf, d_fftsize);
 
-        memcpy(central_band, &d_fbuf[central_first_items], sizeof(float)*bw_items);
-        memcpy(right_band, &d_fbuf[right_first_items], sizeof(float)*bw_items);
-        memcpy(left_band, &d_fbuf[left_first_items], sizeof(float)*bw_items);
+        memcpy(central_band, &d_fbuf[central_first_items], sizeof(float) * bw_items);
+        memcpy(right_band, &d_fbuf[right_first_items], sizeof(float) * bw_items);
+        memcpy(left_band, &d_fbuf[left_first_items], sizeof(float) * bw_items);
 
         volk_32f_accumulator_s32f(central_band_acc, central_band, bw_items);
         volk_32f_accumulator_s32f(right_band_acc, right_band, bw_items);
