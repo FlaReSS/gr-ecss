@@ -55,7 +55,7 @@ namespace gr {
             gr::io_signature::make(1, 1, sizeof(gr_complex)),
             gr::io_signature::makev(4, 4, iosig)),
             d_order(order), d_N(N), d_integer_phase(0), d_integer_phase_denormalized(0),
-            branch_2_3_max((freq_central / d_samp_rate * M_TWOPI) + bw), branch_2_3_min((freq_central / d_samp_rate * M_TWOPI) - bw),
+            branch_2_3_max(((freq_central + (bw / 2)) * M_TWOPI )/ d_samp_rate), branch_2_3_min(((freq_central - (bw / 2)) * M_TWOPI) / d_samp_rate),
             branch_3_par(0), branch_2_3_par(0), branch_2_3(0), d_samp_rate(samp_rate),
             d_Coeff1_2(Coeff1_2), d_Coeff2_2(Coeff2_2), d_Coeff4_2(Coeff4_2),
             d_Coeff1_3(Coeff1_3), d_Coeff2_3(Coeff2_3), d_Coeff3_3(Coeff3_3),
@@ -221,9 +221,17 @@ namespace gr {
     pll_impl::frequency_limit(double step)
     {
       if(branch_2_3 > branch_2_3_max)
+      {
+        branch_2_3 = branch_2_3_max;
         return branch_2_3_max;
+      }
+
+
       else if(branch_2_3 < branch_2_3_min)
-            return branch_2_3_min;
+            {
+              branch_2_3 = branch_2_3_min;
+              return branch_2_3_min;
+            }
           else
             return step;
     }
@@ -334,16 +342,16 @@ namespace gr {
     pll_impl::set_freq_central(float freq)
     {
       d_freq_central = freq;
-      branch_2_3_max = (freq / d_samp_rate * M_TWOPI) + d_bw;
-      branch_2_3_min = (freq / d_samp_rate * M_TWOPI) - d_bw;
+      branch_2_3_max = ((freq + (d_bw / 2)) * M_TWOPI) / d_samp_rate;
+      branch_2_3_min = ((freq - (d_bw / 2)) * M_TWOPI) / d_samp_rate;
     }
 
     void
     pll_impl::set_bw(float bw)
     {
       d_bw = bw;
-      branch_2_3_max = (d_freq_central / d_samp_rate * M_TWOPI) + bw;
-      branch_2_3_min = (d_freq_central / d_samp_rate * M_TWOPI) - bw;
+      branch_2_3_max = ((d_freq_central + (bw / 2)) * M_TWOPI) / d_samp_rate;
+      branch_2_3_min = ((d_freq_central - (bw / 2)) * M_TWOPI) / d_samp_rate;
     }
 
     /*******************************************************************

@@ -164,7 +164,7 @@ def plot(self, data_pll):
     self.pdf.add_to_pdf(fig)
 
 def print_parameters(data):
-    to_print = "\p Order= %d; Coeff1 (2nd order)= %f; Coeff2 (2nd order)= %f; Coeff4 (2nd order)= %f; Coeff1 (3rd order)= %f; Coeff2 (3rd order)= %f; Coeff3 (3rd order)= %f; f_central= %.2f; bw= %.2f; Sample rate = %d; Input frequency = %d; Input noise = %.2f \p" \
+    to_print = "\p Order = %d; Coeff1 (2nd order) = %f; Coeff2 (2nd order) = %f; Coeff4 (2nd order) = %f; Coeff1 (3rd order) = %f; Coeff2 (3rd order) = %f; Coeff3 (3rd order) = %f; Frequency central = %.2fHz; Bandwidth = %.2fHz; Sample rate = %dHz; Input frequency = %dHz; Input noise = %.2fV \p" \
         %(data.order, data.coeff1_2, data.coeff2_2, data.coeff2_4, data.coeff1_3, data.coeff2_3, data.coeff3_3, data.f_central, data.bw, data.samp_rate, data.freq, data.noise)
     print to_print
 
@@ -226,14 +226,10 @@ def test_fft(self, data):
     cnr_src = dst_source_cnr.data()
     cnr_out = dst_pll_out_cnr.data()
 
-    print len(out)
-
-    # data_fft.src = src[(data.items - (data.fft_size / 2)) : data.items] + src[(data.items - data.fft_size) : (data.items - (data.fft_size / 2))]
-    # data_fft.out = out[(data.items - (data.fft_size / 2)) : data.items] + out[(data.items - data.fft_size) : (data.items - (data.fft_size / 2))]
     data_fft.src = src[(data.fft_size / 2) : data.fft_size] + src[0 : (data.fft_size / 2)]
-    data_fft.out = out[data.items - (data.fft_size / 2) : data.items] + out[data.items - data.fft_size : data.items - (data.fft_size / 2)]
-    data_fft.cnr_src = cnr_src[-1]
-    data_fft.cnr_out = cnr_out[-1]
+    data_fft.out = out[data.items - (data.fft_size / 2) : data.items] + out[data.items - data.fft_size : data.items - (data.fft_size / 2)] #take the last fft_size elements
+    data_fft.cnr_src = cnr_src[-1] #take the last element
+    data_fft.cnr_out = cnr_out[-1] #take the last element
     data_fft.bins = np.linspace(- (data.samp_rate / 2.0), (data.samp_rate / 2.0), data.fft_size, endpoint=True)
 
     return data_fft
@@ -299,38 +295,100 @@ class qa_pll (gr_unittest.TestCase):
         self.pdf.finalize_pdf()
 
     def test_001_t (self):
-        """Test 1 """
+        """test_001_t"""
         param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
 
         param.order = 2
-        param.coeff1_2 = 0.1
-        param.coeff2_2 = 0.001
+        param.coeff1_2 = 0.021
+        param.coeff2_2 = 0.000022
         param.coeff2_4 = 1
-        param.coeff1_3 = 0.01
-        param.coeff2_3 = 0.00001
-        param.coeff3_3 = 0.00000001
+        param.coeff1_3 = 0.0038
+        param.coeff2_3 = 0.000002
+        param.coeff3_3 = 0.0000000009
         param.f_central = 500
         param.bw = 500
         param.N = 38
         param.fft_size = 1024
-        param.samp_rate = 4096
-        param.items = 4096 / 2
+        param.samp_rate = 4096 * 4
+        param.items = 4096 * 16
         param.freq = 500
         param.noise = 0
 
         print_parameters(param)
 
         data_sine = test_sine(self, param)
-        # plot(self,data_sine)
+        plot(self,data_sine)
 
-        param.items = 4096 * 2
+        param.items = 4096 * 16
 
         data_fft = test_fft(self, param)
-        # plot_fft(self,data_fft)
+        plot_fft(self,data_fft)
 
         print "prova"
 
+    def test_002_t (self):
+        """test_002_t"""
+        param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
 
+        param.order = 2
+        param.coeff1_2 = 0.021
+        param.coeff2_2 = 0.000022
+        param.coeff2_4 = 1
+        param.coeff1_3 = 0.0038
+        param.coeff2_3 = 0.000002
+        param.coeff3_3 = 0.0000000009
+        param.f_central = 500
+        param.bw = 500
+        param.N = 38
+        param.fft_size = 1024
+        param.samp_rate = 4096 * 4
+        param.items = 4096 * 16
+        param.freq = 750
+        param.noise = 0
+
+        print_parameters(param)
+
+        data_sine = test_sine(self, param)
+        plot(self,data_sine)
+
+        param.items = 4096 * 8
+
+        data_fft = test_fft(self, param)
+        plot_fft(self,data_fft)
+
+        print "prova"
+
+    def test_003_t (self):
+        """test_003_t"""
+        param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
+
+        param.order = 2
+        param.coeff1_2 = 0.021
+        param.coeff2_2 = 0.000022
+        param.coeff2_4 = 1
+        param.coeff1_3 = 0.0038
+        param.coeff2_3 = 0.000002
+        param.coeff3_3 = 0.0000000009
+        param.f_central = 500
+        param.bw = 500
+        param.N = 38
+        param.fft_size = 1024
+        param.samp_rate = 4096 * 4
+        param.items = 4096 * 16
+        param.freq = 1100
+        param.noise = 0
+
+        print_parameters(param)
+
+        data_sine = test_sine(self, param)
+        plot(self,data_sine)
+
+        param.items = 4096 * 16
+
+        data_fft = test_fft(self, param)
+        plot_fft(self,data_fft)
+
+        print "prova"
 
 
 if __name__ == '__main__':
