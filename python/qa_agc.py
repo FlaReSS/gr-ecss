@@ -24,7 +24,7 @@ class Pdf_class(object):
 
         if not os.path.exists(dir_to):
             os.makedirs(dir_to)
-
+        self.name_test = name_test.split('.')[0]
         self.name_complete = dir_to + '/' + name_test.split('.')[0] + "_graphs.pdf"
 
     def add_to_pdf(self, fig):
@@ -42,11 +42,11 @@ class Pdf_class(object):
                 pdf.savefig(graph)   #write the figures for that list
 
             d = pdf.infodict()
-            d['Title'] = 'Multipage PDF Example'
-            d['Author'] = u'Jouni K. Sepp\xe4nen'
-            d['Subject'] = 'How to create a multipage pdf file and set its metadata'
-            d['Keywords'] = 'PdfPages multipage keywords author title subject'
-            d['CreationDate'] = datetime.datetime(2009, 11, 13)
+            d['Title'] = self.name_test
+            d['Author'] = 'Antonio Miraglia - ISISpace'
+            d['Subject'] = 'self generated graphs from the qa test'
+            d['Keywords'] = self.name_test
+            d['CreationDate'] = datetime.datetime(2018, 8, 21)
             d['ModDate'] = datetime.datetime.today()
 
 class Test_parameters:
@@ -74,6 +74,8 @@ class Test_parameters:
 def plot(name_test, d1, d2, d3, d4, t, reference, error, zero, settling_time, pdf):
     """this function create a defined graph with the data inputs"""
 
+    plt.rcParams['text.usetex'] = True
+
     data1 = np.asarray(d1)
     data2 = np.asarray(d2)
     data3 = np.asarray(d3)
@@ -100,7 +102,7 @@ def plot(name_test, d1, d2, d3, d4, t, reference, error, zero, settling_time, pd
     ax2.tick_params(axis='y', labelcolor='blue')
 
     ax3.set_xlabel('Time [s]')
-    ax3.set_ylabel('Amplitude [V]', color='r')
+    ax3.set_ylabel ('Amplitude [V]', color='r')
     ax3.set_title("Input", fontsize=20)
     ax3.plot(time, data3, color='r', scalex=True, scaley=True)
     ax3.tick_params(axis='y', labelcolor='red')
@@ -153,12 +155,12 @@ def transient_evaluation(name_test,data_in, data_out, data, error, time_error_me
             end = i
 
         #for the graphs
-        if ((i >= (start - data.sampling_freq * 0.01 + 1)) and ((i <= (start - 1 + data.sampling_freq * 0.05)) or (found == True))):
-            time.append(i*1.0 / data.sampling_freq)
-            out_real.append(data_out[i].real)
-            out_rms.append(rms_out)
-            in_real.append(data_in[i].real)
-            in_rms.append(rms_in)
+        #if ((i >= (start - data.sampling_freq * 0.01 + 1)) and ((i <= (start - 1 + data.sampling_freq * 0.05)) or (found == True))):
+        time.append(i*1.0 / data.sampling_freq)
+        out_real.append(data_out[i].real)
+        out_rms.append(rms_out)
+        in_real.append(data_in[i].real)
+        in_rms.append(rms_in)
 
         # error percentage after the settling time up to the end
         if ( i >= (len(data_in) - data.sampling_freq * time_error_measure)):
@@ -223,7 +225,10 @@ def test_sine(self, tb, data):
 
     tb.connect(head, dst_source)
 
-    self.tb.run()
+    self.tb.start()
+    time.sleep(0.5)
+    src_sine.set_frequency(10)
+    self.tb.stop()
 
     data_in = dst_source.data()
     data_out = dst_agc.data()
@@ -232,7 +237,7 @@ def test_sine(self, tb, data):
 class qa_agc (gr_unittest.TestCase):
 
     #numeber of tests generated in the cycle (should be used a number whose square root is an even integer)
-    NUM_TESTS = 7
+    NUM_TESTS = 1
 
     global_self = gr_unittest.TestCase
     data = []

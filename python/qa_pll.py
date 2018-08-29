@@ -6,7 +6,7 @@
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
-from gnuradio import fft
+from gnuradio.fft import logpwrfft
 from collections import namedtuple
 from gnuradio.fft import window
 import ecss_swig as ecss
@@ -17,8 +17,83 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-def plot(data_pll):
-# def plot(name_test, data_pll, pdf):
+class Pdf_class(object):
+    """this class can print a single pdf for all the tests"""
+
+    graphs_list = []
+
+    def __init__(self, name_test='test'):
+        current_dir = os.getcwd()
+        dir_to = os.path.join(current_dir, 'Graphs')
+
+        if not os.path.exists(dir_to):
+            os.makedirs(dir_to)
+        self.name_test = name_test.split('.')[0]
+        self.name_complete = dir_to + '/' + name_test.split('.')[0] + "_graphs.pdf"
+
+    def add_to_pdf(self, fig):
+        """this function can add a new element/page to the list of pages"""
+
+        fig_size = [21 / 2.54, 29.7 / 2.54] # width in inches & height in inches
+        fig.set_size_inches(fig_size)
+        Pdf_class.graphs_list.append(fig)
+
+    def finalize_pdf(self):
+        """this function print the final version of the pdf with all the pages"""
+
+        with PdfPages(self.name_complete) as pdf:
+            for graph in Pdf_class.graphs_list:
+                pdf.savefig(graph)   #write the figures for that list
+
+            d = pdf.infodict()
+            d['Title'] = self.name_test
+            d['Author'] = 'Antonio Miraglia - ISISpace'
+            d['Subject'] = 'self generated graphs from the qa test'
+            d['Keywords'] = self.name_test
+            d['CreationDate'] = datetime.datetime(2018, 8, 21)
+            d['ModDate'] = datetime.datetime.today()
+
+
+def plot_fft(self, data_fft):
+    """this function create a defined graph with the data inputs"""
+
+    plt.rcParams['text.usetex'] = True
+
+    src = np.asarray(data_fft.src)
+    out = np.asarray(data_fft.out)
+    bins = np.asarray(data_fft.bins)
+
+    fig, (ax1, ax2) = plt.subplots(2)
+
+    ax1.set_xlabel('Frequency [Hz]')
+    ax1.set_ylabel('Power [dB]', color='r')
+    ax1.set_title("Output PLL",  fontsize=20)
+    ax1.plot(bins, out, color='r', scalex=True, scaley=True)
+    ax1.text(0.99,0.98,"CNR: %.2fdB" %(data_fft.cnr_out), horizontalalignment='right', verticalalignment='top',color='m',transform=ax1.transAxes)
+    ax1.tick_params(axis='y', labelcolor='red')
+    ax1.grid(True)
+
+    ax2.set_xlabel('Frequency [Hz]')
+    ax2.set_ylabel('Power [dB]', color='r')
+    ax2.set_title("Input PLL",  fontsize=20)
+    ax2.plot(bins, src, color='r', scalex=True, scaley=True)
+    ax2.text(0.99,0.98,"CNR: %.2fdB" %(data_fft.cnr_src), horizontalalignment='right', verticalalignment='top',color='m',transform=ax2.transAxes)
+    ax2.tick_params(axis='y', labelcolor='red')
+    ax2.grid(True)
+
+    name_test = self.id().split("__main__.")[1]
+    name_test_usetex = name_test.replace('_', '\_').replace('.', ': ')
+
+    fig.suptitle(name_test_usetex, fontsize=30)
+    fig.tight_layout()  # otherwise the right y-label is slightly clipped
+    fig.subplots_adjust(hspace=0.6, top=0.85, bottom=0.15)
+    # plt.legend((l1, l2, l3), ('error range', 'settling time range', 'settling time'), loc='lower center', bbox_to_anchor=(0.5, -0.5), fancybox=True, shadow=True, ncol=3)
+
+    # plt.show()
+    self.pdf.add_to_pdf(fig)
+
+
+def plot(self, data_pll):
     """this function create a defined graph with the data inputs"""
 
     plt.rcParams['text.usetex'] = True
@@ -36,10 +111,6 @@ def plot(data_pll):
     pe = np.asarray(data_pll.pe)
     pa = np.asarray(data_pll.pa)
     time = np.asarray(data_pll.time)
-
-    print freq
-
-    print "bvgbtqaevgfbtaevgf"
 
     fig, (ax1, ax3, ax4, ax5) = plt.subplots(4)
 
@@ -75,25 +146,97 @@ def plot(data_pll):
     ax4.grid(True)
 
     ax5.set_xlabel('Time [s]')
-    ax5.set_ylabel ('Phase accumulator', color='r')
+    ax5.set_ylabel ('Phase Accumulator', color='r')
     ax5.set_title("pa", fontsize=20)
     ax5.plot(time, pa, color='r', scalex=True, scaley=True)
     ax5.tick_params(axis='y', labelcolor='red')
     ax5.grid(True)
 
+    name_test = self.id().split("__main__.")[1]
+    name_test_usetex = name_test.replace('_', '\_').replace('.', ': ')
 
-    # fig.suptitle(name_test.split('.')[1], fontsize=30)
+    fig.suptitle(name_test_usetex, fontsize=30)
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
     fig.subplots_adjust(hspace=0.6, top=0.85, bottom=0.15)
     # plt.legend((l1, l2, l3), ('error range', 'settling time range', 'settling time'), loc='lower center', bbox_to_anchor=(0.5, -0.5), fancybox=True, shadow=True, ncol=3)
 
-    plt.show()
-    # pdf.add_to_pdf(fig)
+    # plt.show()
+    self.pdf.add_to_pdf(fig)
 
 def print_parameters(data):
-    to_print = "\p Order= %d, Coeff1 (2nd order)= %f, Coeff2 (2nd order)= %f, Coeff4 (2nd order)= %f, Coeff1 (3rd order)= %f, Coeff2 (3rd order)= %f, Coeff3 (3rd order)= %f, Sample rate = %d, Input frequency = %d, Input noise = %f \p" \
-        %(data.order, data.coeff1_2, data.coeff2_2, data.coeff2_4, data.coeff1_3, data.coeff2_3, data.coeff3_3, data.samp_rate, data.freq, data.noise)
-    return to_print
+    to_print = "\p Order= %d; Coeff1 (2nd order)= %f; Coeff2 (2nd order)= %f; Coeff4 (2nd order)= %f; Coeff1 (3rd order)= %f; Coeff2 (3rd order)= %f; Coeff3 (3rd order)= %f; f_central= %.2f; bw= %.2f; Sample rate = %d; Input frequency = %d; Input noise = %.2f \p" \
+        %(data.order, data.coeff1_2, data.coeff2_2, data.coeff2_4, data.coeff1_3, data.coeff2_3, data.coeff3_3, data.f_central, data.bw, data.samp_rate, data.freq, data.noise)
+    print to_print
+
+def test_fft(self, data):
+    """this function run the defined test, for easier understanding"""
+
+    tb = self.tb
+    data_fft = namedtuple('data_fft', 'src out cnr_src cnr_out bins')
+
+    amplitude = 1
+    offset = 0
+
+    src_sine = analog.sig_source_c(data.samp_rate, analog.GR_SIN_WAVE, data.freq, amplitude, offset)
+    src_noise = analog.noise_source_c(analog.GR_GAUSSIAN, data.noise, offset)
+
+    adder = blocks.add_vcc(1)
+    throttle = blocks.throttle(gr.sizeof_gr_complex*1, data.samp_rate,True)
+    head = blocks.head(gr.sizeof_gr_complex, int (data.items))
+
+    logpwrfft_src = logpwrfft.logpwrfft_c( sample_rate=data.samp_rate, fft_size=data.fft_size, ref_scale=2, frame_rate=30, avg_alpha=0.1, average=False)
+    logpwrfft_out = logpwrfft.logpwrfft_c( sample_rate=data.samp_rate, fft_size=data.fft_size, ref_scale=2, frame_rate=30, avg_alpha=0.1, average=False)
+    cnr_src = flaress.snr(True, data.samp_rate, data.fft_size, data.bw, (data.bw * 10))
+    cnr_out = flaress.snr(True, data.samp_rate, data.fft_size, data.bw, (data.bw * 10))
+
+    dst_source_fft = blocks.vector_sink_f(data.fft_size)
+    dst_pll_out_fft = blocks.vector_sink_f(data.fft_size, data.items)
+    dst_source_cnr = blocks.vector_sink_f()
+    dst_pll_out_cnr = blocks.vector_sink_f()
+    dst_null_freq = blocks.null_sink(gr.sizeof_float*1)
+    dst_null_pe = blocks.null_sink(gr.sizeof_float*1)
+    dst_null_pa = blocks.null_sink(flaress.sizeof_long*1)
+
+    pll = ecss.pll(data.samp_rate, data.order, data.N, data.coeff1_2, data.coeff2_2, data.coeff2_4, data.coeff1_3, data.coeff2_3, data.coeff3_3, data.f_central, data.bw)
+
+    tb.connect(src_sine, (adder, 0))
+    tb.connect(src_noise,(adder, 1))
+    tb.connect(adder, throttle)
+    tb.connect(throttle, head)
+
+    tb.connect(head, logpwrfft_src)
+    tb.connect(logpwrfft_src, dst_source_fft)
+    tb.connect(logpwrfft_src, cnr_src)
+    tb.connect(cnr_src, dst_source_cnr)
+
+    tb.connect(head, pll)
+    tb.connect((pll, 0), logpwrfft_out)
+    tb.connect(logpwrfft_out, dst_pll_out_fft)
+    tb.connect(logpwrfft_out, cnr_out)
+    tb.connect(cnr_out, dst_pll_out_cnr)
+
+    tb.connect((pll, 1), dst_null_freq)
+    tb.connect((pll, 2), dst_null_pe)
+    tb.connect((pll, 3), dst_null_pa)
+
+    self.tb.run()
+
+    src = dst_source_fft.data()
+    out = dst_pll_out_fft.data()
+    cnr_src = dst_source_cnr.data()
+    cnr_out = dst_pll_out_cnr.data()
+
+    print len(out)
+
+    # data_fft.src = src[(data.items - (data.fft_size / 2)) : data.items] + src[(data.items - data.fft_size) : (data.items - (data.fft_size / 2))]
+    # data_fft.out = out[(data.items - (data.fft_size / 2)) : data.items] + out[(data.items - data.fft_size) : (data.items - (data.fft_size / 2))]
+    data_fft.src = src[(data.fft_size / 2) : data.fft_size] + src[0 : (data.fft_size / 2)]
+    data_fft.out = out[data.items - (data.fft_size / 2) : data.items] + out[data.items - data.fft_size : data.items - (data.fft_size / 2)]
+    data_fft.cnr_src = cnr_src[-1]
+    data_fft.cnr_out = cnr_out[-1]
+    data_fft.bins = np.linspace(- (data.samp_rate / 2.0), (data.samp_rate / 2.0), data.fft_size, endpoint=True)
+
+    return data_fft
 
 def test_sine(self, data):
     """this function run the defined test, for easier understanding"""
@@ -145,19 +288,19 @@ def test_sine(self, data):
     return data_pll
 
 
-
-
 class qa_pll (gr_unittest.TestCase):
 
     def setUp (self):
         self.tb = gr.top_block ()
+        self.pdf = Pdf_class(self.id().split(".")[1])
 
     def tearDown (self):
         self.tb = None
+        self.pdf.finalize_pdf()
 
     def test_001_t (self):
         """Test 1 """
-        param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N freq noise')
+        param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
 
         param.order = 2
         param.coeff1_2 = 0.1
@@ -169,19 +312,29 @@ class qa_pll (gr_unittest.TestCase):
         param.f_central = 500
         param.bw = 500
         param.N = 38
-        param.samp_rate = 4192
-        param.items = 4192 / 3
+        param.fft_size = 1024
+        param.samp_rate = 4096
+        param.items = 4096 / 2
         param.freq = 500
         param.noise = 0
 
-        data_out = test_sine(self, param)
-        plot(data_out)
+        print_parameters(param)
+
+        data_sine = test_sine(self, param)
+        # plot(self,data_sine)
+
+        param.items = 4096 * 2
+
+        data_fft = test_fft(self, param)
+        # plot_fft(self,data_fft)
+
+        print "prova"
 
 
 
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_pll)
-    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_1')
+    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_2')
     runner.run(suite)
     #gr_unittest.TestProgram()

@@ -132,7 +132,7 @@ class _HtmlTestResult(_TextTestResult):
             outputs = outputs.split("\p")[2]
             return outputs, parameters
         else:
-            parameters = ""
+            parameters = "no parameters"
             return outputs, parameters
 
     def getDescription(self, test):
@@ -402,7 +402,7 @@ class _HtmlTestResult(_TextTestResult):
         else:
             out_messages = testCase.stdout.decode('latin-1')
 
-        param = testCase.parameters.decode('latin-1')
+        param = testCase.parameters.decode('latin-1').replace(";", ";<br />")
         stack= out_messages.replace("\n", "<br />") + testCase.stderr.decode('latin-1')
 
         status = ('success', 'danger', 'warning', 'info')[testCase.outcome-1]
@@ -413,8 +413,10 @@ class _HtmlTestResult(_TextTestResult):
             error_message = testCase.err[1]
         else:
             error_message = testCase.err
-        if(template == DEFAULT_TEMPLATE_2):
+
+        if(template == 'DEFAULT_TEMPLATE_2'):
             return test_cases_list.append([desc, param, stack, status, error_type, error_message])
+
         else:
             return test_cases_list.append([desc, stack, status, error_type, error_message])
 
