@@ -17,6 +17,79 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
+def plot(data_pll):
+# def plot(name_test, data_pll, pdf):
+    """this function create a defined graph with the data inputs"""
+
+    plt.rcParams['text.usetex'] = True
+    real = []
+    imag = []
+
+    for i in xrange (len(data_pll.out)):
+        real.append(data_pll.out[i].real)
+        imag.append(data_pll.out[i].imag)
+
+    out_re = np.asarray(real)
+    out_im = np.asarray(imag)
+
+    freq = np.asarray(data_pll.freq)
+    pe = np.asarray(data_pll.pe)
+    pa = np.asarray(data_pll.pa)
+    time = np.asarray(data_pll.time)
+
+    print freq
+
+    print "bvgbtqaevgfbtaevgf"
+
+    fig, (ax1, ax3, ax4, ax5) = plt.subplots(4)
+
+    ax1.set_xlabel('Time [s]')
+    ax1.set_ylabel('Real', color='r')
+    ax1.set_title("Out",  fontsize=20)
+    ax1.plot(time, out_re, color='r', scalex=True, scaley=True)
+    # l2 = ax1.axvspan(xmin = (zero + 0.01), xmax = (zero + 0.03), color='m', alpha= 0.1)
+    # l3 = ax1.axvline(x = (zero + settling_time), color='m', linewidth=2, linestyle='--')
+    # ax1.text(0.99,0.01,"Settling time: " + str(settling_time) + "s", horizontalalignment='right', verticalalignment='bottom',color='m',transform=ax1.transAxes)
+    ax1.tick_params(axis='y', labelcolor='red')
+    ax1.grid(True)
+
+    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+
+    ax2.set_ylabel('Imag', color='b')  # we already handled the x-label with ax1
+    ax2.plot(time, out_im, color='b', scalex=True, scaley=True)
+    # l1 = ax2.axhspan(ymin=(reference - error * reference), ymax=(reference + error * reference), color='c', alpha= 0.1)
+    ax2.tick_params(axis='y', labelcolor='blue')
+
+    ax3.set_xlabel('Time [s]')
+    ax3.set_ylabel ('frequency [Hz]', color='r')
+    ax3.set_title("freq", fontsize=20)
+    ax3.plot(time, freq, color='r', scalex=True, scaley=True)
+    ax3.tick_params(axis='y', labelcolor='red')
+    ax3.grid(True)
+
+    ax4.set_xlabel('Time [s]')
+    ax4.set_ylabel ('Phase Error [rad]', color='r')
+    ax4.set_title("pe", fontsize=20)
+    ax4.plot(time, pe, color='r', scalex=True, scaley=True)
+    ax4.tick_params(axis='y', labelcolor='red')
+    ax4.grid(True)
+
+    ax5.set_xlabel('Time [s]')
+    ax5.set_ylabel ('Phase accumulator', color='r')
+    ax5.set_title("pa", fontsize=20)
+    ax5.plot(time, pa, color='r', scalex=True, scaley=True)
+    ax5.tick_params(axis='y', labelcolor='red')
+    ax5.grid(True)
+
+
+    # fig.suptitle(name_test.split('.')[1], fontsize=30)
+    fig.tight_layout()  # otherwise the right y-label is slightly clipped
+    fig.subplots_adjust(hspace=0.6, top=0.85, bottom=0.15)
+    # plt.legend((l1, l2, l3), ('error range', 'settling time range', 'settling time'), loc='lower center', bbox_to_anchor=(0.5, -0.5), fancybox=True, shadow=True, ncol=3)
+
+    plt.show()
+    # pdf.add_to_pdf(fig)
+
 def print_parameters(data):
     to_print = "\p Order= %d, Coeff1 (2nd order)= %f, Coeff2 (2nd order)= %f, Coeff4 (2nd order)= %f, Coeff1 (3rd order)= %f, Coeff2 (3rd order)= %f, Coeff3 (3rd order)= %f, Sample rate = %d, Input frequency = %d, Input noise = %f \p" \
         %(data.order, data.coeff1_2, data.coeff2_2, data.coeff2_4, data.coeff1_3, data.coeff2_3, data.coeff3_3, data.samp_rate, data.freq, data.noise)
@@ -26,7 +99,7 @@ def test_sine(self, data):
     """this function run the defined test, for easier understanding"""
 
     tb = self.tb
-    data_pll = namedtuple('data_pll', 'src out freq pe pa')
+    data_pll = namedtuple('data_pll', 'src out freq pe pa time')
 
     amplitude = 1
     offset = 0
@@ -67,6 +140,7 @@ def test_sine(self, data):
     data_pll.freq = dst_pll_freq.data()
     data_pll.pe = dst_pll_pe.data()
     data_pll.pa = dst_pll_pa.data()
+    data_pll.time = np.linspace(0, (data.items * 1.0 / data.samp_rate), data.items, endpoint=False)
 
     return data_pll
 
@@ -87,30 +161,22 @@ class qa_pll (gr_unittest.TestCase):
 
         param.order = 2
         param.coeff1_2 = 0.1
-        param.coeff2_2= 0.001
-        param.coeff2_4= 1
-        param.coeff1_3= 0.01
-        param.coeff2_3= 0.00001
-        param.coeff3_3= 0.00000001
+        param.coeff2_2 = 0.001
+        param.coeff2_4 = 1
+        param.coeff1_3 = 0.01
+        param.coeff2_3 = 0.00001
+        param.coeff3_3 = 0.00000001
         param.f_central = 500
         param.bw = 500
         param.N = 38
         param.samp_rate = 4192
-        param.items = 4192 * 2
+        param.items = 4192 / 3
         param.freq = 500
         param.noise = 0
 
+        data_out = test_sine(self, param)
+        plot(data_out)
 
-
-        # print get_parameters(data)
-        print "\p weeeeeeee \p"
-
-
-        data = test_sine(self, param)
-
-        self.assertEqual(0, 0)
-
-        print data.pe
 
 
 
