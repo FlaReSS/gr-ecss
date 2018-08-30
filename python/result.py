@@ -394,7 +394,7 @@ class _HtmlTestResult(_TextTestResult):
         """ Return a list with test name or desciption, status and error
             msg if fail or skip. """
         test_name = self._test_method_name(testCase.test_id)
-        test_description = testCase.test_description.replace(";", ";<br />")
+        test_description = testCase.test_description.replace(";", ";<br />").replace(":", ":<br />")
         desc = test_description or test_name
 
         if (testCase.stdout.decode('latin-1').startswith("\n") == True):
@@ -457,7 +457,7 @@ class _HtmlTestResult(_TextTestResult):
 
         html_file = render_html(testRunner.template, title=report_name,
                                 headers=report_headers,
-                                testcase_name=self.testcase_name,
+                                testcase_name="qa_" + self.testcase_name,
                                 description= "",
                                 tests_results=test_cases_list,
                                 total_tests=total_test)

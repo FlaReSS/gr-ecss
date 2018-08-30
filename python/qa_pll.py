@@ -92,9 +92,59 @@ def plot_fft(self, data_fft):
     # plt.show()
     self.pdf.add_to_pdf(fig)
 
+def check_comlex(data_out, real_final, imag_final, error):
+    """this function checks the complex output data from the pll. It checks the time to reach the final value with the expected error (if the output reachs it), and the error/accuracy of the outputs"""
+
+    if (abs(data_out[-1].real - real_final) > abs(error)) or (abs(data_out[-1].imag - imag_final) > abs(error)): #check if is reached the final value at the end
+        return np.inf, np.inf, np.inf
+
+    imag_error_max = 0
+    real_error_max = 0
+
+    for i in reversed(xrange (len(data_out))):
+        if (abs(data_out[i].real - real_final) > abs(real_error_max)):
+            real_error_max = abs(data_out[i].real - real_final)
+
+        if (abs(data_out[i].imag - imag_final) > abs(imag_error_max)):
+            imag_error_max = abs(data_out[i].imag - imag_final)
+
+        if (abs(data_out[i].real - real_final) > abs(error)) or (abs(data_out[i].imag - imag_final) > abs(error)):
+            settling_time_index = i
+            break
+    return settling_time_index, real_error_max, imag_error_max
+
+def check_float(data_out, final, error):
+    """this function checks the float data from the pll. It checks the time to reach the final value with the expected error (if the output reachs it), and the error/accuracy of the outputs"""
+
+    if (abs(data_out[-1] - final) > abs(error)): #check if is reached the final value at the end
+        return np.inf, np.inf
+
+    error_max = 0
+    for i in reversed(xrange (len(data_out))):
+        if (abs(data_out[i] - final) > abs(error_max)):
+            error_max = abs(data_out[i] - final)
+
+        if (abs(data_out[i] - final) > abs(error)):
+            settling_time_index = i
+            break
+    return settling_time_index, error_max
+
+def check_pa(data_out, items):
+    """this function checks the integer phase accumulator output from the pll. evaluates the minimum step and the slope"""
+
+    minimum_step = sys.maxint
+    slope = 0
+    for i in reversed(xrange (len(data_out))):
+        if i > 0:
+            if (abs(data_out[i] - data_out[i - 1]) < abs(minimum_step)):
+                minimum_step = abs(data_out[i] - data_out[i - 1])
+            if (i < (len(data_out) - items - 1)):       #this is only the average on n items
+                slope = ((data_out[i] - data_out[i - 1]) / items) + slope
+
+    return minimum_step, slope
 
 def plot(self, data_pll):
-    """this function create a defined graph with the data inputs"""
+    """this function create a defined graph for the pll with the data input and outputs"""
 
     plt.rcParams['text.usetex'] = True
     real = []
@@ -164,7 +214,7 @@ def plot(self, data_pll):
     self.pdf.add_to_pdf(fig)
 
 def print_parameters(data):
-    to_print = "\p Order = %d; Coeff1 (2nd order) = %f; Coeff2 (2nd order) = %f; Coeff4 (2nd order) = %f; Coeff1 (3rd order) = %f; Coeff2 (3rd order) = %f; Coeff3 (3rd order) = %f; Frequency central = %.2fHz; Bandwidth = %.2fHz; Sample rate = %dHz; Input frequency = %dHz; Input noise = %.2fV \p" \
+    to_print = "\p Order = %d; Coeff1 (2nd order) = %f; Coeff2 (2nd order) = %f; Coeff4 (2nd order) = %f; Coeff1 (3rd order) = %f; Coeff2 (3rd order) = %f; Coeff3 (3rd order) = %f; Frequency central = %.2f Hz; Bandwidth = %.2f Hz; Sample rate = %d Hz; Input frequency = %d Hz; Input noise = %.2f V \p" \
         %(data.order, data.coeff1_2, data.coeff2_2, data.coeff2_4, data.coeff1_3, data.coeff2_3, data.coeff3_3, data.f_central, data.bw, data.samp_rate, data.freq, data.noise)
     print to_print
 
@@ -295,7 +345,7 @@ class qa_pll (gr_unittest.TestCase):
         self.pdf.finalize_pdf()
 
     def test_001_t (self):
-        """test_001_t"""
+        """test_001_t: with a input sine without noise in the central BW of PLL"""
         param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
 
         param.order = 2
@@ -310,7 +360,7 @@ class qa_pll (gr_unittest.TestCase):
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 4
-        param.items = 4096 * 16
+        param.items = 4096 * 2
         param.freq = 500
         param.noise = 0
 
@@ -319,76 +369,121 @@ class qa_pll (gr_unittest.TestCase):
         data_sine = test_sine(self, param)
         plot(self,data_sine)
 
-        param.items = 4096 * 16
+        param.items = 4096 * 2
 
         data_fft = test_fft(self, param)
         plot_fft(self,data_fft)
 
-        print "prova"
+        #check output 'out'
+        out_settling_time_index, out_real_error_max, out_imag_error_max = check_comlex(data_sine.out, 1, 0, 0.1)
+        out_settling_time_ms = (1.0 / param.samp_rate) * out_settling_time_index * 1000.0
+        self.assertLess(out_settling_time_ms, np.inf) #errors are intrinsically asserted
+        print "-Output 'Out' Settling time : %f ms;" % out_settling_time_ms
+        print "-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max
+        print "-Output 'Out' Imag absolute maximum error: %.3f." % out_imag_error_max
 
-    def test_002_t (self):
-        """test_002_t"""
-        param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
+        #check output 'out'
+        pe_settling_time_index, pe_error_max = check_float(data_sine.pe, 0, 0.1)
+        pe_settling_time_ms = (1.0 / param.samp_rate) * pe_settling_time_index * 1000.0
+        self.assertLess(pe_settling_time_ms, np.inf) #errors are intrinsically asserted
+        print "-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms
+        print "-Output 'pe' absolute maximum error: %.3f;" % pe_error_max
 
-        param.order = 2
-        param.coeff1_2 = 0.021
-        param.coeff2_2 = 0.000022
-        param.coeff2_4 = 1
-        param.coeff1_3 = 0.0038
-        param.coeff2_3 = 0.000002
-        param.coeff3_3 = 0.0000000009
-        param.f_central = 500
-        param.bw = 500
-        param.N = 38
-        param.fft_size = 1024
-        param.samp_rate = 4096 * 4
-        param.items = 4096 * 16
-        param.freq = 750
-        param.noise = 0
+        #check output 'out'
+        freq_settling_time_index, freq_error_max = check_float(data_sine.freq, param.freq, (param.freq * 0.05)) #check if the measured output frequency is the same of the input signal ± 5%
+        freq_settling_time_ms = (1.0 / param.samp_rate) * freq_settling_time_index * 1000.0
+        self.assertLess(freq_settling_time_ms, np.inf) #errors are intrinsically asserted
+        print "-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms
+        print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
 
-        print_parameters(param)
+        #check output 'pa'
+        pa_min_step , pa_slope = check_pa(data_sine.pa, 100)
+        precision = math.pow(2,(- (param.N - 1))) * math.pi
+        pa_min_step_rad = (pa_min_step >> (64 - param.N)) * precision
+        pa_slope_rad = (pa_slope >> (64 - param.N)) * precision
+        self.assertGreaterEqual(pa_min_step_rad, precision)
+        print "-Output 'pa' Slope : %f rad/s;" % pa_slope_rad       # WARNING: this is only a mean
+        print "-Output 'pa' Min step : %f rad;" % pa_min_step_rad
 
-        data_sine = test_sine(self, param)
-        plot(self,data_sine)
 
-        param.items = 4096 * 8
-
-        data_fft = test_fft(self, param)
-        plot_fft(self,data_fft)
-
-        print "prova"
-
-    def test_003_t (self):
-        """test_003_t"""
-        param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
-
-        param.order = 2
-        param.coeff1_2 = 0.021
-        param.coeff2_2 = 0.000022
-        param.coeff2_4 = 1
-        param.coeff1_3 = 0.0038
-        param.coeff2_3 = 0.000002
-        param.coeff3_3 = 0.0000000009
-        param.f_central = 500
-        param.bw = 500
-        param.N = 38
-        param.fft_size = 1024
-        param.samp_rate = 4096 * 4
-        param.items = 4096 * 16
-        param.freq = 1100
-        param.noise = 0
-
-        print_parameters(param)
-
-        data_sine = test_sine(self, param)
-        plot(self,data_sine)
-
-        param.items = 4096 * 16
-
-        data_fft = test_fft(self, param)
-        plot_fft(self,data_fft)
-
-        print "prova"
+    # def test_002_t (self):
+    #     """test_002_t: with a input sine without noise in the boundary BW of PLL"""
+    #     param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
+    #
+    #     param.order = 2
+    #     param.coeff1_2 = 0.021
+    #     param.coeff2_2 = 0.000022
+    #     param.coeff2_4 = 1
+    #     param.coeff1_3 = 0.0038
+    #     param.coeff2_3 = 0.000002
+    #     param.coeff3_3 = 0.0000000009
+    #     param.f_central = 500
+    #     param.bw = 500
+    #     param.N = 38
+    #     param.fft_size = 1024
+    #     param.samp_rate = 4096 * 4
+    #     param.items = 4096 * 6
+    #     param.freq = 750
+    #     param.noise = 0
+    #
+    #     print_parameters(param)
+    #
+    #     data_sine = test_sine(self, param)
+    #     plot(self,data_sine)
+    #
+    #     param.items = 4096 * 6
+    #
+    #     data_fft = test_fft(self, param)
+    #     plot_fft(self,data_fft)
+    #
+    #     settling_time_index, real_error_max, imag_error_max = check_out(data_sine.out, 1, 0, 0.1)
+    #     settling_time_ms = (1.0 / param.samp_rate) * settling_time_index * 1000.0
+    #
+    #     self.assertLess(settling_time_ms, np.inf) #errors are intrinsically asserted
+    #
+    #     print "-Settling time: %f ms;" % settling_time_ms
+    #     print "-Output Real absolute maximum error: %.3f;" % real_error_max
+    #     print "-Output Imag absolute maximum error: %.3f." % imag_error_max
+    #
+    # def test_003_t (self):
+    #     """test_003_t: with a sine without noise out of the BW of PLL"""
+    #     param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
+    #
+    #     param.order = 2
+    #     param.coeff1_2 = 0.021
+    #     param.coeff2_2 = 0.000022
+    #     param.coeff2_4 = 1
+    #     param.coeff1_3 = 0.0038
+    #     param.coeff2_3 = 0.000002
+    #     param.coeff3_3 = 0.0000000009
+    #     param.f_central = 500
+    #     param.bw = 500
+    #     param.N = 38
+    #     param.fft_size = 1024
+    #     param.samp_rate = 4096 * 4
+    #     param.items = 4096 * 8
+    #     param.freq = 1100
+    #     param.noise = 0
+    #
+    #     print_parameters(param)
+    #
+    #     data_sine = test_sine(self, param)
+    #     plot(self,data_sine)
+    #
+    #     param.items = 4096 * 8
+    #
+    #     data_fft = test_fft(self, param)
+    #     plot_fft(self,data_fft)
+    #
+    #     settling_time_index, real_error_max, imag_error_max = check_out(data_sine.out, 1, 0, 0.1)
+    #     settling_time_ms = (1.0 / param.samp_rate) * settling_time_index * 1000.0
+    #
+    #     self.assertEqual(settling_time_ms, np.inf) #have to be be inf (so, unlocked), errors are intrinsically asserted
+    #
+    #
+    #     print "-Settling time: %f ms;" % settling_time_ms
+    #     print "-Output Real absolute maximum error: %.3f;" % real_error_max
+    #     print "-Output Imag absolute maximum error: %.3f." % imag_error_max
 
 
 if __name__ == '__main__':
