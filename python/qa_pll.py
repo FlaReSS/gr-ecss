@@ -11,8 +11,8 @@ from collections import namedtuple
 from gnuradio.fft import window
 import ecss_swig as ecss
 import flaress
-import math, time, datetime, os, abc, sys
-import runner
+import math, time, datetime, os, abc, sys, pmt
+import runner, threading
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
@@ -344,67 +344,66 @@ class qa_pll (gr_unittest.TestCase):
         self.tb = None
         self.pdf.finalize_pdf()
 
-    def test_001_t (self):
-        """test_001_t: with a input sine without noise in the central BW of PLL"""
-        param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
-
-        param.order = 2
-        param.coeff1_2 = 0.021
-        param.coeff2_2 = 0.000022
-        param.coeff2_4 = 1
-        param.coeff1_3 = 0.0038
-        param.coeff2_3 = 0.000002
-        param.coeff3_3 = 0.0000000009
-        param.f_central = 500
-        param.bw = 500
-        param.N = 38
-        param.fft_size = 1024
-        param.samp_rate = 4096 * 4
-        param.items = 4096 * 2
-        param.freq = 500
-        param.noise = 0
-
-        print_parameters(param)
-
-        data_sine = test_sine(self, param)
-        plot(self,data_sine)
-
-        param.items = 4096 * 2
-
-        data_fft = test_fft(self, param)
-        plot_fft(self,data_fft)
-
-        #check output 'out'
-        out_settling_time_index, out_real_error_max, out_imag_error_max = check_comlex(data_sine.out, 1, 0, 0.1)
-        out_settling_time_ms = (1.0 / param.samp_rate) * out_settling_time_index * 1000.0
-        self.assertLess(out_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'Out' Settling time : %f ms;" % out_settling_time_ms
-        print "-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max
-        print "-Output 'Out' Imag absolute maximum error: %.3f." % out_imag_error_max
-
-        #check output 'out'
-        pe_settling_time_index, pe_error_max = check_float(data_sine.pe, 0, 0.1)
-        pe_settling_time_ms = (1.0 / param.samp_rate) * pe_settling_time_index * 1000.0
-        self.assertLess(pe_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms
-        print "-Output 'pe' absolute maximum error: %.3f;" % pe_error_max
-
-        #check output 'out'
-        freq_settling_time_index, freq_error_max = check_float(data_sine.freq, param.freq, (param.freq * 0.05)) #check if the measured output frequency is the same of the input signal ± 5%
-        freq_settling_time_ms = (1.0 / param.samp_rate) * freq_settling_time_index * 1000.0
-        self.assertLess(freq_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms
-        print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
-
-        #check output 'pa'
-        pa_min_step , pa_slope = check_pa(data_sine.pa, 100)
-        precision = math.pow(2,(- (param.N - 1))) * math.pi
-        pa_min_step_rad = (pa_min_step >> (64 - param.N)) * precision
-        pa_slope_rad = (pa_slope >> (64 - param.N)) * precision
-        self.assertGreaterEqual(pa_min_step_rad, precision)
-        print "-Output 'pa' Slope : %f rad/s;" % pa_slope_rad       # WARNING: this is only a mean
-        print "-Output 'pa' Min step : %f rad;" % pa_min_step_rad
-
+    # def test_001_t (self):
+    #     """test_001_t: with a input sine without noise in the central BW of PLL"""
+    #     param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
+    #
+    #     param.order = 2
+    #     param.coeff1_2 = 0.021
+    #     param.coeff2_2 = 0.000022
+    #     param.coeff2_4 = 1
+    #     param.coeff1_3 = 0.0038
+    #     param.coeff2_3 = 0.000002
+    #     param.coeff3_3 = 0.0000000009
+    #     param.f_central = 500
+    #     param.bw = 500
+    #     param.N = 38
+    #     param.fft_size = 1024
+    #     param.samp_rate = 4096 * 4
+    #     param.items = 4096 * 2
+    #     param.freq = 500
+    #     param.noise = 0
+    #
+    #     print_parameters(param)
+    #
+    #     data_sine = test_sine(self, param)
+    #     plot(self,data_sine)
+    #
+    #     param.items = 4096 * 2
+    #
+    #     data_fft = test_fft(self, param)
+    #     plot_fft(self,data_fft)
+    #
+    #     #check output 'out'
+    #     out_settling_time_index, out_real_error_max, out_imag_error_max = check_comlex(data_sine.out, 1, 0, 0.1)
+    #     out_settling_time_ms = (1.0 / param.samp_rate) * out_settling_time_index * 1000.0
+    #     self.assertLess(out_settling_time_ms, np.inf) #errors are intrinsically asserted
+    #     print "-Output 'Out' Settling time : %f ms;" % out_settling_time_ms
+    #     print "-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max
+    #     print "-Output 'Out' Imag absolute maximum error: %.3f." % out_imag_error_max
+    #
+    #     #check output 'out'
+    #     pe_settling_time_index, pe_error_max = check_float(data_sine.pe, 0, 0.1)
+    #     pe_settling_time_ms = (1.0 / param.samp_rate) * pe_settling_time_index * 1000.0
+    #     self.assertLess(pe_settling_time_ms, np.inf) #errors are intrinsically asserted
+    #     print "-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms
+    #     print "-Output 'pe' absolute maximum error: %.3f;" % pe_error_max
+    #
+    #     #check output 'out'
+    #     freq_settling_time_index, freq_error_max = check_float(data_sine.freq, param.freq, (param.freq * 0.05)) #check if the measured output frequency is the same of the input signal ± 5%
+    #     freq_settling_time_ms = (1.0 / param.samp_rate) * freq_settling_time_index * 1000.0
+    #     self.assertLess(freq_settling_time_ms, np.inf) #errors are intrinsically asserted
+    #     print "-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms
+    #     print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
+    #
+    #     #check output 'pa'
+    #     pa_min_step , pa_slope = check_pa(data_sine.pa, 100)
+    #     precision = math.pow(2,(- (param.N - 1))) * math.pi
+    #     pa_min_step_rad = (pa_min_step >> (64 - param.N)) * precision
+    #     pa_slope_rad = (pa_slope >> (64 - param.N)) * precision
+    #     self.assertGreaterEqual(pa_min_step_rad, precision)
+    #     print "-Output 'pa' Slope : %f rad/s;" % pa_slope_rad       # WARNING: this is only a mean
+    #     print "-Output 'pa' Min step : %f rad;" % pa_min_step_rad
 
     # def test_002_t (self):
     #     """test_002_t: with a input sine without noise in the boundary BW of PLL"""
@@ -444,14 +443,14 @@ class qa_pll (gr_unittest.TestCase):
     #     print "-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max
     #     print "-Output 'Out' Imag absolute maximum error: %.3f." % out_imag_error_max
     #
-    #     #check output 'out'
+    #     #check output 'pe'
     #     pe_settling_time_index, pe_error_max = check_float(data_sine.pe, 0, 0.1)
     #     pe_settling_time_ms = (1.0 / param.samp_rate) * pe_settling_time_index * 1000.0
     #     self.assertLess(pe_settling_time_ms, np.inf) #errors are intrinsically asserted
     #     print "-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms
     #     print "-Output 'pe' absolute maximum error: %.3f;" % pe_error_max
     #
-    #     #check output 'out'
+    #     #check output 'freq'
     #     freq_settling_time_index, freq_error_max = check_float(data_sine.freq, param.freq, (param.freq * 0.05)) #check if the measured output frequency is the same of the input signal ± 5%
     #     freq_settling_time_ms = (1.0 / param.samp_rate) * freq_settling_time_index * 1000.0
     #     self.assertLess(freq_settling_time_ms, np.inf) #errors are intrinsically asserted
@@ -466,7 +465,7 @@ class qa_pll (gr_unittest.TestCase):
     #     self.assertGreaterEqual(pa_min_step_rad, precision)
     #     print "-Output 'pa' Slope : %f rad/s;" % pa_slope_rad       # WARNING: this is only a mean
     #     print "-Output 'pa' Min step : %f rad;" % pa_min_step_rad
-    #
+
     # def test_003_t (self):
     #     """test_003_t: with a sine without noise out of the BW of PLL"""
     #     param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
@@ -505,14 +504,14 @@ class qa_pll (gr_unittest.TestCase):
     #     print "-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max
     #     print "-Output 'Out' Imag absolute maximum error: %.3f." % out_imag_error_max
     #
-    #     #check output 'out'
+    #     #check output 'pe'
     #     pe_settling_time_index, pe_error_max = check_float(data_sine.pe, 0, 0.1)
     #     pe_settling_time_ms = (1.0 / param.samp_rate) * pe_settling_time_index * 1000.0
     #     self.assertLess(pe_settling_time_ms, np.inf) #errors are intrinsically asserted
     #     print "-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms
     #     print "-Output 'pe' absolute maximum error: %.3f;" % pe_error_max
     #
-    #     #check output 'out'
+    #     #check output 'freq'
     #     freq_settling_time_index, freq_error_max = check_float(data_sine.freq, param.freq, (param.freq * 0.05)) #check if the measured output frequency is the same of the input signal ± 5%
     #     freq_settling_time_ms = (1.0 / param.samp_rate) * freq_settling_time_index * 1000.0
     #     self.assertLess(freq_settling_time_ms, np.inf) #errors are intrinsically asserted
@@ -528,6 +527,185 @@ class qa_pll (gr_unittest.TestCase):
     #     print "-Output 'pa' Slope : %f rad/s;" % pa_slope_rad       # WARNING: this is only a mean
     #     print "-Output 'pa' Min step : %f rad;" % pa_min_step_rad
 
+    # def test_004_t (self):
+    #     """test_004_t: reset tag in the middle of the simulation"""
+    #     tb = self.tb
+    #     param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
+    #     data_pll = namedtuple('data_pll', 'src out freq pe pa time')
+    #
+    #     param.order = 2
+    #     param.coeff1_2 = 0.021
+    #     param.coeff2_2 = 0.000022
+    #     param.coeff2_4 = 1
+    #     param.coeff1_3 = 0.0038
+    #     param.coeff2_3 = 0.000002
+    #     param.coeff3_3 = 0.0000000009
+    #     param.f_central = 500
+    #     param.bw = 1000
+    #     param.N = 38
+    #     param.fft_size = 1024
+    #     param.samp_rate = 4096 * 4
+    #     param.items = 4096 * 2
+    #     param.freq = 550
+    #     param.noise = 0
+    #
+    #     print_parameters(param)
+    #
+    #     amplitude = 1
+    #     offset = 0
+    #
+    #     src_sine = analog.sig_source_c(param.samp_rate, analog.GR_SIN_WAVE, param.freq, amplitude, offset)
+    #     src_tag = blocks.tags_strobe(gr.sizeof_gr_complex*1, pmt.intern("reset"), (param.items / 2),  pmt.intern("pll"))
+    #
+    #     adder = blocks.add_vcc(1)
+    #     throttle = blocks.throttle(gr.sizeof_gr_complex*1, param.samp_rate,True)
+    #     head = blocks.head(gr.sizeof_gr_complex, int (param.items))
+    #
+    #     dst_source = blocks.vector_sink_c()
+    #     dst_pll_out = blocks.vector_sink_c()
+    #     dst_pll_freq = blocks.vector_sink_f()
+    #     dst_pll_pe = blocks.vector_sink_f()
+    #     dst_pll_pa = flaress.vector_sink_int64()
+    #
+    #     pll = ecss.pll(param.samp_rate, param.order, param.N, param.coeff1_2, param.coeff2_2, param.coeff2_4, param.coeff1_3, param.coeff2_3, param.coeff3_3, param.f_central, param.bw)
+    #
+    #     tb.connect(src_sine, (adder, 0))
+    #     tb.connect(src_tag,(adder, 1))
+    #     tb.connect(adder, throttle)
+    #     tb.connect(throttle, head)
+    #     tb.connect(head, dst_source)
+    #     tb.connect(head, pll)
+    #     tb.connect((pll, 0), dst_pll_out)
+    #     tb.connect((pll, 1), dst_pll_freq)
+    #     tb.connect((pll, 2), dst_pll_pe)
+    #     tb.connect((pll, 3), dst_pll_pa)
+    #
+    #     self.tb.run()
+    #
+    #     data_pll.src = dst_source.data()
+    #     data_pll.out = dst_pll_out.data()
+    #     data_pll.freq = dst_pll_freq.data()
+    #     data_pll.pe = dst_pll_pe.data()
+    #     data_pll.pa = dst_pll_pa.data()
+    #     data_pll.time = np.linspace(0, (param.items * 1.0 / param.samp_rate), param.items, endpoint=False)
+    #
+    #     plot(self,data_pll)
+    #
+    #     #the reset tag initializes the pll at the central frequency (so all the internal registers of the loop filter) and sets to zero the phase accumulator
+    #     self.assertAlmostEqual(data_pll.freq[param.items / 2], param.f_central, 0) #only the integer part
+    #     self.assertAlmostEqual(data_pll.pa[param.items / 2], 0)
+    #
+    #     print "-Reset tag received at the moment: %.3f ms." % (param.items / 2 * (1000.0 / param.samp_rate))
+
+    def test_006_t (self):
+        """test_006_t: switch from the second order to the third order"""
+
+        tb = self.tb
+        param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
+        data_pll = namedtuple('data_pll', 'src out freq pe pa time')
+
+        param.order = 2
+        param.coeff1_2 = 0.021
+        param.coeff2_2 = 0.000022
+        param.coeff2_4 = 1
+        param.coeff1_3 = 0.0038
+        param.coeff2_3 = 0.000002
+        param.coeff3_3 = 0.0000000009
+        param.f_central = 500
+        param.bw = 1500
+        param.N = 38
+        param.fft_size = 1024
+        param.samp_rate = 4096
+        param.items = 4096 * 4
+        param.freq = 1000
+        param.noise = 0
+
+        # print_parameters(param)
+
+        amplitude = 1
+        offset = 0
+
+        # pll = ecss.pll(param.samp_rate, param.order, param.N, param.coeff1_2, param.coeff2_2, param.coeff2_4, param.coeff1_3, param.coeff2_3, param.coeff3_3, param.f_central, param.bw)
+        src = analog.sig_source_f(param.samp_rate, analog.GR_CONST_WAVE, param.freq, 0, 0)
+        debug = flaress.debug_func_probe(gr.sizeof_float*1)
+
+        def _probe_func_probe():
+            time.sleep(2)
+            try:
+            #     # pll.set_order(3)
+            #     # src.set_offset(1)
+                debug.debug_nitems()
+            except AttributeError:
+                pass
+
+        _probe_func_thread = threading.Thread(target=_probe_func_probe)
+        _probe_func_thread.daemon = True
+
+        throttle = blocks.throttle(gr.sizeof_float*1, param.samp_rate,True)
+        head = blocks.head(gr.sizeof_float, int (param.items))
+        dst_source = blocks.vector_sink_f()
+        src_null = blocks.null_source(gr.sizeof_float*1)
+
+
+        throttle.set_max_noutput_items (param.samp_rate)
+        throttle.set_min_noutput_items (param.samp_rate)
+
+        tb.connect(src, throttle)
+        tb.connect(throttle, head)
+        tb.connect(head, dst_source)
+        tb.connect(head, debug)
+
+        _probe_func_thread.start()
+
+        tb.run()
+
+        data = debug.data()
+
+        print data
+
+        # src_sine = analog.sig_source_c(param.samp_rate, analog.GR_SIN_WAVE, param.freq, amplitude, offset)
+        # src_tag = blocks.tags_strobe(gr.sizeof_gr_complex*1, pmt.intern("reset"), (param.items / 2),  pmt.intern("pll"))
+        #
+        # adder = blocks.add_vcc(1)
+        # throttle = blocks.throttle(gr.sizeof_gr_complex*1, param.samp_rate,True)
+        # head = blocks.head(gr.sizeof_gr_complex, int (param.items))
+        #
+        # dst_source = blocks.vector_sink_c()
+        # dst_pll_out = blocks.vector_sink_c()
+        # dst_pll_freq = blocks.vector_sink_f()
+        # dst_pll_pe = blocks.vector_sink_f()
+        # dst_pll_pa = flaress.vector_sink_int64()
+        #
+        # throttle.set_max_noutput_items (param.samp_rate)
+        # throttle.set_min_noutput_items (param.samp_rate)
+        #
+        # tb.connect(src_sine, (adder, 0))
+        # tb.connect(src_tag,(adder, 1))
+        # tb.connect(adder, throttle)
+        # tb.connect(throttle, head)
+        # tb.connect(head, dst_source)
+        # tb.connect(head, pll)
+        # tb.connect((pll, 0), dst_pll_out)
+        # tb.connect((pll, 1), dst_pll_freq)
+        # tb.connect((pll, 2), dst_pll_pe)
+        # tb.connect((pll, 3), dst_pll_pa)
+        #
+        # self.tb.run()
+        #
+        # data_pll.src = dst_source.data()
+        # data_pll.out = dst_pll_out.data()
+        # data_pll.freq = dst_pll_freq.data()
+        # data_pll.pe = dst_pll_pe.data()
+        # data_pll.pa = dst_pll_pa.data()
+        # data_pll.time = np.linspace(0, (param.items * 1.0 / param.samp_rate), param.items, endpoint=False)
+        #
+        # plot(self,data_pll)
+        #
+        # #the reset tag initializes the pll at the central frequency (so all the internal registers of the loop filter) and sets to zero the phase accumulator
+        # self.assertAlmostEqual(data_pll.freq[param.items / 2], param.f_central, 0) #only the integer part
+        # self.assertAlmostEqual(data_pll.pa[param.items / 2], 0)
+        #
+        # print "-Reset tag received at the moment: %.3f ms." % (param.items / 2 * (1000.0 / param.samp_rate))
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_pll)

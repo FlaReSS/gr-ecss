@@ -125,12 +125,6 @@ namespace gr {
 
       std::vector<tag_t> tags;
 
-      if (tags.size()>0) { //debug
-        std::cout << "tags size: " << tags.size() << '\n';
-        std::cout << "tags[0] offset: " << tags[0].offset - nitems_read(0) << '\n';
-        std::cout << "tags[0] value: " << tags[0].value << '\n';
-      }
-
       for(int i = 0; i < noutput_items; i++) {
 
          get_tags_in_window( // Note the different method name
@@ -142,7 +136,6 @@ namespace gr {
 
          if (tags.size() > 0) {
            if (tags[0].value == pmt::intern("reset") && tags[0].key == pmt::intern("pll")) {
-             std::cout << "reset" << '\n';
              reset();
            }
          }
