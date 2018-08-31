@@ -61,6 +61,7 @@ namespace gr {
             d_Coeff1_3(Coeff1_3), d_Coeff2_3(Coeff2_3), d_Coeff3_3(Coeff3_3),
             d_freq_central(freq_central), d_bw(bw)
           {
+            set_tag_propagation_policy(TPP_DONT);
             set_N(N);
             set_Coeff1_2(Coeff1_2);
             set_Coeff2_2(Coeff2_2);
@@ -69,6 +70,7 @@ namespace gr {
             set_Coeff2_3(Coeff2_3);
             set_Coeff3_3(Coeff3_3);
             set_order(order);
+            reset();
           }
 
     /*
@@ -123,14 +125,6 @@ namespace gr {
 
       std::vector<tag_t> tags;
 
-      // get_tags_in_window( // Note the different method name
-      //     tags, // Tags will be saved here
-      //     0, // Port 0
-      //     0, // Start of range (relative to nitems_read(0))
-      //     noutput_items, // End of relative range
-      //     pmt::mp("reset") // Optional: Only find tags with key "my_tag_key"
-      // );
-
       if (tags.size()>0) { //debug
         std::cout << "tags size: " << tags.size() << '\n';
         std::cout << "tags[0] offset: " << tags[0].offset - nitems_read(0) << '\n';
@@ -143,19 +137,20 @@ namespace gr {
              tags, // Tags will be saved here
              0, // Port 0
              i, // Start of range (relative to nitems_read(0))
-             (i + 1), // End of relative range
-             pmt::mp("reset") // Optional: Only find tags with key "my_tag_key"
+             (i + 1) // End of relative range
          );
 
-         // if (tags.size() > 0) {
-         //   std::cout << tags[0]. << '\n';
-         // }
+         if (tags.size() > 0) {
+           if (tags[0].value == pmt::intern("reset") && tags[0].key == pmt::intern("pll")) {
+             std::cout << "reset" << '\n';
+             reset();
+           }
+         }
 
         phase_accumulator[i] = d_integer_phase;
         gr::sincos(d_integer_phase_denormalized, &t_imag, &t_real);
         feedback = (gr_complexd) input[i] * gr_complexd(t_real, -t_imag);
         output[i] = (gr_complex) feedback;
-        // output[i] = (gr_complex) gr_complexd(t_real, -t_imag);
         error = phase_detector(feedback);
 
         phase_out[i] = error;
@@ -163,13 +158,22 @@ namespace gr {
 
         //frequency_limit();
         frq[i] = branch_2_3 * d_samp_rate / M_TWOPI;
-        //frq[i] = (float) d_integer_phase_denormalized;
         filter_out_limited = frequency_limit(filter_out);
 
         accumulator(filter_out_limited);
         NCO_denormalization();
       }
       return noutput_items;
+    }
+
+    void
+    pll_impl::reset()
+    {
+      branch_3_par = 0;
+      branch_2_3_par = 0;
+      branch_2_3 = d_freq_central / d_samp_rate * M_TWOPI;
+      d_integer_phase_denormalized = 0;
+      d_integer_phase = 0;
     }
 
     double

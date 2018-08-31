@@ -145,8 +145,8 @@ namespace gr {
           if(first == true){
             add_item_tag(0, // Port number
                  nitems_written(0) + d_fftsize, // Offset
-                 pmt::mp("reset"), // Key
-                 pmt::from_bool(true) // Value
+                 pmt::intern("reset"), // Key
+                 pmt::intern("pll") // Value
                 );
             // std::cout << "signal search tag offset: "<< j << '\n'; //debug
             first = false;

@@ -28,7 +28,7 @@ namespace gr {
 
     class pll_impl : public pll
     {
-    public:
+
       int d_N;
       int d_samp_rate;
       int d_order;
@@ -42,12 +42,12 @@ namespace gr {
       double branch_2_3_max, branch_2_3_min;
 
       double mod_2pi(double in);
-
+      void reset();
       void NCO_denormalization();
       double phase_detector(gr_complexd sample);
       double magnitude(gr_complexd sample);
 
-
+      public:
       pll_impl(int samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float freq_central, float bw);
       ~pll_impl();
 
@@ -98,6 +98,7 @@ namespace gr {
       /*******************************************************************
       * SET FUNCTIONS
       *******************************************************************/
+
       /*!
        * \brief Set the precision of the PLL.
        *
