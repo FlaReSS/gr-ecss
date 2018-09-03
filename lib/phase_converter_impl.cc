@@ -53,9 +53,6 @@ namespace gr {
       precision = pow(2,(- (N - 1)));
     }
 
-    /*
-     * Our virtual destructor.
-     */
     phase_converter_impl::~phase_converter_impl()
     {}
 
