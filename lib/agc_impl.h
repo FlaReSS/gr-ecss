@@ -38,7 +38,6 @@
        agc_impl(float attack_time, float reference, float gain, int samp_rate);
        ~agc_impl();
 
-       // Where all the action really happens
        int work(int noutput_items,
           gr_vector_const_void_star &input_items,
           gr_vector_void_star &output_items);
