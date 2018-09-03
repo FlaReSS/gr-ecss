@@ -149,7 +149,6 @@ namespace gr {
         phase_out[i] = error;
         filter_out = advance_loop(error);
 
-        //frequency_limit();
         frq[i] = branch_2_3 * d_samp_rate / M_TWOPI;
         filter_out_limited = frequency_limit(filter_out);
 
