@@ -7,8 +7,7 @@ from jinja2 import Template
 import pdfkit
 
 DEFAULT_TEMPLATE = os.path.join(os.path.dirname(__file__), "template",
-                                "final_report_template .html")
-
+                                "final_report_template.html")
 def load_template(template):
     """ Try to read a file from a given path, if file
         does not exist, load default one. """
@@ -42,13 +41,13 @@ class HtmlFinalTestResult():
         self.name = "Final_Report_Tests.pdf"
         self.title = "Final report tests for gr-ecss"
         self.description= "Here are appended all the test results processed automatically"
-        self.output = "../Final Report"
+        self.output = "../python/Final Report"
         self.class_name =""
         self.testcase_class_name= ""
         self.path_file_final = ""
         self.inputs = "Results"
         self.all_html=[]
-        self.tests= ['prova1', 'prova2']
+        self.tests= []
 
     def get_all_tests(self):
         """ Try to read CMakeLists.txt from python dir in order to get all the tests name"""
@@ -142,7 +141,7 @@ class HtmlFinalTestResult():
                     self.all_html.append(complete_path)
                     status= "appended"
                 else:
-                    print("Input name file: wrong!\n")
+                    print("Input name file: the file does not exist!\n")
             else:
                 print("Inputs path: wrong!\n")
 
@@ -150,8 +149,6 @@ class HtmlFinalTestResult():
             print("CLASS NAME NOT FOUND!")
 
         return test_files_list.append([test_name, status])
-
-
 
 
     def generate_first_page(self):
@@ -186,7 +183,8 @@ class HtmlFinalTestResult():
             'margin-bottom': '0.75in',
             'margin-left': '0.75in',
             'encoding': "UTF-8",
-            'no-outline': None
+            'no-outline': None,
+            'dpi':210,
             }
         pdfkit.from_file(self.all_html, self.path_file_final, options=options)
 
