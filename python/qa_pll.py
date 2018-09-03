@@ -292,7 +292,7 @@ def test_fft(self, data):
 
     return data_fft
 
-def test_sine(self, data):
+def test_sine(self, param):
     """this function run the defined test, for easier understanding"""
 
     tb = self.tb
@@ -301,12 +301,12 @@ def test_sine(self, data):
     amplitude = 1
     offset = 0
 
-    src_sine = analog.sig_source_c(data.samp_rate, analog.GR_SIN_WAVE, data.freq, amplitude, offset)
-    src_noise = analog.noise_source_c(analog.GR_GAUSSIAN, data.noise, offset)
+    src_sine = analog.sig_source_c(param.samp_rate, analog.GR_SIN_WAVE, param.freq, amplitude, offset)
+    src_noise = analog.noise_source_c(analog.GR_GAUSSIAN, param.noise, offset)
 
     adder = blocks.add_vcc(1)
-    throttle = blocks.throttle(gr.sizeof_gr_complex*1, data.samp_rate,True)
-    head = blocks.head(gr.sizeof_gr_complex, int (data.items))
+    throttle = blocks.throttle(gr.sizeof_gr_complex*1, param.samp_rate,True)
+    head = blocks.head(gr.sizeof_gr_complex, int (param.items))
 
     dst_source = blocks.vector_sink_c()
     dst_pll_out = blocks.vector_sink_c()
@@ -314,7 +314,7 @@ def test_sine(self, data):
     dst_pll_pe = blocks.vector_sink_f()
     dst_pll_pa = flaress.vector_sink_int64()
 
-    pll = ecss.pll(data.samp_rate, data.order, data.N, data.coeff1_2, data.coeff2_2, data.coeff2_4, data.coeff1_3, data.coeff2_3, data.coeff3_3, data.f_central, data.bw)
+    pll = ecss.pll(param.samp_rate, param.order, param.N, param.coeff1_2, param.coeff2_2, param.coeff2_4, param.coeff1_3, param.coeff2_3, param.coeff3_3, param.f_central, param.bw)
 
     tb.connect(src_sine, (adder, 0))
     tb.connect(src_noise,(adder, 1))
@@ -327,8 +327,8 @@ def test_sine(self, data):
     tb.connect((pll, 2), dst_pll_pe)
     tb.connect((pll, 3), dst_pll_pa)
 
-    # throttle.set_max_noutput_items (data.samp_rate)
-    # throttle.set_min_noutput_items (data.samp_rate)
+    # throttle.set_max_noutput_items (param.samp_rate)
+    # throttle.set_min_noutput_items (param.samp_rate)
 
     self.tb.run()
 
@@ -337,7 +337,7 @@ def test_sine(self, data):
     data_pll.freq = dst_pll_freq.data()
     data_pll.pe = dst_pll_pe.data()
     data_pll.pa = dst_pll_pa.data()
-    data_pll.time = np.linspace(0, (data.items * 1.0 / data.samp_rate), data.items, endpoint=False)
+    data_pll.time = np.linspace(0, (param.items * 1.0 / param.samp_rate), param.items, endpoint=False)
 
     return data_pll
 
@@ -388,7 +388,7 @@ class qa_pll (gr_unittest.TestCase):
         self.assertLess(out_settling_time_ms, np.inf) #errors are intrinsically asserted
         print "-Output 'Out' Settling time : %f ms;" % out_settling_time_ms
         print "-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max
-        print "-Output 'Out' Imag absolute maximum error: %.3f." % out_imag_error_max
+        print "-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max
 
         #check output 'pe'
         pe_settling_time_index, pe_error_max = check_float(data_sine.pe, 0, 0.1)
@@ -411,7 +411,7 @@ class qa_pll (gr_unittest.TestCase):
         pa_slope_rad = (pa_slope >> (64 - param.N)) * precision
         self.assertGreaterEqual(pa_min_step_rad, precision)
         print "-Output 'pa' Slope : %f rad/s;" % pa_slope_rad       # WARNING: this is only a mean
-        print "-Output 'pa' Min step : %f rad;" % pa_min_step_rad
+        print "-Output 'pa' Min step : %f rad." % pa_min_step_rad
 
     def test_002_t (self):
         """test_002_t: with a input sine without noise in the boundary BW of PLL"""
@@ -449,7 +449,7 @@ class qa_pll (gr_unittest.TestCase):
         self.assertLess(out_settling_time_ms, np.inf) #errors are intrinsically asserted
         print "-Output 'Out' Settling time : %f ms;" % out_settling_time_ms
         print "-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max
-        print "-Output 'Out' Imag absolute maximum error: %.3f." % out_imag_error_max
+        print "-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max
 
         #check output 'pe'
         pe_settling_time_index, pe_error_max = check_float(data_sine.pe, 0, 0.1)
@@ -472,7 +472,7 @@ class qa_pll (gr_unittest.TestCase):
         pa_slope_rad = (pa_slope >> (64 - param.N)) * precision
         self.assertGreaterEqual(pa_min_step_rad, precision)
         print "-Output 'pa' Slope : %f rad/s;" % pa_slope_rad       # WARNING: this is only a mean
-        print "-Output 'pa' Min step : %f rad;" % pa_min_step_rad
+        print "-Output 'pa' Min step : %f rad." % pa_min_step_rad
 
     def test_003_t (self):
         """test_003_t: with a sine without noise out of the BW of PLL"""
@@ -529,7 +529,7 @@ class qa_pll (gr_unittest.TestCase):
         pa_slope_rad = (pa_slope >> (64 - param.N)) * precision
         self.assertGreaterEqual(pa_min_step_rad, precision)
         print "-Output 'pa' Slope : %f rad/s;" % pa_slope_rad       # WARNING: this is only a mean
-        print "-Output 'pa' Min step : %f rad;" % pa_min_step_rad
+        print "-Output 'pa' Min step : %f rad." % pa_min_step_rad
 
     def test_004_t (self):
         """test_004_t: reset tag in the middle of the simulation"""
@@ -693,8 +693,8 @@ class qa_pll (gr_unittest.TestCase):
         #check the switch
         self.assertEqual(len(switch), 1)
         self.assertEqual(self.debug_order, 3)
-        print "-Final order of the pll: %d" %self.debug_order
-        print "-Set function received at the moment (of the simulation): %.2f s." % (switch[0] * (1.0 / param.samp_rate))
+        print "-Final order of the pll: %d;" %self.debug_order
+        print "-Set function received at the moment (of the simulation): %.2f s;" % (switch[0] * (1.0 / param.samp_rate))
 
         #check output 'out'
         out_settling_time_index, out_real_error_max, out_imag_error_max = check_complex(data_pll.out, 1, 0, 0.1)
@@ -702,7 +702,7 @@ class qa_pll (gr_unittest.TestCase):
         self.assertLess(out_settling_time_ms, np.inf) #errors are intrinsically asserted
         print "-Output 'Out' Settling time : %f ms;" % out_settling_time_ms
         print "-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max
-        print "-Output 'Out' Imag absolute maximum error: %.3f." % out_imag_error_max
+        print "-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max
 
         #check output 'out'
         pe_settling_time_index, pe_error_max = check_float(data_pll.pe, 0, 0.1)
@@ -725,7 +725,7 @@ class qa_pll (gr_unittest.TestCase):
         pa_slope_rad = (pa_slope >> (64 - param.N)) * precision
         self.assertGreaterEqual(pa_min_step_rad, precision)
         print "-Output 'pa' Slope : %f rad/s;" % pa_slope_rad       # WARNING: this is only a mean
-        print "-Output 'pa' Min step : %f rad;" % pa_min_step_rad
+        print "-Output 'pa' Min step : %f rad." % pa_min_step_rad
 
     def test_007_t (self):
         """test_007_t: frequency sweep input"""
