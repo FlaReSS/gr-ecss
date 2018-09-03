@@ -41,9 +41,6 @@ namespace gr {
         (new phase_converter_impl(N));
     }
 
-    /*
-     * The private constructor
-     */
     phase_converter_impl::phase_converter_impl(int N)
       : gr::sync_block("phase_converter",
               gr::io_signature::make(1, 1, sizeof(float)),
