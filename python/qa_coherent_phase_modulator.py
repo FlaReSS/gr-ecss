@@ -57,9 +57,11 @@ class qa_coherent_phase_modulator (gr_unittest.TestCase):
 
     def setUp (self):
         self.tb = gr.top_block ()
+        self.pdf = Pdf_class(self.id().split(".")[1])
 
     def tearDown (self):
         self.tb = None
+        self.pdf.finalize_pdf()
 
     def test_001_t (self):
         # set up fg
