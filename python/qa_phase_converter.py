@@ -6,12 +6,11 @@
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
-from gnuradio.fft import logpwrfft
 from collections import namedtuple
 from gnuradio.fft import window
 import ecss_swig as ecss
 import flaress
-import math, time, datetime, os, abc, sys, pmt
+import math, time, datetime, os, abc, sys
 import runner, threading
 import numpy as np
 import matplotlib.pyplot as plt
@@ -53,7 +52,7 @@ class Pdf_class(object):
             d['ModDate'] = datetime.datetime.today()
 
 def print_parameters(data):
-    to_print = "\p Sample rate = %d Hz; Numer of Bits = %d; Minimum Value = %.3f rad; MAximum Value = %.3f rad \p" \
+    to_print = "\p Sample rate = %d Hz; Number of Bits = %d; Minimum Value = %.3f rad; Maximum Value = %.3f rad \p" \
         %(data.samp_rate, data.N, data.min_value, data.max_value)
     print to_print
 
@@ -166,7 +165,7 @@ class qa_phase_converter (gr_unittest.TestCase):
         self.assertGreaterEqual(pe_min_step_rad, precision)
         print "-Output Slope : %f rad/s;" % pe_slope_rad       # WARNING: this is only a mean
         print "-Output Min step : %f rad." % pe_min_step_rad
-    
+
     def test_002_t (self):
         """test_002_t: precision test"""
         param = namedtuple('param', 'samp_rate items N min_value max_value')
@@ -194,5 +193,3 @@ if __name__ == '__main__':
     runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_2')
     runner.run(suite)
     #gr_unittest.TestProgram()
-    
-
