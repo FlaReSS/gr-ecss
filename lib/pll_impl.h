@@ -112,7 +112,7 @@ namespace gr {
        * Sets the internal number of bits.
        * This value is set only at the start.
        *
-       * \param order    (int) new number of bits
+       * \param N    (int) new number of bits
        */
       void set_N(int N);
 

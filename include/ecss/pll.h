@@ -56,8 +56,8 @@ namespace gr {
         * \param Coeff1_3 value of the coefficient in the Proportional arm of the third order Loop Filter.
         * \param Coeff2_3 value of the coefficient in the Integral arm of the third order Loop Filter.
         * \param Coeff3_3 value of the coefficient in the Double Integral arm of the third order Loop Filter.
-        * \param max_freq maximum value of frequency that PLL can catch.
-        * \param min_freq minimum value of frequency that PLL can catchl.
+        * \param freq_central central value of frequency that PLL can catch.
+        * \param bw bandwidth of frequency that PLL can catchl.
        */
       static sptr make(int samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float freq_central, float bw);
 
