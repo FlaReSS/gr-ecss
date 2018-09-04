@@ -30,16 +30,16 @@ namespace gr {
   namespace ecss {
 
     signal_search::sptr
-    signal_search::make(int fftsize, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate)
+    signal_search::make(int fftsize, bool carrier, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate)
     {
       return gnuradio::get_initial_sptr
-        (new signal_search_impl(fftsize, wintype, freq_central, bandwidth, freq_cutoff, threshold, samp_rate));
+        (new signal_search_impl(fftsize, wintype, carrier, freq_central, bandwidth, freq_cutoff, threshold, samp_rate));
     }
 
     /*
      * The private constructor
      */
-    signal_search_impl::signal_search_impl(int fftsize, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate)
+    signal_search_impl::signal_search_impl(int fftsize, bool carrier, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate)
       : gr::block("signal_search",
               gr::io_signature::make(1, 1, sizeof(gr_complex)),
               gr::io_signature::make(1, 1, sizeof(gr_complex))),

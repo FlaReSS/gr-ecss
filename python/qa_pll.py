@@ -834,7 +834,7 @@ class qa_pll (gr_unittest.TestCase):
         self.assertLess(out_settling_time_ms, np.inf) #errors are intrinsically asserted
         print "-Output 'Out' Settling time : %f ms;" % out_settling_time_ms
         print "-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max
-        print "-Output 'Out' Imag absolute maximum error: %.3f." % out_imag_error_max
+        print "-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max
 
         #check output 'pe'
         pe_settling_time_index, pe_error_max = check_float(data_pll.pe, 0, 0.1)
@@ -857,7 +857,7 @@ class qa_pll (gr_unittest.TestCase):
         pa_slope_rad = (pa_slope >> (64 - param.N)) * precision
         self.assertGreaterEqual(pa_min_step_rad, precision)
         print "-Output 'pa' Slope : %f rad/s;" % pa_slope_rad       # WARNING: this is only a mean
-        print "-Output 'pa' Min step : %f rad;" % pa_min_step_rad
+        print "-Output 'pa' Min step : %f rad." % pa_min_step_rad
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_pll)

@@ -5,17 +5,10 @@
   <category>[ecss]</category>
   <import>from ecss import variables_loop_filter</import>
 
-  <var_make>
-self.$(id) = $(id) = variables_loop_filter.get_$(type.fcn)($index_m, $natural_freq, $damping, $samp_rate)
-  </var_make>
+  <var_make>self.$(id) = $(id) = variables_loop_filter.get_$(type.fcn)($index_m, $natural_freq, $damping, $samp_rate)</var_make>
   <var_value>variables_loop_filter.get_$(type.fcn)($index_m, $natural_freq, $damping, $samp_rate)</var_value>
   <make></make>
 
-
-  <!-- <callback>set_index_m($index_m)</callback>
-  <callback>set_natural_freq($natural_freq)</callback>
-  <callback>set_damping($damping)</callback>
-  <callback>set_samp_rate($samp_rate)</callback> -->
   <param>
     <name>Coefficient</name>
     <key>type</key>
@@ -46,7 +39,6 @@ self.$(id) = $(id) = variables_loop_filter.get_$(type.fcn)($index_m, $natural_fr
       <opt>fcn:coeff3_3</opt>
     </option>
 	</param>
-
 
   <param>
     <name>natural frequency</name>

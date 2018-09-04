@@ -29,22 +29,29 @@ namespace gr {
   namespace ecss {
 
     /*!
-     * \brief <+description of block+>
+     * \brief AGC Log-based.
      * \ingroup ecss
      *
+     * \details This block generates a complex output signal which is the input complex signal adjusted (amplified or attenuated)in order to become
+     * an output signal of fixed rms value.
+     * The output rms value will be the value of the reference parameter.
+     * In order to be more user friendly, it is possible to set the settling time of the AGC.
      */
     class ECSS_API agc : virtual public gr::sync_block
     {
      public:
+       /*!
+        * \brief Return a shared_ptr to a new instance of ecss::agc.
+        */
       typedef boost::shared_ptr<agc> sptr;
 
       /*!
-       * \brief Return a shared_ptr to a new instance of ecss::agc.
-       *
-       * To avoid accidental use of raw pointers, ecss::agc's
-       * constructor is in a private implementation
-       * class. ecss::agc::make is the public interface for
-       * creating new instances.
+        * \brief Make a AGC Log-based.
+        *
+        * \param samp_rate Sampling rate of signal.
+        * \param reference rms value of the output.
+        * \param gain initial gain of the AGC.
+        * \param attack_time is the expected attack/settling time of the AGC.
        */
       static sptr make(float attack_time, float reference, float gain, int samp_rate);
 

@@ -76,7 +76,7 @@ namespace gr {
 
 
      public:
-      signal_search_impl(int fftsize, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate);
+      signal_search_impl(int fftsize, bool carrier, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate);
       ~signal_search_impl();
 
       // Where all the action really happens

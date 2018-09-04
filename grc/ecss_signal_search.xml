@@ -6,11 +6,7 @@
   <import>import ecss</import>
   <import>from gnuradio.filter import firdes</import>
   <make>ecss.signal_search($fftsize, $wintype, $freq_central, $bandwidth, $freq_cutoff, $threshold, $samp_rate)</make>
-  <!-- Make one 'param' node for every Parameter you want settable from the GUI.
-       Sub-nodes:
-       * name
-       * key (makes the value accessible as $keyname, e.g. in the make node)
-       * type -->
+
   <param>
    <name>Window Type</name>
    <key>wintype</key>

@@ -39,14 +39,17 @@ namespace gr {
     class ECSS_API pll : virtual public gr::sync_block
     {
      public:
+       /*!
+        * \brief Return a shared_ptr to a new instance of ecss::pll.
+        */
       typedef boost::shared_ptr<pll> sptr;
 
       /*!
-        * \brief Make a PLL with complex mixer
+        * \brief Make a PLL with complex mixer.
         *
         * \param samp_rate Sampling rate of signal.
         * \param order Loop filter order.
-        * \param N number of bits
+        * \param N number of bits.
         * \param Coeff1_2 value of the coefficient in the Proportional arm of the second order Loop Filter.
         * \param Coeff2_2 value of the coefficient in the Integral arm of the second order Loop Filter.
         * \param Coeff4_2 value of the coefficient in the Integral arm of the second order Loop Filter for the imperfect integration.

@@ -5,11 +5,7 @@
   <category>[ecss]</category>
   <import>import ecss</import>
   <make>ecss.coherent_phase_modulator($N, $n_inputs)</make>
-  <!-- Make one 'param' node for every Parameter you want settable from the GUI.
-       Sub-nodes:
-       * name
-       * key (makes the value accessible as $keyname, e.g. in the make node)
-       * type -->
+
   <param>
     <name>number of bits</name>
     <key>N</key>
@@ -34,14 +30,4 @@
     <name>out</name>
     <type>complex</type>
   </source>
-  <doc>
-    This block generates a complex output signal modulated in phase by inputs.
-    All the int64 inputs are added each other in order to get the final phase value which will be the output signal phase.
-
-    That block evaluates In-phase and Quadrature components through sine and cosine functions of the final phase value evaluated.
-
-    Furthermore, this block allows to reduce the accuracy (setting the number of bits N) of the mathematics in order to simulate properly a real behavior.
-
-    Finally, this block is designed for work together with a custom PLL designed present in the ecss module of OOT.
-  </doc>
 </block>
