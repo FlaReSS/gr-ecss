@@ -303,7 +303,7 @@ def test_sine(self, param):
 
     src_sine = analog.sig_source_c(param.samp_rate, analog.GR_SIN_WAVE, param.freq, amplitude, offset)
     src_noise = analog.noise_source_c(analog.GR_GAUSSIAN, param.noise, offset)
-
+    
     adder = blocks.add_vcc(1)
     throttle = blocks.throttle(gr.sizeof_gr_complex*1, param.samp_rate,True)
     head = blocks.head(gr.sizeof_gr_complex, int (param.items))
@@ -325,7 +325,8 @@ def test_sine(self, param):
     tb.connect((pll, 0), dst_pll_out)
     tb.connect((pll, 1), dst_pll_freq)
     tb.connect((pll, 2), dst_pll_pe)
-    tb.connect((pll, 3), dst_pll_pa)
+    tb.connect((pll, 3), dst_pll_pa)\
+    
 
     # throttle.set_max_noutput_items (param.samp_rate)
     # throttle.set_min_noutput_items (param.samp_rate)
