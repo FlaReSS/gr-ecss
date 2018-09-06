@@ -41,7 +41,7 @@ namespace gr {
               gr::io_signature::make(1, 1, sizeof (int64_t))),
               d_uplink(uplink), d_downlink(downlink), d_N(N)
     {
-      precision = pow(2,(- (N - 1)));
+      precision = pow(2,(- (52 - 1)));  //maximum precision
     }
 
     gain_phase_accumulator_impl::~gain_phase_accumulator_impl()
@@ -61,7 +61,8 @@ namespace gr {
       for (int i = 0; i < noutput_items; i++){
         temp_integer_phase = (in[i] >> (64 - d_N));
         temp_denormalized = (double)(temp_integer_phase * precision);
-        temp_denormalized = temp_denormalized * double(d_downlink / d_uplink);
+        temp_denormalized = temp_denormalized * (double)d_downlink;
+        temp_denormalized = temp_denormalized / (double)d_uplink;
         temp_integer_phase = (int64_t)(temp_denormalized / precision);
         out[i] = (temp_integer_phase << (64 - d_N));
       }

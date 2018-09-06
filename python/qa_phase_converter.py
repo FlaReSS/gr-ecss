@@ -15,6 +15,7 @@ import runner, threading
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+
 class Pdf_class(object):
     """this class can print a single pdf for all the tests"""
 
@@ -56,7 +57,7 @@ def print_parameters(data):
         %(data.samp_rate, data.N, data.min_value, data.max_value)
     print to_print
 
-def check_pa(data_out, items):
+def check_integer_phase(data_out, items):
     """this function checks the integer phase accumulator output from the pll. evaluates the minimum step and the slope"""
 
     minimum_step = sys.maxint
@@ -155,16 +156,16 @@ class qa_phase_converter (gr_unittest.TestCase):
 
         print_parameters(param)
 
-        data_pe = test_ramp(self, param)
-        plot(self,data_pe)
+        data_pc = test_ramp(self, param)
+        plot(self,data_pc)
 
-        pe_min_step , pe_slope = check_pa(data_pe.out, 100)
+        pc_min_step , pc_slope = check_integer_phase(data_pc.out, 100)
         precision = math.pow(2,(- (param.N - 1))) * math.pi
-        pe_min_step_rad = (pe_min_step >> (64 - param.N)) * precision
-        pe_slope_rad = (pe_slope >> (64 - param.N)) * precision
+        pc_min_step_rad = (pc_min_step >> (64 - param.N)) * precision
+        pc_slope_rad = (pc_slope >> (64 - param.N)) * precision
         self.assertGreaterEqual(pe_min_step_rad, precision)
-        print "-Output Slope : %f rad/s;" % pe_slope_rad       # WARNING: this is only a mean
-        print "-Output Min step : %f rad." % pe_min_step_rad
+        print "-Output Slope : %f rad/s;" % pc_slope_rad       # WARNING: this is only a mean
+        print "-Output Min step : %f rad." % pc_min_step_rad
 
     def test_002_t (self):
         """test_002_t: precision test"""
@@ -177,16 +178,16 @@ class qa_phase_converter (gr_unittest.TestCase):
 
         print_parameters(param)
 
-        data_pe = test_ramp(self, param)
-        plot(self,data_pe)
+        data_pc = test_ramp(self, param)
+        plot(self,data_pc)
 
-        pe_min_step , pe_slope = check_pa(data_pe.out, 100)
+        pc_min_step , pc_slope = check_integer_phase(data_pc.out, 100)
         precision = math.pow(2,(- (param.N - 1))) * math.pi
-        pe_min_step_rad = (pe_min_step >> (64 - param.N)) * precision
-        pe_slope_rad = (pe_slope >> (64 - param.N)) * precision
-        self.assertGreaterEqual(pe_min_step_rad, precision)
-        print "-Output Slope : %f rad/s;" % pe_slope_rad       # WARNING: this is only a mean
-        print "-Output Min step : %f rad." % pe_min_step_rad
+        pc_min_step_rad = (pc_min_step >> (64 - param.N)) * precision
+        pc_slope_rad = (pc_slope >> (64 - param.N)) * precision
+        self.assertGreaterEqual(pc_min_step_rad, precision)
+        print "-Output Slope : %f rad/s;" % pc_slope_rad       # WARNING: this is only a mean
+        print "-Output Min step : %f rad." % pc_min_step_rad
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_phase_converter)

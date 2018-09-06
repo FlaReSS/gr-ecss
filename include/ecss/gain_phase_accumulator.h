@@ -27,41 +27,51 @@
 namespace gr {
   namespace ecss {
 
-    /*!
+  /*!
      * \brief output = input / uplink * downlink
      * \ingroup ecss
+     * \details This block multiply the input for a constant given by the ratio (downlink / uplink).
+     * This block takes in account the internal mathematic of the processors, so, to avoid phase jumps
+     * by rounding in int64, this block will consider the number of bits of the trasformation.
+     * 
+     * This block should to be uses between the ecss PLL and Coherent Phase Modulator.
      */
-    class ECSS_API gain_phase_accumulator : virtual public gr::sync_block
-    {
-     public:
-      // gr::ecss::gain_phase_accumulator::sptr
-      typedef boost::shared_ptr<gain_phase_accumulator> sptr;
+  class ECSS_API gain_phase_accumulator : virtual public gr::sync_block
+  {
+  public:
+    // gr::ecss::gain_phase_accumulator::sptr
+    typedef boost::shared_ptr<gain_phase_accumulator> sptr;
 
     /*!
-     * \brief output = input / uplink * downlink
+     * \brief output is the input multiplied by the turn around ratio.
      * \ingroup ecss
+     * \details The turn around ration is evaluated as (downlink / uplink).
+     * 
+     * \param N number of bits.
+     * \param uplink uplink frequency for evaluate the turn aroun ratio.
+     * \param downlink downlink frequency for evaluate the turn aroun ratio.
      */
-      static sptr make(int N, int uplink, int downlink);
+    static sptr make(int N, int uplink, int downlink);
 
-      /*!
+    /*!
        * \brief Return uplink constant
        */
-      virtual int get_uplink() const = 0;
+    virtual int get_uplink() const = 0;
 
-      /*!
+    /*!
        * \brief Return downlink constant
        */
-      virtual int get_downlink() const = 0;
+    virtual int get_downlink() const = 0;
 
-      /*!
+    /*!
        * \brief Set uplink constant
        */
-      virtual void set_uplink(int uplink) = 0;
+    virtual void set_uplink(int uplink) = 0;
 
-      /*!
+    /*!
        * \brief Set downlink constant
        */
-      virtual void set_downlink(int downlink) = 0;
+    virtual void set_downlink(int downlink) = 0;
     };
 
   } // namespace ecss
