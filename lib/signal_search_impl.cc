@@ -117,8 +117,9 @@ namespace gr {
       const gr_complex *in = (const gr_complex *) input_items[0];
       gr_complex *out = (gr_complex *) output_items[0];
       int j = 0;
+      int i = 0;
 
-      for(int i = 0; i < noutput_items; i += d_fftsize) {
+      for(i = 0; i < noutput_items; i += d_fftsize) {
         memcpy(d_residbuf, &in[i], sizeof(gr_complex)*d_fftsize);
 
         fft(d_fbuf, d_residbuf, d_fftsize);
@@ -159,7 +160,7 @@ namespace gr {
 
       }
 
-      consume_each (noutput_items);  //fix the problem with the consume_each!!!
+      consume_each (i);  //fix the problem with the consume_each!!!
       return j;
     }
 

@@ -60,11 +60,4 @@
     <key>samp_rate</key>
     <type>int</type>
   </param>
-  <doc>
-This block evaluates the coefficients for the ecss pll.
-
-Tips:
-- notice that GnuRadio allows to create one variable for each block, so will be necessary to insert several variable blocks.
-- Gnuradio does not allow the callback function for variables. This means that to change in real time the coefficients of pll, you can create several variables for each Coefficient, and choose the wanted one with another block (i.e. chooser block).
-  </doc>
 </block>
