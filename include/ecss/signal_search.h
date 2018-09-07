@@ -66,11 +66,13 @@ namespace gr {
       virtual float get_bandwidth() const = 0;
       virtual float get_freq_cutoff() const = 0;
       virtual float get_threshold() const = 0;
+      virtual bool get_carrier() const = 0;
 
       virtual void set_freq_central(float freq_central) = 0;
       virtual void set_bandwidth(double bandwidth) = 0;
       virtual void set_freq_cutoff(double freq_cutoff) = 0;
       virtual void set_threshold(double threshold) = 0;
+      virtual void set_carrier(bool carrier) = 0;
       virtual void reset() = 0;
     };
 

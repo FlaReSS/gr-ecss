@@ -32,8 +32,7 @@ namespace gr {
     signal_search::sptr
     signal_search::make(int fftsize, bool carrier, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate)
     {
-      return gnuradio::get_initial_sptr
-        (new signal_search_impl(fftsize, wintype, carrier, freq_central, bandwidth, freq_cutoff, threshold, samp_rate));
+      return gnuradio::get_initial_sptr(new signal_search_impl(fftsize, carrier, wintype, freq_central, bandwidth, freq_cutoff, threshold, samp_rate));
     }
 
     /*
@@ -44,10 +43,16 @@ namespace gr {
               gr::io_signature::make(1, 1, sizeof(gr_complex)),
               gr::io_signature::make(1, 1, sizeof(gr_complex))),
               d_wintype((filter::firdes::win_type)(wintype)),
-              d_fftsize(fftsize), d_freq_central(freq_central), d_bandwidth(bandwidth),
-              d_freq_cutoff(freq_cutoff), d_threshold(threshold), d_samp_rate(samp_rate),
-              d_iir_central(M_PI * freq_cutoff / samp_rate), d_iir_left(M_PI * freq_cutoff / samp_rate), d_iir_right(M_PI * freq_cutoff / samp_rate)
+              d_fftsize(fftsize), d_freq_central(freq_central), 
+              d_bandwidth(bandwidth), d_freq_cutoff(freq_cutoff),
+              d_threshold(threshold), d_samp_rate(samp_rate),
+              d_iir_central(M_PI * freq_cutoff / samp_rate), 
+              d_iir_left(M_PI * freq_cutoff / samp_rate), 
+              d_iir_right(M_PI * freq_cutoff / samp_rate),
+              d_carrier(carrier)
     {
+
+      debug_first = true;
       d_fft = new fft::fft_complex(d_fftsize, true);
 
       d_fftsize_half = (unsigned int)(floor(d_fftsize/2.0));
@@ -66,11 +71,20 @@ namespace gr {
       central_band_acc = (float*)volk_malloc(bw_items * sizeof(float), volk_get_alignment());
       memset(central_band_acc, 0, bw_items * sizeof(float));
 
+      central_band_max_index = (uint32_t *)volk_malloc(sizeof(uint32_t), volk_get_alignment());
+      memset(central_band_max_index, 0, sizeof(uint32_t));
+
       right_band_acc = (float*)volk_malloc(bw_items * sizeof(float), volk_get_alignment());
       memset(right_band_acc, 0, bw_items * sizeof(float));
 
+      right_band_max_index = (uint32_t *)volk_malloc(sizeof(uint32_t), volk_get_alignment());
+      memset(right_band_max_index, 0, sizeof(uint32_t));
+
       left_band_acc = (float*)volk_malloc(bw_items * sizeof(float), volk_get_alignment());
       memset(left_band_acc, 0, bw_items * sizeof(float));
+
+      left_band_max_index = (uint32_t *)volk_malloc(sizeof(uint32_t), volk_get_alignment());
+      memset(left_band_max_index, 0, sizeof(uint32_t));
 
       d_residbuf = (gr_complex*)volk_malloc(d_fftsize * sizeof(gr_complex), volk_get_alignment());
       memset(d_residbuf, 0, d_fftsize * sizeof(gr_complex));
@@ -100,6 +114,10 @@ namespace gr {
       // delete d_band_pass_filter_1;
       // delete d_band_pass_filter_2;
       // delete d_band_pass_filter_3;
+
+      // volk_free(increasing);
+      // volk_free(decreasing);
+      // volk_free(out);
     }
 
     void
@@ -128,27 +146,54 @@ namespace gr {
         memcpy(right_band, &d_fbuf[right_first_items], sizeof(float) * bw_items);
         memcpy(left_band, &d_fbuf[left_first_items], sizeof(float) * bw_items);
 
-        volk_32f_accumulator_s32f(central_band_acc, central_band, bw_items);
-        volk_32f_accumulator_s32f(right_band_acc, right_band, bw_items);
-        volk_32f_accumulator_s32f(left_band_acc, left_band, bw_items);
+        if (d_carrier == true) {
+          volk_32f_index_max_32u(central_band_max_index, central_band, bw_items);
+          volk_32f_index_max_32u(right_band_max_index, right_band, bw_items);
+          volk_32f_index_max_32u(left_band_max_index, left_band, bw_items);
+          central_band_p = central_band[*central_band_max_index];
+          right_band_p = right_band[*right_band_max_index];
+          left_band_p = left_band[*left_band_max_index];
+        }
+        else
+        {
+          volk_32f_accumulator_s32f(central_band_acc, central_band, bw_items);
+          volk_32f_accumulator_s32f(right_band_acc, right_band, bw_items);
+          volk_32f_accumulator_s32f(left_band_acc, left_band, bw_items);
+          central_band_p = *central_band_acc / bw_items;
+          right_band_p = *right_band_acc / bw_items;
+          left_band_p = *left_band_acc / bw_items;
+        }
+        
+        // if (i == 0) {
+        //   std::cout << "central_band_mean: " << central_band_mean << std::endl;
+        //   std::cout << "right_band_mean: " << right_band_mean << std ::endl;
+        //   std::cout << "left_band_mean: " << left_band_mean << std ::endl;
+        // }      
 
-        central_band_mean = *central_band_acc / bw_items;
-        right_band_mean = *right_band_acc / bw_items;
-        left_band_mean = *left_band_acc / bw_items;
+        if (debug_first == true)
+        {
+          debug_first = false;
+          for (size_t w = 0; w < bw_items; w++)
+          {
+            std::cout << "central_band[" << w << "]: " << central_band[w] << std::endl;
+          }
+        }
+        
+        d_iir_central.filter(central_band_p);
+        d_iir_left.filter(right_band_p);
+        d_iir_right.filter(left_band_p);
 
-        d_iir_central.filter(central_band_mean);
-        d_iir_left.filter(right_band_mean);
-        d_iir_right.filter(left_band_mean);
+        if (((d_iir_central.prev_output() - d_iir_right.prev_output()) > d_threshold) && ((d_iir_central.prev_output() - d_iir_left.prev_output()) > d_threshold))
+        {
 
-        if (((d_iir_central.prev_output() - d_iir_right.prev_output()) > d_threshold) && ((d_iir_central.prev_output() - d_iir_left.prev_output()) > d_threshold)) {
-
-          memcpy(&out[i], &in[i], sizeof(gr_complex)*d_fftsize);
-          if(first == true){
-            add_item_tag(0, // Port number
-                 nitems_written(0) + d_fftsize, // Offset
-                 pmt::intern("reset"), // Key
-                 pmt::intern("pll") // Value
-                );
+          memcpy(&out[i], &in[i], sizeof(gr_complex) * d_fftsize);
+          if (first == true)
+          {
+            add_item_tag(0,                             // Port number
+                          nitems_written(0) + d_fftsize, // Offset
+                          pmt::intern("reset"),          // Key
+                          pmt::intern("pll")             // Value
+            );
             // std::cout << "signal search tag offset: "<< j << '\n'; //debug
             first = false;
           }
@@ -187,10 +232,14 @@ namespace gr {
     void
     signal_search_impl::items_eval()
     {
-      bw_items = (d_bandwidth / d_samp_rate) * d_fftsize;
-      central_first_items = ((d_freq_central / d_samp_rate) * d_fftsize) + d_fftsize_half;
+      bw_items = ceil(d_bandwidth / d_samp_rate * d_fftsize / 2) * 2;   //round up to the nearest even
+      central_first_items = ((d_freq_central / d_samp_rate) * d_fftsize) + d_fftsize_half - (bw_items / 2);
       left_first_items = central_first_items - bw_items - 1;
       right_first_items = central_first_items + bw_items + 1;
+      std::cout<< "bw_items: " << bw_items << std::endl;
+      std::cout << "central_first_items: "<< central_first_items<< std ::endl;
+      std::cout << "left_first_items: "<< left_first_items<< std ::endl;
+      std::cout << "right_first_items: "<< right_first_items<< std ::endl;
     }
 
     void
@@ -203,17 +252,19 @@ namespace gr {
     }
 
     float
-    signal_search_impl::get_freq_central() const {return d_freq_central;}
+    signal_search_impl::get_freq_central() const { return d_freq_central;}
 
     float
-    signal_search_impl::get_bandwidth() const {return d_bandwidth;}
+    signal_search_impl::get_bandwidth() const { return d_bandwidth; }
 
     float
-    signal_search_impl::get_freq_cutoff() const {return d_freq_cutoff;}
+    signal_search_impl::get_freq_cutoff() const { return d_freq_cutoff; }
 
     float
-    signal_search_impl::get_threshold() const {return 10 * std::log10(d_threshold);}
+    signal_search_impl::get_threshold() const { return 10 * std::log10(d_threshold); }
 
+    bool
+    signal_search_impl::get_carrier() const { return d_carrier; }
 
     void
     signal_search_impl::set_freq_central(float freq_central) {
@@ -233,6 +284,15 @@ namespace gr {
     void
     signal_search_impl::set_threshold(double threshold) {
       d_threshold = std::pow(10.0, threshold/10);;
+    }
+
+    void
+    signal_search_impl::set_carrier(bool carrier)
+    {
+      d_carrier = carrier;
+      d_iir_central.reset();
+      d_iir_right.reset();
+      d_iir_left.reset();
     }
 
     void

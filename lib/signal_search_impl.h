@@ -33,15 +33,17 @@ namespace gr {
     class signal_search_impl : public signal_search
     {
      private:
+      bool debug_first;
       bool first;
+      bool d_carrier;
       int d_samp_rate;
       float d_threshold;
       float d_bandwidth;
       float d_freq_cutoff;
       float d_freq_central;
-      float central_band_mean, central_band_avg;
-      float right_band_mean, right_band_avg;
-      float left_band_mean, left_band_avg;
+      float central_band_p, central_band_avg;
+      float right_band_p, right_band_avg;
+      float left_band_p, left_band_avg;
       int d_fftsize;
       int d_fftsize_half;
       int bw_items;
@@ -62,6 +64,9 @@ namespace gr {
       double* d_pdu_magbuf;
       float* central_band;
       float* central_band_acc;
+      uint32_t *central_band_max_index;
+      uint32_t *right_band_max_index;
+      uint32_t *left_band_max_index;
       float* right_band;
       float* right_band_acc;
       float* left_band;
@@ -91,11 +96,13 @@ namespace gr {
       float get_bandwidth() const;
       float get_freq_cutoff() const;
       float get_threshold() const;
+      bool get_carrier() const;
 
       void set_freq_central(float freq_central);
       void set_bandwidth(double bandwidth);
       void set_freq_cutoff(double freq_cutoff);
       void set_threshold(double threshold);
+      void set_carrier(bool carrier);
       void reset();
 
     };
