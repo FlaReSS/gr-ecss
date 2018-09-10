@@ -53,11 +53,17 @@ namespace gr {
     {
 
       debug_first = true;
+      d_decimation = 8;
+      ninput_items_buffer = 0;
+    
       d_fft = new fft::fft_complex(d_fftsize, true);
 
       d_fftsize_half = (unsigned int)(floor(d_fftsize/2.0));
 
       items_eval();
+
+      in_buffer = (gr_complex *)volk_malloc((16000) * sizeof(gr_complex), volk_get_alignment());
+      memset(in_buffer, 0, (16000) * sizeof(gr_complex));    //extra buffer of 4096 items
 
       central_band = (float*)volk_malloc(bw_items * sizeof(float), volk_get_alignment());
       memset(central_band, 0, bw_items * sizeof(float));
@@ -123,7 +129,7 @@ namespace gr {
     void
     signal_search_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
     {
-      ninput_items_required[0] = noutput_items;
+      ninput_items_required[0] = ceil(noutput_items / d_fftsize) * d_fftsize;
     }
 
     int
@@ -134,79 +140,96 @@ namespace gr {
     {
       const gr_complex *in = (const gr_complex *) input_items[0];
       gr_complex *out = (gr_complex *) output_items[0];
-      int j = 0;
+      int out_items = 0;
       int i = 0;
 
-      for(i = 0; i < noutput_items; i += d_fftsize) {
-        memcpy(d_residbuf, &in[i], sizeof(gr_complex)*d_fftsize);
-
-        fft(d_fbuf, d_residbuf, d_fftsize);
-
-        memcpy(central_band, &d_fbuf[central_first_items], sizeof(float) * bw_items);
-        memcpy(right_band, &d_fbuf[right_first_items], sizeof(float) * bw_items);
-        memcpy(left_band, &d_fbuf[left_first_items], sizeof(float) * bw_items);
-
-        if (d_carrier == true) {
-          volk_32f_index_max_32u(central_band_max_index, central_band, bw_items);
-          volk_32f_index_max_32u(right_band_max_index, right_band, bw_items);
-          volk_32f_index_max_32u(left_band_max_index, left_band, bw_items);
-          central_band_p = central_band[*central_band_max_index];
-          right_band_p = right_band[*right_band_max_index];
-          left_band_p = left_band[*left_band_max_index];
-        }
-        else
+      memcpy(&in_buffer[ninput_items_buffer], in, sizeof(gr_complex) * (noutput_items));
+      ninput_items_buffer = ninput_items_buffer + noutput_items;
+      // std::cout << "1) ninput_items_buffer: " << ninput_items_buffer << '\n'; //debug
+      // std::cout << "noutput_items: " << noutput_items << std::endl;
+      if (ninput_items_buffer >= d_fftsize)
+      {
+        for (i = 0; i < ninput_items_buffer; i += d_fftsize)
         {
-          volk_32f_accumulator_s32f(central_band_acc, central_band, bw_items);
-          volk_32f_accumulator_s32f(right_band_acc, right_band, bw_items);
-          volk_32f_accumulator_s32f(left_band_acc, left_band, bw_items);
-          central_band_p = *central_band_acc / bw_items;
-          right_band_p = *right_band_acc / bw_items;
-          left_band_p = *left_band_acc / bw_items;
-        }
-        
-        // if (i == 0) {
-        //   std::cout << "central_band_mean: " << central_band_mean << std::endl;
-        //   std::cout << "right_band_mean: " << right_band_mean << std ::endl;
-        //   std::cout << "left_band_mean: " << left_band_mean << std ::endl;
-        // }      
+          memcpy(d_residbuf, &in_buffer[i], sizeof(gr_complex) * d_fftsize);
+          fft(d_fbuf, d_residbuf, d_fftsize);
 
-        if (debug_first == true)
-        {
-          debug_first = false;
-          for (size_t w = 0; w < bw_items; w++)
+          // std::cout << "ninput_items_buffer: " << ninput_items_buffer << std::endl;
+          memcpy(central_band, &d_fbuf[central_first_items], sizeof(float) * bw_items);
+          memcpy(right_band, &d_fbuf[right_first_items], sizeof(float) * bw_items);
+          memcpy(left_band, &d_fbuf[left_first_items], sizeof(float) * bw_items);
+
+          if (d_carrier == true)
           {
-            std::cout << "central_band[" << w << "]: " << central_band[w] << std::endl;
+            volk_32f_index_max_32u(central_band_max_index, central_band, bw_items);
+            volk_32f_index_max_32u(right_band_max_index, right_band, bw_items);
+            volk_32f_index_max_32u(left_band_max_index, left_band, bw_items);
+            central_band_p = central_band[*central_band_max_index];
+            right_band_p = right_band[*right_band_max_index];
+            left_band_p = left_band[*left_band_max_index];
           }
-        }
-        
-        d_iir_central.filter(central_band_p);
-        d_iir_left.filter(right_band_p);
-        d_iir_right.filter(left_band_p);
-
-        if (((d_iir_central.prev_output() - d_iir_right.prev_output()) > d_threshold) && ((d_iir_central.prev_output() - d_iir_left.prev_output()) > d_threshold))
-        {
-
-          memcpy(&out[i], &in[i], sizeof(gr_complex) * d_fftsize);
-          if (first == true)
+          else
           {
-            add_item_tag(0,                             // Port number
-                          nitems_written(0) + d_fftsize, // Offset
-                          pmt::intern("reset"),          // Key
-                          pmt::intern("pll")             // Value
-            );
-            // std::cout << "signal search tag offset: "<< j << '\n'; //debug
-            first = false;
+            volk_32f_accumulator_s32f(central_band_acc, central_band, bw_items);
+            volk_32f_accumulator_s32f(right_band_acc, right_band, bw_items);
+            volk_32f_accumulator_s32f(left_band_acc, left_band, bw_items);
+            central_band_p = *central_band_acc / bw_items;
+            right_band_p = *right_band_acc / bw_items;
+            left_band_p = *left_band_acc / bw_items;
           }
-          j += d_fftsize;
-        }
-        else{
-          first = true;
-        }
 
+          // if (i == 0) {
+          //   std::cout << "central_band_mean: " << central_band_mean << std::endl;
+          //   std::cout << "right_band_mean: " << right_band_mean << std ::endl;
+          //   std::cout << "left_band_mean: " << left_band_mean << std ::endl;
+          // }
+
+          // if (debug_first == true)
+          // {
+          //   debug_first = false;
+          //   for (size_t w = 0; w < bw_items; w++)
+          //   {
+          //     std::cout << "central_band[" << w << "]: " << central_band[w] << std::endl;
+          //   }
+          // }
+
+          d_iir_central.filter(central_band_p);
+          d_iir_right.filter(left_band_p);
+          d_iir_left.filter(right_band_p);
+
+          central_band_avg = d_iir_central.prev_output();
+          right_band_avg = d_iir_right.prev_output();
+          left_band_avg = d_iir_left.prev_output();
+
+          if (((central_band_avg - right_band_avg) > d_threshold) && ((central_band_avg - left_band_avg) > d_threshold))
+          {
+
+            memcpy(&out[i], &in_buffer[i], sizeof(gr_complex) * d_fftsize);
+            if (first == true)
+            {
+              add_item_tag(0,                             // Port number
+                           nitems_written(0) + d_fftsize, // Offset
+                           pmt::intern("reset"),          // Key
+                           pmt::intern("pll")             // Value
+              );
+              
+              first = false;
+            }
+            out_items += d_fftsize;
+          }
+          else
+          {
+            first = true;
+          }
+
+          ninput_items_buffer -= d_fftsize;
+        }
       }
-
-      consume_each (i);  //fix the problem with the consume_each!!!
-      return j;
+        // ninput_items_buffer = ninput_items_buffer - in_items;
+        // std::cout << "2) ninput_items_buffer: " << ninput_items_buffer << '\n'; //debug
+      std::cout << "ninput_items_buffer: " << ninput_items_buffer << '\n'; //debug
+      consume_each(noutput_items);
+      return out_items;
     }
 
 
@@ -236,10 +259,10 @@ namespace gr {
       central_first_items = ((d_freq_central / d_samp_rate) * d_fftsize) + d_fftsize_half - (bw_items / 2);
       left_first_items = central_first_items - bw_items - 1;
       right_first_items = central_first_items + bw_items + 1;
-      std::cout<< "bw_items: " << bw_items << std::endl;
-      std::cout << "central_first_items: "<< central_first_items<< std ::endl;
-      std::cout << "left_first_items: "<< left_first_items<< std ::endl;
-      std::cout << "right_first_items: "<< right_first_items<< std ::endl;
+      // std::cout<< "bw_items: " << bw_items << std::endl;
+      // std::cout << "central_first_items: "<< central_first_items<< std ::endl;
+      // std::cout << "left_first_items: "<< left_first_items<< std ::endl;
+      // std::cout << "right_first_items: "<< right_first_items<< std ::endl;
     }
 
     void
