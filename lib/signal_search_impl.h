@@ -24,6 +24,7 @@
 #include <ecss/signal_search.h>
 #include <gnuradio/filter/single_pole_iir.h>
 #include <gnuradio/filter/firdes.h>
+#include <gnuradio/filter/pfb_arb_resampler.h>
 #include <gnuradio/fft/fft.h>
 #include <vector>
 
@@ -59,8 +60,11 @@ private:
   filter::single_pole_iir<float, float, float> d_iir_central;
   filter::single_pole_iir<float, float, float> d_iir_left;
   filter::single_pole_iir<float, float, float> d_iir_right;
+
+  filter::kernel::pfb_arb_resampler_ccf *pfb_decimator;
   // std::vector<gr_complex> d_new_taps;
   fft::fft_complex *d_fft;
+
   gr_complex *d_residbuf;
   double *d_magbuf;
   double *d_pdu_magbuf;
@@ -76,11 +80,11 @@ private:
   float *d_tmpbuf;
   float *d_fbuf;
 
-  gr_complex *in_buffer;
+  std::vector<gr_complex> in_decimated;
   int d_decimation;
-  int ninput_items_buffer;
     
   void fft(float *data_out, const gr_complex *data_in, int size);
+  
   void buildwindow();
   void items_eval();
 

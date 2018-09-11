@@ -92,9 +92,11 @@
   <sink>
     <name>in</name>
     <type>complex</type>
+    <vlen>$fftsize * 8</vlen>
   </sink>
   <source>
     <name>out</name>
     <type>complex</type>
+    <vlen>$fftsize * 8</vlen>
   </source>
 </block>
