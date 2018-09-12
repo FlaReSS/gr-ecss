@@ -5,7 +5,7 @@
   <category>[ecss]</category>
   <import>import ecss</import>
   <import>from gnuradio.filter import firdes</import>
-  <make>ecss.signal_search($fftsize, $carrier, $wintype, $freq_central, $bandwidth, $freq_cutoff, $threshold, $samp_rate)</make>
+  <make>ecss.signal_search($fftsize, $decimation, $carrier, $average, $wintype, $freq_central, $bandwidth, $freq_cutoff, $threshold, $samp_rate)</make>
 
   <param>
    <name>Window Type</name>
@@ -63,6 +63,13 @@
    <key>fftsize</key>
    <type>int</type>
   </param>
+
+  <param>
+  <name>Decimation</name>
+  <key>decimation</key>
+  <type>int</type>
+  </param>
+
   <param>
     <name>Central frequency of the signal</name>
     <key>freq_central</key>
@@ -73,6 +80,22 @@
     <key>bandwidth</key>
     <type>real</type>
   </param>
+
+  <param>
+  <name>Average</name>
+  <key>average</key>
+  <value>True</value>
+  <type>bool</type>
+  <option>
+    <name>Yes</name>
+    <key>True</key>
+  </option>
+  <option>
+    <name>No</name>
+    <key>False</key>
+  </option>
+</param>
+
   <param>
     <name>Frequency cut-off (average)</name>
     <key>freq_cutoff</key>
@@ -92,11 +115,11 @@
   <sink>
     <name>in</name>
     <type>complex</type>
-    <vlen>$fftsize * 8</vlen>
+    <vlen>$fftsize * $decimation</vlen>
   </sink>
   <source>
     <name>out</name>
     <type>complex</type>
-    <vlen>$fftsize * 8</vlen>
+    <vlen>$fftsize * $decimation</vlen>
   </source>
 </block>

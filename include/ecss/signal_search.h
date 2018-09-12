@@ -52,7 +52,9 @@ namespace gr {
         * \brief Signal Search with internal FFT evaluation.
         *
         * \param samp_rate Sampling rate of signal.
+        * \param decimation Internal Resampling rate of signal, before the FFT evaluation.
         * \param carrier says to the signal search if have to search a carrier or an 'wider' signal.
+        * \param average if average (with IIR Filters) at the output of FFT is applied or not.
         * \param fftsize size of the FFT evaluated internally.
         * \param wintype type of window to apply.
         * \param freq_central this is the centre of the bandwidth where the signal is searched.
@@ -60,20 +62,26 @@ namespace gr {
         * \param freq_cutoff value of cut-off frequency of the internal IIR used to filer the output of the internal bandwidth.
         * \param threshold it is the minimum difference that must to be between the central band and the lateral ones in order to discriminate if there is a signal on the input.
        */
-      static sptr make(int fftsize, bool carrier, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate);
+      static sptr make(int fftsize, int decimation, bool carrier, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate);
 
       virtual float get_freq_central() const = 0;
       virtual float get_bandwidth() const = 0;
       virtual float get_freq_cutoff() const = 0;
       virtual float get_threshold() const = 0;
       virtual bool get_carrier() const = 0;
+      virtual bool get_average() const = 0;
+      virtual int get_decimation() const = 0;
+      virtual int get_fftsize() const = 0;
 
       virtual void set_freq_central(float freq_central) = 0;
-      virtual void set_bandwidth(double bandwidth) = 0;
-      virtual void set_freq_cutoff(double freq_cutoff) = 0;
-      virtual void set_threshold(double threshold) = 0;
+      virtual void set_bandwidth(float bandwidth) = 0;
+      virtual void set_freq_cutoff(float freq_cutoff) = 0;
+      virtual void set_threshold(float threshold) = 0;
       virtual void set_carrier(bool carrier) = 0;
-      virtual void reset() = 0;
+      virtual void set_average(bool average) = 0;
+      // virtual void set_fftsize(int fftsize) = 0;
+      // virtual void set_decimation(int decimation) = 0;
+      // virtual void reset() = 0;
     };
 
   } // namespace ecss

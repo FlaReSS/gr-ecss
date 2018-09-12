@@ -36,10 +36,11 @@ namespace ecss
 class signal_search_impl : public signal_search
 {
 private:
-  bool debug_first;
   bool first;
   bool d_carrier;
+  bool d_average;
   int d_samp_rate;
+  int d_decimation;
   float d_threshold;
   float d_bandwidth;
   float d_freq_cutoff;
@@ -81,15 +82,17 @@ private:
   float *d_fbuf;
 
   std::vector<gr_complex> in_decimated;
-  int d_decimation;
     
   void fft(float *data_out, const gr_complex *data_in, int size);
   
+  void create_buffers();
+  void destroy_buffers();
   void buildwindow();
   void items_eval();
+  void average_reset();
 
 public:
-  signal_search_impl(int fftsize, bool carrier, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate);
+  signal_search_impl(int fftsize, int decimation, bool carrier, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate);
   ~signal_search_impl();
 
   void forecast(int noutput_items, gr_vector_int &ninput_items_required);
@@ -104,13 +107,18 @@ public:
   float get_freq_cutoff() const;
   float get_threshold() const;
   bool get_carrier() const;
+  bool get_average() const;
+  int get_decimation() const;
+  int get_fftsize() const;
 
   void set_freq_central(float freq_central);
-  void set_bandwidth(double bandwidth);
-  void set_freq_cutoff(double freq_cutoff);
-  void set_threshold(double threshold);
+  void set_bandwidth(float bandwidth);
+  void set_freq_cutoff(float freq_cutoff);
+  void set_threshold(float threshold);
   void set_carrier(bool carrier);
-  void reset();
+  void set_average(bool average);
+  // void set_fftsize(int fftsize);
+  // void set_decimation(int decimation);
 };
 
 } // namespace ecss
