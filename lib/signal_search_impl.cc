@@ -35,9 +35,6 @@ namespace gr {
     return gnuradio::get_initial_sptr(new signal_search_impl(fftsize, decimation, carrier, average, wintype, freq_central, bandwidth, freq_cutoff, threshold, samp_rate));
     }
 
-    /*
-     * The private constructor
-     */
     signal_search_impl::signal_search_impl(int fftsize, int decimation, bool carrier, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate)
         : gr::block("signal_search",
                     gr::io_signature::make(1, 1, sizeof(gr_complex) * (decimation * fftsize)),
@@ -309,7 +306,7 @@ namespace gr {
 
     void
     signal_search_impl::set_threshold(float threshold) {
-      d_threshold = std::pow(10.0, threshold/10);;
+      d_threshold = std::pow(10.0, threshold/10);
     }
 
     void

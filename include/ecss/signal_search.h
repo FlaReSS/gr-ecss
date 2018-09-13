@@ -34,21 +34,21 @@ namespace gr {
      * \ingroup ecss
      *
      * \details This block uses an FFT to analyze the input signal.
-     * It is condired as main bin (from the FFT) the one correspondent to the parameter value setted. So, are condired as central bandwidth
+     * It is condired as main bin (from the FFT) the one correspondent to the parameter value setted. So, is condired as central bandwidth
      * the ones around the main one in the bandwidth setted. So, are also taken two more bands of the same width around the main one.
      *
      * Setting the carrier search, will be compared only the power of the higher bin in the main band with the power of the lateral ones. If it is setted the signal search,
-     * is evaluated the power of the whole main band and compared with the lateral ones. In both cases, the difference of power have to be equal or greater than the main one.
+     * is evaluated the power of the whole main band and compared with the lateral ones. In both cases, the difference of power have to be equal or greater than the threshold set.
      */
     class ECSS_API signal_search : virtual public gr::block
     {
      public:
        /*!
-        * \brief Return a shared_ptr to a new instance of ecss::pll.
+        * \brief Return a shared_ptr to a new instance of ecss::signal_search.
         */
-      typedef boost::shared_ptr<signal_search> sptr;
+       typedef boost::shared_ptr<signal_search> sptr;
 
-      /*!
+       /*!
         * \brief Signal Search with internal FFT evaluation.
         *
         * \param samp_rate Sampling rate of signal.
@@ -62,26 +62,26 @@ namespace gr {
         * \param freq_cutoff value of cut-off frequency of the internal IIR used to filer the output of the internal bandwidth.
         * \param threshold it is the minimum difference that must to be between the central band and the lateral ones in order to discriminate if there is a signal on the input.
        */
-      static sptr make(int fftsize, int decimation, bool carrier, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate);
+       static sptr make(int fftsize, int decimation, bool carrier, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate);
 
-      virtual float get_freq_central() const = 0;
-      virtual float get_bandwidth() const = 0;
-      virtual float get_freq_cutoff() const = 0;
-      virtual float get_threshold() const = 0;
-      virtual bool get_carrier() const = 0;
-      virtual bool get_average() const = 0;
-      virtual int get_decimation() const = 0;
-      virtual int get_fftsize() const = 0;
+       virtual float get_freq_central() const = 0;
+       virtual float get_bandwidth() const = 0;
+       virtual float get_freq_cutoff() const = 0;
+       virtual float get_threshold() const = 0;
+       virtual bool get_carrier() const = 0;
+       virtual bool get_average() const = 0;
+       virtual int get_decimation() const = 0;
+       virtual int get_fftsize() const = 0;
 
-      virtual void set_freq_central(float freq_central) = 0;
-      virtual void set_bandwidth(float bandwidth) = 0;
-      virtual void set_freq_cutoff(float freq_cutoff) = 0;
-      virtual void set_threshold(float threshold) = 0;
-      virtual void set_carrier(bool carrier) = 0;
-      virtual void set_average(bool average) = 0;
-      // virtual void set_fftsize(int fftsize) = 0;
-      // virtual void set_decimation(int decimation) = 0;
-      // virtual void reset() = 0;
+       virtual void set_freq_central(float freq_central) = 0;
+       virtual void set_bandwidth(float bandwidth) = 0;
+       virtual void set_freq_cutoff(float freq_cutoff) = 0;
+       virtual void set_threshold(float threshold) = 0;
+       virtual void set_carrier(bool carrier) = 0;
+       virtual void set_average(bool average) = 0;
+       // virtual void set_fftsize(int fftsize) = 0;
+       // virtual void set_decimation(int decimation) = 0;
+       // virtual void reset() = 0;
     };
 
   } // namespace ecss

@@ -52,3 +52,4 @@ GR_ADD_TEST(qa_coherent_phase_modulator ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOU
 GR_ADD_TEST(qa_phase_converter ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_phase_converter.py)
 GR_ADD_TEST(qa_signal_search ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_signal_search.py)
 GR_ADD_TEST(qa_gain_phase_accumulator ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_gain_phase_accumulator.py)
+GR_ADD_TEST(qa_signal_search_goertzel ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_signal_search_goertzel.py)

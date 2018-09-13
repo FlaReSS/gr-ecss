@@ -29,5 +29,6 @@ install(FILES
     phase_converter.h
     variables_loop_filter.h
     signal_search.h
-    gain_phase_accumulator.h DESTINATION include/ecss
+    gain_phase_accumulator.h
+    signal_search_goertzel.h DESTINATION include/ecss
 )

@@ -26,5 +26,6 @@ install(FILES
     ecss_phase_converter.xml
     ecss_variables_loop_filter.xml
     ecss_signal_search.xml
-    ecss_gain_phase_accumulator.xml DESTINATION share/gnuradio/grc/blocks
+    ecss_gain_phase_accumulator.xml
+    ecss_signal_search_goertzel.xml DESTINATION share/gnuradio/grc/blocks
 )

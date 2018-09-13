@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<block>
+  <name>Signal Search Goertzel</name>
+  <key>ecss_signal_search_goertzel</key>
+  <category>[ecss]</category>
+  <import>import ecss</import>
+  <make>ecss.signal_search_goertzel($size, $average, $freq_central, $bandwidth, $freq_cutoff, $threshold, $samp_rate)</make>
+ 
+
+  <param>
+   <name>Size</name>
+   <key>size</key>
+   <type>int</type>
+  </param>
+
+  <param>
+    <name>Central frequency of the signal</name>
+    <key>freq_central</key>
+    <type>real</type>
+  </param>
+  <param>
+    <name>Bandwidth of the signal</name>
+    <key>bandwidth</key>
+    <type>real</type>
+  </param>
+
+  <param>
+  <name>Average</name>
+  <key>average</key>
+  <value>True</value>
+  <type>bool</type>
+  <option>
+    <name>Yes</name>
+    <key>True</key>
+  </option>
+  <option>
+    <name>No</name>
+    <key>False</key>
+  </option>
+</param>
+
+  <param>
+    <name>Frequency cut-off (average)</name>
+    <key>freq_cutoff</key>
+    <type>real</type>
+  </param>
+  <param>
+    <name>Threshold [dB]</name>
+    <key>threshold</key>
+    <type>real</type>
+  </param>
+  <param>
+    <name>samp_rate</name>
+    <key>samp_rate</key>
+    <value>samp_rate</value>
+    <type>int</type>
+  </param>
+
+  <sink>
+    <name>in</name>
+    <type>complex</type>
+    <vlen>$size</vlen>
+  </sink>
+  <source>
+    <name>out</name>
+    <type>complex</type>
+    <vlen>$size</vlen>
+  </source>
+</block>
