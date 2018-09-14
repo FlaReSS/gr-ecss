@@ -46,19 +46,16 @@ namespace gr{
           d_freq_central(freq_central),
           d_bandwidth(bandwidth), d_freq_cutoff(freq_cutoff),
           d_threshold(threshold), d_samp_rate(samp_rate),
-          d_iir_central(M_PI * freq_cutoff / samp_rate),
-          d_iir_lateral(M_PI * freq_cutoff / samp_rate),
+          d_iir(M_PI * freq_cutoff / samp_rate),
           d_average(average), d_size(size)
     {
       debug = 0;
       first = true;
       create_buffers();
       average_reset();
-      // if (d_freq_central!= 0){
-        signal_gen(d_freq_central);
-      // }
-      coeff_central = coeff_eval(0);
-      std::cout << "coeff_central: " << coeff_central << std::endl;
+      signal_gen(d_freq_central);
+      coeff_lateral = coeff_eval(d_bandwidth);
+      std::cout << "coeff_lateral: " << coeff_lateral << std::endl;
     }
 
     signal_search_goertzel_impl::~signal_search_goertzel_impl()
@@ -68,6 +65,7 @@ namespace gr{
     void
     signal_search_goertzel_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
     {
+      ninput_items_required[0] = noutput_items;
     }
 
     int
@@ -78,55 +76,88 @@ namespace gr{
     {
       gr_complex *in = (gr_complex *) input_items[0];
       gr_complex *out = (gr_complex *)output_items[0];
+      float ratio;
+      float ratio_avg;
+      uint out_items = 0;
+      uint index = 0;
 
-      for (int i = 0; i < noutput_items; i++)
+      for (uint i = 0; i < noutput_items; i++)
       {
-        int index = i * d_size;
-        // if (d_freq_central != 0){
-          // volk_32fc_x2_multiply_32fc(in_shifted_buffer, &in[index], signal_shifter_buffer, d_size);
-          // out[i] = goertzel(&in_shifted_buffer[0], coeff_central);
-        // out[i] = goertzel(&in[index], coeff_central);
-        // if (debug < 4000)
-        //   std::cout << "result:  " << goertzel(&in[index], coeff_central) << std::endl;
-        goertzel(&in[index], coeff_central);
-        memcpy(&out[index], &in[index], sizeof(gr_complex) * d_size);
-        // }
-        // else{
-        //   out[i] = goertzel(in[index], coeff_central);
-        // }
         
-      }
+        if (d_freq_central != 0){
+          volk_32fc_x2_multiply_32fc(in_shifted_buffer, &in[index], signal_shifter_buffer, d_size);
+          ratio = double_goertzel(in_shifted_buffer, coeff_lateral);
+        }
+        else{
+          ratio = double_goertzel(&in[index], coeff_lateral);
+        }
 
+        if (d_average == true){
+          d_iir.filter(ratio);
+          ratio_avg = d_iir.prev_output();
+        }
+        else{
+          ratio_avg = ratio;
+        }
+        if(debug<4000)
+          std::cout << "ratio: " << ratio << std::endl;
+        debug++;
+        if (ratio_avg >= d_threshold){
+          memcpy(&out[index], &in[index], sizeof(gr_complex) * d_size);
+          if (first == true)
+          {
+            add_item_tag(0,                           // Port number
+                         nitems_written(0) + (index), // Offset
+                         pmt::intern("reset"),        // Key
+                         pmt::intern("pll")           // Value
+            );
+
+            first = false;
+          }
+          out_items++;
+          index += d_size;
+          }
+          else{
+            first = true;
+          }
+      }
+      
       consume_each(noutput_items);
-      return noutput_items;
+      return out_items;
     }
 
-    double
-    signal_search_goertzel_impl::goertzel(gr_complex *in, double coeff)
+    float
+    signal_search_goertzel_impl::double_goertzel(gr_complex *in, double coeff)
     {
+      double Q0_zero, Q1_zero, Q2_zero;
       double Q0, Q1, Q2;
+      double magnitude_2_zero;
       double magnitude_2;
 
+      Q1_zero = 0.0;
+      Q2_zero = 0.0;
       Q1 = 0.0;
       Q2 = 0.0;
 
       for (int i = 0; i < d_size; i++)
       {
-        gr_complex input= *in;
+        gr_complex input = *in;
+        Q0_zero = input.real() + (2 * Q1_zero) - Q2_zero;
         Q0 = input.real() + (coeff * Q1) - Q2;
         // std::cout<<"input.real(): "<<input.real()<<std::endl;
+        Q2_zero = Q1_zero;
+        Q1_zero = Q0_zero;
         Q2 = Q1;
         Q1 = Q0;
         in++;
       }
-      magnitude_2 = (Q1 * Q1) + (Q2 * Q2) - (Q1 * Q2 * coeff);  //
+      magnitude_2_zero = (Q1_zero * Q1_zero) + (Q2_zero * Q2_zero) - (Q1_zero * Q2_zero * 2);  //
+      magnitude_2 = (Q1 * Q1) + (Q2 * Q2) - (Q1 * Q2 * coeff);
 
-      Q1 = 0.0;
-      Q2 = 0.0;
-      if(magnitude_2 == 0)
-        std::cout << "debug: " << debug << std::endl;
-      debug ++;
-      return magnitude_2;
+      // if(magnitude_2 == 0)
+      //   std::cout << "debug: " << debug << std::endl;
+      // debug ++;
+      return (float)(magnitude_2_zero - magnitude_2) / (d_size * d_size);
     }
 
     double
@@ -208,8 +239,7 @@ namespace gr{
     }
     void 
     signal_search_goertzel_impl::set_threshold(float threshold){
-      d_threshold = std::pow(10.0, threshold / 10);
-      
+      d_threshold = std::pow(10.0, (threshold / 10));
     }
     void 
     signal_search_goertzel_impl::set_average(bool average){
@@ -237,8 +267,7 @@ namespace gr{
     void
     signal_search_goertzel_impl::average_reset()
     {
-      d_iir_central.reset();
-      d_iir_lateral.reset();
+      d_iir.reset();
     }
 
   } /* namespace ecss */

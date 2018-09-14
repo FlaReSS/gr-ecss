@@ -42,15 +42,14 @@ namespace ecss
       float d_freq_central;
       float central_band_p, central_band_avg;
       float lateral_band_p, lateral_band_avg;
-      filter::single_pole_iir<float, float, float> d_iir_central;
-      filter::single_pole_iir<float, float, float> d_iir_lateral;
+      filter::single_pole_iir<float, float, float> d_iir;
       gr_complex *in_shifted_buffer;
       gr_complex *signal_shifter_buffer;
 
       double coeff_central;
       double coeff_lateral;
 
-      double goertzel(gr_complex *in, double coeff);
+      float double_goertzel(gr_complex *in, double coeff);
 
       void create_buffers();
       void destroy_buffers();
