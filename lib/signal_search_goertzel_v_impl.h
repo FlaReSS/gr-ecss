@@ -17,10 +17,10 @@
  * the Free Software Foundation, Inc., 51 Franklin Street,
  * Boston, MA 02110-1301, USA.
  */
-#ifndef INCLUDED_ECSS_SIGNAL_SEARCH_GOERTZEL_IMPL_H
-#define INCLUDED_ECSS_SIGNAL_SEARCH_GOERTZEL_IMPL_H
+#ifndef INCLUDED_ECSS_SIGNAL_SEARCH_GOERTZEL_V_IMPL_H
+#define INCLUDED_ECSS_SIGNAL_SEARCH_GOERTZEL_V_IMPL_H
 
-#include <ecss/signal_search_goertzel.h>
+#include <ecss/signal_search_goertzel_v.h>
 #include <gnuradio/filter/single_pole_iir.h>
 #include <vector>
 
@@ -29,7 +29,7 @@ namespace gr
 namespace ecss
 {
 
-  class signal_search_goertzel_impl : public signal_search_goertzel
+  class signal_search_goertzel_v_impl : public signal_search_goertzel_v
   {
     private:
       bool first;
@@ -59,8 +59,8 @@ namespace ecss
       int debug;
 
     public:
-      signal_search_goertzel_impl(int size, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate);
-      ~signal_search_goertzel_impl();
+      signal_search_goertzel_v_impl(int size, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate);
+      ~signal_search_goertzel_v_impl();
 
       // Where all the action really happens
       void forecast(int noutput_items, gr_vector_int &ninput_items_required);
@@ -88,5 +88,5 @@ namespace ecss
   } // namespace ecss
 } // namespace gr
 
-#endif /* INCLUDED_ECSS_SIGNAL_SEARCH_GOERTZEL_IMPL_H */
+#endif /* INCLUDED_ECSS_SIGNAL_SEARCH_GOERTZEL_IMPL_V_H */
 

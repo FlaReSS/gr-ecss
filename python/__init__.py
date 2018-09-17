@@ -33,5 +33,6 @@ except ImportError:
 # import any pure python here
 from spl_encoder import spl_encoder
 from spl_decoder import spl_decoder
+from signal_search_goertzel_hier import signal_search_goertzel_hier
 
 #

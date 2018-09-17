@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <block>
-  <name>Signal Search Goertzel</name>
-  <key>ecss_signal_search_goertzel</key>
+  <name>Signal Search Goertzel Vector</name>
+  <key>ecss_signal_search_goertzel_v</key>
   <category>[ecss]</category>
   <import>import ecss</import>
-  <make>ecss.signal_search_goertzel($size, $average, $freq_central, $bandwidth, $freq_cutoff, $threshold, $samp_rate)</make>
+  <make>ecss.signal_search_goertzel_v($size, $average, $freq_central, $bandwidth, $freq_cutoff, $threshold, $samp_rate)</make>
   <callback>set_freq_central($freq_central)</callback>
   <callback>set_bandwidth($bandwidth)</callback>
   <callback>set_freq_cutoff($freq_cutoff)</callback>
@@ -64,9 +64,11 @@
   <sink>
     <name>in</name>
     <type>complex</type>
+    <vlen>$size</vlen>
   </sink>
   <source>
     <name>out</name>
     <type>complex</type>
+    <vlen>$size</vlen>
   </source>
 </block>

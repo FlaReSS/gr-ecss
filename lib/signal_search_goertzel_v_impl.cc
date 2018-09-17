@@ -22,7 +22,7 @@
 #endif
 
 #include <gnuradio/io_signature.h>
-#include "signal_search_goertzel_impl.h"
+#include "signal_search_goertzel_v_impl.h"
 #include <volk/volk.h>
 #include <gnuradio/sincos.h>
 #include <gnuradio/math.h>
@@ -33,16 +33,16 @@ namespace gr{
     #define M_TWOPI (2.0*M_PI)
     #endif
 
-    signal_search_goertzel::sptr
-    signal_search_goertzel::make(int size, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate)
+    signal_search_goertzel_v::sptr
+    signal_search_goertzel_v::make(int size, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate)
     {
-      return gnuradio::get_initial_sptr(new signal_search_goertzel_impl(size, average, freq_central, bandwidth, freq_cutoff, threshold, samp_rate));
+      return gnuradio::get_initial_sptr(new signal_search_goertzel_v_impl(size, average, freq_central, bandwidth, freq_cutoff, threshold, samp_rate));
     }
 
-    signal_search_goertzel_impl::signal_search_goertzel_impl(int size, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate)
-        : gr::block("signal_search_goertzel",
-                    gr::io_signature::make(1, 1, sizeof(gr_complex)),
-                    gr::io_signature::make(1, 1, sizeof(gr_complex))),
+    signal_search_goertzel_v_impl::signal_search_goertzel_v_impl(int size, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate)
+        : gr::block("signal_search_goertzel_v",
+                    gr::io_signature::make(1, 1, sizeof(gr_complex) * size),
+                    gr::io_signature::make(1, 1, sizeof(gr_complex) * size)),
           d_freq_central(freq_central),
           d_bandwidth(bandwidth), d_freq_cutoff(freq_cutoff),
           d_threshold(threshold), d_samp_rate(samp_rate),
@@ -58,18 +58,18 @@ namespace gr{
       std::cout << "coeff_lateral: " << coeff_lateral << std::endl;
     }
 
-    signal_search_goertzel_impl::~signal_search_goertzel_impl()
+    signal_search_goertzel_v_impl::~signal_search_goertzel_v_impl()
     {
     }
 
     void
-    signal_search_goertzel_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
+    signal_search_goertzel_v_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
     {
-      ninput_items_required[0] = 4096;
+      ninput_items_required[0] = noutput_items;
     }
 
     int
-    signal_search_goertzel_impl::general_work (int noutput_items,
+    signal_search_goertzel_v_impl::general_work (int noutput_items,
                        gr_vector_int &ninput_items,
                        gr_vector_const_void_star &input_items,
                        gr_vector_void_star &output_items)
@@ -79,17 +79,17 @@ namespace gr{
       float ratio;
       float ratio_avg;
       uint out_items = 0;
-      uint i = 0;
+      uint index = 0;
 
-      for (i = 0; i < noutput_items; i+= d_size)
+      for (uint i = 0; i < noutput_items; i++)
       {
         
         if (d_freq_central != 0){
-          volk_32fc_x2_multiply_32fc(in_shifted_buffer, &in[i], signal_shifter_buffer, d_size);
+          volk_32fc_x2_multiply_32fc(in_shifted_buffer, &in[index], signal_shifter_buffer, d_size);
           ratio = double_goertzel_complex(in_shifted_buffer, coeff_lateral);
         }
         else{
-          ratio = double_goertzel_complex(&in[i], coeff_lateral);
+          ratio = double_goertzel_complex(&in[index], coeff_lateral);
         }
 
         if (d_average == true){
@@ -104,30 +104,31 @@ namespace gr{
         //   std::cout << "ratio: " << ratio << std::endl;
         // debug++;
         if (ratio_avg > 0.18){
-          memcpy(&out[i], &in[i], sizeof(gr_complex) * d_size);
+          memcpy(&out[index], &in[index], sizeof(gr_complex) * d_size);
           if (first == true)
           {
             add_item_tag(0,                           // Port number
-                         nitems_written(0) + (i), // Offset
+                         nitems_written(0) + (index), // Offset
                          pmt::intern("reset"),        // Key
                          pmt::intern("pll")           // Value
             );
 
             first = false;
           }
-          out_items += d_size;
+          out_items++;
+          index += d_size;
           }
           else{
             first = true;
           }
       }
       
-      consume_each(i);
+      consume_each(noutput_items);
       return out_items;
     }
 
     float
-    signal_search_goertzel_impl::double_goertzel_complex(gr_complex *in, float coeff)
+    signal_search_goertzel_v_impl::double_goertzel_complex(gr_complex *in, float coeff)
     {
       float Q0_0r, Q0_1r, Q0_0i, Q0_1i;
       float Q1_0r, Q2_0r, Q1_0i, Q2_0i;
@@ -182,7 +183,7 @@ namespace gr{
     }
 
     float
-    signal_search_goertzel_impl::coeff_eval(float freq)
+    signal_search_goertzel_v_impl::coeff_eval(float freq)
     {
       int k = (int)(((d_size * freq) / d_samp_rate));
       float coeff = 2 * cos((double)((M_TWOPI / d_size) * k));
@@ -190,7 +191,7 @@ namespace gr{
     }
 
     void
-    signal_search_goertzel_impl::signal_gen(float freq)
+    signal_search_goertzel_v_impl::signal_gen(float freq)
     {
       double phase=0;
       double  delta_phase;
@@ -216,26 +217,26 @@ namespace gr{
     }
 
     float
-    signal_search_goertzel_impl::get_freq_central() const { return d_freq_central; }
+    signal_search_goertzel_v_impl::get_freq_central() const { return d_freq_central; }
 
     float
-    signal_search_goertzel_impl::get_bandwidth() const { return d_bandwidth; }
+    signal_search_goertzel_v_impl::get_bandwidth() const { return d_bandwidth; }
 
     float
-    signal_search_goertzel_impl::get_freq_cutoff() const { return d_freq_cutoff; }
+    signal_search_goertzel_v_impl::get_freq_cutoff() const { return d_freq_cutoff; }
 
     float
-    signal_search_goertzel_impl::get_threshold() const { return 10 * std::log10(d_threshold); }
+    signal_search_goertzel_v_impl::get_threshold() const { return 10 * std::log10(d_threshold); }
 
     bool
-    signal_search_goertzel_impl::get_average() const { return d_average; }
+    signal_search_goertzel_v_impl::get_average() const { return d_average; }
 
     int
-    signal_search_goertzel_impl::get_size() const { return d_size; }
+    signal_search_goertzel_v_impl::get_size() const { return d_size; }
 
 
     void 
-    signal_search_goertzel_impl::set_freq_central(float freq_central){
+    signal_search_goertzel_v_impl::set_freq_central(float freq_central){
       //!WARNING to complete
       if (abs(freq_central) >= (d_samp_rate / (2)))
       {
@@ -244,7 +245,7 @@ namespace gr{
       d_freq_central = freq_central;
     }
     void 
-    signal_search_goertzel_impl::set_bandwidth(float bandwidth){
+    signal_search_goertzel_v_impl::set_bandwidth(float bandwidth){
       //!WARNING to complete
       if (bandwidth >= d_samp_rate || bandwidth < 0)
       {
@@ -254,29 +255,29 @@ namespace gr{
     }
 
     void 
-    signal_search_goertzel_impl::set_freq_cutoff(float freq_cutoff){
+    signal_search_goertzel_v_impl::set_freq_cutoff(float freq_cutoff){
       //!WARNING to complete
       average_reset();
     }
 
     void 
-    signal_search_goertzel_impl::set_threshold(float threshold){
+    signal_search_goertzel_v_impl::set_threshold(float threshold){
       d_threshold = std::pow(10.0, (threshold / 10));
     }
 
     void 
-    signal_search_goertzel_impl::set_average(bool average){
+    signal_search_goertzel_v_impl::set_average(bool average){
       d_average = average;
       average_reset();
     }
 
     void 
-    signal_search_goertzel_impl::set_size(int size){
+    signal_search_goertzel_v_impl::set_size(int size){
       d_size = size;
     }
 
     void
-    signal_search_goertzel_impl::create_buffers()
+    signal_search_goertzel_v_impl::create_buffers()
     {
       in_shifted_buffer = (gr_complex *)volk_malloc(d_size * sizeof(gr_complex), volk_get_alignment());
       memset(in_shifted_buffer, 0, d_size * sizeof(gr_complex));
@@ -286,14 +287,14 @@ namespace gr{
     }
 
     void
-    signal_search_goertzel_impl::destroy_buffers()
+    signal_search_goertzel_v_impl::destroy_buffers()
     {
       volk_free(in_shifted_buffer);
       volk_free(signal_shifter_buffer);
     }
 
     void
-    signal_search_goertzel_impl::average_reset()
+    signal_search_goertzel_v_impl::average_reset()
     {
       d_iir.reset();
     }

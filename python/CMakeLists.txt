@@ -34,7 +34,7 @@ GR_PYTHON_INSTALL(
     __init__.py
     spl_encoder.py
     spl_decoder.py
-    DESTINATION ${GR_PYTHON_DIR}/ecss
+    signal_search_goertzel_hier.py DESTINATION ${GR_PYTHON_DIR}/ecss
 )
 
 ########################################################################
@@ -53,3 +53,5 @@ GR_ADD_TEST(qa_phase_converter ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/
 GR_ADD_TEST(qa_signal_search ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_signal_search.py)
 GR_ADD_TEST(qa_gain_phase_accumulator ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_gain_phase_accumulator.py)
 GR_ADD_TEST(qa_signal_search_goertzel ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_signal_search_goertzel.py)
+GR_ADD_TEST(qa_signal_search_goertzel_hier ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_signal_search_goertzel_hier.py)
+GR_ADD_TEST(qa_signal_search_goertzel_v ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_signal_search_goertzel_v.py)

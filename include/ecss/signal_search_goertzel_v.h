@@ -17,8 +17,8 @@
  * the Free Software Foundation, Inc., 51 Franklin Street,
  * Boston, MA 02110-1301, USA.
  */
-#ifndef INCLUDED_ECSS_SIGNAL_SEARCH_GOERTZEL_H
-#define INCLUDED_ECSS_SIGNAL_SEARCH_GOERTZEL_H
+#ifndef INCLUDED_ECSS_SIGNAL_SEARCH_GOERTZEL_V_H
+#define INCLUDED_ECSS_SIGNAL_SEARCH_GOERTZEL_V_H
 
 #include <ecss/api.h>
 #include <gnuradio/block.h>
@@ -40,13 +40,13 @@
      * Is evaluated the power of the main band and compared with the lateral one. 
      * The difference of power have to be equal or greater than than the threshold set.
      */
-  class ECSS_API signal_search_goertzel : virtual public gr::block
+  class ECSS_API signal_search_goertzel_v : virtual public gr::block
   {
     public:
         /*!
-            * \brief Return a shared_ptr to a new instance of ecss::signal_search_goertzel.
+            * \brief Return a shared_ptr to a new instance of ecss::signal_search_goertzel_v.
             */
-        typedef boost::shared_ptr<signal_search_goertzel> sptr;
+        typedef boost::shared_ptr<signal_search_goertzel_v> sptr;
 
         /*!
             * \brief Signal Search with Goertzel Algorithm evaluation.
@@ -80,4 +80,4 @@
   } // namespace ecss
 } // namespace gr
 
-#endif /* INCLUDED_ECSS_SIGNAL_SEARCH_GOERTZEL_H */
+#endif /* INCLUDED_ECSS_SIGNAL_SEARCH_GOERTZEL_V_H */

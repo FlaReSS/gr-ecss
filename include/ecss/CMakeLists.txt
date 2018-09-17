@@ -30,5 +30,6 @@ install(FILES
     variables_loop_filter.h
     signal_search.h
     gain_phase_accumulator.h
-    signal_search_goertzel.h DESTINATION include/ecss
+    signal_search_goertzel.h
+    signal_search_goertzel_v.h DESTINATION include/ecss
 )
