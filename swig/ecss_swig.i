@@ -17,6 +17,7 @@
 #include "ecss/gain_phase_accumulator.h"
 #include "ecss/signal_search_goertzel.h"
 #include "ecss/signal_search_goertzel_v.h"
+#include "ecss/signal_search_fft_v.h"
 %}
 
 
@@ -39,3 +40,6 @@ GR_SWIG_BLOCK_MAGIC2(ecss, gain_phase_accumulator);
 GR_SWIG_BLOCK_MAGIC2(ecss, signal_search_goertzel);
 %include "ecss/signal_search_goertzel_v.h"
 GR_SWIG_BLOCK_MAGIC2(ecss, signal_search_goertzel_v);
+
+%include "ecss/signal_search_fft_v.h"
+GR_SWIG_BLOCK_MAGIC2(ecss, signal_search_fft_v);

@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<block>
+  <name>Signal Search FFT hier</name>
+  <key>ecss_signal_search_fft_hier</key>
+  <category>[ecss]</category>
+  <import>import ecss</import>
+  <import>from gnuradio.filter import firdes</import>
+  <make>ecss.signal_search_fft_hier($fftsize, $decimation, $carrier, $average, $wintype, $freq_central, $bandwidth, $freq_cutoff, $threshold, $samp_rate)</make>
+
+  <param>
+    <name>Window Type</name>
+    <key>wintype</key>
+    <value>firdes.WIN_BLACKMAN_hARRIS</value>
+    <type>enum</type>
+    <hide>part</hide>
+    <option>
+      <name>Blackman-harris</name>
+      <key>firdes.WIN_BLACKMAN_hARRIS</key>
+    </option>
+    <option>
+      <name>Hamming</name>
+      <key>firdes.WIN_HAMMING</key>
+    </option>
+    <option>
+      <name>Hann</name>
+      <key>firdes.WIN_HANN</key>
+    </option>
+    <option>
+      <name>Blackman</name>
+      <key>firdes.WIN_BLACKMAN</key>
+    </option>
+    <option>
+      <name>Rectangular</name>
+      <key>firdes.WIN_RECTANGULAR</key>
+    </option>
+    <option>
+      <name>Kaiser</name>
+      <key>firdes.WIN_KAISER</key>
+    </option>
+    <option>
+      <name>Flat-top</name>
+      <key>firdes.WIN_FLATTOP</key>
+    </option>
+  </param>
+
+  <param>
+    <name>Carrier</name>
+    <key>carrier</key>
+    <value>True</value>
+    <type>bool</type>
+    <option>
+      <name>Carrier Search</name>
+      <key>True</key>
+    </option>
+    <option>
+      <name>Signal Search</name>
+      <key>False</key>
+    </option>
+  </param>
+
+  <param>
+    <name>FFT size</name>
+    <key>fftsize</key>
+    <type>int</type>
+  </param>
+
+  <param>
+    <name>Decimation</name>
+    <key>decimation</key>
+    <type>int</type>
+  </param>
+
+  <param>
+    <name>Central frequency of the signal</name>
+    <key>freq_central</key>
+    <type>real</type>
+  </param>
+  <param>
+    <name>Bandwidth of the signal</name>
+    <key>bandwidth</key>
+    <type>real</type>
+  </param>
+
+  <param>
+    <name>Average</name>
+    <key>average</key>
+    <value>True</value>
+    <type>bool</type>
+    <option>
+      <name>Yes</name>
+      <key>True</key>
+    </option>
+    <option>
+      <name>No</name>
+      <key>False</key>
+    </option>
+  </param>
+
+  <param>
+    <name>Frequency cut-off (average)</name>
+    <key>freq_cutoff</key>
+    <type>real</type>
+  </param>
+  <param>
+    <name>Threshold [dB]</name>
+    <key>threshold</key>
+    <type>real</type>
+  </param>
+  <param>
+    <name>samp_rate</name>
+    <key>samp_rate</key>
+    <type>int</type>
+  </param>
+
+  <sink>
+    <name>in</name>
+    <type>complex</type>
+    <vlen>$fftsize * $decimation</vlen>
+  </sink>
+  <source>
+    <name>out</name>
+    <type>complex</type>
+    <vlen>$fftsize * $decimation</vlen>
+  </source>
+</block>

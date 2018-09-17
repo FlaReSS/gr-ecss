@@ -34,5 +34,6 @@ except ImportError:
 from spl_encoder import spl_encoder
 from spl_decoder import spl_decoder
 from signal_search_goertzel_hier import signal_search_goertzel_hier
+from signal_search_fft_hier import signal_search_fft_hier
 
 #

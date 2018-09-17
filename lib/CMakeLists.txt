@@ -34,7 +34,8 @@ list(APPEND ecss_sources
     signal_search_impl.cc
     gain_phase_accumulator_impl.cc
     signal_search_goertzel_impl.cc
-    signal_search_goertzel_v_impl.cc )
+    signal_search_goertzel_v_impl.cc
+    signal_search_fft_v_impl.cc )
 
 set(ecss_sources "${ecss_sources}" PARENT_SCOPE)
 if(NOT ecss_sources)

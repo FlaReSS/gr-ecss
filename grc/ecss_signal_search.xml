@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <block>
-  <name>signal_search</name>
+  <name>Signal Search</name>
   <key>ecss_signal_search</key>
   <category>[ecss]</category>
   <import>import ecss</import>
