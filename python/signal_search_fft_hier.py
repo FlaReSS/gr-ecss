@@ -46,11 +46,11 @@ class signal_search_fft_hier(gr.hier_block2):
         self.fftsize = fftsize
 
         self.ecss_signal_search_fft_v = ecss.signal_search_fft_v(
-            self.size, self.average, self.freq_central,  self.bandwidth, self.freq_cutoff, self.threshold, self.samp_rate)
+            self.fftsize, self.decimation, self.carrier, self.average, self.wintype, self.freq_central, self.bandwidth, self.freq_cutoff, self.threshold, self.samp_rate)
         self.blocks_stream_to_vector = blocks.stream_to_vector(
-            gr.sizeof_gr_complex*1, self.size)
+            gr.sizeof_gr_complex*1, self.fftsize * self.decimation)
         self.blocks_vector_to_stream = blocks.vector_to_stream(
-            gr.sizeof_gr_complex*1, self.size)
+            gr.sizeof_gr_complex*1, self.fftsize * self.decimation)
 
         ##################################################
         # Connections
@@ -62,43 +62,47 @@ class signal_search_fft_hier(gr.hier_block2):
                      (self.blocks_vector_to_stream, 0))
         self.connect((self.blocks_vector_to_stream, 0), self)
 
-    def set_freq_central(self, freq_central):
+
+    def get_freq_central():
+        return self.ecss_signal_search_fft_v.get_freq_central()
+
+    def get_bandwidth():
+        return self.ecss_signal_search_fft_v.get_bandwidth()
+
+    def get_freq_cutoff():
+        return self.ecss_signal_search_fft_v.get_freq_cutoff()
+
+    def get_threshold():
+        return self.ecss_signal_search_fft_v.get_threshold()
+
+    def get_carrier():
+        return self.ecss_signal_search_fft_v.get_carrier()
+
+    def get_average():
+        return self.ecss_signal_search_fft_v.get_average()
+
+    def get_decimation():
+        return self.ecss_signal_search_fft_v.get_decimation()
+
+    def get_fftsize():
+        return self.ecss_signal_search_fft_v.get_fftsize()
+
+ 
+    def set_freq_central(freq_central):
         self.ecss_signal_search_fft_v.set_freq_central(freq_central)
 
-    def set_bandwidth(self, bandwidth):
-        self.size = int(
-            2 ** (math.floor(math.log((self.samp_rate / bandwidth), 2))))
-        print("Signal Search FFT set with internal size: %d" % (self.size))
-        self.bandwidth = self.samp_rate / self.size
-        if self.bandwidth != bandwidth:
-            print("Warning: Signal Search FFT set with internal bandwidth: %d Hz" % (
-                self.bandwidth))
+    def set_bandwidth(bandwidth):
+        self.ecss_signal_search_fft_v.set_bandwidth(bandwidth)
 
-        self.ecss_signal_search_goertzel.set_bandwidth(bandwidth)
+    def set_freq_cutoff(freq_cutoff):
+        self.ecss_signal_search_fft_v.set_freq_cutoff(freq_cutoff)
 
-    def set_freq_cutoff(self, freq_cutoff):
-        self.ecss_signal_search_goertzel.set_freq_cutoff(freq_cutoff)
+    def set_threshold(threshold):
+        self.ecss_signal_search_fft_v.set_threshold(threshold)
 
-    def set_threshold(self, threshold):
-        self.ecss_signal_search_goertzel.set_threshold(threshold)
+    def set_carrier(carrier):
+        self.ecss_signal_search_fft_v.set_carrier(carrier)
 
-    def set_average(self, average):
-        self.ecss_signal_search_goertzel.set_average(average)
+    def set_average(average):
+        self.ecss_signal_search_fft_v.set_average(average)
 
-    def get_freq_central(self):
-        return self.ecss_signal_search_goertzel.get_freq_central()
-
-    def get_bandwidth(self):
-        return self.ecss_signal_search_goertzel.get_bandwidth()
-
-    def get_freq_cutoff(self):
-        return self.ecss_signal_search_goertzel.get_freq_cutoff()
-
-    def get_threshold(self):
-        return self.ecss_signal_search_goertzel.get_threshold()
-
-    def get_average(self):
-        return self.ecss_signal_search_goertzel.get_average()
-
-    def get_size(self):
-        return self.ecss_signal_search_goertzel.get_size()

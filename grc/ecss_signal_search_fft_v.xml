@@ -6,7 +6,13 @@
   <import>import ecss</import>
   <import>from gnuradio.filter import firdes</import>
   <make>ecss.signal_search_fft_v($fftsize, $decimation, $carrier, $average, $wintype, $freq_central, $bandwidth, $freq_cutoff, $threshold, $samp_rate)</make>
-
+  <callback>set_freq_central($freq_central)</callback>
+  <callback>set_bandwidth($bandwidth)</callback>
+  <callback>set_freq_cutoff($freq_cutoff)</callback>
+  <callback>set_threshold($threshold)</callback>
+  <callback>set_average($average)</callback>
+  <callback>set_carrier($carrier)</callback>
+  
   <param>
     <name>Window Type</name>
     <key>wintype</key>
