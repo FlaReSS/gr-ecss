@@ -680,7 +680,7 @@ from gnuradio import gr, gr_unittest
 from gnuradio import blocks
 import ecss_swig as ecss
 
-class qa_spl_encoder (gr_unittest.TestCase):
+class qa_nrzl_encoder_subcarrier (gr_unittest.TestCase):
 
     def setUp (self):
         self.tb = gr.top_block ()
@@ -695,4 +695,4 @@ class qa_spl_encoder (gr_unittest.TestCase):
 
 
 if __name__ == '__main__':
-    gr_unittest.run(qa_spl_encoder, "qa_spl_encoder.xml")
+    gr_unittest.run(qa_nrzl_encoder_subcarrier, "qa_nrzl_encoder_subcarrier.xml")

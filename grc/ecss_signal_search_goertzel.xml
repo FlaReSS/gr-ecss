@@ -55,10 +55,10 @@
     <type>real</type>
   </param>
   <param>
-    <name>samp_rate</name>
+    <name>Samp Rate</name>
     <key>samp_rate</key>
     <value>samp_rate</value>
-    <type>int</type>
+    <type>real</type>
   </param>
 
   <sink>

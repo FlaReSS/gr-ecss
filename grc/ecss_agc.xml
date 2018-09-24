@@ -1,13 +1,12 @@
 <?xml version="1.0"?>
 <block>
-  <name>agc</name>
+  <name>AGC</name>
   <key>ecss_agc</key>
   <category>[ecss]</category>
   <import>import ecss</import>
   <make>ecss.agc($attack_time, $reference, $gain, $samp_rate)</make>
 
   <callback>set_attack_time($attack_time)</callback>
-  <callback>set_samp_rate($samp_rate)</callback>
   <callback>set_reference($reference)</callback>
   <callback>set_gain($gain)</callback>
 
@@ -32,7 +31,7 @@
   <param>
     <name>sample rate</name>
     <key>samp_rate</key>
-    <type>int</type>
+    <type>real</type>
   </param>
 
   <sink>

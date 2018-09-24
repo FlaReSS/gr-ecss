@@ -17,6 +17,11 @@
 #include "ecss/signal_search_goertzel.h"
 #include "ecss/signal_search_goertzel_v.h"
 #include "ecss/signal_search_fft_v.h"
+#include "ecss/spl_encoder.h"
+#include "ecss/spl_decoder.h"
+#include "ecss/nrzl_encoder.h"
+#include "ecss/nrzl_decoder.h"
+#include "ecss/nrzl_encoder_subcarrier.h"
 %}
 
 
@@ -41,3 +46,13 @@ GR_SWIG_BLOCK_MAGIC2(ecss, signal_search_goertzel_v);
 
 %include "ecss/signal_search_fft_v.h"
 GR_SWIG_BLOCK_MAGIC2(ecss, signal_search_fft_v);
+%include "ecss/spl_encoder.h"
+GR_SWIG_BLOCK_MAGIC2(ecss, spl_encoder);
+%include "ecss/spl_decoder.h"
+GR_SWIG_BLOCK_MAGIC2(ecss, spl_decoder);
+%include "ecss/nrzl_encoder.h"
+GR_SWIG_BLOCK_MAGIC2(ecss, nrzl_encoder);
+%include "ecss/nrzl_decoder.h"
+GR_SWIG_BLOCK_MAGIC2(ecss, nrzl_decoder);
+%include "ecss/nrzl_encoder_subcarrier.h"
+GR_SWIG_BLOCK_MAGIC2(ecss, nrzl_encoder_subcarrier);

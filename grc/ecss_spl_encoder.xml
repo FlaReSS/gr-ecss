@@ -1,38 +1,31 @@
 <?xml version="1.0"?>
 <block>
-  <name>spl_encoder</name>
+  <name>SP-L Encoder</name>
   <key>ecss_spl_encoder</key>
-  <category>ecss</category>
+  <category>[ecss]</category>
   <import>import ecss</import>
-  <make>ecss.spl_encoder()</make>
-  <!-- Make one 'param' node for every Parameter you want settable from the GUI.
-       Sub-nodes:
-       * name
-       * key (makes the value accessible as $keyname, e.g. in the make node)
-       * type -->
+  <make>ecss.spl_encoder($bit_rate, $samp_rate)</make>
+  
   <param>
-    <name>...</name>
-    <key>...</key>
-    <type>...</type>
+    <name>Samp Rate</name>
+    <key>samp_rate</key>
+    <value>samp_rate</value>
+    <type>real</type>
   </param>
 
-  <!-- Make one 'sink' node per input. Sub-nodes:
-       * name (an identifier for the GUI)
-       * type
-       * vlen
-       * optional (set to 1 for optional inputs) -->
+  <param>
+    <name>Bit Rate</name>
+    <key>bit_rate</key>
+    <value>bit_rate</value>
+    <type>real</type>
+  </param>
+
   <sink>
     <name>in</name>
-    <type><!-- e.g. int, float, complex, byte, short, xxx_vector, ...--></type>
+    <type>byte</type>
   </sink>
-
-  <!-- Make one 'source' node per output. Sub-nodes:
-       * name (an identifier for the GUI)
-       * type
-       * vlen
-       * optional (set to 1 for optional inputs) -->
   <source>
     <name>out</name>
-    <type><!-- e.g. int, float, complex, byte, short, xxx_vector, ...--></type>
+    <type>float</type>
   </source>
 </block>

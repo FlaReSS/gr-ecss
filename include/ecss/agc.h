@@ -53,14 +53,12 @@ namespace gr {
         * \param gain initial gain of the AGC.
         * \param attack_time is the expected attack/settling time of the AGC.
        */
-      static sptr make(float attack_time, float reference, float gain, int samp_rate);
+      static sptr make(float attack_time, float reference, float gain, float samp_rate);
 
       virtual float attack_time() const=0;
-      virtual float samp_rate() const=0;
       virtual float reference() const=0;
       virtual float gain() const=0;
       virtual void set_attack_time(float attack_time)=0;
-      virtual void set_samp_rate(float samp_rate)=0;
       virtual void set_reference(float reference)=0;
       virtual void set_gain(float gain)=0;
     };

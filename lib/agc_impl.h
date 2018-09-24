@@ -32,10 +32,10 @@
         float d_attack_time;		// adjustment rate
         float d_reference;	// reference value
         float d_gain;		// current gain
-        int d_samp_rate;
+        float d_samp_rate;
 
       public:
-       agc_impl(float attack_time, float reference, float gain, int samp_rate);
+       agc_impl(float attack_time, float reference, float gain, float samp_rate);
        ~agc_impl();
 
        int work(int noutput_items,
@@ -43,11 +43,9 @@
           gr_vector_void_star &output_items);
 
        float attack_time() const;
-       float samp_rate() const;
        float reference() const;
        float gain() const;
        void set_attack_time(float attack_time);
-       void set_samp_rate(float samp_rate);
        void set_reference(float reference);
        void set_gain(float gain);
      };

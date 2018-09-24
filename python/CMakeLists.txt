@@ -32,10 +32,9 @@ endif()
 GR_PYTHON_INSTALL(
     FILES
     __init__.py
-    spl_encoder.py
-    spl_decoder.py
     signal_search_goertzel_hier.py
-    signal_search_fft_hier.py DESTINATION ${GR_PYTHON_DIR}/ecss
+    signal_search_fft_hier.py
+    modulator.py DESTINATION ${GR_PYTHON_DIR}/ecss
 )
 
 ########################################################################
@@ -46,8 +45,6 @@ include(GrTest)
 set(GR_TEST_TARGET_DEPS gnuradio-ecss)
 set(GR_TEST_PYTHON_DIRS ${CMAKE_BINARY_DIR}/swig)
 GR_ADD_TEST(qa_agc ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_agc.py)
-GR_ADD_TEST(qa_spl_encoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_spl_encoder.py)
-GR_ADD_TEST(qa_spl_decoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_spl_decoder.py)
 GR_ADD_TEST(qa_pll ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_pll.py)
 GR_ADD_TEST(qa_coherent_phase_modulator ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_coherent_phase_modulator.py)
 GR_ADD_TEST(qa_phase_converter ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_phase_converter.py)
@@ -58,3 +55,9 @@ GR_ADD_TEST(qa_signal_search_goertzel_v ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOU
 GR_ADD_TEST(qa_signal_search_fft_hier ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_signal_search_fft_hier.py)
 GR_ADD_TEST(qa_signal_search_fft ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_signal_search_fft.py)
 GR_ADD_TEST(qa_signal_search_fft_v ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_signal_search_fft_v.py)
+GR_ADD_TEST(qa_spl_encoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_spl_encoder.py)
+GR_ADD_TEST(qa_spl_decoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_spl_decoder.py)
+GR_ADD_TEST(qa_nrzl_encoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_nrzl_encoder.py)
+GR_ADD_TEST(qa_nrzl_decoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_nrzl_decoder.py)
+GR_ADD_TEST(qa_nrzl_encoder_subcarrier ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_nrzl_encoder_subcarrier.py)
+GR_ADD_TEST(qa_modulator ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_modulator.py)

@@ -30,7 +30,7 @@ namespace gr {
     {
 
       int d_N;
-      int d_samp_rate;
+      float d_samp_rate;
       int d_order;
       int64_t d_integer_phase;
       double d_integer_phase_denormalized;                /*!< Integer value after to be denormalized */
@@ -48,7 +48,7 @@ namespace gr {
       double magnitude(gr_complexd sample);
 
       public:
-      pll_impl(int samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float freq_central, float bw);
+      pll_impl(float samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float freq_central, float bw);
       ~pll_impl();
 
       int work (int noutput_items,

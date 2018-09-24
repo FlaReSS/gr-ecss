@@ -31,5 +31,10 @@ install(FILES
     gain_phase_accumulator.h
     signal_search_goertzel.h
     signal_search_goertzel_v.h
-    signal_search_fft_v.h DESTINATION include/ecss
+    signal_search_fft_v.h
+    spl_encoder.h
+    spl_decoder.h
+    nrzl_encoder.h
+    nrzl_decoder.h
+    nrzl_encoder_subcarrier.h DESTINATION include/ecss
 )

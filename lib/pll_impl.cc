@@ -39,7 +39,7 @@ namespace gr {
 
 
     pll::sptr
-    pll::make(int samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float freq_central, float bw)
+    pll::make(float samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float freq_central, float bw)
     {
       return gnuradio::get_initial_sptr
         (new pll_impl(samp_rate, order, N, Coeff1_2, Coeff2_2, Coeff4_2, Coeff1_3, Coeff2_3, Coeff3_3, freq_central, bw));
@@ -50,7 +50,7 @@ namespace gr {
      */
     static int ios[] = {sizeof(gr_complex), sizeof(float), sizeof(float), sizeof(int64_t)};
     static std::vector<int> iosig(ios, ios+sizeof(ios)/sizeof(int));
-    pll_impl::pll_impl(int samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float freq_central, float bw)
+    pll_impl::pll_impl(float samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float freq_central, float bw)
       : gr::sync_block("pll",
             gr::io_signature::make(1, 1, sizeof(gr_complex)),
             gr::io_signature::makev(4, 4, iosig)),

@@ -34,12 +34,12 @@ namespace gr{
     #endif
 
     signal_search_goertzel_v::sptr
-    signal_search_goertzel_v::make(int size, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate)
+    signal_search_goertzel_v::make(int size, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
     {
       return gnuradio::get_initial_sptr(new signal_search_goertzel_v_impl(size, average, freq_central, bandwidth, freq_cutoff, threshold, samp_rate));
     }
 
-    signal_search_goertzel_v_impl::signal_search_goertzel_v_impl(int size, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate)
+    signal_search_goertzel_v_impl::signal_search_goertzel_v_impl(int size, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
         : gr::block("signal_search_goertzel_v",
                     gr::io_signature::make(1, 1, sizeof(gr_complex) * size),
                     gr::io_signature::make(1, 1, sizeof(gr_complex) * size)),
@@ -103,7 +103,7 @@ namespace gr{
         // if(debug<4000)
         //   std::cout << "ratio: " << ratio << std::endl;
         // debug++;
-        if (ratio_avg > 0.18){
+        if (ratio_avg >= 1.8){
           memcpy(&out[index], &in[index], sizeof(gr_complex) * d_size);
           if (first == true)
           {
@@ -135,7 +135,8 @@ namespace gr{
       float Q1_1r, Q2_1r, Q1_1i, Q2_1i;
       float magnitude_0r, magnitude_0i;
       float magnitude_1r, magnitude_1i;
-      float outputr, outputi;
+      // float outputr, outputi;
+      float output_0, output_1;
 
       Q1_0r = 0.0;
       Q2_0r = 0.0;
@@ -170,16 +171,21 @@ namespace gr{
 
       magnitude_0r = (Q1_0r * Q1_0r) + (Q2_0r* Q2_0r) - (Q1_0r * Q2_0r * 2);
       magnitude_1r = (Q1_1r * Q1_1r)+ (Q2_1r* Q2_1r) - (Q1_1r * Q2_1r * coeff);
-      outputr = (magnitude_0r - magnitude_1r);
+      // outputr = (magnitude_0r - magnitude_1r);
 
       magnitude_0i = (Q1_0i * Q1_0i) + (Q2_0i* Q2_0i) - (Q1_0i * Q2_0i * 2);
       magnitude_1i = (Q1_1i * Q1_1i)+ (Q2_1i* Q2_1i) - (Q1_1i * Q2_1i * coeff);
-      outputi = (magnitude_0i - magnitude_1i);
+      // outputi = (magnitude_0i - magnitude_1i);
+
+      output_0 = (magnitude_0r + magnitude_0i);
+      output_1 = (magnitude_1r + magnitude_1i);
+        
 
       // if(magnitude_2 == 0)
       //   std::cout << "debug: " << debug << std::endl;
       // debug ++;
-      return (outputr + outputi) / (d_size * d_size);
+      // return (outputr + outputi) / (d_size * d_size);
+      return output_0 / output_1;
     }
 
     float

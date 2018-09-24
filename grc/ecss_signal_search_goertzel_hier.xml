@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <block>
-  <name>signal_search_goertzel_hier</name>
+  <name>Signal Search Goertzel hier</name>
   <key>ecss_signal_search_goertzel_hier</key>
   <category>[ecss]</category>
   <import>import ecss</import>
@@ -51,7 +51,7 @@
     <name>samp_rate</name>
     <key>samp_rate</key>
     <value>samp_rate</value>
-    <type>int</type>
+    <type>real</type>
   </param>
 
   <sink>

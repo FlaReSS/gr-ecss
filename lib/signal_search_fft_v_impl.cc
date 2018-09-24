@@ -32,12 +32,12 @@ namespace ecss
 {
 
 signal_search_fft_v::sptr
-signal_search_fft_v::make(int fftsize, int decimation, bool carrier, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate)
+signal_search_fft_v::make(int fftsize, int decimation, bool carrier, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
 {
   return gnuradio::get_initial_sptr(new signal_search_fft_v_impl(fftsize, decimation, carrier, average, wintype, freq_central, bandwidth, freq_cutoff, threshold, samp_rate));
 }
 
-signal_search_fft_v_impl::signal_search_fft_v_impl(int fftsize, int decimation, bool carrier, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate)
+signal_search_fft_v_impl::signal_search_fft_v_impl(int fftsize, int decimation, bool carrier, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
     : gr::block("signal_search_fft",
                 gr::io_signature::make(1, 1, sizeof(gr_complex) * (decimation * fftsize)),
                 gr::io_signature::make(1, 1, sizeof(gr_complex) * (decimation * fftsize))),

@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <block>
-  <name>SP-L Decoder</name>
-  <key>ecss_spl_decoder</key>
+  <name>NRZ-L Decoder</name>
+  <key>ecss_nrzl_decoder</key>
   <category>[ecss]</category>
   <import>import ecss</import>
-  <make>ecss.spl_decoder($bit_rate, $samp_rate)</make>
+  <make>ecss.nrzl_decoder($bit_rate, $samp_rate)</make>
 
   <param>
     <name>Samp Rate</name>

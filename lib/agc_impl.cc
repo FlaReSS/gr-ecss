@@ -32,7 +32,7 @@ namespace gr {
   namespace ecss {
 
     agc::sptr
-    agc::make(float attack_time, float reference, float gain, int samp_rate)
+    agc::make(float attack_time, float reference, float gain, float samp_rate)
     {
       return gnuradio::get_initial_sptr
         (new agc_impl(attack_time, reference, gain, samp_rate));
@@ -41,7 +41,7 @@ namespace gr {
     /*
      * The private constructor
      */
-    agc_impl::agc_impl(float attack_time, float reference, float gain, int samp_rate)
+    agc_impl::agc_impl(float attack_time, float reference, float gain, float samp_rate)
       : gr::sync_block("agc",
               gr::io_signature::make(1, 1, sizeof(gr_complex)),
               gr::io_signature::make(1, 1, sizeof(gr_complex))),
@@ -49,7 +49,6 @@ namespace gr {
               d_gain(gain), d_samp_rate(samp_rate)
     {
         set_attack_time(attack_time);
-        set_samp_rate(samp_rate);
         set_reference(reference);
         set_gain(gain);
     }
@@ -85,11 +84,9 @@ namespace gr {
 
 
     float agc_impl::attack_time() const      { return d_attack_time; }
-    float agc_impl::samp_rate() const      { return d_samp_rate; }
   	float agc_impl::reference() const      { return d_reference; }
   	float agc_impl::gain() const      { return d_gain;  }
     void agc_impl::set_attack_time(float attack_time) { d_attack_time = attack_time; }
-    void agc_impl::set_samp_rate(float samp_rate) { d_samp_rate = samp_rate; }
   	void agc_impl::set_reference(float reference) { d_reference = reference; }
   	void agc_impl::set_gain(float gain) { d_gain = gain; }
 

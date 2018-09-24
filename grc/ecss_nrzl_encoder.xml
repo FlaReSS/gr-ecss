@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <block>
-  <name>SP-L Decoder</name>
-  <key>ecss_spl_decoder</key>
+  <name>NRZ-L Encoder</name>
+  <key>ecss_nrzl_encoder</key>
   <category>[ecss]</category>
   <import>import ecss</import>
-  <make>ecss.spl_decoder($bit_rate, $samp_rate)</make>
-
+  <make>ecss.nrzl_encoder($bit_rate, $samp_rate)</make>
+  
   <param>
     <name>Samp Rate</name>
     <key>samp_rate</key>
@@ -22,10 +22,10 @@
 
   <sink>
     <name>in</name>
-    <type>float</type>
+    <type>byte</type>
   </sink>
   <source>
     <name>out</name>
-    <type>byte</type>
+    <type>float</type>
   </source>
 </block>

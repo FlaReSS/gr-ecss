@@ -115,7 +115,7 @@
   <param>
     <name>samp_rate</name>
     <key>samp_rate</key>
-    <type>int</type>
+    <type>real</type>
   </param>
 
   <sink>

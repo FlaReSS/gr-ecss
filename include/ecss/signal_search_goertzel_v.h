@@ -60,7 +60,7 @@
             * \param freq_cutoff value of cut-off frequency of the internal IIR used to filer the output of the internal bandwidth.
             * \param threshold it is the minimum difference that must to be between the central band and the lateral ones in order to discriminate if there is
         */
-        static sptr make(int size, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate);
+        static sptr make(int size, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);
         
 
         virtual float get_freq_central() const = 0;

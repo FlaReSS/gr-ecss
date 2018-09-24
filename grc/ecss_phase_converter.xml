@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <block>
-  <name>phase converter</name>
+  <name>Phase Converter</name>
   <key>ecss_phase_converter</key>
   <category>[ecss]</category>
   <import>import ecss</import>

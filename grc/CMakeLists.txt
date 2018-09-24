@@ -19,8 +19,6 @@
 # Boston, MA 02110-1301, USA.
 install(FILES
     ecss_agc.xml
-    ecss_spl_encoder.xml
-    ecss_spl_decoder.xml
     ecss_pll.xml
     ecss_coherent_phase_modulator.xml
     ecss_phase_converter.xml
@@ -30,5 +28,11 @@ install(FILES
     ecss_signal_search_goertzel_hier.xml
     ecss_signal_search_goertzel_v.xml
     ecss_signal_search_fft_hier.xml
-    ecss_signal_search_fft_v.xml DESTINATION share/gnuradio/grc/blocks
+    ecss_signal_search_fft_v.xml
+    ecss_spl_encoder.xml
+    ecss_spl_decoder.xml
+    ecss_nrzl_encoder.xml
+    ecss_nrzl_decoder.xml
+    ecss_nrzl_encoder_subcarrier.xml
+    ecss_modulator.xml DESTINATION share/gnuradio/grc/blocks
 )

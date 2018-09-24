@@ -39,7 +39,7 @@ private:
   bool first;
   bool d_carrier;
   bool d_average;
-  int d_samp_rate;
+  float d_samp_rate;
   int d_decimation;
   float d_threshold;
   float d_bandwidth;
@@ -92,7 +92,7 @@ private:
   void average_reset();
 
 public:
-  signal_search_fft_v_impl(int fftsize, int decimation, bool carrier, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate);
+  signal_search_fft_v_impl(int fftsize, int decimation, bool carrier, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);
   ~signal_search_fft_v_impl();
 
   void forecast(int noutput_items, gr_vector_int &ninput_items_required);

@@ -47,7 +47,7 @@ public:
        * class. ecss::signal_search_fft_v::make is the public interface for
        * creating new instances.
        */
-  static sptr make(int fftsize, int decimation, bool carrier, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate);
+  static sptr make(int fftsize, int decimation, bool carrier, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);
 
   virtual float get_freq_central() const = 0;
   virtual float get_bandwidth() const = 0;

@@ -34,7 +34,7 @@ namespace ecss
     private:
       bool first;
       bool d_average;
-      int d_samp_rate;
+      float d_samp_rate;
       int d_size;
       float d_threshold;
       float d_bandwidth;
@@ -59,7 +59,7 @@ namespace ecss
       int debug;
 
     public:
-      signal_search_goertzel_impl(int size, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, int samp_rate);
+      signal_search_goertzel_impl(int size, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);
       ~signal_search_goertzel_impl();
 
       // Where all the action really happens

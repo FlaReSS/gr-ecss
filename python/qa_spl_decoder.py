@@ -678,7 +678,7 @@
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-from spl_decoder import spl_decoder
+import ecss_swig as ecss
 
 class qa_spl_decoder (gr_unittest.TestCase):
 

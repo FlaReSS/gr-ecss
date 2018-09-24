@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <block>
-  <name>pll</name>
+  <name>PLL</name>
   <key>ecss_pll</key>
   <category>[ecss]</category>
   <import>import ecss</import>
@@ -17,7 +17,7 @@
   <param>
     <name>sample rate</name>
     <key>samp_rate</key>
-    <type>int</type>
+    <type>real</type>
   </param>
   <param>
     <name>order</name>
