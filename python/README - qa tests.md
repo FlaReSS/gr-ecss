@@ -46,7 +46,8 @@ to the final report. The latter, will be appended if the test will be positive.
 
 Finally, it is possible to create automatically an final report with all the qa tests appended.
 To do it, from terminal, in the path <gr-module>/build/python, run this command:
+
 > python ../../python/final_report.py 
 
-
+this command/program will generate a new folder called "Final Report" which contains the final report in .pdf format.
 
