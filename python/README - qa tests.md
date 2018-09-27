@@ -20,7 +20,7 @@ with the following:
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(<QA_TEST>)
-    runner = runner.HTMLTestRunner(output='Results')
+    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_1')
     runner.run(suite)
     gr_unittest.TestProgram()
 
@@ -35,8 +35,18 @@ Thus, under each test, please use six quotes """" """ to describe the test. It's
 to insert more tests. The descriptions, will be inserted automatically in the final report,
 so, should to be short and exhaustive. It is suggested to start with the name of the test, i.e. "Test 1: ".
 
+It is also possible to use a second template called DEFAULT_TEMPLATE_2 which print also the parameters. To print them, it is mandatory  to print with this format: print "\p ..... \p". (of course, the parameters should to be insterted instead of the dots).
+
 Each test must have an assert comparison, i.e. assertComplexTuplesAlmostEqual(), this is useful
 in order to catch if the test is passed or not.
 
-Finally, it is possible to use the normal print function in order to provide extra information
+In addition, it is possible to use the normal print function in order to provide extra information
 to the final report. The latter, will be appended if the test will be positive.
+
+
+Finally, it is possible to create automatically an final report with all the qa tests appended.
+To do it, from terminal, in the path <gr-module>/build/python, run this command:
+> python ../../python/final_report.py 
+
+
+
