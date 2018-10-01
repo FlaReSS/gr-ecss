@@ -54,9 +54,8 @@ namespace gr{
       first = true;
       create_buffers();
       average_reset();
-      signal_gen(d_freq_central);
-      coeff_lateral = coeff_eval(d_bandwidth);
-      std::cout << "coeff_lateral: " << coeff_lateral << std::endl;
+      // signal_gen(d_freq_central);
+      coeff_eval(freq_central, bandwidth);
     }
 
     signal_search_goertzel_impl::~signal_search_goertzel_impl()
@@ -87,13 +86,13 @@ namespace gr{
       for (i = 0; i < noutput_items; i+= d_size)
       {
         
-        if (d_freq_central != 0){
-          volk_32fc_x2_multiply_32fc(in_shifted_buffer, &in[i], signal_shifter_buffer, d_size);
-          goertzel = double_goertzel_complex(in_shifted_buffer, coeff_lateral);
-        }
-        else{
-          goertzel = double_goertzel_complex(&in[i], coeff_lateral);
-        }
+        // if (d_freq_central != 0){
+        //   volk_32fc_x2_multiply_32fc(in_shifted_buffer, &in[i], signal_shifter_buffer, d_size);
+        //   goertzel = double_goertzel_complex(in_shifted_buffer, coeff_lateral);
+        // }
+        // else{
+          goertzel = double_goertzel_complex(&in[i]);
+        // }
 
         if (d_average == true){
           d_iir_central.filter(goertzel.central);
@@ -112,8 +111,13 @@ namespace gr{
         // if(debug<4000)
         //   std::cout << "ratio: " << ratio << std::endl;
         // debug++;
-        if ((central_avg > left_avg * d_threshold) && (central_avg > right_avg * d_threshold))
+
+
+        if ((central_avg > (left_avg * d_threshold)) && (central_avg > (right_avg * d_threshold)))
         {
+          std::cout << "goertzel.central: " << goertzel.central << std::endl;
+          std::cout << "goertzel.left: " << goertzel.left << std::endl;
+          std::cout << "goertzel.right: " << goertzel.right << std::endl;
           memcpy(&out[i], &in[i], sizeof(gr_complex) * d_size);
           if (first == true)
           {
@@ -126,10 +130,10 @@ namespace gr{
             first = false;
           }
           out_items += d_size;
-          }
-          else{
-            first = true;
-          }
+        }
+        else{
+          first = true;
+        }
       }
       
       consume_each(i);
@@ -137,8 +141,9 @@ namespace gr{
     }
 
     signal_search_goertzel_impl::bins
-    signal_search_goertzel_impl::double_goertzel_complex(gr_complex *in, float k)
+    signal_search_goertzel_impl::double_goertzel_complex(gr_complex *in)
     {
+
       float Q0_0r, Q0_0i, Q0_1r, Q0_1i, Q0_2r, Q0_2i;
       float Q1_0r, Q1_0i, Q1_1r, Q1_1i, Q1_2r, Q1_2i;
       float Q2_0r, Q2_0i, Q2_1r, Q2_1i, Q2_2r, Q2_2i;
@@ -148,18 +153,6 @@ namespace gr{
       float imag_0i, imag_1i, imag_2i;
 
       bins outputs;
-
-      float coeff_0 = 2;
-      float cosine_0 = 1;
-      float sine_0 = 0;
-
-      float coeff_1 = 2 * cos((double)((M_TWOPI / d_size) * k));
-      float cosine_1 = cos((double)((M_TWOPI / d_size) * k));
-      float sine_1 = sin((double)((M_TWOPI / d_size) * k));
-
-      float coeff_2 = 2 * cos((double)((M_TWOPI / d_size) * (-k)));
-      float cosine_2 = cos((double)((M_TWOPI / d_size) * (-k)));
-      float sine_2 = sin((double)((M_TWOPI / d_size) * (-k)));
 
       Q1_0r = 0.0;
       Q2_0r = 0.0;
@@ -179,47 +172,47 @@ namespace gr{
       for (int i = 0; i < d_size; i++)
       {
         gr_complex input = *in;
-        Q0_0r = input.real() + (coeff_0 * Q1_0r) - Q2_0r;
+        Q0_0r = input.real() + (d_coeff_0 * Q1_0r) - Q2_0r;
         Q2_0r = Q1_0r;
         Q1_0r = Q0_0r;
         
-        Q0_1r = input.real() + (coeff_1 * Q1_1r) - Q2_1r;
+        Q0_1r = input.real() + (d_coeff_1 * Q1_1r) - Q2_1r;
         Q2_1r = Q1_1r;
         Q1_1r = Q0_1r;
 
-        Q0_2r = input.real() + (coeff_2 * Q1_2r) - Q2_2r;
+        Q0_2r = input.real() + (d_coeff_2 * Q1_2r) - Q2_2r;
         Q2_2r = Q1_2r;
         Q1_2r = Q0_2r;
 
-        Q0_0i = input.imag() + (coeff_0 * Q1_0i) - Q2_0i;
+        Q0_0i = input.imag() + (d_coeff_0 * Q1_0i) - Q2_0i;
         Q2_0i = Q1_0i;
         Q1_0i = Q0_0i;
 
-        Q0_1i = input.imag() + (coeff_1 * Q1_1i) - Q2_1i;
+        Q0_1i = input.imag() + (d_coeff_1 * Q1_1i) - Q2_1i;
         Q2_1i = Q1_1i;
         Q1_1i = Q0_1i;
 
-        Q0_2i = input.imag() + (coeff_2 * Q1_2i) - Q2_2i;
+        Q0_2i = input.imag() + (d_coeff_2 * Q1_2i) - Q2_2i;
         Q2_2i = Q1_2i;
         Q1_2i = Q0_2i;
 
         in++;
       }
 
-      real_0r = (Q1_0r - Q2_0r * cosine_0);
-      imag_0r = (Q2_0r * sine_0);
-      real_0i = (Q1_0i - Q2_0i * cosine_0);
-      imag_0i = (Q2_0i * sine_0);
+      real_0r = (Q1_0r - Q2_0r * d_cosine_0);
+      imag_0r = (Q2_0r * d_sine_0);
+      real_0i = (Q1_0i - Q2_0i * d_cosine_0);
+      imag_0i = (Q2_0i * d_sine_0);
 
-      real_1r = (Q1_1r - Q2_1r * cosine_1);
-      imag_1r = (Q2_1r * sine_1);
-      real_1i = (Q1_1i - Q2_1i * cosine_1);
-      imag_1i = (Q2_1i * sine_1);
+      real_1r = (Q1_1r - Q2_1r * d_cosine_1);
+      imag_1r = (Q2_1r * d_sine_1);
+      real_1i = (Q1_1i - Q2_1i * d_cosine_1);
+      imag_1i = (Q2_1i * d_sine_1);
 
-      real_2r = (Q1_2r - Q2_2r * cosine_2);
-      imag_2r = (Q2_2r * sine_2);
-      real_2i = (Q1_2i - Q2_2i * cosine_2);
-      imag_2i = (Q2_2i * sine_2);
+      real_2r = (Q1_2r - Q2_2r * d_cosine_2);
+      imag_2r = (Q2_2r * d_sine_2);
+      real_2i = (Q1_2i - Q2_2i * d_cosine_2);
+      imag_2i = (Q2_2i * d_sine_2);
 
       // magnitude_0r = (Q1_0r * Q1_0r) + (Q2_0r* Q2_0r) - (Q1_0r * Q2_0r * 2);
       // magnitude_1r = (Q1_1r * Q1_1r)+ (Q2_1r* Q2_1r) - (Q1_1r * Q2_1r * coeff);
@@ -229,23 +222,37 @@ namespace gr{
       // magnitude_1i = (Q1_1i * Q1_1i)+ (Q2_1i* Q2_1i) - (Q1_1i * Q2_1i * coeff);
       // // outputi = (magnitude_0i - magnitude_1i);
 
-      outputs.central = d_size + ((real_0r - imag_0i) * (real_0r - imag_0i) + (imag_0r + real_0i) * (imag_0r + real_0i));
-      outputs.left = d_size + ((real_1r - imag_1i) * (real_1r - imag_1i) + (imag_1r + real_1i) * (imag_1r + real_1i));
-      outputs.right = d_size + ((real_2r - imag_2i) * (real_2r - imag_2i) + (imag_2r + real_2i) * (imag_2r + real_2i));
+      outputs.central = ((real_0r - imag_0i) * (real_0r - imag_0i) + (real_0i + imag_0r) * (real_0i + imag_0r));
+      outputs.right = ((real_1r - imag_1i) * (real_1r - imag_1i) + (real_1i + imag_1r) * (real_1i + imag_1r));
+      outputs.left = ((real_2r - imag_2i) * (real_2r - imag_2i) + (real_2i + imag_2r) * (real_2i + imag_2r));
 
       // if(magnitude_2 == 0)
-      //   std::cout << "debug: " << debug << std::endl;
+
       // debug ++;
       // return (outputr + outputi) / (d_size * d_size);
       return outputs;
     }
 
-    float
-    signal_search_goertzel_impl::coeff_eval(float freq)
+    void
+    signal_search_goertzel_impl::coeff_eval(float freq_central, float bandwidth)
     {
-      int k = (int)(((d_size * freq) / d_samp_rate));
+      int k_0 = (int)(((d_size * freq_central) / d_samp_rate));
 
-      return k;
+      d_coeff_0 = 2 * cos((double)((M_TWOPI / d_size) * k_0));
+      d_cosine_0 = cos((double)((M_TWOPI / d_size) * k_0));
+      d_sine_0 = sin((double)((M_TWOPI / d_size) * k_0));
+
+      int k_1 = (int)(((d_size * (freq_central + bandwidth)) / d_samp_rate));
+
+      d_coeff_1 = 2 * cos((double)((M_TWOPI / d_size) * k_1));
+      d_cosine_1 = cos((double)((M_TWOPI / d_size) * k_1));
+      d_sine_1 = sin((double)((M_TWOPI / d_size) * k_1));
+
+      int k_2 = (int)(((d_size * (freq_central - bandwidth)) / d_samp_rate));
+
+      d_coeff_2 = 2 * cos((double)((M_TWOPI / d_size) * k_2));
+      d_cosine_2 = cos((double)((M_TWOPI / d_size) * k_2));
+      d_sine_2 = sin((double)((M_TWOPI / d_size) * k_2));
     }
 
     void

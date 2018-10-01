@@ -39,6 +39,16 @@ namespace ecss
         float right;
       };
 
+      float d_coeff_0;
+      float d_cosine_0;
+      float d_sine_0;
+      float d_coeff_1;
+      float d_cosine_1;
+      float d_sine_1;
+      float d_coeff_2;
+      float d_cosine_2;
+      float d_sine_2;
+
       bool first;
       bool d_average;
       float d_samp_rate;
@@ -58,12 +68,12 @@ namespace ecss
 
       float coeff_lateral;
 
-      bins double_goertzel_complex(gr_complex *in, float k);
+      bins double_goertzel_complex(gr_complex *in);
 
       void create_buffers();
       void destroy_buffers();
       void average_reset();
-      float coeff_eval(float freq);
+      void coeff_eval(float freq_central, float bandwidth);
       void signal_gen(float freq);
 
 
