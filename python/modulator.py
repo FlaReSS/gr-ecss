@@ -94,15 +94,13 @@ class modulator(gr.hier_block2):
         # self.connect((self.selector_convolutional_in, 0), (self.convolutional_encoder, 0))
         # self.connect((self.convolutional_encoder, 0), (self.selector_convolutional_out, 0))
         # self.connect((self.selector_convolutional_in, 1), (self.selector_convolutional_out, 1))
-        
         # self.connect((self.selector_convolutional_out, 0), (self.selector_encoder_in, 0))
-        # self.connect((self.selector_encoder_in, 2), (self.nrzl_encoder, 0))
-        # self.connect((self.selector_encoder_in, 1), (self.nrzl_encoder_subcarrier, 0))
+        # self.connect((self.selector_encoder_in, 1), (self.nrzl_encoder, 0))
+        # self.connect((self.selector_encoder_in, 2), (self.nrzl_encoder_subcarrier, 0))
         # self.connect((self.selector_encoder_in, 0), (self.spl_encoder, 0))
-        # self.connect((self.nrzl_encoder, 0), (self.selector_encoder_out, 2))
-        # self.connect((self.nrzl_encoder_subcarrier, 0), (self.selector_encoder_out, 1))
+        # self.connect((self.nrzl_encoder, 0), (self.selector_encoder_out, 1))
+        # self.connect((self.nrzl_encoder_subcarrier, 0), (self.selector_encoder_out, 2))
         # self.connect((self.spl_encoder, 0), (self.selector_encoder_out, 0))
-        
         # self.connect((self.selector_encoder_out, 0), (self.selector_srrc_in, 0))
         # self.connect((self.selector_srrc_in, 0), (self.root_raised_cosine_filter, 0))
         # self.connect((self.selector_srrc_in, 1), (self.selector_srrc_out, 1))
@@ -111,7 +109,38 @@ class modulator(gr.hier_block2):
 
 
 
-        self.connect(self, self.spl_encoder)
+        # self.connect(self, (self.convolutional_encoder, 0))
+        # self.connect((self.convolutional_encoder, 0), (self.selector_convolutional_out, 0))
+        # self.connect(self, (self.selector_convolutional_out, 1))
 
+        # self.connect((self.selector_convolutional_out, 0), (self.nrzl_encoder, 0))
+        # self.connect((self.selector_convolutional_out, 0), (self.nrzl_encoder_subcarrier, 0))
+        # self.connect((self.selector_convolutional_out, 0), (self.spl_encoder, 0))
+        # self.connect((self.nrzl_encoder, 0), (self.selector_encoder_out, 2))
+        # self.connect((self.nrzl_encoder_subcarrier, 0), (self.selector_encoder_out, 1))
+        # self.connect((self.spl_encoder, 0), (self.selector_encoder_out, 0))
         
-        self.connect(self.spl_encoder, self)
+        # self.connect((self.selector_encoder_out, 0), (self.root_raised_cosine_filter, 0))
+        # self.connect((self.selector_encoder_out, 0), (self.selector_srrc_out, 1))
+        # self.connect((self.root_raised_cosine_filter, 0), (self.selector_srrc_out, 0))
+        # self.connect((self.selector_srrc_out, 0), self)
+
+
+
+        if (sel_encoder == 0):
+            encoder = self.spl_encoder
+        elif (sel_encoder == 1 ):
+            encoder = self.nrzl_encoder
+        else:
+            encoder = self.nrzl_encoder_subcarrier
+
+
+        if (sel_convolutional == 0):
+            self.connect(self, convolutional, encoder)
+        else:
+            self.connect(self, encoder)
+        
+        if (sel_srrc == 0):
+            self.connect(encoder, srcc, self)
+        else:
+            self.connect(encoder, self)

@@ -190,7 +190,7 @@ namespace gr {
     pll_impl::accumulator(double step_phase)
     {
       double filter_out_norm = step_phase / M_PI;
-      int64_t temp_integer_phase = (int64_t)(filter_out_norm / precision);
+      int64_t temp_integer_phase = (int64_t)round(filter_out_norm / precision);
       d_integer_phase += (temp_integer_phase << (64 - d_N)) ;
       }
 

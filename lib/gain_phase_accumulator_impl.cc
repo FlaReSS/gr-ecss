@@ -63,7 +63,7 @@ namespace gr {
         temp_denormalized = (double)(temp_integer_phase * precision);
         temp_denormalized = temp_denormalized * (double)d_downlink;
         temp_denormalized = temp_denormalized / (double)d_uplink;
-        temp_integer_phase = (int64_t)(temp_denormalized / precision);
+        temp_integer_phase = (int64_t)round(temp_denormalized / precision);
         out[i] = (temp_integer_phase << (64 - d_N));
       }
       return noutput_items;

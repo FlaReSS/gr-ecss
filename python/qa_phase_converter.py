@@ -65,7 +65,8 @@ def check_integer_phase(data_out, items):
     for i in reversed(xrange (len(data_out))):
         if i > 0:
             if (abs(data_out[i] - data_out[i - 1]) < abs(minimum_step)):
-                minimum_step = abs(data_out[i] - data_out[i - 1])
+                if abs(data_out[i] - data_out[i - 1]) != 0:
+                    minimum_step = abs(data_out[i] - data_out[i - 1])
             if (i < (len(data_out) - items - 1)):       #this is only the average on n items
                 slope = ((data_out[i] - data_out[i - 1]) / items) + slope
     return minimum_step, slope
@@ -84,14 +85,14 @@ def plot(self, data_pe):
     ax1.set_xlabel('Time [s]')
     ax1.set_ylabel('Phase [rad]', color='r')
     ax1.set_title("Input",  fontsize=20)
-    ax1.plot(time, data_in, color='r', scalex=True, scaley=True)
+    ax1.plot(time, data_in, color='r', scalex=True, scaley=True, linewidth=1)
     ax1.tick_params(axis='y', labelcolor='red')
     ax1.grid(True)
 
     ax2.set_xlabel('Time [s]')
     ax2.set_ylabel ('Integer Phase', color='r')
     ax2.set_title("Output", fontsize=20)
-    ax2.plot(time, data_out, color='r', scalex=True, scaley=True)
+    ax2.plot(time, data_out, color='r', scalex=True, scaley=True, linewidth=1)
     ax2.tick_params(axis='y', labelcolor='red')
     ax2.grid(True)
 
@@ -150,29 +151,7 @@ class qa_phase_converter (gr_unittest.TestCase):
         param = namedtuple('param', 'samp_rate items N min_value max_value')
         param.N = 38
         param.samp_rate = 4096
-        param.items = 4096 * 2
-        param.max_value = 2 * math.pi
-        param.min_value = -2 * math.pi
-
-        print_parameters(param)
-
-        data_pc = test_ramp(self, param)
-        plot(self,data_pc)
-
-        pc_min_step , pc_slope = check_integer_phase(data_pc.out, 100)
-        precision = math.pow(2,(- (param.N - 1))) * math.pi
-        pc_min_step_rad = (pc_min_step >> (64 - param.N)) * precision
-        pc_slope_rad = (pc_slope >> (64 - param.N)) * precision
-        self.assertGreaterEqual(pe_min_step_rad, precision)
-        print "-Output Slope : %f rad/s;" % pc_slope_rad       # WARNING: this is only a mean
-        print "-Output Min step : %f rad." % pc_min_step_rad
-
-    def test_002_t (self):
-        """test_002_t: precision test"""
-        param = namedtuple('param', 'samp_rate items N min_value max_value')
-        param.N = 4
-        param.samp_rate = 4096
-        param.items = 4096 * 2
+        param.items = param.samp_rate * 2
         param.max_value = 2 * math.pi
         param.min_value = -2 * math.pi
 
@@ -188,6 +167,29 @@ class qa_phase_converter (gr_unittest.TestCase):
         self.assertGreaterEqual(pc_min_step_rad, precision)
         print "-Output Slope : %f rad/s;" % pc_slope_rad       # WARNING: this is only a mean
         print "-Output Min step : %f rad." % pc_min_step_rad
+
+    def test_002_t (self):
+        """test_002_t: precision test"""
+        param = namedtuple('param', 'samp_rate items N min_value max_value')
+        param.N = 4
+        param.samp_rate = 4096 * 4
+        param.items = param.samp_rate / 2
+        param.max_value = 2 * math.pi
+        param.min_value = -2 * math.pi
+
+        print_parameters(param)
+
+        data_pc = test_ramp(self, param)
+        plot(self,data_pc)
+
+        pc_min_step , pc_slope = check_integer_phase(data_pc.out, 100)
+        precision = math.pow(2,(- (param.N - 1))) * math.pi
+        pc_min_step_rad = (pc_min_step >> (64 - param.N)) * precision
+        pc_slope_rad = (pc_slope >> (64 - param.N)) * precision
+        self.assertGreaterEqual(pc_min_step_rad, precision)
+        print "-Output Slope : %f rad/s;" % pc_slope_rad       # WARNING: this is only a mean
+        print "-Output Min step : %f rad." % pc_min_step_rad
+
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_phase_converter)

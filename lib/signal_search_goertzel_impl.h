@@ -32,6 +32,13 @@ namespace ecss
   class signal_search_goertzel_impl : public signal_search_goertzel
   {
     private:
+      struct bins
+      {
+        float central;
+        float left;
+        float right;
+      };
+
       bool first;
       bool d_average;
       float d_samp_rate;
@@ -41,14 +48,17 @@ namespace ecss
       float d_freq_cutoff;
       float d_freq_central;
       float central_band_p, central_band_avg;
-      float lateral_band_p, lateral_band_avg;
-      filter::single_pole_iir<float, float, float> d_iir;
+      float left_band_p, left_band_avg;
+      float right_band_p, right_band_avg;
+      filter::single_pole_iir<float, float, float> d_iir_central;
+      filter::single_pole_iir<float, float, float> d_iir_left;
+      filter::single_pole_iir<float, float, float> d_iir_right;
       gr_complex *in_shifted_buffer;
       gr_complex *signal_shifter_buffer;
 
       float coeff_lateral;
 
-      float double_goertzel_complex(gr_complex *in, float coeff);
+      bins double_goertzel_complex(gr_complex *in, float k);
 
       void create_buffers();
       void destroy_buffers();
@@ -56,7 +66,6 @@ namespace ecss
       float coeff_eval(float freq);
       void signal_gen(float freq);
 
-      int debug;
 
     public:
       signal_search_goertzel_impl(int size, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);

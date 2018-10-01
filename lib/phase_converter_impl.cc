@@ -75,7 +75,7 @@ namespace gr {
     int64_t
     phase_converter_impl::double_to_integer(double double_value)
     {
-      return (int64_t)(double_value / precision);
+      return (int64_t)round(double_value / precision);
     }
 
     double

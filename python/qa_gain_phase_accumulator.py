@@ -65,7 +65,8 @@ def check_integer_phase(data_out, items):
     for i in reversed(xrange (len(data_out))):
         if i > 0:
             if (abs(data_out[i] - data_out[i - 1]) < abs(minimum_step)):
-                minimum_step = abs(data_out[i] - data_out[i - 1])
+                if abs(data_out[i] - data_out[i - 1]) != 0:
+                    minimum_step = abs(data_out[i] - data_out[i - 1])
             if (i < (len(data_out) - items - 1)):       #this is only the average on n items
                 slope = ((data_out[i] - data_out[i - 1]) / items) + slope
     return minimum_step, slope
@@ -84,14 +85,14 @@ def plot(self, data_gain):
     ax1.set_xlabel('Time [s]')
     ax1.set_ylabel ('Integer Phase', color='r')
     ax1.set_title("Input", fontsize=20)
-    ax1.plot(time, data_in, color='r', scalex=True, scaley=True)
+    ax1.plot(time, data_in, color='r', scalex=True, scaley=True, linewidth=1)
     ax1.tick_params(axis='y', labelcolor='red')
     ax1.grid(True)
 
     ax2.set_xlabel('Time [s]')
     ax2.set_ylabel ('Integer Phase', color='r')
     ax2.set_title("Output", fontsize=20)
-    ax2.plot(time, data_out, color='r', scalex=True, scaley=True)
+    ax2.plot(time, data_out, color='r', scalex=True, scaley=True, linewidth=1)
     ax2.tick_params(axis='y', labelcolor='red')
     ax2.grid(True)
 
@@ -270,7 +271,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         param = namedtuple('param', 'samp_rate items N uplink downlink min_value max_value')
         param.N = 4
         param.samp_rate = 4096
-        param.items = 4096 * 2
+        param.items = param.samp_rate * 2
         param.max_value = 2 * math.pi
         param.min_value = -2 * math.pi
         param.uplink = 221
@@ -295,7 +296,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         src_slope_rad = (src_slope >> (64 - param.N)) * precision
 
         
-        self.assertAlmostEqual((src_min_step_rad *tar), gain_min_step_rad, 4)
+        self.assertAlmostEqual((src_min_step_rad *tar), gain_min_step_rad, 1)
         # self.assertAlmostEqual((src_slope_rad * tar), gain_slope_rad, 4)
         self.assertGreaterEqual(gain_min_step_rad, precision)
 

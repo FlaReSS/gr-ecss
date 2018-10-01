@@ -71,7 +71,7 @@ def plot(self, data, reference, error, zero, settling_time):
     ax1.set_xlabel('Time [s]')
     ax1.set_ylabel('Amplitude [V]', color='r')
     ax1.set_title("Output",  fontsize=20)
-    ax1.plot(time, out_real, color='r', scalex=True, scaley=True)
+    ax1.plot(time, out_real, color='r', scalex=True, scaley=True, linewidth=1)
     l2 = ax1.axvspan(xmin = (zero + 0.01), xmax = (zero + 0.03), color='m', alpha= 0.1)
     l3 = ax1.axvline(x = (zero + (settling_time / 1000.0)), color='m', linewidth=2, linestyle='--')
     ax1.text(0.99,0.98,"Settling time: " + str(settling_time) + " ms", horizontalalignment='right', verticalalignment='top',color='m',transform=ax1.transAxes)
@@ -81,14 +81,14 @@ def plot(self, data, reference, error, zero, settling_time):
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
 
     ax2.set_ylabel('Root Mean Square [Vrms]', color='b')  # we already handled the x-label with ax1
-    ax2.plot(time, out_rms, color='b', scalex=True, scaley=True)
+    ax2.plot(time, out_rms, color='b', scalex=True, scaley=True, linewidth=1)
     l1 = ax2.axhspan(ymin=(reference - error * reference), ymax=(reference + error * reference), color='c', alpha= 0.1)
     ax2.tick_params(axis='y', labelcolor='blue')
 
     ax3.set_xlabel('Time [s]')
     ax3.set_ylabel ('Amplitude [V]', color='r')
     ax3.set_title("Input", fontsize=20)
-    ax3.plot(time, in_real, color='r', scalex=True, scaley=True)
+    ax3.plot(time, in_real, color='r', scalex=True, scaley=True, linewidth=1)
     ax3.tick_params(axis='y', labelcolor='red')
     ax3.grid(True)
 

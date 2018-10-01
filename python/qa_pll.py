@@ -67,7 +67,7 @@ def plot_fft(self, data_fft):
     ax1.set_xlabel('Frequency [Hz]')
     ax1.set_ylabel('Power [dB]', color='r')
     ax1.set_title("Output PLL",  fontsize=20)
-    ax1.plot(bins, out, color='r', scalex=True, scaley=True)
+    ax1.plot(bins, out, color='r', scalex=True, scaley=True, linewidth=1)
     ax1.text(0.99,0.98,"CNR: %.2fdB" %(data_fft.cnr_out), horizontalalignment='right', verticalalignment='top',color='m',transform=ax1.transAxes)
     ax1.tick_params(axis='y', labelcolor='red')
     ax1.grid(True)
@@ -75,7 +75,7 @@ def plot_fft(self, data_fft):
     ax2.set_xlabel('Frequency [Hz]')
     ax2.set_ylabel('Power [dB]', color='r')
     ax2.set_title("Input PLL",  fontsize=20)
-    ax2.plot(bins, src, color='r', scalex=True, scaley=True)
+    ax2.plot(bins, src, color='r', scalex=True, scaley=True, linewidth=1)
     ax2.text(0.99,0.98,"CNR: %.2fdB" %(data_fft.cnr_src), horizontalalignment='right', verticalalignment='top',color='m',transform=ax2.transAxes)
     ax2.tick_params(axis='y', labelcolor='red')
     ax2.grid(True)
@@ -122,19 +122,22 @@ def check_float(data_out, final, error):
 
     if (abs(data_out[-1] - final) > abs(error)): #check if is reached the final value at the end
         return np.inf, np.inf
-
+        
+    settling_time_index = np.inf
     error_max = 0
     for i in reversed(xrange (len(data_out))):
         if (abs(data_out[i] - final) > abs(error_max)):
             error_max = abs(data_out[i] - final)
 
         if (abs(data_out[i] - final) > abs(error)): #have to be at least 5 items in that range
-            if (abs(data_out[i - 1] - final) > abs(error)):
-                if (abs(data_out[i - 2] - final) > abs(error)):
-                    if (abs(data_out[i - 3] - final) > abs(error)):
-                        if (abs(data_out[i - 4] - final) > abs(error)):
-                            settling_time_index = i
-                            break
+            count = 0
+            for j in range(100):
+                if (abs(data_out[i - j] - final) > abs(error)):
+                    count = count + 1
+                else:
+                    break
+            if count == 100 / 4:
+                settling_time_index = i
     return settling_time_index, error_max
 
 def check_pa(data_out, items):
@@ -175,7 +178,7 @@ def plot(self, data_pll):
     ax1.set_xlabel('Time [s]')
     ax1.set_ylabel('Real', color='r')
     ax1.set_title("Out",  fontsize=20)
-    ax1.plot(time, out_re, color='r', scalex=True, scaley=True)
+    ax1.plot(time, out_re, color='r', scalex=True, scaley=True, linewidth=1)
     # l2 = ax1.axvspan(xmin = (zero + 0.01), xmax = (zero + 0.03), color='m', alpha= 0.1)
     # l3 = ax1.axvline(x = (zero + settling_time), color='m', linewidth=2, linestyle='--')
     # ax1.text(0.99,0.01,"Settling time: " + str(settling_time) + "s", horizontalalignment='right', verticalalignment='bottom',color='m',transform=ax1.transAxes)
@@ -185,28 +188,28 @@ def plot(self, data_pll):
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
 
     ax2.set_ylabel('Imag', color='b')  # we already handled the x-label with ax1
-    ax2.plot(time, out_im, color='b', scalex=True, scaley=True)
+    ax2.plot(time, out_im, color='b', scalex=True, scaley=True, linewidth=1)
     # l1 = ax2.axhspan(ymin=(reference - error * reference), ymax=(reference + error * reference), color='c', alpha= 0.1)
     ax2.tick_params(axis='y', labelcolor='blue')
 
     ax3.set_xlabel('Time [s]')
     ax3.set_ylabel ('frequency [Hz]', color='r')
     ax3.set_title("freq", fontsize=20)
-    ax3.plot(time, freq, color='r', scalex=True, scaley=True)
+    ax3.plot(time, freq, color='r', scalex=True, scaley=True, linewidth=1)
     ax3.tick_params(axis='y', labelcolor='red')
     ax3.grid(True)
 
     ax4.set_xlabel('Time [s]')
     ax4.set_ylabel ('Phase Error [rad]', color='r')
     ax4.set_title("pe", fontsize=20)
-    ax4.plot(time, pe, color='r', scalex=True, scaley=True)
+    ax4.plot(time, pe, color='r', scalex=True, scaley=True, linewidth=1)
     ax4.tick_params(axis='y', labelcolor='red')
     ax4.grid(True)
 
     ax5.set_xlabel('Time [s]')
     ax5.set_ylabel ('Phase Accumulator', color='r')
     ax5.set_title("pa", fontsize=20)
-    ax5.plot(time, pa, color='r', scalex=True, scaley=True)
+    ax5.plot(time, pa, color='r', scalex=True, scaley=True, linewidth=1)
     ax5.tick_params(axis='y', labelcolor='red')
     ax5.grid(True)
 
@@ -369,8 +372,8 @@ class qa_pll (gr_unittest.TestCase):
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 4
-        param.items = 4096 * 2
-        param.freq = 750
+        param.items = param.samp_rate / 2
+        param.freq = 600
         param.noise = 0
 
         print_parameters(param)
@@ -378,7 +381,7 @@ class qa_pll (gr_unittest.TestCase):
         data_sine = test_sine(self, param)
         plot(self,data_sine)
 
-        param.items = 4096 * 2
+        param.items = param.samp_rate
 
         data_fft = test_fft(self, param)
         plot_fft(self,data_fft)
@@ -430,7 +433,7 @@ class qa_pll (gr_unittest.TestCase):
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 4
-        param.items = 4096 * 6
+        param.items = param.samp_rate / 2
         param.freq = 750
         param.noise = 0
 
@@ -439,7 +442,7 @@ class qa_pll (gr_unittest.TestCase):
         data_sine = test_sine(self, param)
         plot(self,data_sine)
 
-        param.items = 4096 * 6
+        param.items = param.samp_rate * 2
 
         data_fft = test_fft(self, param)
         plot_fft(self,data_fft)
@@ -491,8 +494,8 @@ class qa_pll (gr_unittest.TestCase):
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 4
-        param.items = 4096 * 8
-        param.freq = 1001
+        param.items = param.samp_rate * 3 / 2
+        param.freq = 751
         param.noise = 0
 
         print_parameters(param)
@@ -518,7 +521,7 @@ class qa_pll (gr_unittest.TestCase):
         print "-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms
 
         #check output 'freq'
-        freq_settling_time_index, freq_error_max = check_float(data_sine.freq, param.freq, (param.freq * 0.05)) #check if the measured output frequency is the same of the input signal ± 5%
+        freq_settling_time_index, freq_error_max = check_float(data_sine.freq, param.freq, (param.freq * 0.005)) #check if the measured output frequency is the same of the input signal ± 5%
         freq_settling_time_ms = (1.0 / param.samp_rate) * freq_settling_time_index * 1000.0
         self.assertEqual(freq_settling_time_ms, np.inf) #have to be be inf (so, unlocked), errors are intrinsically asserted
         print "-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms
@@ -550,7 +553,7 @@ class qa_pll (gr_unittest.TestCase):
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 4
-        param.items = 4096 * 2
+        param.items = param.samp_rate / 2
         param.freq = 550
         param.noise = 0
 
@@ -621,7 +624,7 @@ class qa_pll (gr_unittest.TestCase):
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096
-        param.items = 4096 * 6
+        param.items = param.samp_rate * 6
         param.freq = 600
         param.noise = 0
 
@@ -747,7 +750,7 @@ class qa_pll (gr_unittest.TestCase):
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 40
-        param.items = 4096 * 80
+        param.items = param.samp_rate * 2
         param.freq_min = 0
         param.freq_max = 1000
         param.sweep = 1000
@@ -803,19 +806,19 @@ class qa_pll (gr_unittest.TestCase):
         src_im = np.asarray(imag)
         time = np.asarray(data_pll.time)
 
-        fig, (ax1) = plt.subplots(1)
+        fig, (ax1, null) = plt.subplots(2)
 
         ax1.set_xlabel('Time [s]')
         ax1.set_ylabel('Real', color='r')
         ax1.set_title("Input",  fontsize=20)
-        ax1.plot(time, src_re, color='r', scalex=True, scaley=True)
+        ax1.plot(time, src_re, color='r', scalex=True, scaley=True, linewidth=1)
         ax1.tick_params(axis='y', labelcolor='red')
         ax1.grid(True)
 
         ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
 
         ax2.set_ylabel('Imag', color='b')  # we already handled the x-label with ax1
-        ax2.plot(time, src_im, color='b', scalex=True, scaley=True)
+        ax2.plot(time, src_im, color='b', scalex=True, scaley=True, linewidth=1)
         # l1 = ax2.axhspan(ymin=(reference - error * reference), ymax=(reference + error * reference), color='c', alpha= 0.1)
         ax2.tick_params(axis='y', labelcolor='blue')
 

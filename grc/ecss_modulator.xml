@@ -16,11 +16,11 @@
       <key>0</key>
     </option>
     <option>
-      <name>NRZ-L with Sub-carrier</name>
+      <name>NRZ-L</name>
       <key>1</key>
     </option>
     <option>
-      <name>NRZ-L</name>
+      <name>NRZ-L with Sub-carrier</name>
       <key>2</key>
     </option>
   </param>
@@ -74,6 +74,7 @@
     <key>sine</key>
     <value>True</value>
     <type>bool</type>
+    <hide>#if (int($sel_encoder()) >= 2) then 'none' else 'all' #</hide>
     <option>
       <name>Sine</name>
       <key>True</key>
@@ -89,6 +90,7 @@
     <key>freq_sub</key>
     <value>16000</value>
     <type>real</type>
+    <hide>#if (int($sel_encoder()) >= 2) then 'none' else 'all' #</hide>
   </param>
   
   <param>
@@ -96,6 +98,7 @@
     <key>ndim</key>
     <value>0</value>
     <type>enum</type>
+    <hide>#if (int($sel_convolutional()) >= 1) then 'all' else 'none' #</hide>
     <option>
       <name>0</name>
       <key>0</key>
@@ -131,6 +134,7 @@
     <key>framebits</key>
     <value>2048</value>
     <type>int</type>
+    <hide>#if (int($sel_convolutional()) >= 1) then 'all' else 'none' #</hide>
   </param>
 
   <param>
@@ -138,6 +142,7 @@
     <key>k</key>
     <value>7</value>
     <type>int</type>
+    <hide>#if (int($sel_convolutional()) >= 1) then 'all' else 'none' #</hide>
   </param>
 
   <param>
@@ -145,6 +150,7 @@
     <key>rate</key>
     <value>2</value>
     <type>int</type>
+    <hide>#if (int($sel_convolutional()) >= 1) then 'all' else 'none' #</hide>
   </param>
 
   <param>
@@ -152,6 +158,7 @@
     <key>polys</key>
     <value>[79,109]</value>
     <type>int_vector</type>
+    <hide>#if (int($sel_convolutional()) >= 1) then 'all' else 'none' #</hide>
   </param>
 
   <param>
@@ -159,6 +166,7 @@
     <key>state_start</key>
     <value>0</value>
     <type>int</type>
+    <hide>#if (int($sel_convolutional()) >= 1) then 'all' else 'none' #</hide>
   </param>
 
   <param>
@@ -166,6 +174,7 @@
     <key>mode</key>
     <value></value>
     <type>enum</type>
+    <hide>#if (int($sel_convolutional()) >= 1) then 'all' else 'none' #</hide>
     <option>
         <name>Streaming</name>
         <key>fec.CC_STREAMING</key>
@@ -189,6 +198,7 @@
     <key>padding</key>
     <value>False</value>
     <type>enum</type>
+    <hide>#if (int($sel_convolutional()) >= 1) then 'all' else 'none' #</hide>
     <option>
         <name>No</name>
         <key>False</key>
@@ -203,6 +213,7 @@
     <name>CE: Threading Type</name>
     <key>threading</key>
     <type>enum</type>
+    <hide>#if (int($sel_convolutional()) >= 1) then 'all' else 'none' #</hide>
     <option>
       <name>Capillary</name>
       <key>capillary</key>
@@ -225,6 +236,7 @@
     <key>puncpat</key>
     <value>'11'</value>
     <type>string</type>
+    <hide>#if (int($sel_convolutional()) >= 1) then 'all' else 'none' #</hide>
   </param>
 
   <param>
@@ -232,6 +244,7 @@
 		<key>roll_off</key>
 		<value>0.35</value>
 		<type>real</type>
+    <hide>#if (int($sel_srrc()) >= 1) then 'all' else 'none' #</hide>
 	</param>
 
 	<param>
@@ -239,6 +252,7 @@
 		<key>num_taps</key>
 		<value>11*samp_rate</value>
 		<type>int</type>
+    <hide>#if (int($sel_srrc()) >= 1) then 'all' else 'none' #</hide>
 	</param>
   
 

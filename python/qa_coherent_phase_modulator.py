@@ -79,27 +79,27 @@ def plot(self, data_cpm):
     ax1.set_xlabel('Time [s]')
     ax1.set_ylabel('Phase [rad]', color='r')
     ax1.set_title("Float Input",  fontsize=20)
-    ax1.plot(time, data_in_rad, color='r', scalex=True, scaley=True)
+    ax1.plot(time, data_in_rad, color='r', scalex=True, scaley=True, linewidth=1)
     ax1.tick_params(axis='y', labelcolor='red')
     ax1.grid(True)
 
     ax2.set_xlabel('Time [s]')
     ax2.set_ylabel ('Integer Phase', color='r')
     ax2.set_title("Integer Input", fontsize=20)
-    ax2.plot(time, data_in_int64, color='r', scalex=True, scaley=True)
+    ax2.plot(time, data_in_int64, color='r', scalex=True, scaley=True, linewidth=1)
     ax2.tick_params(axis='y', labelcolor='red')
     ax2.grid(True)
 
     ax3.set_xlabel('Time [s]')
     ax3.set_ylabel ('Real', color='r')
     ax3.set_title("Output", fontsize=20)
-    ax3.plot(time, out_re, color='r', scalex=True, scaley=True)
+    ax3.plot(time, out_re, color='r', scalex=True, scaley=True, linewidth=1)
     ax3.tick_params(axis='y', labelcolor='red')
     ax3.grid(True)
 
     ax4 = ax3.twinx()
     ax4.set_ylabel('Imag', color='b')  # we already handled the x-label with ax1
-    ax4.plot(time, out_im, color='b', scalex=True, scaley=True)
+    ax4.plot(time, out_im, color='b', scalex=True, scaley=True, linewidth=1)
     ax4.tick_params(axis='y', labelcolor='blue')
 
     name_test = self.id().split("__main__.")[1]
@@ -125,7 +125,7 @@ def plot_fft(self, data_fft):
     ax1.set_xlabel('Frequency [Hz]')
     ax1.set_ylabel('Power [dB]', color='r')
     ax1.set_title("Output Coherent Phase Modulator",  fontsize=20)
-    ax1.plot(bins, out, color='r', scalex=True, scaley=True)
+    ax1.plot(bins, out, color='r', scalex=True, scaley=True, linewidth=1)
     ax1.text(0.99,0.98,"CNR: %.2fdB" %(data_fft.cnr_out), horizontalalignment='right', verticalalignment='top',color='m',transform=ax1.transAxes)
     ax1.tick_params(axis='y', labelcolor='red')
     ax1.grid(True)
