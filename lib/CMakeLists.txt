@@ -33,13 +33,13 @@ list(APPEND ecss_sources
     variables_loop_filter.cc
     gain_phase_accumulator_impl.cc
     signal_search_goertzel_impl.cc
-    signal_search_goertzel_v_impl.cc
     signal_search_fft_v_impl.cc
     spl_encoder_impl.cc
     spl_decoder_impl.cc
     nrzl_encoder_impl.cc
     nrzl_decoder_impl.cc
-    nrzl_encoder_subcarrier_impl.cc )
+    nrzl_encoder_subcarrier_impl.cc
+    )
 
 set(ecss_sources "${ecss_sources}" PARENT_SCOPE)
 if(NOT ecss_sources)

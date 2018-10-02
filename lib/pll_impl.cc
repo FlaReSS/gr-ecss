@@ -37,7 +37,6 @@ namespace gr {
     #define M_TWOPI (2.0*M_PI)
     #endif
 
-
     pll::sptr
     pll::make(float samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float freq_central, float bw)
     {

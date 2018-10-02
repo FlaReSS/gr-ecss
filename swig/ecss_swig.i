@@ -15,7 +15,6 @@
 #include "ecss/variables_loop_filter.h"
 #include "ecss/gain_phase_accumulator.h"
 #include "ecss/signal_search_goertzel.h"
-#include "ecss/signal_search_goertzel_v.h"
 #include "ecss/signal_search_fft_v.h"
 #include "ecss/spl_encoder.h"
 #include "ecss/spl_decoder.h"
@@ -41,8 +40,7 @@ GR_SWIG_BLOCK_MAGIC2(ecss, phase_converter);
 GR_SWIG_BLOCK_MAGIC2(ecss, gain_phase_accumulator);
 %include "ecss/signal_search_goertzel.h"
 GR_SWIG_BLOCK_MAGIC2(ecss, signal_search_goertzel);
-%include "ecss/signal_search_goertzel_v.h"
-GR_SWIG_BLOCK_MAGIC2(ecss, signal_search_goertzel_v);
+
 
 %include "ecss/signal_search_fft_v.h"
 GR_SWIG_BLOCK_MAGIC2(ecss, signal_search_fft_v);
@@ -56,3 +54,4 @@ GR_SWIG_BLOCK_MAGIC2(ecss, nrzl_encoder);
 GR_SWIG_BLOCK_MAGIC2(ecss, nrzl_decoder);
 %include "ecss/nrzl_encoder_subcarrier.h"
 GR_SWIG_BLOCK_MAGIC2(ecss, nrzl_encoder_subcarrier);
+

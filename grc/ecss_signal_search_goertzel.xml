@@ -4,20 +4,13 @@
   <key>ecss_signal_search_goertzel</key>
   <category>[ecss]</category>
   <import>import ecss</import>
-  <make>ecss.signal_search_goertzel($size, $average, $freq_central, $bandwidth, $freq_cutoff, $threshold, $samp_rate)</make>
+  <make>ecss.signal_search_goertzel($average, $freq_central, $bandwidth, $freq_cutoff, $threshold, $samp_rate)</make>
   <callback>set_freq_central($freq_central)</callback>
   <callback>set_bandwidth($bandwidth)</callback>
   <callback>set_freq_cutoff($freq_cutoff)</callback>
   <callback>set_threshold($threshold)</callback>
   <callback>set_average($average)</callback>
   <callback>set_size($samp_rate)</callback>
-
-  <param>
-   <name>Size</name>
-   <key>size</key>
-   <type>int</type>
-  </param>
-
   <param>
     <name>Central frequency of the signal</name>
     <key>freq_central</key>

@@ -33,7 +33,7 @@ except ImportError:
 # import any pure python here
 
 
-from signal_search_goertzel_hier import signal_search_goertzel_hier
+
 from signal_search_fft_hier import signal_search_fft_hier
 from modulator import modulator
 

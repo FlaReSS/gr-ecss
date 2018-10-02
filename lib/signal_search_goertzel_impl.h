@@ -48,7 +48,7 @@ namespace ecss
       float d_coeff_2;
       float d_cosine_2;
       float d_sine_2;
-
+      float d_limit;
       bool first;
       bool d_average;
       float d_samp_rate;
@@ -78,7 +78,7 @@ namespace ecss
 
 
     public:
-      signal_search_goertzel_impl(int size, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);
+      signal_search_goertzel_impl(bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);
       ~signal_search_goertzel_impl();
 
       // Where all the action really happens
@@ -102,7 +102,7 @@ namespace ecss
       void set_freq_cutoff(float freq_cutoff);
       void set_threshold(float threshold);
       void set_average(bool average);
-      void set_size(int size);
+      void set_size();
     };
   } // namespace ecss
 } // namespace gr

@@ -34,12 +34,12 @@ namespace gr{
     #endif
 
     signal_search_goertzel::sptr
-    signal_search_goertzel::make(int size, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
+    signal_search_goertzel::make(bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
     {
-      return gnuradio::get_initial_sptr(new signal_search_goertzel_impl(size, average, freq_central, bandwidth, freq_cutoff, threshold, samp_rate));
+      return gnuradio::get_initial_sptr(new signal_search_goertzel_impl(average, freq_central, bandwidth, freq_cutoff, threshold, samp_rate));
     }
 
-    signal_search_goertzel_impl::signal_search_goertzel_impl(int size, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
+    signal_search_goertzel_impl::signal_search_goertzel_impl(bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
         : gr::block("signal_search_goertzel",
                     gr::io_signature::make(1, 1, sizeof(gr_complex)),
                     gr::io_signature::make(1, 1, sizeof(gr_complex))),
@@ -49,8 +49,9 @@ namespace gr{
           d_iir_central(M_PI * freq_cutoff / samp_rate),
           d_iir_left(M_PI * freq_cutoff / samp_rate),
           d_iir_right(M_PI * freq_cutoff / samp_rate),
-          d_average(average), d_size(size)
+          d_average(average)
     {
+      set_size();
       first = true;
       create_buffers();
       average_reset();
@@ -115,9 +116,9 @@ namespace gr{
 
         if ((central_avg > (left_avg * d_threshold)) && (central_avg > (right_avg * d_threshold)))
         {
-          std::cout << "goertzel.central: " << goertzel.central << std::endl;
-          std::cout << "goertzel.left: " << goertzel.left << std::endl;
-          std::cout << "goertzel.right: " << goertzel.right << std::endl;
+          // std::cout << "goertzel.central: " << goertzel.central << std::endl;
+          // std::cout << "goertzel.left: " << goertzel.left << std::endl;
+          // std::cout << "goertzel.right: " << goertzel.right << std::endl;
           memcpy(&out[i], &in[i], sizeof(gr_complex) * d_size);
           if (first == true)
           {
@@ -226,6 +227,16 @@ namespace gr{
       outputs.right = ((real_1r - imag_1i) * (real_1r - imag_1i) + (real_1i + imag_1r) * (real_1i + imag_1r));
       outputs.left = ((real_2r - imag_2i) * (real_2r - imag_2i) + (real_2i + imag_2r) * (real_2i + imag_2r));
 
+      if (outputs.central <= d_limit){
+          outputs.central = 0.001;
+      }
+      if (outputs.right <= d_limit){
+          outputs.right = 0.001;
+      }
+      if (outputs.left <= d_limit){
+        outputs.left = 0.001;
+      }
+
       // if(magnitude_2 == 0)
 
       // debug ++;
@@ -236,19 +247,19 @@ namespace gr{
     void
     signal_search_goertzel_impl::coeff_eval(float freq_central, float bandwidth)
     {
-      int k_0 = (int)(((d_size * freq_central) / d_samp_rate));
+      float k_0 = (float)(((d_size * freq_central) / d_samp_rate));
 
       d_coeff_0 = 2 * cos((double)((M_TWOPI / d_size) * k_0));
       d_cosine_0 = cos((double)((M_TWOPI / d_size) * k_0));
       d_sine_0 = sin((double)((M_TWOPI / d_size) * k_0));
 
-      int k_1 = (int)(((d_size * (freq_central + bandwidth)) / d_samp_rate));
+      float k_1 = (float)(((d_size * (freq_central + bandwidth*1.01)) / d_samp_rate));
 
       d_coeff_1 = 2 * cos((double)((M_TWOPI / d_size) * k_1));
       d_cosine_1 = cos((double)((M_TWOPI / d_size) * k_1));
       d_sine_1 = sin((double)((M_TWOPI / d_size) * k_1));
 
-      int k_2 = (int)(((d_size * (freq_central - bandwidth)) / d_samp_rate));
+      float k_2 = (float)(((d_size * (freq_central - bandwidth*1.01)) / d_samp_rate));
 
       d_coeff_2 = 2 * cos((double)((M_TWOPI / d_size) * k_2));
       d_cosine_2 = cos((double)((M_TWOPI / d_size) * k_2));
@@ -317,6 +328,7 @@ namespace gr{
         throw std::out_of_range("signal search: invalid bandwidth. Must be positive and lower than samp_rate.");
       }
       d_bandwidth = bandwidth;
+      set_size();
     }
 
     void 
@@ -337,8 +349,14 @@ namespace gr{
     }
 
     void 
-    signal_search_goertzel_impl::set_size(int size){
-      d_size = size;
+    signal_search_goertzel_impl::set_size(){
+      d_size = (int)(d_samp_rate / d_bandwidth);
+      if (d_size > 4096 || d_size <= 0)
+      {
+        throw std::out_of_range("signal search: invalid bandwidth and/or samp rate. The ratio (samp_rate / bandwidth) must to be positive and lower than 4096.");
+        d_size = 4096;
+      }
+      d_limit = d_size * d_size * 0.405;
     }
 
     void

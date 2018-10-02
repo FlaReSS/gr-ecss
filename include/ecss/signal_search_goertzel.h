@@ -53,16 +53,14 @@
             *
             * \param samp_rate Sampling rate of signal.
             * \param average if average (with IIR Filters) at the output of FFT is applied or not.
-            * \param size size of the Goertzel Algorithm evaluated internally, it defines the resolution.
             * \param freq_central this is the centre of the bandwidth where the signal is searched, 
             * it must be an integer multiple of the sampling frequency (samp rate).
             * \param bandwidth value of bandwidth where the signal is searched.
             * \param freq_cutoff value of cut-off frequency of the internal IIR used to filer the output of the internal bandwidth.
             * \param threshold it is the minimum difference that must to be between the central band and the lateral ones in order to discriminate if there is
         */
-        static sptr make(int size, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);
+        static sptr make(bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);
         
-
         virtual float get_freq_central() const = 0;
         virtual float get_bandwidth() const = 0;
         virtual float get_freq_cutoff() const = 0;
@@ -75,7 +73,7 @@
         virtual void set_freq_cutoff(float freq_cutoff) = 0;
         virtual void set_threshold(float threshold) = 0;
         virtual void set_average(bool average) = 0;
-        virtual void set_size(int size) = 0;
+        virtual void set_size() = 0;
     };
   } // namespace ecss
 } // namespace gr

@@ -25,8 +25,6 @@ install(FILES
     ecss_variables_loop_filter.xml
     ecss_gain_phase_accumulator.xml
     ecss_signal_search_goertzel.xml
-    ecss_signal_search_goertzel_hier.xml
-    ecss_signal_search_goertzel_v.xml
     ecss_signal_search_fft_hier.xml
     ecss_signal_search_fft_v.xml
     ecss_spl_encoder.xml
@@ -34,5 +32,6 @@ install(FILES
     ecss_nrzl_encoder.xml
     ecss_nrzl_decoder.xml
     ecss_nrzl_encoder_subcarrier.xml
-    ecss_modulator.xml DESTINATION share/gnuradio/grc/blocks
+    ecss_modulator.xml
+    DESTINATION share/gnuradio/grc/blocks
 )
