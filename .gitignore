@@ -1,7 +1,5 @@
 
 build/
+python/*.pyc
+*.pyc
 ecss.code-workspace
-python/spl_encoder.pyc
-python/spl_decoder.pyc
-lib/.vscode/settings.json
-lib/.vscode/c_cpp_properties.json

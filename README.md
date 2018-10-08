@@ -29,6 +29,14 @@ make test
 sudo make install  
 sudo ldconfig 
 
+MAC OS X installation (from MacPort):
+
+mkdir build 
+cd build 
+cmake -DCMAKE_INSTALL_PREFIX=/opt/local/ ../ 
+make 
+make test 
+sudo make install 
 
 --------------------------------------------------------------------------------------------------------
 
