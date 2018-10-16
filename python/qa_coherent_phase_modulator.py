@@ -157,8 +157,7 @@ def test_accumulator(self, param):
     dst_src_pa = flaress.vector_sink_int64()
     dst_out_cpm = blocks.vector_sink_c()
 
-    logpwrfft_out = logpwrfft.logpwrfft_c( sample_rate=param.samp_rate, fft_size=param.fft_size, ref_scale=2, frame_rate=30, avg_alpha=0.1, average=False)
-    cnr_out = flaress.snr(True, param.samp_rate, param.fft_size, 10, 100)
+    snr_estimator = flaress.snr_estimator_cfv(auto_carrier = True, carrier = True, all_spectrum = True, freq_central = 0, samp_rate = param.samp_rate, nintems = param.fft_size, signal_bw = 0 , noise_bw = param.noise_bw, avg_alpha = 1.0, average = False, win = window.blackmanharris)
     dst_pll_out_fft = blocks.vector_sink_f(param.fft_size, param.items)
     dst_pll_out_cnr = blocks.vector_sink_f()
 
@@ -174,13 +173,12 @@ def test_accumulator(self, param):
     tb.connect(head, pc)
     tb.connect(pc, dst_src_pa)
     tb.connect(pc, cpm)
+    tb.connect(cpm, snr_estimator)
+    
+
+    tb.connect((snr_estimator,0), dst_pll_out_cnr)
+    tb.connect((snr_estimator,1), dst_pll_out_fft)
     tb.connect(cpm, dst_out_cpm)
-
-    tb.connect(cpm, logpwrfft_out)
-    tb.connect(logpwrfft_out, dst_pll_out_fft)
-    tb.connect(logpwrfft_out, cnr_out)
-    tb.connect(cnr_out, dst_pll_out_cnr)
-
     self.tb.run()
 
     data_pc.src_rad = dst_src_rad.data()
@@ -190,7 +188,8 @@ def test_accumulator(self, param):
     
     out = dst_pll_out_fft.data()
     cnr_out = dst_pll_out_cnr.data()
-    data_fft.out = out[param.items - (param.fft_size / 2) : param.items] + out[param.items - param.fft_size : param.items - (param.fft_size / 2)] #take the last fft_size elements
+    # data_fft.out = out[param.items - (param.fft_size / 2) : param.items] + out[param.items - param.fft_size : param.items - (param.fft_size / 2)] #take the last fft_size elements
+    data_fft.out = out[param.items - param.fft_size : param.items] #take the last fft_size elements
     data_fft.cnr_out = cnr_out[-1] #take the last element
     data_fft.bins = np.linspace(- (param.samp_rate / 2.0), (param.samp_rate / 2.0), param.fft_size, endpoint=True)
     data_fft.carrier = (data_fft.out.index(max(data_fft.out)) - (param.fft_size / 2)) * (param.samp_rate * 1.0 / param.fft_size)  #expressed in Hz
@@ -209,13 +208,14 @@ class qa_coherent_phase_modulator (gr_unittest.TestCase):
 
     def test_001_t (self):
         """test_001_t: with a phase accumulator"""
-        param = namedtuple('param', 'samp_rate items fft_size N inputs step')
+        param = namedtuple('param', 'samp_rate items fft_size N inputs step noise_bw')
         param.N = 38
         param.samp_rate = 4096
         param.items = param.samp_rate 
         param.fft_size = 1024
         param.inputs = 1
         param.step = 1000 * math.pi   # to express it in rad/s
+        param.noise_bw = 1000
 
         print_parameters(param)
 

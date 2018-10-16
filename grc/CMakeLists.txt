@@ -26,7 +26,6 @@ install(FILES
     ecss_gain_phase_accumulator.xml
     ecss_signal_search_goertzel.xml
     ecss_signal_search_fft_hier.xml
-    ecss_signal_search_fft_v.xml
     ecss_spl_encoder.xml
     ecss_spl_decoder.xml
     ecss_nrzl_encoder.xml

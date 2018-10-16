@@ -5,7 +5,7 @@
   <category>[ecss]</category>
   <import>import ecss</import>
   <import>from gnuradio.filter import firdes</import>
-  <make>ecss.signal_search_fft_hier($fftsize, $decimation, $carrier, $average, $wintype, $freq_central, $bandwidth, $freq_cutoff, $threshold, $samp_rate)</make>
+  <make>ecss.signal_search_fft_hier($fftsize, $decimation, $average, $wintype, $freq_central, $bandwidth, $freq_cutoff, $threshold, $samp_rate)</make>
   <callback>set_freq_central($freq_central)</callback>
   <callback>set_bandwidth($bandwidth)</callback>
   <callback>set_freq_cutoff($freq_cutoff)</callback>
@@ -46,21 +46,6 @@
     <option>
       <name>Flat-top</name>
       <key>firdes.WIN_FLATTOP</key>
-    </option>
-  </param>
-
-  <param>
-    <name>Carrier</name>
-    <key>carrier</key>
-    <value>True</value>
-    <type>bool</type>
-    <option>
-      <name>Carrier Search</name>
-      <key>True</key>
-    </option>
-    <option>
-      <name>Signal Search</name>
-      <key>False</key>
     </option>
   </param>
 

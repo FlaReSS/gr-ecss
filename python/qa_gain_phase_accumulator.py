@@ -103,7 +103,7 @@ def plot(self, data_gain):
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
     fig.subplots_adjust(hspace=0.6, top=0.85, bottom=0.15)
 
-    # plt.show()
+    #plt.show()
     self.pdf.add_to_pdf(fig)
 
 def test_ramp(self, param):
@@ -152,12 +152,12 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         """test_001_t: wrapping test"""
         param = namedtuple('param', 'samp_rate items N uplink downlink min_value max_value')
         param.N = 38
-        param.samp_rate = 4096
-        param.items = 4096 * 2
+        param.samp_rate = 4096 * 32
+        param.items = param.samp_rate 
         param.max_value = 2 * math.pi
         param.min_value = -2 * math.pi
         param.uplink = 221
-        param.downlink = 2400
+        param.downlink = 240
 
         print_parameters(param)
 
@@ -189,11 +189,11 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         print "-Output Min step : %f rad." % gain_min_step_rad
 
     def test_002_t (self):
-        """test_002_t: wrapping test"""
+        """test_002_t: wrapping test with higher ratio"""
         param = namedtuple('param', 'samp_rate items N uplink downlink min_value max_value')
         param.N = 38
         param.samp_rate = 4096 * 32
-        param.items = 4096 * 2
+        param.items = param.samp_rate  
         param.max_value = 2 * math.pi
         param.min_value = -2 * math.pi
         param.uplink = 221
@@ -228,15 +228,15 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         print "-Output Min step : %f rad." % gain_min_step_rad
 
     def test_003_t (self):
-        """test_003_t: wrapping test"""
+        """test_003_t: wrapping test with higher slope"""
         param = namedtuple('param', 'samp_rate items N uplink downlink min_value max_value')
         param.N = 38
         param.samp_rate = 4096 * 64
-        param.items = 4096 * 2
+        param.items = param.samp_rate / 32
         param.max_value = 2 * math.pi
         param.min_value = -2 * math.pi
         param.uplink = 221
-        param.downlink = 2400
+        param.downlink = 240
 
         print_parameters(param)
 

@@ -32,12 +32,12 @@ namespace ecss
 {
 
 signal_search_fft_v::sptr
-signal_search_fft_v::make(int fftsize, int decimation, bool carrier, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
+signal_search_fft_v::make(int fftsize, int decimation, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
 {
-  return gnuradio::get_initial_sptr(new signal_search_fft_v_impl(fftsize, decimation, carrier, average, wintype, freq_central, bandwidth, freq_cutoff, threshold, samp_rate));
+  return gnuradio::get_initial_sptr(new signal_search_fft_v_impl(fftsize, decimation, average, wintype, freq_central, bandwidth, freq_cutoff, threshold, samp_rate));
 }
 
-signal_search_fft_v_impl::signal_search_fft_v_impl(int fftsize, int decimation, bool carrier, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
+signal_search_fft_v_impl::signal_search_fft_v_impl(int fftsize, int decimation, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
     : gr::block("signal_search_fft",
                 gr::io_signature::make(1, 1, sizeof(gr_complex) * (decimation * fftsize)),
                 gr::io_signature::make(1, 1, sizeof(gr_complex) * (decimation * fftsize))),
@@ -45,11 +45,9 @@ signal_search_fft_v_impl::signal_search_fft_v_impl(int fftsize, int decimation, 
       d_fftsize(fftsize), d_freq_central(freq_central),
       d_bandwidth(bandwidth), d_freq_cutoff(freq_cutoff),
       d_threshold(threshold), d_samp_rate(samp_rate),
-      d_iir_central(M_PI * freq_cutoff / (samp_rate / decimation)),
-      d_iir_left(M_PI * freq_cutoff / (samp_rate / decimation)),
-      d_iir_right(M_PI * freq_cutoff / (samp_rate / decimation)),
-      d_carrier(carrier), d_average(average),
-      d_decimation(decimation)
+      d_iir_signal(M_PI * freq_cutoff / (samp_rate / decimation)),
+      d_iir_noise(M_PI * freq_cutoff / (samp_rate / decimation)),
+      d_average(average), d_decimation(decimation)
 {
   first = true;
   float resamplig = (float)(1.0 / decimation);
@@ -85,6 +83,7 @@ int signal_search_fft_v_impl::general_work(int noutput_items,
   gr_complex *in = (gr_complex *)input_items[0];
   gr_complex *out = (gr_complex *)output_items[0];
 
+  int temp_signal_band_max_index;
   int out_items = 0;
   int item_read;
   int i = 0;
@@ -98,51 +97,44 @@ int signal_search_fft_v_impl::general_work(int noutput_items,
 
     fft(d_fbuf, &in_decimated[0], d_fftsize);
 
-    memcpy(central_band, &d_fbuf[central_first_items], sizeof(float) * bw_items);
-    memcpy(right_band, &d_fbuf[right_first_items], sizeof(float) * bw_items);
-    memcpy(left_band, &d_fbuf[left_first_items], sizeof(float) * bw_items);
+    memcpy(searching_band, &d_fbuf[searching_first_items], sizeof(float) * bw_items);
 
-    if (d_carrier == true)
+    volk_32f_index_max_32u(signal_band_max_index, searching_band, bw_items);
+    signal_band_p = 0;
+
+    temp_signal_band_max_index = *signal_band_max_index ;
+
+    for(int z = (temp_signal_band_max_index - 3); z <= (temp_signal_band_max_index + 3); z++)
     {
-      volk_32f_index_max_32u(central_band_max_index, central_band, bw_items);
-      volk_32f_index_max_32u(right_band_max_index, right_band, bw_items);
-      volk_32f_index_max_32u(left_band_max_index, left_band, bw_items);
-      central_band_p = central_band[*central_band_max_index];
-      right_band_p = right_band[*right_band_max_index];
-      left_band_p = left_band[*left_band_max_index];
+      if(z >= 0 && z<bw_items)
+      {
+        signal_band_p += searching_band[z];
+      }
     }
-    else
-    {
-      volk_32f_accumulator_s32f(central_band_acc, central_band, bw_items);
-      volk_32f_accumulator_s32f(right_band_acc, right_band, bw_items);
-      volk_32f_accumulator_s32f(left_band_acc, left_band, bw_items);
-      central_band_p = *central_band_acc / bw_items;
-      right_band_p = *right_band_acc / bw_items;
-      left_band_p = *left_band_acc / bw_items;
-    }
+
+    volk_32f_accumulator_s32f(noise_band_acc, searching_band, bw_items);
+
+    noise_band_p = (*noise_band_acc - signal_band_p) + (7 * ((*noise_band_acc - signal_band_p) / (bw_items - 7)));
 
     if (d_average == true)
     {
-      d_iir_central.filter(central_band_p);
-      d_iir_right.filter(left_band_p);
-      d_iir_left.filter(right_band_p);
+      d_iir_signal.filter(signal_band_p);
+      d_iir_noise.filter(noise_band_p);
 
-      central_band_avg = d_iir_central.prev_output();
-      right_band_avg = d_iir_right.prev_output();
-      left_band_avg = d_iir_left.prev_output();
+      signal_band_avg = d_iir_signal.prev_output();
+      noise_band_avg = d_iir_noise.prev_output();
     }
     else
     {
-      central_band_avg = central_band_p;
-      right_band_avg = right_band_p;
-      left_band_avg = left_band_p;
+      signal_band_avg = signal_band_p;
+      noise_band_avg = noise_band_p;
     }
 
     // std::cout<<"central_band_p: "<<central_band_p <<std::endl;
     // std::cout<<"right_band_p: "<<right_band_p <<std::endl;
     // std::cout << "left_band_p: " <<left_band_p << std::endl;
 
-    if (((central_band_avg - right_band_avg) > d_threshold) && ((central_band_avg - left_band_avg) > d_threshold))
+    if (signal_band_avg > (d_threshold * noise_band_avg))
     {
       memcpy(&out[index], &in[index], sizeof(gr_complex) * d_fftsize * d_decimation);
       if (first == true)
@@ -178,7 +170,7 @@ void signal_search_fft_v_impl::fft(float *data_out, const gr_complex *data_in, i
   }
 
   d_fft->execute(); // compute the fft
-  volk_32fc_s32f_x2_power_spectral_density_32f(data_out, d_fft->get_outbuf(), size, 1.0, size);
+  volk_32fc_magnitude_squared_32f(data_out, d_fft->get_outbuf(), size);
 
   // Perform shift operation
   memcpy(d_tmpbuf, &data_out[0], sizeof(float) * (d_fftsize_half + 1));
@@ -198,39 +190,14 @@ void signal_search_fft_v_impl::items_eval()
     throw std::out_of_range("signal search: invalid bandwidth. It generates a negative number of bins. Please, check the values of sampling rate, decimation, fft size and bandwith");
     bw_items = 0;
   }
-  if (bw_items > (d_fftsize / 3))
+  if (bw_items < 14)
   {
-    throw std::out_of_range("signal search: invalid bandwidth. It generates a too big number of bins for 3 bands. Please, check the values of sampling rate, decimation, fft size and bandwith");
-    bw_items = floor(d_fftsize / 3);
+    throw std::out_of_range("signal search: invalid bandwidth. It generates a too small number of bins. Please, check the values of sampling rate, decimation, fft size and bandwith");
+    bw_items = 14;
   }
 
-  central_first_items = ((d_freq_central / down_samp) * d_fftsize) + d_fftsize_half - (bw_items / 2);
-  left_first_items = central_first_items - bw_items - 1;
-  std::cout << "central_first_items: " << central_first_items << std::endl;
-  std::cout << "left_first_items: " << left_first_items << std::endl;
-  if (left_first_items < 0)
-  {
-    throw std::out_of_range("signal search: invalid left bandwidth. It generates a negative number of bins (it is too far to the left). Please, check the values of sampling rate, decimation, fft size, central frequency and bandwith");
-    int difference = -left_first_items;
-    right_first_items += difference;
-    left_first_items += difference;
-    central_first_items += difference;
-  }
-
-  right_first_items = central_first_items + bw_items + 1;
-  std::cout << "right_first_items: " << right_first_items << std ::endl;
-  if ((right_first_items + bw_items) > d_fftsize)
-  {
-    throw std::out_of_range("signal search: invalid right bandwidth. It generates a too big number of bins (it is too far to the right). Please, check the values of sampling rate, decimation, fft size, central frequency and bandwith");
-    int difference = (right_first_items + bw_items) - d_fftsize;
-    right_first_items -= difference;
-    left_first_items -= difference;
-    central_first_items -= difference;
-  }
-  // std::cout<< "bw_items: " << bw_items << std::endl;
-  // std::cout << "central_first_items: "<< central_first_items<< std ::endl;
-  // std::cout << "left_first_items: "<< left_first_items<< std ::endl;
-  // std::cout << "right_first_items: "<< right_first_items<< std ::endl;
+  searching_first_items = ((d_freq_central / down_samp) * d_fftsize) + d_fftsize_half - (bw_items / 2);
+  std::cout << "searching_first_items: " << searching_first_items << std::endl;
 }
 
 void signal_search_fft_v_impl::buildwindow()
@@ -249,8 +216,6 @@ float signal_search_fft_v_impl::get_bandwidth() const { return d_bandwidth; }
 float signal_search_fft_v_impl::get_freq_cutoff() const { return d_freq_cutoff; }
 
 float signal_search_fft_v_impl::get_threshold() const { return 10 * std::log10(d_threshold); }
-
-bool signal_search_fft_v_impl::get_carrier() const { return d_carrier; }
 
 bool signal_search_fft_v_impl::get_average() const { return d_average; }
 
@@ -288,9 +253,8 @@ void signal_search_fft_v_impl::set_freq_cutoff(float freq_cutoff)
     throw std::out_of_range("signal search: invalid frequency cut-off. Must be positive and lower than (samp_rate / decimation).");
   }
   d_freq_cutoff = freq_cutoff;
-  d_iir_central.set_taps(M_PI * freq_cutoff / (d_samp_rate / d_decimation));
-  d_iir_right.set_taps(M_PI * freq_cutoff / (d_samp_rate / d_decimation));
-  d_iir_left.set_taps(M_PI * freq_cutoff / (d_samp_rate / d_decimation));
+  d_iir_signal.set_taps(M_PI * freq_cutoff / (d_samp_rate / d_decimation));
+  d_iir_noise.set_taps(M_PI * freq_cutoff / (d_samp_rate / d_decimation));
 
   average_reset();
 }
@@ -300,11 +264,6 @@ void signal_search_fft_v_impl::set_threshold(float threshold)
   d_threshold = std::pow(10.0, threshold / 10);
 }
 
-void signal_search_fft_v_impl::set_carrier(bool carrier)
-{
-  d_carrier = carrier;
-  average_reset();
-}
 
 void signal_search_fft_v_impl::set_average(bool average)
 {
@@ -332,32 +291,17 @@ void signal_search_fft_v_impl::create_buffers()
 
   in_decimated.resize((d_fftsize));
 
-  central_band = (float *)volk_malloc(bw_items * sizeof(float), volk_get_alignment());
-  memset(central_band, 0, bw_items * sizeof(float));
+  searching_band = (float *)volk_malloc(bw_items * sizeof(float), volk_get_alignment());
+  memset(searching_band, 0, bw_items * sizeof(float));
 
-  right_band = (float *)volk_malloc(bw_items * sizeof(float), volk_get_alignment());
-  memset(right_band, 0, bw_items * sizeof(float));
+  signal_band_acc = (float *)volk_malloc(bw_items * sizeof(float), volk_get_alignment());
+  memset(signal_band_acc, 0, bw_items * sizeof(float));
 
-  left_band = (float *)volk_malloc(bw_items * sizeof(float), volk_get_alignment());
-  memset(left_band, 0, bw_items * sizeof(float));
+  signal_band_max_index = (uint32_t *)volk_malloc(sizeof(uint32_t), volk_get_alignment());
+  memset(signal_band_max_index, 0, sizeof(uint32_t));
 
-  central_band_acc = (float *)volk_malloc(bw_items * sizeof(float), volk_get_alignment());
-  memset(central_band_acc, 0, bw_items * sizeof(float));
-
-  central_band_max_index = (uint32_t *)volk_malloc(sizeof(uint32_t), volk_get_alignment());
-  memset(central_band_max_index, 0, sizeof(uint32_t));
-
-  right_band_acc = (float *)volk_malloc(bw_items * sizeof(float), volk_get_alignment());
-  memset(right_band_acc, 0, bw_items * sizeof(float));
-
-  right_band_max_index = (uint32_t *)volk_malloc(sizeof(uint32_t), volk_get_alignment());
-  memset(right_band_max_index, 0, sizeof(uint32_t));
-
-  left_band_acc = (float *)volk_malloc(bw_items * sizeof(float), volk_get_alignment());
-  memset(left_band_acc, 0, bw_items * sizeof(float));
-
-  left_band_max_index = (uint32_t *)volk_malloc(sizeof(uint32_t), volk_get_alignment());
-  memset(left_band_max_index, 0, sizeof(uint32_t));
+  noise_band_acc = (float *)volk_malloc(bw_items * sizeof(float), volk_get_alignment());
+  memset(noise_band_acc, 0, bw_items * sizeof(float));
 
   d_residbuf = (gr_complex *)volk_malloc(d_fftsize * sizeof(gr_complex), volk_get_alignment());
   memset(d_residbuf, 0, d_fftsize * sizeof(gr_complex));
@@ -375,14 +319,9 @@ void signal_search_fft_v_impl::destroy_buffers()
 {
   in_decimated.clear();
 
-  volk_free(central_band);
-  volk_free(right_band);
-  volk_free(left_band);
-  volk_free(central_band_max_index);
-  volk_free(right_band_acc);
-  volk_free(right_band_max_index);
-  volk_free(left_band_acc);
-  volk_free(left_band_max_index);
+  volk_free(searching_band);
+  volk_free(signal_band_max_index);
+  volk_free(noise_band_acc);
   volk_free(d_residbuf);
   volk_free(d_magbuf);
   volk_free(d_tmpbuf);
@@ -391,9 +330,8 @@ void signal_search_fft_v_impl::destroy_buffers()
 
 void signal_search_fft_v_impl::average_reset()
 {
-  d_iir_central.reset();
-  d_iir_right.reset();
-  d_iir_left.reset();
+  d_iir_signal.reset();
+  d_iir_noise.reset();
 }
 
 } /* namespace ecss */

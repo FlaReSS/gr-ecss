@@ -136,11 +136,11 @@ class modulator(gr.hier_block2):
 
 
         if (sel_convolutional == 0):
-            self.connect(self, convolutional, encoder)
+            self.connect(self, self.convolutional_encoder, encoder)
         else:
             self.connect(self, encoder)
         
         if (sel_srrc == 0):
-            self.connect(encoder, srcc, self)
+            self.connect(encoder, self.root_raised_cosine_filter, self)
         else:
             self.connect(encoder, self)

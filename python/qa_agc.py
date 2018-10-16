@@ -106,7 +106,8 @@ def plot(self, data, reference, error, zero, settling_time):
     fig.subplots_adjust(hspace=0.35, top=0.85, bottom=0.15)
     plt.legend((l1, l2, l3), ('error range', 'settling time range', 'settling time'), loc='lower center', bbox_to_anchor=(0.5, -0.5), fancybox=True, shadow=True, ncol=3)
 
-    #plt.show()
+    
+    # plt.show()
     self.pdf.add_to_pdf(fig)
 
 def test_sine(self, param):

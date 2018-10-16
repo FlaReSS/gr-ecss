@@ -52,7 +52,7 @@
             * \brief Signal Search with Goertzel Algorithm evaluation.
             *
             * \param samp_rate Sampling rate of signal.
-            * \param average if average (with IIR Filters) at the output of FFT is applied or not.
+            * \param average if average (with IIR Filters) at the output of FFT is applied or not
             * \param freq_central this is the centre of the bandwidth where the signal is searched, 
             * it must be an integer multiple of the sampling frequency (samp rate).
             * \param bandwidth value of bandwidth where the signal is searched.

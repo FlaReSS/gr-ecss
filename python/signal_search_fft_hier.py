@@ -28,7 +28,7 @@ class signal_search_fft_hier(gr.hier_block2):
     docstring for block signal_search_fft_hier
     """
 
-    def __init__(self, fftsize, decimation, carrier, average, wintype, freq_central, bandwidth, freq_cutoff, threshold, samp_rate):
+    def __init__(self, fftsize, decimation, average, wintype, freq_central, bandwidth, freq_cutoff, threshold, samp_rate):
         gr.hier_block2.__init__(self,
             "signal_search_fft_hier",
             gr.io_signature(1, 1, gr.sizeof_gr_complex),
@@ -41,12 +41,11 @@ class signal_search_fft_hier(gr.hier_block2):
         self.samp_rate = samp_rate
         self.bandwidth = bandwidth
         self.wintype = wintype
-        self.carrier = carrier
         self.decimation = decimation
         self.fftsize = fftsize
 
         self.ecss_signal_search_fft_v = ecss.signal_search_fft_v(
-            self.fftsize, self.decimation, self.carrier, self.average, self.wintype, self.freq_central, self.bandwidth, self.freq_cutoff, self.threshold, self.samp_rate)
+            self.fftsize, self.decimation, self.average, self.wintype, self.freq_central, self.bandwidth, self.freq_cutoff, self.threshold, self.samp_rate)
         self.blocks_stream_to_vector = blocks.stream_to_vector(
             gr.sizeof_gr_complex*1, self.fftsize * self.decimation)
         self.blocks_vector_to_stream = blocks.vector_to_stream(
