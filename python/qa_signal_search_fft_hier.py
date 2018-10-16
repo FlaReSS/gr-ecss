@@ -7,7 +7,6 @@
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 from gnuradio.filter import firdes
-from signal_search_fft_hier import signal_search_fft_hier
 from collections import namedtuple
 import ecss
 import flaress

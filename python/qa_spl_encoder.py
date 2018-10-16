@@ -136,7 +136,7 @@ class qa_spl_encoder (gr_unittest.TestCase):
 
     def test_001_t (self):
         """test_001_t: """
-        param = namedtuple('param', 'data_src bit_rate samp_rate N')
+        param = namedtuple('param', 'data_src bit_rate samp_rate')
 
         
         param.bit_rate = 1000
