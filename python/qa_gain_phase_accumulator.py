@@ -53,23 +53,27 @@ class Pdf_class(object):
             d['ModDate'] = datetime.datetime.today()
 
 def print_parameters(data):
-    to_print = "\p Sample rate = %d Hz; Number of Bits = %d; Uplink = %d; Downlink = %d; Minimum Value = %.3f rad; Maximum Value = %.3f rad \p" \
-        %(data.samp_rate, data.N, data.uplink, data.downlink, data.min_value, data.max_value)
+    to_print = "\p Sample rate = %d Hz; Number of Bits = %d; Uplink = %d; Downlink = %d; Phase step Value = %.3f rad; Phase step noise = %.3f Vrms \p" \
+        %(data.samp_rate, data.N, data.uplink, data.downlink, data.value, data.noise)
     print to_print
 
-def check_integer_phase(data_out, items):
+def check_integer_phase(data_out, N, items):
     """this function checks the integer phase accumulator output. evaluates the minimum step and the slope"""
 
     minimum_step = sys.maxint
-    slope = 0
+    precision = math.pow(2,(- (N - 1))) * math.pi
+    slope = []
     for i in reversed(xrange (len(data_out))):
         if i > 0:
             if (abs(data_out[i] - data_out[i - 1]) < abs(minimum_step)):
                 if abs(data_out[i] - data_out[i - 1]) != 0:
                     minimum_step = abs(data_out[i] - data_out[i - 1])
-            if (i < (len(data_out) - items - 1)):       #this is only the average on n items
-                slope = (data_out[i] - data_out[i - 1])  + slope
-    return minimum_step, (slope/ items)
+
+            if (i > (len(data_out) - items - 1)):       #this is only the average on n items
+                int_slope = (data_out[i] - data_out[i - 1])
+                slope.append((int_slope >> (64 - N)) * precision)
+
+    return ((minimum_step >> (64 - N)) * precision), sum(slope)/len(slope) 
 
 def plot(self, data_gain):
     """this function create a defined graph for the pll with the data input and output"""
@@ -103,17 +107,19 @@ def plot(self, data_gain):
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
     fig.subplots_adjust(hspace=0.6, top=0.85, bottom=0.15)
 
-    #plt.show()
+    # plt.show()
     self.pdf.add_to_pdf(fig)
 
-def test_ramp(self, param):
+def test_pa(self, param):
     """this function run the defined test, for easier understanding"""
 
     tb = self.tb
     data_pc = namedtuple('data_pc', 'src out time')
 
-    src_ramp = analog.sig_source_f(param.samp_rate, analog.GR_SAW_WAVE, (param.samp_rate * 0.5 / param.items), 2.0 * (param.max_value - param.min_value), (2.0 * param.min_value - param.max_value))
+    src_phase = analog.sig_source_f(param.samp_rate, analog.GR_CONST_WAVE, 0, 0, param.value)
+    src_noise = analog.noise_source_f(analog.GR_GAUSSIAN, param.noise, 0)
 
+    adder = blocks.add_vff(1)
     throttle = blocks.throttle(gr.sizeof_float*1, param.samp_rate,True)
     head = blocks.head(gr.sizeof_float, int (param.items))
 
@@ -121,9 +127,11 @@ def test_ramp(self, param):
     dst_gain_out = flaress.vector_sink_int64()
 
     pc = ecss.phase_converter(param.N)
-    gain = ecss.gain_phase_accumulator(param.N, param.uplink, param.downlink)
+    gain = ecss.gain_phase_accumulator(param.reset, param.uplink, param.downlink)
 
-    tb.connect(src_ramp, throttle)
+    tb.connect(src_phase, (adder, 0))
+    tb.connect(src_noise, (adder, 1))
+    tb.connect(adder, throttle)
     tb.connect(throttle, head)
     tb.connect(head, pc)
     tb.connect(pc, gain)
@@ -135,10 +143,6 @@ def test_ramp(self, param):
     data_pc.src = dst_pc_out.data()
     data_pc.out = dst_gain_out.data()
     data_pc.time = np.linspace(0, (param.items * 1.0 / param.samp_rate), param.items, endpoint=False)
-
-    print "src:", data_pc.src[0], data_pc.src[100]
-    print "out:", data_pc.out[0], data_pc.out[100]
-
 
     return data_pc
 
@@ -156,159 +160,124 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         """test_001_t: wrapping test"""
         param = namedtuple('param', 'samp_rate items N uplink downlink min_value max_value')
         param.N = 38
-        param.samp_rate = 4096 * 32
-        param.items = param.samp_rate 
-        param.max_value = 2 * math.pi
-        param.min_value = -2 * math.pi
+        param.samp_rate = 4096 
+        param.items = param.samp_rate / 2
+        param.value = 0.1
+        param.noise = 0.0
         param.uplink = 221
         param.downlink = 240
+        param.reset = 0
 
         print_parameters(param)
 
-        data_gain = test_ramp(self, param)
+        data_gain = test_pa(self, param)
         plot(self,data_gain)
 
-        src_min_step , src_slope = check_integer_phase(data_gain.src, 100)
+        src_step_phase = np.mean(data_gain.src)
 
-        gain_min_step , gain_slope = check_integer_phase(data_gain.out, 100)
+        gain_min_step, gain_slope = check_integer_phase(data_gain.out, param.N , 10)
         
-        precision = math.pow(2,(- (param.N - 1))) * math.pi
         tar = (param.downlink * 1.0 / param.uplink)     #turn around ratio
-        
-        gain_min_step_rad = (gain_min_step >> (64 - param.N)) * precision
-        gain_slope_rad = (gain_slope >> (64 - param.N)) * precision
 
-        src_min_step_rad = (src_min_step >> (64 - param.N)) * precision
-        src_slope_rad = (src_slope >> (64 - param.N)) * precision
-
-        
-        self.assertAlmostEqual((src_min_step_rad ), gain_min_step_rad)
-        self.assertAlmostEqual((src_slope_rad ), gain_slope_rad)
-        self.assertGreaterEqual(gain_min_step_rad, precision)
+        self.assertAlmostEqual((tar * param.value), gain_slope )
+        self.assertAlmostEqual((tar * param.value), gain_min_step)
 
         print "-Turn Around Ration : %f;" % tar
-        print "-Input Slope : %f rad/s;" % src_slope_rad       # WARNING: this is only a mean
-        print "-Input Min step : %f rad." % src_min_step_rad
-        print "-Output Slope : %f rad/s;" % gain_slope_rad       # WARNING: this is only a mean
-        print "-Output Min step : %f rad." % gain_min_step_rad
+        print "-Output Slope : %f rad/s;" % gain_slope * param.samp_rate
+        print "-Output Min step : %f rad." % gain_min_step
 
     def test_002_t (self):
         """test_002_t: wrapping test with higher ratio"""
         param = namedtuple('param', 'samp_rate items N uplink downlink min_value max_value')
         param.N = 38
-        param.samp_rate = 4096 * 32
-        param.items = param.samp_rate  
-        param.max_value = 2 * math.pi
-        param.min_value = -2 * math.pi
+        param.samp_rate = 4096
+        param.items = param.samp_rate / 20
+        param.value = 0.1
+        param.noise = 0.0
         param.uplink = 221
         param.downlink = 2400
+        param.reset = 0
 
         print_parameters(param)
 
-        data_gain = test_ramp(self, param)
+        data_gain = test_pa(self, param)
         plot(self,data_gain)
 
-        src_min_step , src_slope = check_integer_phase(data_gain.src, 100)
+        src_step_phase = np.mean(data_gain.src)
 
-        gain_min_step , gain_slope = check_integer_phase(data_gain.out, 100)
+        gain_min_step, gain_slope = check_integer_phase(data_gain.out, param.N , 1)
         
-        precision = math.pow(2,(- (param.N - 1))) * math.pi
         tar = (param.downlink * 1.0 / param.uplink)     #turn around ratio
-        
-        gain_min_step_rad = (gain_min_step >> (64 - param.N)) * precision
-        gain_slope_rad = (gain_slope >> (64 - param.N)) * precision
 
-        src_min_step_rad = (src_min_step >> (64 - param.N)) * precision
-        src_slope_rad = (src_slope >> (64 - param.N)) * precision
-
-        self.assertAlmostEqual((src_min_step_rad *tar), gain_min_step_rad)
-        self.assertAlmostEqual((src_slope_rad * tar), gain_slope_rad)
-        self.assertGreaterEqual(gain_min_step_rad, precision)
+        self.assertAlmostEqual((tar * param.value), gain_slope )
+        self.assertAlmostEqual((tar * param.value), gain_min_step)
 
         print "-Turn Around Ration : %f;" % tar
-        print "-Input Slope : %f rad/s;" % src_slope_rad       # WARNING: this is only a mean
-        print "-Input Min step : %f rad." % src_min_step_rad
-        print "-Output Slope : %f rad/s;" % gain_slope_rad       # WARNING: this is only a mean
-        print "-Output Min step : %f rad." % gain_min_step_rad
+        print "-Output Slope : %f rad/s;" % gain_slope * param.samp_rate
+        print "-Output Min step : %f rad." % gain_min_step
+
 
     def test_003_t (self):
         """test_003_t: wrapping test with higher slope"""
         param = namedtuple('param', 'samp_rate items N uplink downlink min_value max_value')
         param.N = 38
-        param.samp_rate = 4096 * 64
-        param.items = param.samp_rate / 32
-        param.max_value = 2 * math.pi
-        param.min_value = -2 * math.pi
+        param.samp_rate = 4096
+        param.items = param.samp_rate / 20
+        param.value = 3
+        param.noise = 0.0
         param.uplink = 221
         param.downlink = 240
+        param.reset = 0
 
         print_parameters(param)
 
-        data_gain = test_ramp(self, param)
+        data_gain = test_pa(self, param)
         plot(self,data_gain)
 
-        src_min_step , src_slope = check_integer_phase(data_gain.src, 100)
+        src_step_phase = np.mean(data_gain.src)
 
-        gain_min_step , gain_slope = check_integer_phase(data_gain.out, 100)
+        gain_min_step, gain_slope = check_integer_phase(data_gain.out, param.N , 1)
         
-        precision = math.pow(2,(- (param.N - 1))) * math.pi
         tar = (param.downlink * 1.0 / param.uplink)     #turn around ratio
-        
-        gain_min_step_rad = (gain_min_step >> (64 - param.N)) * precision
-        gain_slope_rad = (gain_slope >> (64 - param.N)) * precision
 
-        src_min_step_rad = (src_min_step >> (64 - param.N)) * precision
-        src_slope_rad = (src_slope >> (64 - param.N)) * precision
-
-        self.assertAlmostEqual((src_min_step_rad *tar), gain_min_step_rad)
-        self.assertAlmostEqual((src_slope_rad * tar), gain_slope_rad)
-        self.assertGreaterEqual(gain_min_step_rad, precision)
+        self.assertAlmostEqual((tar * param.value), gain_slope )
+        self.assertAlmostEqual((tar * param.value), gain_min_step)
 
         print "-Turn Around Ration : %f;" % tar
-        print "-Input Slope : %f rad/s;" % src_slope_rad       # WARNING: this is only a mean
-        print "-Input Min step : %f rad." % src_min_step_rad
-        print "-Output Slope : %f rad/s;" % gain_slope_rad       # WARNING: this is only a mean
-        print "-Output Min step : %f rad." % gain_min_step_rad
+        print "-Output Slope : %f rad/s;" % gain_slope * param.samp_rate
+        print "-Output Min step : %f rad." % gain_min_step
+
 
     def test_004_t (self):
         """test_004_t: precision test"""
         param = namedtuple('param', 'samp_rate items N uplink downlink min_value max_value')
-        param.N = 4
+        param.N = 8
         param.samp_rate = 4096
-        param.items = param.samp_rate * 2
-        param.max_value = 2 * math.pi
-        param.min_value = -2 * math.pi
+        param.items = param.samp_rate / 2
+        param.value = 0.1
+        param.noise = 0.0
         param.uplink = 221
         param.downlink = 240
+        param.reset = 0
 
         print_parameters(param)
 
-        data_gain = test_ramp(self, param)
+        data_gain = test_pa(self, param)
         plot(self,data_gain)
 
-        src_min_step , src_slope = check_integer_phase(data_gain.src, 100)
+        src_step_phase = np.mean(data_gain.src)
 
-        gain_min_step , gain_slope = check_integer_phase(data_gain.out, 100)
-
-        precision = math.pow(2,(- (param.N - 1))) * math.pi
+        gain_min_step, gain_slope = check_integer_phase(data_gain.out, param.N , 5)
+        
         tar = (param.downlink * 1.0 / param.uplink)     #turn around ratio
-        
-        gain_min_step_rad = (gain_min_step >> (64 - param.N)) * precision
-        gain_slope_rad = (gain_slope >> (64 - param.N)) * precision
 
-        src_min_step_rad = (src_min_step >> (64 - param.N)) * precision
-        src_slope_rad = (src_slope >> (64 - param.N)) * precision
-
-        
-        self.assertAlmostEqual((src_min_step_rad *tar), gain_min_step_rad, 1)
-        # self.assertAlmostEqual((src_slope_rad * tar), gain_slope_rad, 4)
-        self.assertGreaterEqual(gain_min_step_rad, precision)
+        self.assertAlmostEqual((tar * param.value), gain_slope , 1)
+        self.assertAlmostEqual((tar * param.value), gain_min_step, 1)
 
         print "-Turn Around Ration : %f;" % tar
-        print "-Input Slope : %f rad/s;" % src_slope_rad       # WARNING: this is only a mean
-        print "-Input Min step : %f rad." % src_min_step_rad
-        print "-Output Slope : %f rad/s;" % gain_slope_rad       # WARNING: this is only a mean
-        print "-Output Min step : %f rad." % gain_min_step_rad
+        print "-Output Slope : %f rad/s;" % gain_slope * param.samp_rate
+        print "-Output Min step : %f rad." % gain_min_step
+
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_gain_phase_accumulator)

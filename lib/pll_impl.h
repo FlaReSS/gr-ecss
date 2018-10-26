@@ -55,12 +55,17 @@ namespace gr {
              gr_vector_const_void_star &input_items,
              gr_vector_void_star &output_items);
 
-      /*! \brief Integer accumulator converter
+      /*! \brief Integer phase converter
       *
-      * Converts the filter output (expressed in double) in an integer value for the integer
-      * accumulator
+      * converts the filter output into integer mathematics
       */
-      void accumulator (double filter_out);
+      int64_t integer_phase_converter(double step_phase);
+
+      /*! \brief Integer accumulator
+      *
+      * integrates the filter output (already converted) using an integer mathematics
+      */
+      void accumulator (int64_t filter_out);
 
       /*! \brief Evaluate the Loop filter output.
       *

@@ -4,14 +4,15 @@
   <key>ecss_gain_phase_accumulator</key>
   <category>[ecss]</category>
   <import>import ecss</import>
-  <make>ecss.gain_phase_accumulator($N, $uplink, $downlink)</make>
-	<callback>set_uplink($uplink)</callback>
+  <make>ecss.gain_phase_accumulator($rst, $uplink, $downlink)</make>
+  <callback>set_reset($rst)</callback>
+  <callback>set_uplink($uplink)</callback>
   <callback>set_downlink($downlink)</callback>
 
 	<param>
-		<name>N of bits</name>
-		<key>N</key>
-		<value>38</value>
+		<name>Reset</name>
+		<key>rst</key>
+		<value>0</value>
 		<type>int</type>
 	</param>
 	<param>
@@ -26,21 +27,12 @@
 		<value>240</value>
 		<type>int</type>
 	</param>
-	<param>
-		<name>Vec Length</name>
-		<key>vlen</key>
-		<value>1</value>
-		<type>int</type>
-	</param>
-	<check>$vlen &gt; 0</check>
 	<sink>
 		<name>in</name>
 		<type>s64</type>
-		<vlen>$vlen</vlen>
 	</sink>
 	<source>
 		<name>out</name>
 		<type>s64</type>
-		<vlen>$vlen</vlen>
 	</source>
 </block>

@@ -145,19 +145,29 @@ def check_float(data_out, final, error, error_items, max_error_items):
 
     return settling_time_index, error_max
 
-def check_pa(data_out, items):
-    """this function checks the integer phase accumulator output from the pll. evaluates the minimum step and the slope"""
+def check_pa(data_out, final, error, error_items, max_error_items):
+    """this function checks the int64 data from the pll. It checks the time to reach the final value with the expected error (if the output reachs it), and the error/accuracy of the outputs"""
 
-    minimum_step = sys.maxint
-    slope = 0
+    if (abs(data_out[-1] - final) > abs(error)): #check if is reached the final value at the end
+        return np.inf, np.inf
+        
+    settling_time_index = np.inf
+    error_max = 0
     for i in reversed(xrange (len(data_out))):
-        if i > 0:
-            if (abs(data_out[i] - data_out[i - 1]) < abs(minimum_step)):
-                minimum_step = abs(data_out[i] - data_out[i - 1])
-            if (i < (len(data_out) - items - 1)):       #this is only the average on n items
-                slope = ((data_out[i] - data_out[i - 1]) / items) + slope
+        if (abs(data_out[i] - final) > abs(error_max)) and (i > (len(data_out) - max_error_items)):
+            error_max = abs(data_out[i] - final)
 
-    return minimum_step, slope
+        if (abs(data_out[i] - final) > abs(error)):
+            count = 0
+            for j in range(error_items):
+                if (abs(data_out[i - j] - final) > abs(error)):
+                    count = count + 1
+                else:
+                    break
+            if count == error_items:
+                settling_time_index = i
+
+    return settling_time_index, error_max
 
 def plot(self, data_pll):
     """this function create a defined graph for the pll with the data input and outputs"""
@@ -417,13 +427,15 @@ class qa_pll (gr_unittest.TestCase):
         print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
 
         #check output 'pa'
-        pa_min_step , pa_slope = check_pa(data_sine.pa, 100)
+        phase_step = 2 * math.pi * param.freq / param.samp_rate
         precision = math.pow(2,(- (param.N - 1))) * math.pi
-        pa_min_step_rad = (pa_min_step >> (64 - param.N)) * precision
-        pa_slope_rad = (pa_slope >> (64 - param.N)) * precision
-        self.assertGreaterEqual(pa_min_step_rad, precision)
-        print "-Output 'pa' Slope : %f rad/s;" % pa_slope_rad       # WARNING: this is only a mean
-        print "-Output 'pa' Min step : %f rad." % pa_min_step_rad
+        phase_step_int = int(round(phase_step / precision))
+        phase_step_int = (phase_step_int << (64 - param.N))
+        pa_settling_time_ms , pa_error_max = check_pa(data_sine.pa, phase_step_int, (phase_step_int * 0.05), 10, 100)
+        pa_error_max_rad = (pa_error_max >> (64 - param.N)) * precision
+        self.assertLess(pa_settling_time_ms, np.inf) #errors are intrinsically asserted
+        print "-Output 'pa' Settling time : %f ms;" % pa_settling_time_ms
+        print "-Output 'pa' absolute maximum error (rad): %.3f;" % pa_error_max_rad
 
     def test_002_t (self):
         """test_002_t: with a input sine without noise in the boundary BW of PLL"""
@@ -478,13 +490,15 @@ class qa_pll (gr_unittest.TestCase):
         print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
 
         #check output 'pa'
-        pa_min_step , pa_slope = check_pa(data_sine.pa, 100)
+        phase_step = 2 * math.pi * param.freq / param.samp_rate
         precision = math.pow(2,(- (param.N - 1))) * math.pi
-        pa_min_step_rad = (pa_min_step >> (64 - param.N)) * precision
-        pa_slope_rad = (pa_slope >> (64 - param.N)) * precision
-        self.assertGreaterEqual(pa_min_step_rad, precision)
-        print "-Output 'pa' Slope : %f rad/s;" % pa_slope_rad       # WARNING: this is only a mean
-        print "-Output 'pa' Min step : %f rad." % pa_min_step_rad
+        phase_step_int = int(round(phase_step / precision))
+        phase_step_int = (phase_step_int << (64 - param.N))
+        pa_settling_time_ms , pa_error_max = check_pa(data_sine.pa, phase_step_int, (phase_step_int * 0.05), 10, 100)
+        pa_error_max_rad = (pa_error_max >> (64 - param.N)) * precision
+        self.assertLess(pa_settling_time_ms, np.inf) #errors are intrinsically asserted
+        print "-Output 'pa' Settling time : %f ms;" % pa_settling_time_ms
+        print "-Output 'pa' absolute maximum error (rad): %.3f;" % pa_error_max_rad
 
     def test_003_t (self):
         """test_003_t: with a sine without noise out of the BW of PLL"""
@@ -535,13 +549,15 @@ class qa_pll (gr_unittest.TestCase):
         print "-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms
 
         #check output 'pa'
-        pa_min_step , pa_slope = check_pa(data_sine.pa, 100)
+        phase_step = 2 * math.pi * param.freq / param.samp_rate
         precision = math.pow(2,(- (param.N - 1))) * math.pi
-        pa_min_step_rad = (pa_min_step >> (64 - param.N)) * precision
-        pa_slope_rad = (pa_slope >> (64 - param.N)) * precision
-        self.assertGreaterEqual(pa_min_step_rad, precision)
-        print "-Output 'pa' Slope : %f rad/s;" % pa_slope_rad       # WARNING: this is only a mean
-        print "-Output 'pa' Min step : %f rad." % pa_min_step_rad
+        phase_step_int = int(round(phase_step / precision))
+        phase_step_int = (phase_step_int << (64 - param.N))
+        pa_settling_time_ms , pa_error_max = check_pa(data_sine.pa, phase_step_int, (phase_step_int * 0.05), 10, 100)
+        pa_error_max_rad = (pa_error_max >> (64 - param.N)) * precision
+        self.assertLess(pa_settling_time_ms, np.inf) #errors are intrinsically asserted
+        print "-Output 'pa' Settling time : %f ms;" % pa_settling_time_ms
+        print "-Output 'pa' absolute maximum error (rad): %.3f;" % pa_error_max_rad
 
     def test_004_t (self):
         """test_004_t: reset tag in the middle of the simulation"""
@@ -731,13 +747,15 @@ class qa_pll (gr_unittest.TestCase):
         print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
 
         #check output 'pa'
-        pa_min_step , pa_slope = check_pa(data_pll.pa, 100)
+        phase_step = 2 * math.pi * param.freq / param.samp_rate
         precision = math.pow(2,(- (param.N - 1))) * math.pi
-        pa_min_step_rad = (pa_min_step >> (64 - param.N)) * precision
-        pa_slope_rad = (pa_slope >> (64 - param.N)) * precision
-        self.assertGreaterEqual(pa_min_step_rad, precision)
-        print "-Output 'pa' Slope : %f rad/s;" % pa_slope_rad       # WARNING: this is only a mean
-        print "-Output 'pa' Min step : %f rad." % pa_min_step_rad
+        phase_step_int = int(round(phase_step / precision))
+        phase_step_int = (phase_step_int << (64 - param.N))
+        pa_settling_time_ms , pa_error_max = check_pa(data_pll.pa, phase_step_int, (phase_step_int * 0.05), 10, 100)
+        pa_error_max_rad = (pa_error_max >> (64 - param.N)) * precision
+        self.assertLess(pa_settling_time_ms, np.inf) #errors are intrinsically asserted
+        print "-Output 'pa' Settling time : %f ms;" % pa_settling_time_ms
+        print "-Output 'pa' absolute maximum error (rad): %.3f;" % pa_error_max_rad
 
     def test_007_t (self):
         """test_007_t: frequency sweep input"""
@@ -863,13 +881,15 @@ class qa_pll (gr_unittest.TestCase):
         print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
 
         #check output 'pa'
-        pa_min_step , pa_slope = check_pa(data_pll.pa, 100)
+        phase_step = 2 * math.pi * ((param.freq_max - param.freq_min) / 2) / param.samp_rate
         precision = math.pow(2,(- (param.N - 1))) * math.pi
-        pa_min_step_rad = (pa_min_step >> (64 - param.N)) * precision
-        pa_slope_rad = (pa_slope >> (64 - param.N)) * precision
-        self.assertGreaterEqual(pa_min_step_rad, precision)
-        print "-Output 'pa' Slope : %f rad/s;" % pa_slope_rad       # WARNING: this is only a mean
-        print "-Output 'pa' Min step : %f rad." % pa_min_step_rad
+        phase_step_int = int(round(phase_step / precision))
+        phase_step_int = (phase_step_int << (64 - param.N))
+        pa_settling_time_ms , pa_error_max = check_pa(data_pll.pa, phase_step_int, (phase_step_int * 0.05), 10, 100)
+        pa_error_max_rad = (pa_error_max >> (64 - param.N)) * precision
+        self.assertLess(pa_settling_time_ms, np.inf) #errors are intrinsically asserted
+        print "-Output 'pa' Settling time : %f ms;" % pa_settling_time_ms
+        print "-Output 'pa' absolute maximum error (rad): %.3f;" % pa_error_max_rad
 
     def test_008_t (self):
         """test_008_t: with a input sine with noise in the central BW of PLL"""
@@ -928,13 +948,15 @@ class qa_pll (gr_unittest.TestCase):
         print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
 
         #check output 'pa'
-        pa_min_step , pa_slope = check_pa(data_sine.pa, 100)
+        phase_step = 2 * math.pi * param.freq / param.samp_rate
         precision = math.pow(2,(- (param.N - 1))) * math.pi
-        pa_min_step_rad = (pa_min_step >> (64 - param.N)) * precision
-        pa_slope_rad = (pa_slope >> (64 - param.N)) * precision
-        self.assertGreaterEqual(pa_min_step_rad, precision)
-        print "-Output 'pa' Slope : %f rad/s;" % pa_slope_rad       # WARNING: this is only a mean
-        print "-Output 'pa' Min step : %f rad." % pa_min_step_rad
+        phase_step_int = int(round(phase_step / precision))
+        phase_step_int = (phase_step_int << (64 - param.N))
+        pa_settling_time_ms , pa_error_max = check_pa(data_sine.pa, phase_step_int, (phase_step_int * 0.05), 10, 100)
+        pa_error_max_rad = (pa_error_max >> (64 - param.N)) * precision
+        self.assertLess(pa_settling_time_ms, np.inf) #errors are intrinsically asserted
+        print "-Output 'pa' Settling time : %f ms;" % pa_settling_time_ms
+        print "-Output 'pa' absolute maximum error (rad): %.3f;" % pa_error_max_rad
 
     def test_009_t (self):
         """test_009_t: with a input sine with noise in the boundary BW of PLL"""
@@ -993,13 +1015,15 @@ class qa_pll (gr_unittest.TestCase):
         print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
 
         #check output 'pa'
-        pa_min_step , pa_slope = check_pa(data_sine.pa, 100)
+        phase_step = 2 * math.pi * param.freq / param.samp_rate
         precision = math.pow(2,(- (param.N - 1))) * math.pi
-        pa_min_step_rad = (pa_min_step >> (64 - param.N)) * precision
-        pa_slope_rad = (pa_slope >> (64 - param.N)) * precision
-        self.assertGreaterEqual(pa_min_step_rad, precision)
-        print "-Output 'pa' Slope : %f rad/s;" % pa_slope_rad       # WARNING: this is only a mean
-        print "-Output 'pa' Min step : %f rad." % pa_min_step_rad
+        phase_step_int = int(round(phase_step / precision))
+        phase_step_int = (phase_step_int << (64 - param.N))
+        pa_settling_time_ms , pa_error_max = check_pa(data_sine.pa, phase_step_int, (phase_step_int * 0.05), 10, 100)
+        pa_error_max_rad = (pa_error_max >> (64 - param.N)) * precision
+        self.assertLess(pa_settling_time_ms, np.inf) #errors are intrinsically asserted
+        print "-Output 'pa' Settling time : %f ms;" % pa_settling_time_ms
+        print "-Output 'pa' absolute maximum error (rad): %.3f;" % pa_error_max_rad
 
     def test_010_t (self):
         """test_010_t: with a sine with noise out of the BW of PLL"""
@@ -1054,13 +1078,15 @@ class qa_pll (gr_unittest.TestCase):
         print "-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms
 
         #check output 'pa'
-        pa_min_step , pa_slope = check_pa(data_sine.pa, 100)
+        phase_step = 2 * math.pi * param.freq / param.samp_rate
         precision = math.pow(2,(- (param.N - 1))) * math.pi
-        pa_min_step_rad = (pa_min_step >> (64 - param.N)) * precision
-        pa_slope_rad = (pa_slope >> (64 - param.N)) * precision
-        self.assertGreaterEqual(pa_min_step_rad, precision)
-        print "-Output 'pa' Slope : %f rad/s;" % pa_slope_rad       # WARNING: this is only a mean
-        print "-Output 'pa' Min step : %f rad." % pa_min_step_rad
+        phase_step_int = int(round(phase_step / precision))
+        phase_step_int = (phase_step_int << (64 - param.N))
+        pa_settling_time_ms , pa_error_max = check_pa(data_sine.pa, phase_step_int, (phase_step_int * 0.05), 10, 100)
+        pa_error_max_rad = (pa_error_max >> (64 - param.N)) * precision
+        self.assertLess(pa_settling_time_ms, np.inf) #errors are intrinsically asserted
+        print "-Output 'pa' Settling time : %f ms;" % pa_settling_time_ms
+        print "-Output 'pa' absolute maximum error (rad): %.3f;" % pa_error_max_rad
 
     def test_011_t (self):
         """test_011_t: switch from the second order to the third order with noise"""
@@ -1184,13 +1210,15 @@ class qa_pll (gr_unittest.TestCase):
         print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
 
         #check output 'pa'
-        pa_min_step , pa_slope = check_pa(data_pll.pa, 100)
+        phase_step = 2 * math.pi * param.freq / param.samp_rate
         precision = math.pow(2,(- (param.N - 1))) * math.pi
-        pa_min_step_rad = (pa_min_step >> (64 - param.N)) * precision
-        pa_slope_rad = (pa_slope >> (64 - param.N)) * precision
-        self.assertGreaterEqual(pa_min_step_rad, precision)
-        print "-Output 'pa' Slope : %f rad/s;" % pa_slope_rad       # WARNING: this is only a mean
-        print "-Output 'pa' Min step : %f rad." % pa_min_step_rad
+        phase_step_int = int(round(phase_step / precision))
+        phase_step_int = (phase_step_int << (64 - param.N))
+        pa_settling_time_ms , pa_error_max = check_pa(data_pll.pa, phase_step_int, (phase_step_int * 0.05), 10, 100)
+        pa_error_max_rad = (pa_error_max >> (64 - param.N)) * precision
+        self.assertLess(pa_settling_time_ms, np.inf) #errors are intrinsically asserted
+        print "-Output 'pa' Settling time : %f ms;" % pa_settling_time_ms
+        print "-Output 'pa' absolute maximum error (rad): %.3f;" % pa_error_max_rad
 
     def test_012_t (self):
         """test_012_t: frequency sweep input with noise"""
@@ -1236,9 +1264,7 @@ class qa_pll (gr_unittest.TestCase):
         dst_pll_out = blocks.vector_sink_c()
         dst_pll_freq = blocks.vector_sink_f()
         dst_pll_pe = blocks.vector_sink_f()
-        dst_pll_pa = flaress.vector_sink_int64()
-
-            
+        dst_pll_pa = flaress.vector_sink_int64()         
 
         tb.connect(src_sweep, vco)
         tb.connect(vco, (adder, 0))
@@ -1328,13 +1354,13 @@ class qa_pll (gr_unittest.TestCase):
         print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
 
         #check output 'pa'
-        pa_min_step , pa_slope = check_pa(data_pll.pa, 100)
+        phase_step = 2 * math.pi * ((param.freq_max - param.freq_min) / 2) / param.samp_rate
         precision = math.pow(2,(- (param.N - 1))) * math.pi
-        pa_min_step_rad = (pa_min_step >> (64 - param.N)) * precision
-        pa_slope_rad = (pa_slope >> (64 - param.N)) * precision
-        self.assertGreaterEqual(pa_min_step_rad, precision)
-        print "-Output 'pa' Slope : %f rad/s;" % pa_slope_rad       # WARNING: this is only a mean
-        print "-Output 'pa' Min step : %f rad." % pa_min_step_rad
+        phase_step_int = int(round(phase_step / precision))
+        phase_step_int = (phase_step_int << (64 - param.N))
+        pa_settling_time_ms , pa_error_max = check_pa(data_pll.pa, phase_step_int, (phase_step_int * 0.05), 10, 100)
+        self.assertLess(pa_settling_time_ms, np.inf) #errors are intrinsically asserted
+        print "-Output 'pa' Settling time : %f ms;" % pa_settling_time_ms
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_pll)

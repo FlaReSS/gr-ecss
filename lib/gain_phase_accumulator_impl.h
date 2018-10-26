@@ -29,21 +29,25 @@ namespace gr {
     class gain_phase_accumulator_impl : public gain_phase_accumulator
     {
      private:
-     int d_N;
       int d_uplink;
       int d_downlink;
-      double precision;
+      int d_reset;
+      int64_t d_integer_phase;
 
      public:
-      gain_phase_accumulator_impl(int N, int uplink, int downlink);
+      gain_phase_accumulator_impl(int reset, int uplink, int downlink);
       ~gain_phase_accumulator_impl();
 
       int work(int noutput_items,
          gr_vector_const_void_star &input_items,
          gr_vector_void_star &output_items);
+
       
+      int get_reset() const { return d_reset; } 
       int get_uplink() const { return d_uplink; }
       int get_downlink() const { return d_downlink; }
+
+      void set_reset(int reset) { d_reset = reset;}
       void set_uplink(int uplink) { d_uplink = uplink; }
       void set_downlink(int downlink) { d_downlink = downlink; }
       

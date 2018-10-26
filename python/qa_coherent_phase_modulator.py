@@ -264,49 +264,20 @@ class qa_coherent_phase_modulator (gr_unittest.TestCase):
         self.tb = None
         self.pdf.finalize_pdf()
 
-    # def test_001_t (self):
-    #     """test_001_t: with a phase accumulator"""
-    #     param = namedtuple('param', 'samp_rate items fft_size N inputs step noise_bw')
-    #     param.N = 38
-    #     param.samp_rate = 4096
-    #     param.items = param.samp_rate 
-    #     param.fft_size = 1024
-    #     param.inputs = 1
-    #     param.step = 1000 * math.pi   # to express it in rad/s
-    #     param.noise_bw = 1000
-
-    #     print_parameters(param)
-
-    #     data_pe, data_fft = test_accumulator(self, param)
-    #     plot(self,data_pe)
-
-    #     plot_fft(self,data_fft)
-        
-    #     self.assertAlmostEqual(param.step / (2 * math.pi), data_fft.carrier)
-    #     print "Frequency measured= %.3f Hz;" %data_fft.carrier
-
-    #     # pe_min_step , pe_slope = check_pa(data_pe.out, 100)
-    #     # precision = math.pow(2,(- (param.N - 1))) * math.pi
-    #     # pe_min_step_rad = (pe_min_step >> (64 - param.N)) * precision
-    #     # pe_slope_rad = (pe_slope >> (64 - param.N)) * precision
-    #     # self.assertGreaterEqual(pe_min_step_rad, precision)
-    #     # print "-Output Slope : %f rad/s;" % pe_slope_rad       # WARNING: this is only a mean
-    #     # print "-Output Min step : %f rad." % pe_min_step_rad
-
-    def test_002_t (self):
-        """test_002_t: with a phase accumulator and gain"""
+    def test_001_t (self):
+        """test_001_t: with a phase accumulator"""
         param = namedtuple('param', 'samp_rate items fft_size N inputs step noise_bw')
         param.N = 38
         param.samp_rate = 4096
         param.items = param.samp_rate 
         param.fft_size = 1024
         param.inputs = 1
-        param.step = 10 * math.pi   # to express it in rad/s
+        param.step = 1000 * math.pi   # to express it in rad/s
         param.noise_bw = 1000
 
         print_parameters(param)
 
-        data_pe, data_fft = test_accumulator_gain(self, param)
+        data_pe, data_fft = test_accumulator(self, param)
         plot(self,data_pe)
 
         plot_fft(self,data_fft)
@@ -321,6 +292,35 @@ class qa_coherent_phase_modulator (gr_unittest.TestCase):
         # self.assertGreaterEqual(pe_min_step_rad, precision)
         # print "-Output Slope : %f rad/s;" % pe_slope_rad       # WARNING: this is only a mean
         # print "-Output Min step : %f rad." % pe_min_step_rad
+
+    # def test_002_t (self):
+    #     """test_002_t: with a phase accumulator and gain"""
+    #     param = namedtuple('param', 'samp_rate items fft_size N inputs step noise_bw')
+    #     param.N = 38
+    #     param.samp_rate = 4096
+    #     param.items = param.samp_rate 
+    #     param.fft_size = 1024
+    #     param.inputs = 1
+    #     param.step = 10 * math.pi   # to express it in rad/s
+    #     param.noise_bw = 1000
+
+    #     print_parameters(param)
+
+    #     data_pe, data_fft = test_accumulator_gain(self, param)
+    #     plot(self,data_pe)
+
+    #     plot_fft(self,data_fft)
+        
+    #     self.assertAlmostEqual(param.step / (2 * math.pi), data_fft.carrier)
+    #     print "Frequency measured= %.3f Hz;" %data_fft.carrier
+
+    #     # pe_min_step , pe_slope = check_pa(data_pe.out, 100)
+    #     # precision = math.pow(2,(- (param.N - 1))) * math.pi
+    #     # pe_min_step_rad = (pe_min_step >> (64 - param.N)) * precision
+    #     # pe_slope_rad = (pe_slope >> (64 - param.N)) * precision
+    #     # self.assertGreaterEqual(pe_min_step_rad, precision)
+    #     # print "-Output Slope : %f rad/s;" % pe_slope_rad       # WARNING: this is only a mean
+    #     # print "-Output Min step : %f rad." % pe_min_step_rad
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_coherent_phase_modulator)

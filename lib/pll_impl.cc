@@ -78,6 +78,61 @@ namespace gr {
     pll_impl::~pll_impl()
     {}
 
+    int
+    pll_impl::work (int noutput_items,
+                       gr_vector_const_void_star &input_items,
+                       gr_vector_void_star &output_items)
+    {
+      const gr_complex *input = (gr_complex*)input_items[0];
+      gr_complex *output = (gr_complex*)output_items[0];
+      float *frq =(float*)output_items[1];
+      float *phase_out =(float*)output_items[2];
+      int64_t *phase_accumulator =(int64_t*)output_items[3];
+
+      gr_complexd feedback;
+      double module, error;
+      double filter_out, filter_out_limited;
+      double t_imag, t_real;
+      int64_t integer_step_phase;
+
+      std::vector<tag_t> tags;
+
+      for(int i = 0; i < noutput_items; i++) {
+
+         get_tags_in_window( // Note the different method name
+             tags, // Tags will be saved here
+             0, // Port 0
+             i, // Start of range (relative to nitems_read(0))
+             (i + 1) // End of relative range
+         );
+
+         if (tags.size() > 0) {
+           if (tags[0].value == pmt::intern("reset") && tags[0].key == pmt::intern("pll")) {
+             reset();
+           }
+         }
+
+        
+        gr::sincos(d_integer_phase_denormalized, &t_imag, &t_real);
+        feedback = (gr_complexd) input[i] * gr_complexd(t_real, -t_imag);
+        output[i] = (gr_complex) feedback;
+        error = phase_detector(feedback);
+
+        phase_out[i] = error;
+        filter_out = advance_loop(error);
+
+        frq[i] = branch_2_3 * d_samp_rate / M_TWOPI;
+        filter_out_limited = frequency_limit(filter_out);
+
+        integer_step_phase = integer_phase_converter(filter_out_limited);
+        phase_accumulator[i] = integer_step_phase;
+        accumulator(integer_step_phase);
+        
+        NCO_denormalization();
+      }
+      return noutput_items;
+    }
+
     double
     pll_impl::mod_2pi(double in)
     {
@@ -104,57 +159,6 @@ namespace gr {
       double sample_magn;
       sample_magn = sqrt(sample.imag()*sample.imag() + sample.real()*sample.real());
       return sample_magn;
-    }
-
-    int
-    pll_impl::work (int noutput_items,
-                       gr_vector_const_void_star &input_items,
-                       gr_vector_void_star &output_items)
-    {
-      const gr_complex *input = (gr_complex*)input_items[0];
-      gr_complex *output = (gr_complex*)output_items[0];
-      float *frq =(float*)output_items[1];
-      float *phase_out =(float*)output_items[2];
-      int64_t *phase_accumulator =(int64_t*)output_items[3];
-
-      gr_complexd feedback;
-      double module, error;
-      double filter_out, filter_out_limited;
-      double t_imag, t_real;
-
-      std::vector<tag_t> tags;
-
-      for(int i = 0; i < noutput_items; i++) {
-
-         get_tags_in_window( // Note the different method name
-             tags, // Tags will be saved here
-             0, // Port 0
-             i, // Start of range (relative to nitems_read(0))
-             (i + 1) // End of relative range
-         );
-
-         if (tags.size() > 0) {
-           if (tags[0].value == pmt::intern("reset") && tags[0].key == pmt::intern("pll")) {
-             reset();
-           }
-         }
-
-        phase_accumulator[i] = d_integer_phase;
-        gr::sincos(d_integer_phase_denormalized, &t_imag, &t_real);
-        feedback = (gr_complexd) input[i] * gr_complexd(t_real, -t_imag);
-        output[i] = (gr_complex) feedback;
-        error = phase_detector(feedback);
-
-        phase_out[i] = error;
-        filter_out = advance_loop(error);
-
-        frq[i] = branch_2_3 * d_samp_rate / M_TWOPI;
-        filter_out_limited = frequency_limit(filter_out);
-
-        accumulator(filter_out_limited);
-        NCO_denormalization();
-      }
-      return noutput_items;
     }
 
     void
@@ -185,13 +189,19 @@ namespace gr {
       }
     }
 
-    void
-    pll_impl::accumulator(double step_phase)
+    int64_t
+    pll_impl::integer_phase_converter(double step_phase)
     {
       double filter_out_norm = step_phase / M_PI;
       int64_t temp_integer_phase = (int64_t)round(filter_out_norm / precision);
-      d_integer_phase += (temp_integer_phase << (64 - d_N)) ;
-      }
+      return (temp_integer_phase << (64 - d_N)) ;
+    }
+
+    void
+    pll_impl::accumulator(int64_t integer_step_phase)
+    {
+      d_integer_phase += integer_step_phase;
+    }
 
     void
     pll_impl::NCO_denormalization()

@@ -47,11 +47,16 @@ namespace gr {
      * \ingroup ecss
      * \details The turn around ration is evaluated as (downlink / uplink).
      * 
-     * \param N number of bits.
+     * \param reset reset of internal registers.
      * \param uplink uplink frequency for evaluate the turn aroun ratio.
      * \param downlink downlink frequency for evaluate the turn aroun ratio.
      */
-    static sptr make(int N, int uplink, int downlink);
+    static sptr make(int reset, int uplink, int downlink);
+
+    /*!
+       * \brief Return reset
+       */
+    virtual int get_reset() const = 0;
 
     /*!
        * \brief Return uplink constant
@@ -62,6 +67,11 @@ namespace gr {
        * \brief Return downlink constant
        */
     virtual int get_downlink() const = 0;
+
+    /*!
+       * \brief Set reset
+       */
+    virtual void set_reset(int reset) = 0;
 
     /*!
        * \brief Set uplink constant

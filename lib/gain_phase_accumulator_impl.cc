@@ -29,19 +29,19 @@ namespace gr {
   namespace ecss {
 
     gain_phase_accumulator::sptr
-    gain_phase_accumulator::make(int N, int uplink, int downlink)
+    gain_phase_accumulator::make(int reset, int uplink, int downlink)
     {
       return gnuradio::get_initial_sptr
-        (new gain_phase_accumulator_impl(N, uplink, downlink));
+        (new gain_phase_accumulator_impl(reset, uplink, downlink));
     }
 
-    gain_phase_accumulator_impl::gain_phase_accumulator_impl(int N, int uplink, int downlink)
+    gain_phase_accumulator_impl::gain_phase_accumulator_impl(int reset, int uplink, int downlink)
       : gr::sync_block("gain_phase_accumulator",
               gr::io_signature::make(1, 1, sizeof (int64_t)),
               gr::io_signature::make(1, 1, sizeof (int64_t))),
-              d_uplink(uplink), d_downlink(downlink), d_N(N)
+              d_uplink(uplink), d_downlink(downlink), d_reset(reset)
     {
-      precision = pow(2,(- (N - 1)));  //maximum precision
+      d_integer_phase = 0;
     }
 
     gain_phase_accumulator_impl::~gain_phase_accumulator_impl()
@@ -55,28 +55,23 @@ namespace gr {
       const int64_t *in = (const int64_t *) input_items[0];
       int64_t *out = (int64_t *) output_items[0];
 
-      // long double temp_denormalized;
-      int64_t temp_denormalized;
-      int64_t temp_integer_phase;
-
-      long double ratio =(long double)(d_downlink / d_uplink);
-      
+      int64_t gain_integer_phase;      
 
       for (int i = 0; i < noutput_items; i++){
-        //temp_integer_phase = (in[i] >> (64 - d_N));
-        // temp_denormalized = (temp_integer_phase * precision);
-        // temp_denormalized = temp_denormalized * ratio;
-        // // temp_denormalized = temp_denormalized * (double) d_downlink;
-        // // temp_denormalized = temp_denormalized / (double) d_uplink;
-        // // temp_integer_phase = (int64_t)round(temp_denormalized / precision);
-        temp_integer_phase = in[i] / d_uplink;
-        temp_integer_phase = temp_integer_phase * (d_downlink - d_uplink);
-        out[i] = in[i] + temp_integer_phase;
-        // out[i] = (temp_integer_phase << (64 - d_N));
+        if (d_reset == 0) {
+          out[i] = d_integer_phase;
+          gain_integer_phase = in[i] / d_uplink;
+          gain_integer_phase = gain_integer_phase * d_downlink;
+          d_integer_phase += gain_integer_phase;
+        }
+        else
+        {
+          d_integer_phase = 0;
+          out[i] = d_integer_phase;
+        }
       }
       return noutput_items;
     }
-
   } /* namespace ecss */
 } /* namespace gr */
 
