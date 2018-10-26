@@ -68,8 +68,8 @@ def check_integer_phase(data_out, items):
                 if abs(data_out[i] - data_out[i - 1]) != 0:
                     minimum_step = abs(data_out[i] - data_out[i - 1])
             if (i < (len(data_out) - items - 1)):       #this is only the average on n items
-                slope = ((data_out[i] - data_out[i - 1]) / items) + slope
-    return minimum_step, slope
+                slope = (data_out[i] - data_out[i - 1])  + slope
+    return minimum_step, (slope/ items)
 
 def plot(self, data_gain):
     """this function create a defined graph for the pll with the data input and output"""
@@ -136,6 +136,10 @@ def test_ramp(self, param):
     data_pc.out = dst_gain_out.data()
     data_pc.time = np.linspace(0, (param.items * 1.0 / param.samp_rate), param.items, endpoint=False)
 
+    print "src:", data_pc.src[0], data_pc.src[100]
+    print "out:", data_pc.out[0], data_pc.out[100]
+
+
     return data_pc
 
 class qa_gain_phase_accumulator (gr_unittest.TestCase):
@@ -178,8 +182,8 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         src_slope_rad = (src_slope >> (64 - param.N)) * precision
 
         
-        self.assertAlmostEqual((src_min_step_rad *tar), gain_min_step_rad)
-        self.assertAlmostEqual((src_slope_rad * tar), gain_slope_rad)
+        self.assertAlmostEqual((src_min_step_rad ), gain_min_step_rad)
+        self.assertAlmostEqual((src_slope_rad ), gain_slope_rad)
         self.assertGreaterEqual(gain_min_step_rad, precision)
 
         print "-Turn Around Ration : %f;" % tar

@@ -55,20 +55,24 @@ namespace gr {
       const int64_t *in = (const int64_t *) input_items[0];
       int64_t *out = (int64_t *) output_items[0];
 
-      long double temp_denormalized;
+      // long double temp_denormalized;
+      int64_t temp_denormalized;
       int64_t temp_integer_phase;
 
       long double ratio =(long double)(d_downlink / d_uplink);
       
 
       for (int i = 0; i < noutput_items; i++){
-        temp_integer_phase = (in[i] >> (64 - d_N));
-        temp_denormalized = (temp_integer_phase * precision);
-        temp_denormalized = temp_denormalized * ratio;
-        // temp_denormalized = temp_denormalized * (double) d_downlink;
-        // temp_denormalized = temp_denormalized / (double) d_uplink;
-        temp_integer_phase = (int64_t)round(temp_denormalized / precision);
-        out[i] = (temp_integer_phase << (64 - d_N));
+        //temp_integer_phase = (in[i] >> (64 - d_N));
+        // temp_denormalized = (temp_integer_phase * precision);
+        // temp_denormalized = temp_denormalized * ratio;
+        // // temp_denormalized = temp_denormalized * (double) d_downlink;
+        // // temp_denormalized = temp_denormalized / (double) d_uplink;
+        // // temp_integer_phase = (int64_t)round(temp_denormalized / precision);
+        temp_integer_phase = in[i] / d_uplink;
+        temp_integer_phase = temp_integer_phase * (d_downlink - d_uplink);
+        out[i] = in[i] + temp_integer_phase;
+        // out[i] = (temp_integer_phase << (64 - d_N));
       }
       return noutput_items;
     }

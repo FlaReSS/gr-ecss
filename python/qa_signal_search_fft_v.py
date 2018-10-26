@@ -8,7 +8,7 @@ from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 from gnuradio.filter import firdes
 from collections import namedtuple
-import ecss
+import ecss_swig as ecss
 import flaress
 import math, time, datetime, os, abc, sys, pmt
 import runner, threading
@@ -41,18 +41,18 @@ def test_sine(self, param):
     dst_out = blocks.vector_sink_c()
     null = blocks.null_sink(gr.sizeof_gr_complex*1)
 
-    signal_search = ecss.signal_search_fft_hier(param.fft_size, param.decimation, Average, firdes.WIN_BLACKMAN_hARRIS, param.f_central, param.bw, param.average, param.threshold, param.samp_rate)
-
-    # ecss_signal_search_fft_v = ecss.signal_search_fft_v(param.fft_size, param.decimation, Average, firdes.WIN_BLACKMAN_hARRIS, param.f_central, param.bw, param.average, param.threshold, param.samp_rate)
-    # blocks_stream_to_vector = blocks.stream_to_vector(gr.sizeof_gr_complex*1, param.fft_size * param.decimation)
-    # blocks_vector_to_stream = blocks.vector_to_stream(gr.sizeof_gr_complex*1, param.fft_size * param.decimation)
+    ecss_signal_search_fft_v = ecss.signal_search_fft_v(param.fft_size, param.decimation, Average, firdes.WIN_BLACKMAN_hARRIS, param.f_central, param.bw, param.average, param.threshold, param.samp_rate)
+    blocks_stream_to_vector = blocks.stream_to_vector(gr.sizeof_gr_complex*1, param.fft_size * param.decimation)
+    blocks_vector_to_stream = blocks.vector_to_stream(gr.sizeof_gr_complex*1, param.fft_size * param.decimation)
 
     tb.connect(src_sine, (adder, 0))
     tb.connect(src_noise,(adder, 1))
     tb.connect(adder, head)
     tb.connect(head, dst_source)
-    tb.connect(adder, signal_search)
-    tb.connect(signal_search, dst_out)
+    tb.connect(head, blocks_stream_to_vector)
+    tb.connect(blocks_stream_to_vector, ecss_signal_search_fft_v)
+    tb.connect(ecss_signal_search_fft_v, blocks_vector_to_stream)
+    tb.connect(blocks_vector_to_stream, dst_out)
     
     # throttle.set_max_noutput_items (param.samp_rate)
     # throttle.set_min_noutput_items (param.samp_rate)
@@ -64,7 +64,7 @@ def test_sine(self, param):
 
     return data_signal_search
 
-class qa_signal_search_fft_hier (gr_unittest.TestCase):
+class qa_signal_search_fft_v (gr_unittest.TestCase):
 
     def setUp (self):
         self.tb = gr.top_block ()
@@ -78,10 +78,10 @@ class qa_signal_search_fft_hier (gr_unittest.TestCase):
 
         param.f_central = 0
         param.bw = 500
-        param.fft_size = 1024 *4
+        param.fft_size = 1024 
         param.decimation = 1
         param.average = 1000
-        param.samp_rate = 4096 * 16
+        param.samp_rate = 4096 * 4
         param.items = param.samp_rate 
         param.freq = 0
         param.threshold = 3
@@ -94,7 +94,7 @@ class qa_signal_search_fft_hier (gr_unittest.TestCase):
         self.assertEqual(len(data_sine.src), len(data_sine.out))
 
 if __name__ == '__main__':
-    suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_signal_search_fft_hier)
+    suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_signal_search_fft_v)
     runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_2')
     runner.run(suite)
     #gr_unittest.TestProgram()
