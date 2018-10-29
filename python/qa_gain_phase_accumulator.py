@@ -58,7 +58,7 @@ def print_parameters(data):
     print to_print
 
 def check_integer_phase(data_out, N, items):
-    """this function checks the integer phase accumulator output. evaluates the minimum step and the slope"""
+    """this function checks the integer phase accumulator output. evaluates the minimum step and the slope of a defined number of items"""
 
     minimum_step = sys.maxint
     precision = math.pow(2,(- (N - 1))) * math.pi
@@ -69,7 +69,7 @@ def check_integer_phase(data_out, N, items):
                 if abs(data_out[i] - data_out[i - 1]) != 0:
                     minimum_step = abs(data_out[i] - data_out[i - 1])
 
-            if (i > (len(data_out) - items - 1)):       #this is only the average on n items
+            if (i > (len(data_out) - items - 1)): 
                 int_slope = (data_out[i] - data_out[i - 1])
                 slope.append((int_slope >> (64 - N)) * precision)
 

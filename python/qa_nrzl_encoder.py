@@ -55,30 +55,26 @@ def print_parameters(data):
         %(data.bit_rate, data.samp_rate)
     print to_print
 
-def plot(self, data):
+def plot(self, data_out, data_src):
     """this function create a defined graph with the data inputs"""
 
     plt.rcParams['text.usetex'] = True
 
-    # out = np.asarray(data.out)
-    # src = np.asarray(data.src)
-    # time = np.asarray(data.time)
+    fig, (ax1, ax2) = plt.subplots(2, sharey=True)
 
-    fig, (ax1) = plt.subplots(1, sharey=True)
-
-    ax1.set_xlabel('Time [s]')
+    ax1.set_xlabel('Time unit')
     ax1.set_ylabel('Amplitude [V]', color='r')
     ax1.set_title("Output",  fontsize=20)
-    ax1.plot(data, color='r', scalex=True, scaley=True, linewidth=1)
+    ax1.plot(data_out, color='r', scalex=True, scaley=True, linewidth=1)
     ax1.tick_params(axis='y', labelcolor='red')
     ax1.grid(True)
 
-    # ax2.set_xlabel('Time [s]')
-    # ax2.set_ylabel ('Amplitude [V]', color='r')
-    # ax2.set_title("Input", fontsize=20)
-    # ax2.plot(time, src, color='r', scalex=True, scaley=True, linewidth=1)
-    # ax2.tick_params(axis='y', labelcolor='red')
-    # ax2.grid(True)
+    ax2.set_xlabel('Time unit')
+    ax2.set_ylabel ('Amplitude [V]', color='r')
+    ax2.set_title("Input", fontsize=20)
+    ax2.plot(data_src, color='r', scalex=True, scaley=True, linewidth=1)
+    ax2.tick_params(axis='y', labelcolor='red')
+    ax2.grid(True)
 
     name_test = self.id().split("__main__.")[1]
     name_test_usetex = name_test.replace('_', '\_').replace('.', ': ')
@@ -90,7 +86,7 @@ def plot(self, data):
     # plt.show()
     self.pdf.add_to_pdf(fig)
 
-def test_spl(self, param):
+def test_nrzl(self, param):
     """this function run the defined test, for easier understanding"""
 
     tb = self.tb
@@ -100,29 +96,16 @@ def test_spl(self, param):
 
     head = blocks.head(gr.sizeof_char, len(param.data_src))
 
-    spl = ecss.spl_encoder(param.bit_rate, param.samp_rate)
+    nrzl = ecss.nrzl_encoder(param.bit_rate, param.samp_rate)
 
     tb.connect(src, head)
-    tb.connect(head, spl)
-    tb.connect(spl, dst)
+    tb.connect(head, nrzl)
+    tb.connect(nrzl, dst)
 
     self.tb.run()
 
     out = dst.data()
     return out
-
-def extract_data_out(data_out, param):
-    """this function extrapolates the data from the output signal"""
-
-    data_extracted = []
-
-    # for i in xrange (len(data_out) - 1):
-    #     if (data_out[i] == 1.0) and (data_out[i + 1] == -1.0) and (i % (param.samp_rate / param.bit_rate) != 0):
-    #         data_extracted.append(1)
-    #     if (data_out[i] == -1.0) and (data_out[i + 1] == 1.0) and (i % (param.samp_rate / param.bit_rate) != 0):
-    #         data_extracted.append(0)
-
-    return data_extracted
 
 class qa_nrzl_encoder (gr_unittest.TestCase):
 
@@ -135,26 +118,42 @@ class qa_nrzl_encoder (gr_unittest.TestCase):
         self.pdf.finalize_pdf()
 
     def test_001_t (self):
-        """test_001_t: """
+        """test_001_t: with repetition of 2"""
         param = namedtuple('param', 'data_src bit_rate samp_rate')
 
         
         param.bit_rate = 1000
-        param.samp_rate = 10000
-        param.data_src = [0,0,1,0,0,0,1,0,1,0,1,1,1,1,1,0,0,0,0,1,0,1]
-
+        param.samp_rate = 2000
+        param.data_src = (0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1)
+        expected_data = (-1, -1, -1, -1, 1, 1, -1, -1, -1, -1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, -1, -1, 1, 1)
 
         print_parameters(param)
 
-        time_error_measure = 0.05
-        error = 0.05
+        data_out = test_nrzl(self, param)
 
-        data_out = test_spl(self, param)
-        data_extracted = extract_data_out(data_out, param)
+        plot(self, data_out, param.data_src)
 
-        plot(self, data_out)
+        self.assertAlmostEqual(data_out, expected_data)
+        print "- Data correctly encoded."
 
-        self.assertEqual(param.data_src, data_extracted)
+    def test_002_t (self):
+        """test_002_t: with repetition of 4"""
+        param = namedtuple('param', 'data_src bit_rate samp_rate')
+
+        param.bit_rate = 1000
+        param.samp_rate = 4000
+        param.data_src = (0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1)
+        expected_data = (-1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1)
+
+        print_parameters(param)
+
+        data_out = test_nrzl(self, param)
+
+        plot(self, data_out, param.data_src)
+
+        self.assertAlmostEqual(data_out, expected_data)
+        print "- Data correctly encoded."
+
 
 
 if __name__ == '__main__':

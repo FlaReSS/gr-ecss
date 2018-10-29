@@ -93,41 +93,35 @@ namespace gr {
 
       delta_phase = (double)(M_TWOPI * freq) / samp_rate;
 
-      for (size_t i = 0; i < d_interpolation; i++)
+      if (sine == true)
       {
-
-        if (abs(phase) > M_PI)
+        for (int i = 0; i < d_interpolation; i++)
         {
-          while (phase > M_PI)
-            phase -= 2 * M_PI;
+          if (abs(phase) > M_PI)
+          {
+            while (phase > M_PI)
+              phase -= 2 * M_PI;
 
-          while (phase < -M_PI)
-            phase += 2 * M_PI;
+            while (phase < -M_PI)
+              phase += 2 * M_PI;
+          }
+          positive[i] = sin(phase);
+          negative[i] = cos(phase);
+          phase += delta_phase;
         }
-
-        positive[i] = sin(phase);
-        negative[i] = cos(phase);
-        if (sine == false)
+      }
+      else
+      {
+        int level = -1;
+        for (int i = 0; i < d_interpolation; i++)
         {
-          if (positive[i] >= 0)
+          if (i % int(samp_rate / (2*freq)) == 0)
           {
-            positive[i] = +1;
+            level *= -1;
           }
-          else
-          {
-            positive[i] = -1;
-          }
-
-          if (negative[i] >= 0)
-          {
-            negative[i] = -1;
-          }
-          else
-          {
-            negative[i] = +1;
-          }
+          positive[i] = level;
+          negative[i] = -level;
         }
-        phase += delta_phase;
       }
     }
 

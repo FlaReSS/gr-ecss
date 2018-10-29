@@ -51,34 +51,30 @@ class Pdf_class(object):
             d['ModDate'] = datetime.datetime.today()
 
 def print_parameters(data):
-    to_print = "\p Bit rate= %d V; f_samp= %.1f Hz\p" \
-        %(data.bit_rate, data.samp_rate)
+    to_print = "\p Bit rate= %d V; f_samp= %.1f Hz; f_sub-carrier= %.1f Hz\p" \
+        %(data.bit_rate, data.samp_rate, data.freq_sub)
     print to_print
 
-def plot(self, data):
+def plot(self, data_out, data_src):
     """this function create a defined graph with the data inputs"""
 
     plt.rcParams['text.usetex'] = True
 
-    # out = np.asarray(data.out)
-    # src = np.asarray(data.src)
-    # time = np.asarray(data.time)
+    fig, (ax1, ax2) = plt.subplots(2, sharey=True)
 
-    fig, (ax1) = plt.subplots(1, sharey=True)
-
-    ax1.set_xlabel('Time [s]')
+    ax1.set_xlabel('Time unit')
     ax1.set_ylabel('Amplitude [V]', color='r')
     ax1.set_title("Output",  fontsize=20)
-    ax1.plot(data, color='r', scalex=True, scaley=True, linewidth=1)
+    ax1.plot(data_out, color='r', scalex=True, scaley=True, linewidth=1)
     ax1.tick_params(axis='y', labelcolor='red')
     ax1.grid(True)
 
-    # ax2.set_xlabel('Time [s]')
-    # ax2.set_ylabel ('Amplitude [V]', color='r')
-    # ax2.set_title("Input", fontsize=20)
-    # ax2.plot(time, src, color='r', scalex=True, scaley=True, linewidth=1)
-    # ax2.tick_params(axis='y', labelcolor='red')
-    # ax2.grid(True)
+    ax2.set_xlabel('Time unit')
+    ax2.set_ylabel ('Amplitude [V]', color='r')
+    ax2.set_title("Input", fontsize=20)
+    ax2.plot(data_src, color='r', scalex=True, scaley=True, linewidth=1)
+    ax2.tick_params(axis='y', labelcolor='red')
+    ax2.grid(True)
 
     name_test = self.id().split("__main__.")[1]
     name_test_usetex = name_test.replace('_', '\_').replace('.', ': ')
@@ -90,7 +86,7 @@ def plot(self, data):
     # plt.show()
     self.pdf.add_to_pdf(fig)
 
-def test_spl(self, param):
+def test_nrlz(self, param):
     """this function run the defined test, for easier understanding"""
 
     tb = self.tb
@@ -100,29 +96,44 @@ def test_spl(self, param):
 
     head = blocks.head(gr.sizeof_char, len(param.data_src))
 
-    spl = ecss.nrzl_encoder_subcarrier(param.sine, param.freq, param.bit_rate, param.samp_rate)
+    nrzl = ecss.nrzl_encoder_subcarrier(param.sine, param.freq_sub, param.bit_rate, param.samp_rate)
 
     tb.connect(src, head)
-    tb.connect(head, spl)
-    tb.connect(spl, dst)
+    tb.connect(head, nrzl)
+    tb.connect(nrzl, dst)
 
     self.tb.run()
 
     out = dst.data()
     return out
 
-def extract_data_out(data_out, param):
-    """this function extrapolates the data from the output signal"""
+def test_subcarrier(self, param, wave_type, amplitude, offset):
+    """this function run the defined test for the sub-carrier test, for easier understanding"""
 
-    data_extracted = []
+    tb = self.tb
 
-    # for i in xrange (len(data_out) - 1):
-    #     if (data_out[i] == 1.0) and (data_out[i + 1] == -1.0) and (i % (param.samp_rate / param.bit_rate) != 0):
-    #         data_extracted.append(1)
-    #     if (data_out[i] == -1.0) and (data_out[i + 1] == 1.0) and (i % (param.samp_rate / param.bit_rate) != 0):
-    #         data_extracted.append(0)
+    src = blocks.vector_source_b(param.data_src, True, 1, [])
+    expected_out = analog.sig_source_f(param.samp_rate, wave_type, param.freq_sub, amplitude, offset)
+    dst_out = blocks.vector_sink_f(1)
+    dst_expected = blocks.vector_sink_f(1)
 
-    return data_extracted
+    head1 = blocks.head(gr.sizeof_float, param.samp_rate)
+    head2 = blocks.head(gr.sizeof_float, param.samp_rate)
+
+    nrzl = ecss.nrzl_encoder_subcarrier(param.sine, param.freq_sub, param.bit_rate, param.samp_rate)
+
+    tb.connect(src, nrzl)
+    tb.connect(nrzl, head1)
+    tb.connect(head1, dst_out)
+    tb.connect(expected_out, head2)
+    tb.connect(head2, dst_expected)
+
+    self.tb.run()
+
+    data_out = dst_out.data()
+    expected_data = dst_expected.data()
+
+    return data_out, expected_data
 
 class qa_nrzl_encoder_subcarrier (gr_unittest.TestCase):
 
@@ -135,57 +146,118 @@ class qa_nrzl_encoder_subcarrier (gr_unittest.TestCase):
         self.pdf.finalize_pdf()
 
     def test_001_t (self):
-        """test_001_t: sine sine sub-carrier test"""
-        param = namedtuple('param', 'data_src bit_rate samp_rate sine freq')
-
+        """test_001_t: check sine wave"""
+        param = namedtuple('param', 'data_src bit_rate samp_rate sine freq_sub')
         
-        param.bit_rate = 1000
-        param.samp_rate = 10000
-        param.freq =  100
+        param.bit_rate = 1
+        param.samp_rate = 4096
         param.sine = True
-        param.data_src = [0,0,1,0,0,0,1,0,1,0,1,1,1,1,1,0,0,0,0,1,0,1]
-
+        param.freq_sub = 100
+        param.data_src = (1,1)
 
         print_parameters(param)
 
-        time_error_measure = 0.05
-        error = 0.05
+        data_out, expected_data = test_subcarrier(self, param, analog.GR_SIN_WAVE, 1, 0)
 
-        data_out = test_spl(self, param)
-        data_extracted = extract_data_out(data_out, param)
-
-        plot(self, data_out)
-
-        self.assertEqual(param.data_src, data_extracted)
+        self.assertFloatTuplesAlmostEqual(data_out, expected_data, 4)
+        print "- Data correctly encoded."
 
     def test_002_t (self):
-        """test_002_t: square wave sub-carrier test"""
-        param = namedtuple('param', 'data_src bit_rate samp_rate sine freq')
-
+        """test_002_t: check cosine wave"""
+        param = namedtuple('param', 'data_src bit_rate samp_rate sine freq_sub')
         
-        param.bit_rate = 1000
-        param.samp_rate = 10000
-        param.freq =  100
-        param.sine = False
-        param.data_src = [0,0,1,0,0,0,1,0,1,0,1,1,1,1,1,0,0,0,0,1,0,1]
-
+        param.bit_rate = 1
+        param.samp_rate = 4096
+        param.sine = True
+        param.freq_sub = 100
+        param.data_src = (0,0)
 
         print_parameters(param)
 
-        time_error_measure = 0.05
-        error = 0.05
+        data_out, expected_data = test_subcarrier(self, param, analog.GR_COS_WAVE, 1, 0)
 
-        data_out = test_spl(self, param)
-        data_extracted = extract_data_out(data_out, param)
+        self.assertFloatTuplesAlmostEqual(data_out, expected_data, 4)
+        print "- Data correctly encoded."
 
-        plot(self, data_out)
+    def test_003_t (self):
+        """test_003_t: check square wave"""
+        param = namedtuple('param', 'data_src bit_rate samp_rate sine freq_sub')
+        
+        param.bit_rate = 1
+        param.samp_rate = 4096
+        param.sine = False
+        param.freq_sub = 512
+        param.data_src = (0, 0)
 
-        self.assertEqual(param.data_src, data_extracted)
+        print_parameters(param)
+
+        data_out, expected_data = test_subcarrier(self, param, analog.GR_SQR_WAVE, 2, -1)
+
+        self.assertFloatTuplesAlmostEqual(data_out, expected_data)
+        print "- Data correctly encoded."
+
+    def test_004_t (self):
+        """test_004_t: check negative square wave"""
+        param = namedtuple('param', 'data_src bit_rate samp_rate sine freq_sub')
+        
+        param.bit_rate = 1
+        param.samp_rate = 4096
+        param.sine = False
+        param.freq_sub = 512
+        param.data_src = (1, 1)
+
+        print_parameters(param)
+
+        data_out, expected_data = test_subcarrier(self, param, analog.GR_SQR_WAVE, -2, 1)
+
+        self.assertFloatTuplesAlmostEqual(data_out, expected_data)
+        print "- Data correctly encoded."
+
+    def test_005_t (self):
+        """test_005_t: sine wave with data"""
+        param = namedtuple('param', 'data_src bit_rate samp_rate sine freq_sub')
+
+        
+        param.bit_rate = 1024
+        param.samp_rate = 4096
+        param.sine = True
+        param.freq_sub = 256
+        param.data_src = (0,0,1,0,0,0,1,0,1,0,1,1,1,1,1,0,0,0,0,1,0,1)
+        expected_data = (1.0, 0.9238795042037964, 0.7071067690849304, 0.3826834261417389, 1.0, 0.9238795042037964, 0.7071067690849304, 0.3826834261417389, 0.0, 0.3826834261417389, 0.7071067690849304, 0.9238795042037964, 1.0, 0.9238795042037964, 0.7071067690849304, 0.3826834261417389, 1.0, 0.9238795042037964, 0.7071067690849304, 0.3826834261417389, 1.0, 0.9238795042037964, 0.7071067690849304, 0.3826834261417389, 0.0, 0.3826834261417389, 0.7071067690849304, 0.9238795042037964, 1.0, 0.9238795042037964, 0.7071067690849304, 0.3826834261417389, 0.0, 0.3826834261417389, 0.7071067690849304, 0.9238795042037964, 1.0, 0.9238795042037964, 0.7071067690849304, 0.3826834261417389, 0.0, 0.3826834261417389, 0.7071067690849304, 0.9238795042037964, 0.0, 0.3826834261417389, 0.7071067690849304, 0.9238795042037964, 0.0, 0.3826834261417389, 0.7071067690849304, 0.9238795042037964, 0.0, 0.3826834261417389, 0.7071067690849304, 0.9238795042037964, 0.0, 0.3826834261417389, 0.7071067690849304, 0.9238795042037964, 1.0, 0.9238795042037964, 0.7071067690849304, 0.3826834261417389, 1.0, 0.9238795042037964, 0.7071067690849304, 0.3826834261417389, 1.0, 0.9238795042037964, 0.7071067690849304, 0.3826834261417389, 1.0, 0.9238795042037964, 0.7071067690849304, 0.3826834261417389, 0.0, 0.3826834261417389, 0.7071067690849304, 0.9238795042037964, 1.0, 0.9238795042037964, 0.7071067690849304, 0.3826834261417389, 0.0, 0.3826834261417389, 0.7071067690849304, 0.9238795042037964)
+
+        print_parameters(param)
+
+        data_out = test_nrlz(self, param)
+
+        plot(self, data_out, param.data_src)
+
+        self.assertFloatTuplesAlmostEqual(data_out, expected_data)
+        print "- Data correctly encoded."
+
+    def test_006_t (self):
+        """test_006_t: square wave with data"""
+        param = namedtuple('param', 'data_src bit_rate samp_rate sine freq_sub')
+
+        
+        param.bit_rate = 1024
+        param.samp_rate = 4096
+        param.sine = False
+        param.freq_sub = 256
+        param.data_src = (0,0,1,0,0,0,1,0,1,0,1,1,1,1,1,0,0,0,0,1,0,1)
+        expected_data = (-1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1)
+
+        print_parameters(param)
+
+        data_out = test_nrlz(self, param)
+
+        plot(self, data_out, param.data_src)
+
+        self.assertFloatTuplesAlmostEqual(data_out, expected_data)
+        print "- Data correctly encoded."
 
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_nrzl_encoder_subcarrier)
     runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_2')
     runner.run(suite)
-    #gr_unittest.TestProgram()
-
+    # gr_unittest.TestProgram()
