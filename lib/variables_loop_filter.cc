@@ -33,97 +33,41 @@ namespace gr {
     #define M_TWOPI (2.0*M_PI)
     #endif
 
-    // void
-    // variables_loop_filter::evaluation(){
-    //   loop_bw = omega * sqrt( 1 + 2* damp + sqrt(pow((2*damp*damp + 1),2.0) + 1));
-    //   double denom_2= (1.0 + 2.0*damp*loop_bw + loop_bw*loop_bw);
-    //   coeff1_2 =  (4*damp*loop_bw) / denom_2;
-    //   coeff2_2 = (4*loop_bw*loop_bw) / denom_2;
-    //
-    //   double a= (m+2)*damp;
-    //   double b= 1 + 2*m*damp*damp;
-    //   double c= m*damp;
-    //   double denom_3 = 8 + 4*b*(omega/samp) + 2*a*(omega/samp)*(omega/samp)+ c*(omega/samp)*(omega/samp)*(omega/samp);
-    //   coeff1_3 = (8*b*(omega/samp) + 2*c*(omega/samp)*(omega/samp)) / denom_3;
-    //   coeff2_3 = (8*a*(omega/samp)*(omega/samp) - 4*c*(omega/samp)*(omega/samp)*(omega/samp)) / denom_3;
-    //   coeff3_3 = (8*c*(omega/samp)*(omega/samp)*(omega/samp)) / denom_3;
-    // }
-    //
-    // void
-    // variables_loop_filter::set_index_m(int index_m){
-    //   m = index_m;
-    //   evaluation();
-    // }
-    //
-    // void
-    // variables_loop_filter::set_natural_freq(float natural_freq){
-    //   omega = M_TWOPI * natural_freq;
-    //   evaluation();
-    // }
-    //
-    // void
-    // variables_loop_filter::set_damping(float damping){
-    //   damp = damping;
-    //   evaluation();
-    // }
-    //
-    // void
-    // variables_loop_filter::set_samp_rate(int samp_rate){
-    //   evaluation();
-    // }
+  std::vector<double>
+  variables_loop_filter::coefficients(float n_freq_2, float damp_2, int m_3, float n_freq_3, float damp_3, int samp)
+  {
+    std::vector<double> coefficients;
+    
+    double omega_2 = M_TWOPI * n_freq_2;
+    double loop_bw_2 = omega_2 * sqrt( 1 + 2* damp_2 + sqrt(pow((2*damp_2*damp_2 + 1),2.0) + 1));
+    double denom_2 = (4.0 + 4.0 * damp_2 * loop_bw_2 * samp + loop_bw_2 * loop_bw_2 * samp * samp);
 
+    double coeff1_2 = (8 * damp_2 * loop_bw_2 * samp) / denom_2;
+    coefficients.push_back(coeff1_2);
 
-    double
-    variables_loop_filter::get_coeff1_2(int m, float n_freq, float damp, int samp)  {
-      double omega = M_TWOPI * n_freq;
-      double loop_bw = omega * sqrt( 1 + 2* damp + sqrt(pow((2*damp*damp + 1),2.0) + 1));
-      double denom_2= (1.0 + 2.0*damp*loop_bw + loop_bw*loop_bw);
-      double coeff1_2 =  (4*damp*loop_bw) / denom_2;
-      return coeff1_2;
+    double coeff2_2 = (2 * damp_2 * damp_2 * loop_bw_2 * loop_bw_2 * samp * samp) / denom_2;
+    coefficients.push_back(coeff2_2);
+
+    double omega_3 = M_TWOPI * n_freq_3;
+    double a= (m_3+2)*damp_3;
+    double b= 1 + 2*m_3*damp_3*damp_3;
+    double c= m_3*damp_3;
+    double denom_3 = 8 + 4*b*(omega_3/samp) + 2*a*(omega_3/samp)*(omega_3/samp)+ c*(omega_3/samp)*(omega_3/samp)*(omega_3/samp);
+
+    double coeff4_2 = 1;
+    coefficients.push_back(coeff4_2);
+
+    double coeff1_3 = (8 * b * (omega_3/samp) + 2 * c * (omega_3/samp)*(omega_3/samp)*(omega_3/samp)) / denom_3;
+    coefficients.push_back(coeff1_3);
+
+    double coeff2_3 = (8 * a * (omega_3 / samp) * (omega_3 / samp) - 4 * c * (omega_3 / samp) * (omega_3 / samp) * (omega_3 / samp)) / denom_3;
+    coefficients.push_back(coeff2_3);
+
+    double coeff3_3 = (8 * c * (omega_3 / samp) * (omega_3 / samp) * (omega_3 / samp)) / denom_3;
+    coefficients.push_back(coeff3_3);
+
+    return coefficients;
     }
-
-    double
-    variables_loop_filter::get_coeff2_2(int m, float n_freq, float damp, int samp)  {
-      double omega = M_TWOPI * n_freq;
-      double loop_bw = omega * sqrt( 1 + 2* damp + sqrt(pow((2*damp*damp + 1),2.0) + 1));
-      double denom_2= (1.0 + 2.0*damp*loop_bw + loop_bw*loop_bw);
-      double coeff2_2 = (4*loop_bw*loop_bw) / pow(denom_2, 2 );
-      return coeff2_2;
-    }
-
-    double
-    variables_loop_filter::get_coeff1_3(int m, float n_freq, float damp, int samp)  {
-      double omega = M_TWOPI * n_freq;
-      double a= (m+2)*damp;
-      double b= 1 + 2*m*damp*damp;
-      double c= m*damp;
-      double denom_3 = 8 + 4*b*(omega/samp) + 2*a*(omega/samp)*(omega/samp)+ c*(omega/samp)*(omega/samp)*(omega/samp);
-      double coeff1_3 = (8*b*(omega/samp) + 2*c*(omega/samp)*(omega/samp)) / denom_3;
-      return coeff1_3;
-    }
-
-    double
-    variables_loop_filter::get_coeff2_3(int m, float n_freq, float damp, int samp)  {
-      double omega = M_TWOPI * n_freq;
-      double a= (m+2)*damp;
-      double b= 1 + 2*m*damp*damp;
-      double c= m*damp;
-      double denom_3 = 8 + 4*b*(omega/samp) + 2*a*(omega/samp)*(omega/samp)+ c*(omega/samp)*(omega/samp)*(omega/samp);
-      double coeff2_3 = (8*a*(omega/samp)*(omega/samp) - 4*c*(omega/samp)*(omega/samp)*(omega/samp)) / denom_3;
-      return coeff2_3;
-    }
-
-    double
-    variables_loop_filter::get_coeff3_3(int m, float n_freq, float damp, int samp)  {
-      double omega = M_TWOPI * n_freq;
-      double a= (m+2)*damp;
-      double b= 1 + 2*m*damp*damp;
-      double c= m*damp;
-      double denom_3 = 8 + 4*b*(omega/samp) + 2*a*(omega/samp)*(omega/samp)+ c*(omega/samp)*(omega/samp)*(omega/samp);
-      double coeff3_3 = (8*c*(omega/samp)*(omega/samp)*(omega/samp)) / denom_3;
-      return coeff3_3;
-    }
-
 
   } /* namespace ecss */
 } /* namespace gr */

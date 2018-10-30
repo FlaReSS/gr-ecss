@@ -58,11 +58,11 @@ def print_parameters(data):
     print to_print
 
 def check_integer_phase(data_out, N, items):
-    """this function checks the integer phase accumulator output. evaluates the minimum step and the slope of a defined number of items"""
+    """this function checks the integer phase accumulator output. It checks the minimum step and the slope of a defined number of items"""
 
     minimum_step = sys.maxint
     precision = math.pow(2,(- (N - 1))) * math.pi
-    slope = []
+    slope = 0
     for i in reversed(xrange (len(data_out))):
         if i > 0:
             if (abs(data_out[i] - data_out[i - 1]) < abs(minimum_step)):
@@ -71,9 +71,16 @@ def check_integer_phase(data_out, N, items):
 
             if (i > (len(data_out) - items - 1)): 
                 int_slope = (data_out[i] - data_out[i - 1])
-                slope.append((int_slope >> (64 - N)) * precision)
+                rad_slope = ((int_slope >> (64 - N)) * precision)
+                
+                if (rad_slope >= math.pi):
+                    rad_slope = rad_slope - 2 * math.pi
+                if (rad_slope < -math.pi):
+                    rad_slope = rad_slope + 2 * math.pi
+                    
+                slope = slope + rad_slope
 
-    return ((minimum_step >> (64 - N)) * precision), sum(slope)/len(slope) 
+    return ((minimum_step >> (64 - N)) * precision), (slope / items)
 
 def plot(self, data_gain):
     """this function create a defined graph for the pll with the data input and output"""

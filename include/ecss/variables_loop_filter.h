@@ -43,17 +43,9 @@ namespace gr {
     class ECSS_API variables_loop_filter
     {
       private:
-        //coefficients initilizated with loop bandwidth = 0.035
-
+      
       public:
-        // variables_loop_filter();
-        // ~variables_loop_filter();
-
-        static double get_coeff1_2(int m, float n_freq, float damp, int samp);
-        static double get_coeff2_2(int m, float n_freq, float damp, int samp) ;
-        static double get_coeff1_3(int m, float n_freq, float damp, int samp) ;
-        static double get_coeff2_3(int m, float n_freq, float damp, int samp) ;
-        static double get_coeff3_3(int m, float n_freq, float damp, int samp) ;
+        static std::vector<double> coefficients(float n_freq_2, float damp_2, int m_3, float n_freq_3, float damp_3, int samp);
     };
   } // namespace ecss
 } // namespace gr

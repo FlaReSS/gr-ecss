@@ -5,58 +5,37 @@
   <category>[ecss]</category>
   <import>from ecss import variables_loop_filter</import>
 
-  <var_make>self.$(id) = $(id) = variables_loop_filter.get_$(type.fcn)($index_m, $natural_freq, $damping, $samp_rate)</var_make>
-  <var_value>variables_loop_filter.get_$(type.fcn)($index_m, $natural_freq, $damping, $samp_rate)</var_value>
+  <var_make>self.$(id) = $(id) = variables_loop_filter.coefficients($natural_freq_2, $damping_2, $index_m_3, $natural_freq_3, $damping_3, $samp_rate)</var_make>
+  <var_value>variables_loop_filter.coefficients($natural_freq_2, $damping_2, $index_m_3, $natural_freq_3, $damping_3, $samp_rate)</var_value>
   <make></make>
 
   <param>
-    <name>Coefficient</name>
-    <key>type</key>
-    <type>enum</type>
-    <option>
-			<name>C1 for 2nd order filter</name>
-      <key>coeff1_2</key>
-			<opt>fcn:coeff1_2</opt>
-		</option>
-    <option>
-			<name>C2 for 2nd order filter</name>
-      <key>coeff2_2</key>
-			<opt>fcn:coeff2_2</opt>
-		</option>
-    <option>
-			<name>C1 for 3rd order filter</name>
-      <key>coeff1_3</key>
-			<opt>fcn:coeff1_3</opt>
-		</option>
-    <option>
-      <name>C2 for 3rd order filter</name>
-      <key>coeff2_3</key>
-      <opt>fcn:coeff2_3</opt>
-    </option>
-    <option>
-      <name>C3 for 3rd order filter</name>
-      <key>coeff3_3</key>
-      <opt>fcn:coeff3_3</opt>
-    </option>
-	</param>
-
-  <param>
-    <name>natural frequency</name>
-    <key>natural_freq</key>
+    <name>Natural frequency (2nd order)</name>
+    <key>natural_freq_2</key>
     <type>real</type>
   </param>
   <param>
-    <name>damping</name>
-    <key>damping</key>
+    <name>Damping (2n order)</name>
+    <key>damping_2</key>
     <type>real</type>
   </param>
   <param>
-    <name>index m</name>
-    <key>index_m</key>
+    <name>Index m (3rd order)</name>
+    <key>index_m_3</key>
     <type>int</type>
   </param>
   <param>
-    <name>sampling rate</name>
+  <name>Natural frequency (3rd order)</name>
+  <key>natural_freq_3</key>
+  <type>real</type>
+</param>
+<param>
+  <name>Damping (3rd order)</name>
+  <key>damping_3</key>
+  <type>real</type>
+</param>
+  <param>
+    <name>Sampling rate</name>
     <key>samp_rate</key>
     <type>int</type>
   </param>
