@@ -50,39 +50,28 @@ namespace gr {
         * \param samp_rate Sampling rate of signal.
         * \param order Loop filter order.
         * \param N number of bits.
-        * \param Coeff1_2 value of the coefficient in the Proportional arm of the second order Loop Filter.
-        * \param Coeff2_2 value of the coefficient in the Integral arm of the second order Loop Filter.
-        * \param Coeff4_2 value of the coefficient in the Integral arm of the second order Loop Filter for the imperfect integration.
-        * \param Coeff1_3 value of the coefficient in the Proportional arm of the third order Loop Filter.
-        * \param Coeff2_3 value of the coefficient in the Integral arm of the third order Loop Filter.
-        * \param Coeff3_3 value of the coefficient in the Double Integral arm of the third order Loop Filter.
+        * \param coefficients value of the coefficients in the following order:
+        * [0]= the Proportional arm of the second order Loop Filter;
+        * [1]= the Integral arm of the second order Loop Filter;
+        * [2]= the Integral arm of the second order Loop Filter for the imperfect integration;
+        * [3]= the Proportional arm of the third order Loop Filter;
+        * [4]= the Integral arm of the third order Loop Filter;
+        * [5]= the Double Integral arm of the third order Loop Filter.
         * \param freq_central central value of frequency that PLL can catch.
         * \param bw bandwidth of frequency that PLL can catchl.
        */
-      static sptr make(float samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float freq_central, float bw);
-
+      static sptr make(float samp_rate, int order, int N, const std::vector<double> &coefficients, float freq_central, float bw);
 
       virtual void set_order(int order) = 0;
 
-      virtual void set_Coeff1_2(double Coeff1_2) = 0;
-      virtual void set_Coeff2_2(double Coeff2_2) = 0;
-      virtual void set_Coeff4_2(double Coeff4_2) = 0;
-      virtual void set_Coeff1_3(double Coeff1_3) = 0;
-      virtual void set_Coeff2_3(double Coeff2_3) = 0;
-      virtual void set_Coeff3_3(double Coeff3_3) = 0;
+      virtual void set_coefficients(const std::vector<double> &coefficients) = 0;
       virtual void set_frequency(float freq) = 0;
       virtual void set_phase(float phase) = 0;
       virtual void set_freq_central(float freq) = 0;
       virtual void set_bw(float bw) = 0;
 
       virtual int get_order() const = 0;
-      virtual double get_Coeff1_2() const = 0;
-      virtual double get_Coeff2_2() const = 0;
-      virtual double get_Coeff4_2() const = 0;
-      virtual double get_Coeff1_3() const = 0;
-      virtual double get_Coeff2_3() const = 0;
-      virtual double get_Coeff3_3() const = 0;
-      virtual float get_frequency() const = 0;
+      virtual std::vector<double> get_coefficients() const = 0;
       virtual float get_phase() const = 0;
       virtual float get_freq_central() const = 0;
       virtual float get_bw() const = 0;

@@ -4,14 +4,9 @@
   <key>ecss_pll</key>
   <category>[ecss]</category>
   <import>import ecss</import>
-  <make>ecss.pll($samp_rate, $order, $N, $Coeff1_2, $Coeff2_2, $Coeff4_2, $Coeff1_3, $Coeff2_3, $Coeff3_3, $freq_central, $bw)</make>
+  <make>ecss.pll($samp_rate, $order, $N, $coefficients, $freq_central, $bw)</make>
   <callback>set_order($order)</callback>
-  <callback>set_Coeff1_2($Coeff1_2)</callback>
-  <callback>set_Coeff2_2($Coeff2_2)</callback>
-  <callback>set_Coeff4_2($Coeff4_2)</callback>
-  <callback>set_Coeff1_3($Coeff1_3)</callback>
-  <callback>set_Coeff2_3($Coeff_3)</callback>
-  <callback>set_Coeff3_3($Coeff3_3)</callback>
+  <callback>set_coefficients($coefficients)</callback>
   <callback>set_fre_central($freq_central)</callback>
   <callback>set_bw($bw)</callback>
   <param>
@@ -29,36 +24,11 @@
     <key>N</key>
     <type>int</type>
   </param>
-  <param>
-    <name>C1 for 2nd order filter</name>
-    <key>Coeff1_2</key>
-    <type>real</type>
-  </param>
-  <param>
-    <name>C2 for 2nd order filter</name>
-    <key>Coeff2_2</key>
-    <type>real</type>
-  </param>
-  <param>
-    <name>C4 for 2nd order filter</name>
-    <key>Coeff4_2</key>
-    <type>real</type>
-  </param>
-  <param>
-    <name>C1 for 3rd order filter</name>
-    <key>Coeff1_3</key>
-    <type>real</type>
-  </param>
-  <param>
-    <name>C2 for 3rd order filter</name>
-    <key>Coeff2_3</key>
-    <type>real</type>
-  </param>
-  <param>
-    <name>C3 for 3rd order filter</name>
-    <key>Coeff3_3</key>
-    <type>real</type>
-  </param>
+<param>
+  <name>Coefficients</name>
+  <key>coefficients</key>
+  <type>float_vector</type>
+</param>
   <param>
     <name>Frequecy central</name>
     <key>freq_central</key>
@@ -70,12 +40,6 @@
     <type>real</type>
   </param>
 
-  <check>$Coeff1_2 &gt;= 0 and $Coeff1_2 &lt;= 1</check>
-  <check>$Coeff2_2 &gt;= 0 and $Coeff2_2 &lt;= 1</check>
-  <check>$Coeff4_2 &gt;= 0 and $Coeff4_2 &lt;= 1</check>
-  <check>$Coeff1_3 &gt;= 0 and $Coeff1_3 &lt;= 1</check>
-  <check>$Coeff2_3 &gt;= 0 and $Coeff2_3 &lt;= 1</check>
-  <check>$Coeff3_3 &gt;= 0 and $Coeff3_3 &lt;= 1</check>
   <check>$order == 2 or $order == 3</check>
   <check>$N &gt;= 1 and $N &lt;= 52</check>
 

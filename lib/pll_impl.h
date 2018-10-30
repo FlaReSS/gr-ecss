@@ -22,6 +22,7 @@
 #define INCLUDED_ECSS_PLL_IMPL_H
 
 #include <ecss/pll.h>
+#include <vector>
 
 namespace gr {
   namespace ecss {
@@ -35,11 +36,10 @@ namespace gr {
       int64_t d_integer_phase;
       double d_integer_phase_denormalized;                /*!< Integer value after to be denormalized */
       double precision;
-      double d_Coeff1_2, d_Coeff2_2, d_Coeff4_2;
-      double d_Coeff1_3, d_Coeff2_3, d_Coeff3_3;
       double branch_3_par, branch_2_3_par, branch_2_3;
       double d_freq_central, d_bw;
       double branch_2_3_max, branch_2_3_min;
+      std::vector<double> d_coefficients;
 
       double mod_2pi(double in);                          /*! Keep the value between -2pi and 2pi */
       void reset();                                       /*! Reset all the registers */
@@ -48,26 +48,26 @@ namespace gr {
       double magnitude(gr_complexd sample);
 
       public:
-      pll_impl(float samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float freq_central, float bw);
-      ~pll_impl();
+        pll_impl(float samp_rate, int order, int N, const std::vector<double> &coefficients, float freq_central, float bw);
+        ~pll_impl();
 
-      int work (int noutput_items,
-             gr_vector_const_void_star &input_items,
-             gr_vector_void_star &output_items);
+        int work(int noutput_items,
+                 gr_vector_const_void_star &input_items,
+                 gr_vector_void_star &output_items);
 
-      /*! \brief Integer phase converter
+        /*! \brief Integer phase converter
       *
       * converts the filter output into integer mathematics
       */
-      int64_t integer_phase_converter(double step_phase);
+        int64_t integer_phase_converter(double step_phase);
 
-      /*! \brief Integer accumulator
+        /*! \brief Integer accumulator
       *
       * integrates the filter output (already converted) using an integer mathematics
       */
-      void accumulator (int64_t filter_out);
+        void accumulator(int64_t filter_out);
 
-      /*! \brief Evaluate the Loop filter output.
+        /*! \brief Evaluate the Loop filter output.
       *
       * \details
       * This function evaluate the output of the PLL loop filter. This function can
@@ -78,9 +78,9 @@ namespace gr {
       * d_Coeff2_2, d_Coeff1_2 to evaluate the output in according with the order of the filter.
       * \returns (double) output loop filter
       */
-      double advance_loop(double error);
+        double advance_loop(double error);
 
-      /*! \brief Keep the phase in the range [-pi, pi).
+        /*! \brief Keep the phase in the range [-pi, pi).
       *
       * \details
       * This function keeps the phase between -pi and pi. If the
@@ -89,9 +89,9 @@ namespace gr {
       * pi-d.
       * \returns (double) new phase limited
       */
-      double phase_wrap(double phase);
+        double phase_wrap(double phase);
 
-      /*! \brief Keep the frequency between d_min_freq and d_max_freq.
+        /*! \brief Keep the frequency between d_min_freq and d_max_freq.
       *
       * \details
       * Specifically, this function works with the phase steps. Thus,
@@ -104,13 +104,13 @@ namespace gr {
       * \param step (double) step
       * \returns (double) new step limited
       */
-      double frequency_limit(double step);
+        double frequency_limit(double step);
 
-      /*******************************************************************
+        /*******************************************************************
       * SET FUNCTIONS
       *******************************************************************/
 
-      /*!
+        /*!
        * \brief Set the precision of the PLL.
        *
        * \details
@@ -119,9 +119,9 @@ namespace gr {
        *
        * \param N    (int) new number of bits
        */
-      void set_N(int N);
+        void set_N(int N);
 
-      /*!
+        /*!
        * \brief Set the loop filter order.
        *
        * \details
@@ -132,87 +132,22 @@ namespace gr {
        *
        * \param order (int) new loop filer order
        */
-      void set_order(int order);
+        void set_order(int order);
 
-      /*!
-       * \brief Set the loop gain Coeff1_2.
+        /*!
+       * \brief Set the loop gain coefficients.
        *
        * \details
-       * Sets the loop filter's Coeff1_2 gain parameter.
+       * Sets the loop filter's coefficient gain parameters.
        *
-       * This value should really only be set by adjusting the loop
+       * This values should really only be set by adjusting the loop
        * bandwidth and damping factor.
        *
-       * \param Coeff1_2 (float) new Coeff1_2 gain
+       * \param coefficients (double) new coefficients
        */
-      void set_Coeff1_2(double Coeff1_2);
+        void set_coefficients(const std::vector<double> &coefficients);
 
-      /*!
-      * \brief Set the loop gain Coeff2_2.
-      *
-      * \details
-      * Sets the loop filter's Coeff2_2 gain parameter.
-      *
-      * This value should really only be set by adjusting the loop
-      * bandwidth and damping factor.
-      *
-      * \param Coeff2_2 (float) new Coeff2_2 gain
-      */
-      void set_Coeff2_2(double Coeff2_2);
-
-      /*!
-      * \brief Set the loop gain Coeff4_2.
-      *
-      * \details
-      * Sets the loop filter's Coeff4_2 gain parameter.
-      *
-      * This value should really only be set by adjusting the loop
-      * bandwidth and damping factor.
-      *
-      * \param Coeff4_2 (float) new Coeff4_2 gain
-      */
-      void set_Coeff4_2(double Coeff4_2);
-
-      /*!
-      * \brief Set the loop gain Coeff1_3.
-      *
-      * \details
-      * Sets the loop filter's Coeff1_3 gain parameter.
-      *
-      * This value should really only be set by adjusting the loop
-      * bandwidth and damping factor.
-      *
-      * \param Coeff1_3 (float) new Coeff1_3 gain
-      */
-      void set_Coeff1_3(double Coeff1_3);
-
-      /*!
-      * \brief Set the loop gain Coeff2_3.
-      *
-      * \details
-      * Sets the loop filter's Coeff2_3 gain parameter.
-      *
-      * This value should really only be set by adjusting the loop
-      * bandwidth and damping factor.
-      *
-      * \param Coeff2_3 (float) new Coeff2_3 gain
-      */
-      void set_Coeff2_3(double Coeff2_3);
-
-      /*!
-      * \brief Set the loop gain Coeff3_3.
-      *
-      * \details
-      * Sets the loop filter's Coeff3_3 gain parameter.
-      *
-      * This value should really only be set by adjusting the loop
-      * bandwidth and damping factor.
-      *
-      * \param Coeff3_3 (float) new Coeff3_3 gain
-      */
-      void set_Coeff3_3(double Coeff3_3);
-
-      /*!
+        /*!
        * \brief Set the control loop's frequency.
        *
        * \details
@@ -223,9 +158,9 @@ namespace gr {
        *
        * \param freq    (float) new frequency
        */
-      void set_frequency(float freq);
+        void set_frequency(float freq);
 
-      /*!
+        /*!
       * \brief Set the control loop's phase.
       *
       * \details
@@ -236,9 +171,9 @@ namespace gr {
       *
       * \param phase (float) new phase
       */
-      void set_phase(float phase);
+        void set_phase(float phase);
 
-      /*!
+        /*!
       * \brief Set the control loop's central frequency.
       *
       * \details
@@ -246,9 +181,9 @@ namespace gr {
       *
       * \param freq (float) new central frequency
       */
-      void set_freq_central(float freq);
+        void set_freq_central(float freq);
 
-      /*!
+        /*!
       * \brief Set the control loop's bandwidth.
       *
       * \details
@@ -256,66 +191,41 @@ namespace gr {
       *
       * \param bw (float) new bandwidth
       */
-      void set_bw(float bw);
+        void set_bw(float bw);
 
-      /*******************************************************************
+        /*******************************************************************
       * GET FUNCTIONS
       *******************************************************************/
 
-      /*!
+        /*!
       * \brief Returns the loop gain order.
       */
-      int get_order() const;
+        int get_order() const;
 
-      /*!
-      * \brief Returns the loop gain Coeff1_2.
+        /*!
+      * \brief Returns the loop gain coefficients.
       */
-      double get_Coeff1_2() const;
+        std::vector<double> get_coefficients() const;
 
-      /*!
-      * \brief Returns the loop gain Coeff2_2.
-      */
-      double get_Coeff2_2() const;
-
-      /*!
-      * \brief Returns the loop gain Coeff4_2.      
-      */
-      double get_Coeff4_2() const;
-
-      /*!
-      * \brief Returns the loop gain Coeff1_3.
-      */
-      double get_Coeff1_3() const;
-
-      /*!
-      * \brief Returns the loop gain Coeff2_3.
-      */
-      double get_Coeff2_3() const;
-
-      /*!
-      * \brief Returns the loop gain Coeff3_3.
-      */
-      double get_Coeff3_3() const;
-
-      /*!
+        /*!
       * \brief Get the control loop's frequency estimated.
       */
-      float get_frequency() const;
+        float get_frequency() const;
 
-      /*!
+        /*!
       * \brief Get the control loop's phase estimate.
       */
-      float get_phase() const;
+        float get_phase() const;
 
-      /*!
+        /*!
       * \brief Get the control loop's central frequency.
       */
-      float get_freq_central() const;
+        float get_freq_central() const;
 
-      /*!
+        /*!
       * \brief Get the control loop's bandwidth.
       */
-      float get_bw() const;
+        float get_bw() const;
       };
 
   } // namespace ecss

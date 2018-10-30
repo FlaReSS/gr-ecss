@@ -28,7 +28,7 @@
 #include <gnuradio/math.h>
 #include <stdexcept>
 #include "pll_impl.h"
-
+#include <vector>
 
 namespace gr {
   namespace ecss {
@@ -38,39 +38,29 @@ namespace gr {
     #endif
 
     pll::sptr
-    pll::make(float samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float freq_central, float bw)
+    pll::make(float samp_rate, int order, int N, const std::vector<double> &coefficients, float freq_central, float bw)
     {
-      return gnuradio::get_initial_sptr
-        (new pll_impl(samp_rate, order, N, Coeff1_2, Coeff2_2, Coeff4_2, Coeff1_3, Coeff2_3, Coeff3_3, freq_central, bw));
-    }
+      return gnuradio::get_initial_sptr(new pll_impl(samp_rate, order, N, coefficients, freq_central, bw));
+      }
 
-    /*
-     * The private constructor
-     */
     static int ios[] = {sizeof(gr_complex), sizeof(float), sizeof(float), sizeof(int64_t)};
     static std::vector<int> iosig(ios, ios+sizeof(ios)/sizeof(int));
-    pll_impl::pll_impl(float samp_rate, int order, int N, double Coeff1_2, double Coeff2_2, double Coeff4_2, double Coeff1_3, double Coeff2_3, double Coeff3_3, float freq_central, float bw)
-      : gr::sync_block("pll",
-            gr::io_signature::make(1, 1, sizeof(gr_complex)),
-            gr::io_signature::makev(4, 4, iosig)),
-            d_order(order), d_N(N), d_integer_phase(0), d_integer_phase_denormalized(0),
-            branch_2_3_max(((freq_central + (bw / 2)) * M_TWOPI )/ d_samp_rate), branch_2_3_min(((freq_central - (bw / 2)) * M_TWOPI) / d_samp_rate),
-            branch_3_par(0), branch_2_3_par(0), branch_2_3(0), d_samp_rate(samp_rate),
-            d_Coeff1_2(Coeff1_2), d_Coeff2_2(Coeff2_2), d_Coeff4_2(Coeff4_2),
-            d_Coeff1_3(Coeff1_3), d_Coeff2_3(Coeff2_3), d_Coeff3_3(Coeff3_3),
-            d_freq_central(freq_central), d_bw(bw)
-          {
-            set_tag_propagation_policy(TPP_DONT);
-            set_N(N);
-            set_Coeff1_2(Coeff1_2);
-            set_Coeff2_2(Coeff2_2);
-            set_Coeff4_2(Coeff4_2);
-            set_Coeff1_3(Coeff1_3);
-            set_Coeff2_3(Coeff2_3);
-            set_Coeff3_3(Coeff3_3);
-            set_order(order);
-            reset();
-          }
+    pll_impl::pll_impl(float samp_rate, int order, int N, const std::vector<double> &coefficients, float freq_central, float bw)
+        : gr::sync_block("pll",
+                         gr::io_signature::make(1, 1, sizeof(gr_complex)),
+                         gr::io_signature::makev(4, 4, iosig)),
+          d_order(order), d_N(N), d_integer_phase(0), d_integer_phase_denormalized(0),
+          branch_2_3_max(((freq_central + (bw / 2)) * M_TWOPI) / d_samp_rate), branch_2_3_min(((freq_central - (bw / 2)) * M_TWOPI) / d_samp_rate),
+          branch_3_par(0), branch_2_3_par(0), branch_2_3(0), d_samp_rate(samp_rate),
+          d_freq_central(freq_central), d_bw(bw), d_coefficients(coefficients)
+    {
+      
+      set_tag_propagation_policy(TPP_DONT);
+      set_N(N);
+      set_coefficients(coefficients);
+      set_order(order);
+      reset();
+    }
 
     /*
      * Our virtual destructor.
@@ -175,16 +165,16 @@ namespace gr {
     {
       if (d_order == 3)
       {
-          branch_3_par += d_Coeff3_3 * error;
-          branch_2_3_par = d_Coeff2_3 * error + branch_3_par;
+          branch_3_par += d_coefficients[5] * error;
+          branch_2_3_par = d_coefficients[4] * error + branch_3_par;
           branch_2_3 += branch_2_3_par;
-          return branch_2_3 + d_Coeff1_3 * error;
+          return branch_2_3 + d_coefficients[3] * error;
       }
       else
       {
           branch_3_par = 0;
-          branch_2_3 = d_Coeff4_2 * branch_2_3 + d_Coeff2_2 * error ;
-          return branch_2_3 + d_Coeff1_2 * error;
+          branch_2_3 = d_coefficients[2] * branch_2_3 + d_coefficients[1] * error;
+          return branch_2_3 + d_coefficients[0] * error;
       }
     }
 
@@ -263,64 +253,18 @@ namespace gr {
       d_order = order;
     }
 
-
     void
-    pll_impl::set_Coeff1_2(double Coeff1_2)
+    pll_impl::set_coefficients(const std::vector<double> &coefficients)
     {
-      if(Coeff1_2 < 0 || Coeff1_2 > 1.0) {
-        throw std::out_of_range ("pll: invalid coefficient 1 for 2nd order. Must be in [0,1].");
+      for(size_t i = 0; i < 6; i++)
+      {
+        if (coefficients[i] < 0 || coefficients[i] > 1.0)
+        {
+          throw std::out_of_range("pll: invalid coefficients. Must be in [0,1].");
+        }
       }
-      d_Coeff1_2 = Coeff1_2;
+      d_coefficients = coefficients;
     }
-
-    void
-    pll_impl::set_Coeff2_2(double Coeff2_2)
-    {
-      if(Coeff2_2 < 0 || Coeff2_2 > 1.0) {
-        throw std::out_of_range ("pll: invalid coefficient 2 for 2nd order. Must be in [0,1].");
-      }
-      d_Coeff2_2 = Coeff2_2;
-    }
-
-    void
-    pll_impl::set_Coeff4_2(double Coeff4_2)
-    {
-      if(Coeff4_2 < 0 || Coeff4_2 > 1.0) {
-        throw std::out_of_range ("pll: invalid coefficient 4 for 2nd order. Must be in [0,1].");
-      }
-      d_Coeff4_2 = Coeff4_2;
-    }
-
-    void
-    pll_impl::set_Coeff1_3(double Coeff1_3)
-    {
-      if(Coeff1_3 < 0 || Coeff1_3 > 1.0) {
-        throw std::out_of_range ("pll: invalid coefficient 1 for 3rd order. Must be in [0,1]. (suggested very small)");
-      }
-      d_Coeff1_3 = Coeff1_3;
-
-    }
-
-    void
-    pll_impl::set_Coeff2_3(double Coeff2_3)
-    {
-      if(Coeff2_3 < 0 || Coeff2_3 > 1.0) {
-        throw std::out_of_range ("pll: invalid coefficient 2 for 3rd order. Must be in [0,1]. (suggested very small)");
-      }
-      d_Coeff2_3 = Coeff2_3;
-
-    }
-
-    void
-    pll_impl::set_Coeff3_3(double Coeff3_3)
-    {
-      if(Coeff3_3 < 0 || Coeff3_3 > 1.0) {
-        throw std::out_of_range ("pll: invalid coefficient 3 for 3rd order. Must be in [0,1]. (suggested very small)");
-      }
-      d_Coeff3_3 = Coeff3_3;
-
-    }
-
 
     void
     pll_impl::set_frequency(float freq)
@@ -368,41 +312,10 @@ namespace gr {
      return d_order;
     }
 
-
-    double
-    pll_impl::get_Coeff1_2() const
+    std::vector<double>
+    pll_impl::get_coefficients() const
     {
-      return d_Coeff1_2;
-    }
-
-    double
-    pll_impl::get_Coeff2_2() const
-    {
-      return d_Coeff2_2;
-    }
-
-    double
-    pll_impl::get_Coeff4_2() const
-    {
-      return d_Coeff4_2;
-    }
-
-    double
-    pll_impl::get_Coeff1_3() const
-    {
-      return d_Coeff1_3;
-    }
-
-    double
-    pll_impl::get_Coeff2_3() const
-    {
-      return d_Coeff2_3;
-    }
-
-    double
-    pll_impl::get_Coeff3_3() const
-    {
-      return d_Coeff3_3;
+      return d_coefficients;
     }
 
     float
