@@ -41,7 +41,9 @@ namespace gr {
               gr::io_signature::make(1, 1, sizeof (int64_t))),
               d_uplink(uplink), d_downlink(downlink), d_reset(reset)
     {
+      first = false;
       d_integer_phase = 0;
+      d_integer_phase_accumulator = 0;
     }
 
     gain_phase_accumulator_impl::~gain_phase_accumulator_impl()
@@ -59,16 +61,28 @@ namespace gr {
 
       for (int i = 0; i < noutput_items; i++){
         if (d_reset == 0) {
+
+          if (first == false)
+          {
+            d_integer_phase = in[i];
+            first = true;
+          }
+          
           out[i] = d_integer_phase;
-          gain_integer_phase = in[i] / d_uplink;
+          d_integer_phase_step = in[i] - d_integer_phase_accumulator;
+
+          gain_integer_phase = d_integer_phase_step / d_uplink;
           gain_integer_phase = gain_integer_phase * d_downlink;
           d_integer_phase += gain_integer_phase;
         }
         else
         {
+          first = false;
           d_integer_phase = 0;
           out[i] = d_integer_phase;
         }
+        
+        d_integer_phase_accumulator = in[i];
       }
       return noutput_items;
     }

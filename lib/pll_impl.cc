@@ -112,23 +112,22 @@ namespace gr {
            }
          }
 
-        
-        gr::sincos(d_integer_phase_denormalized, &t_imag, &t_real);
-        feedback = (gr_complexd) input[i] * gr_complexd(t_real, -t_imag);
-        output[i] = (gr_complex) feedback;
-        error = phase_detector(feedback);
+         phase_accumulator[i] = d_integer_phase;
+         gr::sincos(d_integer_phase_denormalized, &t_imag, &t_real);
+         feedback = (gr_complexd)input[i] * gr_complexd(t_real, -t_imag);
+         output[i] = (gr_complex)feedback;
+         error = phase_detector(feedback);
 
-        phase_out[i] = error;
-        filter_out = advance_loop(error);
+         phase_out[i] = error;
+         filter_out = advance_loop(error);
 
-        frq[i] = branch_2_3 * d_samp_rate / M_TWOPI;
-        filter_out_limited = frequency_limit(filter_out);
+         frq[i] = branch_2_3 * d_samp_rate / M_TWOPI;
+         filter_out_limited = frequency_limit(filter_out);
 
-        integer_step_phase = integer_phase_converter(filter_out_limited);
-        phase_accumulator[i] = integer_step_phase;
-        accumulator(integer_step_phase);
-        
-        NCO_denormalization();
+         integer_step_phase = integer_phase_converter(filter_out_limited);
+         accumulator(integer_step_phase);
+
+         NCO_denormalization();
       }
       return noutput_items;
     }

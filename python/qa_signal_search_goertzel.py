@@ -88,95 +88,149 @@ class qa_signal_search_goertzel (gr_unittest.TestCase):
 
     def tearDown (self):
         self.tb = None
-
-    def test_001_t (self):
-        """test_001_t: with a input sine without noise in the central BW of PLL"""
+    
+    def test_000_t (self):
+        """test_000_t: Delay"""
         param = namedtuple('param', 'f_central bw samp_rate items average cutoff threshold freq noise')
+        tb = self.tb
 
         param.f_central = 0
         param.bw = 1000
         param.average = False
         param.cutoff = 1000 
         param.samp_rate = 4096 * 8
-        param.items = param.samp_rate 
+        param.items = param.samp_rate * 8
         param.freq = 0
         param.threshold = 0
         param.noise = 0
 
         print_parameters(param)
 
-        data_sine = test_sine(self, param)
+        amplitude = 1
+        offset = 0
+        Average = False
 
-        expected_tags = tuple([ make_tag("reset", "pll", 0, 'src_sine')])
+        src_sine =analog.sig_source_c(param.samp_rate, analog.GR_COS_WAVE, param.freq, amplitude, offset)
+        throttle = blocks.throttle(gr.sizeof_gr_complex*1, param.samp_rate,True)
+        head = blocks.head(gr.sizeof_gr_complex, int (param.items))
 
-        self.assertGreaterEqual(len(data_sine.out), len(data_sine.src))
-        self.assertEqual(len(data_sine.tags), 1)
-        self.assertTrue(compare_tags(data_sine.tags[0], expected_tags[0]))
+        dst_source = blocks.vector_sink_c()
+        dst_out = blocks.vector_sink_c()
 
+        signal_search = ecss.signal_search_goertzel(param.average, param.f_central, param.bw, param.cutoff, param.threshold, param.samp_rate)
 
-    def test_002_t (self):
-        """test_002_t: with a input sine without noise on border BW of PLL"""
-        param = namedtuple('param', 'f_central bw samp_rate items average cutoff threshold freq noise')
+        agc = ecss.agc(0.01, 1, 1, param.samp_rate)
 
-        param.f_central = 0
-        param.bw = 1000
-        param.average = False
-        param.cutoff = 1000 
-        param.samp_rate = 4096 * 8
-        param.items = param.samp_rate 
-        param.freq = 500
-        param.threshold = 0
-        param.noise = 0
+        # ecss_signal_search_fft_v = ecss.signal_search_fft_v(param.fft_size, param.decimation, Average, firdes.WIN_BLACKMAN_hARRIS, param.f_central, param.bw, param.average, param.threshold, param.samp_rate)
+        # blocks_stream_to_vector = blocks.stream_to_vector(gr.sizeof_gr_complex*1, param.fft_size * param.decimation)
+        # blocks_vector_to_stream = blocks.vector_to_stream(gr.sizeof_gr_complex*1, param.fft_size * param.decimation)
 
-        print_parameters(param)
-
-        data_sine = test_sine(self, param)
-
-        self.assertGreaterEqual(len(data_sine.out), len(data_sine.src))
-        self.assertEqual(len(data_sine.tags), 1)
+        tb.connect(src_sine, throttle)
+        tb.connect(throttle, head)
+        tb.connect(head, agc)
+        tb.connect(agc, dst_source)
+        tb.connect(agc, signal_search)
+        tb.connect(signal_search, dst_out)
         
-    def test_003_t (self):
-        """test_003_t: with a input sine without noise outside BW of PLL"""
-        param = namedtuple('param', 'f_central bw samp_rate items average cutoff threshold freq noise')
+        # throttle.set_max_noutput_items (param.samp_rate)
+        # throttle.set_min_noutput_items (param.samp_rate)
 
-        param.f_central = 0
-        param.bw = 1000
-        param.average = False
-        param.cutoff = 1000 
-        param.samp_rate = 4096 * 8
-        param.items = param.samp_rate 
-        param.freq = 550
-        param.threshold = 0
-        param.noise = 0
+        self.tb.run()
 
-        print_parameters(param)
+        data_src = dst_source.data()
+        data_out = dst_out.data()
 
-        data_sine = test_sine(self, param)
+        print len(data_src), len(data_out)
 
-        self.assertEqual(len(data_sine.out), 0)
-        self.assertEqual(len(data_sine.tags), 0)
 
-    def test_004_t (self):
-        """test_004_t: with a input sine with noise in the central BW of PLL"""
-        param = namedtuple('param', 'f_central bw samp_rate items average cutoff threshold freq noise')
+    # def test_001_t (self):
+    #     """test_001_t: with a input sine without noise in the central BW of PLL"""
+    #     param = namedtuple('param', 'f_central bw samp_rate items average cutoff threshold freq noise')
 
-        param.f_central = 0
-        param.bw = 1000
-        param.average = False
-        param.cutoff = 1000 
-        param.samp_rate = 4096 * 8
-        param.items = param.samp_rate 
-        param.freq = 0
-        param.threshold = 0
-        param.noise = 1
+    #     param.f_central = 0
+    #     param.bw = 1000
+    #     param.average = False
+    #     param.cutoff = 1000 
+    #     param.samp_rate = 4096 * 8
+    #     param.items = param.samp_rate 
+    #     param.freq = 0
+    #     param.threshold = 0
+    #     param.noise = 0
 
-        print_parameters(param)
+    #     print_parameters(param)
 
-        data_sine = test_sine(self, param)
+    #     data_sine = test_sine(self, param)
 
-        self.assertGreaterEqual(len(data_sine.src), len(data_sine.out))
-        self.assertGreater(len(data_sine.out), 0)
-        self.assertGreaterEqual(len(data_sine.tags), 1)
+    #     expected_tags = tuple([ make_tag("reset", "pll", 0, 'src_sine')])
+
+    #     self.assertGreaterEqual(len(data_sine.out), len(data_sine.src))
+    #     self.assertEqual(len(data_sine.tags), 1)
+    #     self.assertTrue(compare_tags(data_sine.tags[0], expected_tags[0]))
+
+
+    # def test_002_t (self):
+    #     """test_002_t: with a input sine without noise on border BW of PLL"""
+    #     param = namedtuple('param', 'f_central bw samp_rate items average cutoff threshold freq noise')
+
+    #     param.f_central = 0
+    #     param.bw = 1000
+    #     param.average = False
+    #     param.cutoff = 1000 
+    #     param.samp_rate = 4096 * 8
+    #     param.items = param.samp_rate 
+    #     param.freq = 500
+    #     param.threshold = 0
+    #     param.noise = 0
+
+    #     print_parameters(param)
+
+    #     data_sine = test_sine(self, param)
+
+    #     self.assertGreaterEqual(len(data_sine.out), len(data_sine.src))
+    #     self.assertEqual(len(data_sine.tags), 1)
+        
+    # def test_003_t (self):
+    #     """test_003_t: with a input sine without noise outside BW of PLL"""
+    #     param = namedtuple('param', 'f_central bw samp_rate items average cutoff threshold freq noise')
+
+    #     param.f_central = 0
+    #     param.bw = 1000
+    #     param.average = False
+    #     param.cutoff = 1000 
+    #     param.samp_rate = 4096 * 8
+    #     param.items = param.samp_rate 
+    #     param.freq = 550
+    #     param.threshold = 0
+    #     param.noise = 0
+
+    #     print_parameters(param)
+
+    #     data_sine = test_sine(self, param)
+
+    #     self.assertEqual(len(data_sine.out), 0)
+    #     self.assertEqual(len(data_sine.tags), 0)
+
+    # def test_004_t (self):
+    #     """test_004_t: with a input sine with noise in the central BW of PLL"""
+    #     param = namedtuple('param', 'f_central bw samp_rate items average cutoff threshold freq noise')
+
+    #     param.f_central = 0
+    #     param.bw = 1000
+    #     param.average = False
+    #     param.cutoff = 1000 
+    #     param.samp_rate = 4096 * 8
+    #     param.items = param.samp_rate 
+    #     param.freq = 0
+    #     param.threshold = 0
+    #     param.noise = 1
+
+    #     print_parameters(param)
+
+    #     data_sine = test_sine(self, param)
+
+    #     self.assertGreaterEqual(len(data_sine.src), len(data_sine.out))
+    #     self.assertGreater(len(data_sine.out), 0)
+    #     self.assertGreaterEqual(len(data_sine.tags), 1)
     
 
 

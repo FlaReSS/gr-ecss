@@ -32,9 +32,12 @@ namespace gr {
       int d_uplink;
       int d_downlink;
       int d_reset;
+      bool first;
       int64_t d_integer_phase;
+      int64_t d_integer_phase_step;
+      int64_t d_integer_phase_accumulator;
 
-     public:
+    public:
       gain_phase_accumulator_impl(int reset, int uplink, int downlink);
       ~gain_phase_accumulator_impl();
 
