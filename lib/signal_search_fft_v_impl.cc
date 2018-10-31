@@ -58,22 +58,16 @@ signal_search_fft_v_impl::signal_search_fft_v_impl(int fftsize, int decimation, 
   pfb_decimator = new filter::kernel::pfb_arb_resampler_ccf(resamplig, filter::firdes::low_pass(1, samp_rate, 5000, 100), 32);
 
   items_eval();
-
   create_buffers();
-
   buildwindow();
-
   average_reset();
 }
 
 signal_search_fft_v_impl::~signal_search_fft_v_impl()
 {
-  destroy_buffers();
+  // destroy_buffers();
 }
 
-void signal_search_fft_v_impl::forecast(int noutput_items, gr_vector_int &ninput_items_required)
-{
-}
 
 int signal_search_fft_v_impl::general_work(int noutput_items,
                                      gr_vector_int &ninput_items,
@@ -156,6 +150,7 @@ int signal_search_fft_v_impl::general_work(int noutput_items,
   }
   consume_each(i);
   return out_items;
+  
 }
 
 void signal_search_fft_v_impl::fft(float *data_out, const gr_complex *data_in, int size)
@@ -183,7 +178,7 @@ void signal_search_fft_v_impl::items_eval()
   int down_samp = d_samp_rate / d_decimation;
 
   bw_items = ceil(d_bandwidth / down_samp * d_fftsize / 2) * 2; //round up to the nearest even
-  std::cout << "bw_items: " << bw_items << std::endl;
+  // std::cout << "bw_items: " << bw_items << std::endl;
 
   if (bw_items < 0)
   {
@@ -197,7 +192,7 @@ void signal_search_fft_v_impl::items_eval()
   }
 
   searching_first_items = ((d_freq_central / down_samp) * d_fftsize) + d_fftsize_half - (bw_items / 2);
-  std::cout << "searching_first_items: " << searching_first_items << std::endl;
+  // std::cout << "searching_first_items: " << searching_first_items << std::endl;
 }
 
 void signal_search_fft_v_impl::buildwindow()
