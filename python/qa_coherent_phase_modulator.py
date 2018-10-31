@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#                     GNU GENERAL PUBLIC LICENSE
+#  GNU GENERAL PUBLIC LICENSE
 #
 
 from gnuradio import gr, gr_unittest
@@ -53,8 +53,8 @@ class Pdf_class(object):
             d['ModDate'] = datetime.datetime.today()
 
 def print_parameters(data):
-    to_print = "\p Sample rate = %d Hz; Number of Bits = %d; FFT Size = %d; Number of Inputs  = %d; Phase Step Amplitude = %f rad/s \p" \
-        %(data.samp_rate, data.N, data.fft_size, data.inputs, data.step)
+    to_print = "\p Sample rate = %d Hz; Number of Bits = %d; FFT Size = %d; Number of Inputs  = %d; Frequency input = %.1f Hz \p" \
+        %(data.samp_rate, data.N, data.fft_size, data.inputs, data.freq)
     print to_print
 
 def plot(self, data_cpm):
@@ -70,19 +70,20 @@ def plot(self, data_cpm):
 
     out_re = np.asarray(real)
     out_im = np.asarray(imag)
-    data_in_rad = np.asarray(data_cpm.src_rad)
+    # data_in_rad = np.asarray(data_cpm.src_rad)
     data_in_int64 = np.asarray(data_cpm.src_int64)
     carrier = np.asarray(data_cpm.carrier)
+    phase = np.asarray(data_cpm.phase)
     time = np.asarray(data_cpm.time)
 
-    fig, (ax1, ax2, ax3, ax5) = plt.subplots(4)
+    fig, (ax2, ax3, ax5) = plt.subplots(3)
 
-    ax1.set_xlabel('Time [s]')
-    ax1.set_ylabel('Phase [rad]', color='r')
-    ax1.set_title("Float Input",  fontsize=20)
-    ax1.plot(time, data_in_rad, color='r', scalex=True, scaley=True, linewidth=1)
-    ax1.tick_params(axis='y', labelcolor='red')
-    ax1.grid(True)
+    # ax1.set_xlabel('Time [s]')
+    # ax1.set_ylabel('Phase [rad]', color='r')
+    # ax1.set_title("Float Input",  fontsize=20)
+    # ax1.plot(time, data_in_rad, color='r', scalex=True, scaley=True, linewidth=1)
+    # ax1.tick_params(axis='y', labelcolor='red')
+    # ax1.grid(True)
 
     ax2.set_xlabel('Time [s]')
     ax2.set_ylabel ('Integer Phase', color='r')
@@ -104,11 +105,12 @@ def plot(self, data_cpm):
     ax4.tick_params(axis='y', labelcolor='blue')
 
     ax5.set_xlabel('Time [s]')
-    ax5.set_ylabel('Frequency [Hz]', color='r')
-    ax5.set_title("Carrier",  fontsize=20)
-    ax5.plot(time, carrier , color='r', scalex=True, scaley=True, linewidth=1)
+    ax5.set_ylabel('Phase [rad]', color='r')
+    ax5.set_title("output",  fontsize=20)
+    ax5.plot(time, phase , color='r', scalex=True, scaley=True, linewidth=1)
     ax5.tick_params(axis='y', labelcolor='red')
     ax5.grid(True)
+
 
     name_test = self.id().split("__main__.")[1]
     name_test_usetex = name_test.replace('_', '\_').replace('.', ': ')
@@ -144,20 +146,33 @@ def plot_fft(self, data_fft):
     fig.suptitle(name_test_usetex, fontsize=30)
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
     fig.subplots_adjust(hspace=0.6, top=0.85, bottom=0.15)
-    # plt.legend((l1, l2, l3), ('error range', 'settling time range', 'settling time'), loc='lower center', bbox_to_anchor=(0.5, -0.5), fancybox=True, shadow=True, ncol=3)
 
     # plt.show()
     self.pdf.add_to_pdf(fig)
+
+def check_phase(data_out):
+    """this function evaluates the derivative of phase input"""
+
+    diff = []
+    for i in reversed(xrange (len(data_out))):
+        if i > 0:
+            temp = data_out[i] * np.conjugate(data_out[i - 1])
+            diff_temp = np.arctan2(temp.imag, temp.real)
+            diff.append(diff_temp)
+
+    return diff
 
 def test_accumulator(self, param):
     """this function run the defined test, for easier understanding"""
 
     tb = self.tb
-    data_pc = namedtuple('data_pc', 'src_rad src_int64 out carrier time')
+    data_pc = namedtuple('data_pc', 'src_rad src_int64 out carrier phase time')
     data_fft = namedtuple('data_fft', 'out cnr_out bins')
 
     # src_ramp = analog.sig_source_f(param.samp_rate, analog.GR_SAW_WAVE, (param.samp_rate * 0.5 / param.items), (2.0 * param.items), (- param.items))
-    src_phase_acc =blocks.vector_source_f((np.linspace(0, param.step * param.items, param.items, endpoint=True)), False, 1, [])
+    # src_phase_acc =blocks.vector_source_f((np.linspace(0, param.step * param.items, param.items, endpoint=True)), False, 1, [])
+    src = analog.sig_source_c(param.samp_rate, analog.GR_COS_WAVE, param.freq , 1, 0)
+    arg = blocks.complex_to_arg(1)
 
     throttle = blocks.throttle(gr.sizeof_float*1, param.samp_rate, True)
     head = blocks.head(gr.sizeof_float, int (param.items))
@@ -170,28 +185,27 @@ def test_accumulator(self, param):
     dst_out_fft = blocks.vector_sink_f(param.fft_size, param.items)
     dst_out_cnr = blocks.vector_sink_f()
     dst_freq_det = blocks.vector_sink_f()
+    dst_phase = blocks.vector_sink_f()
 
-    multiply_const = blocks.multiply_const_ff(param.step / param.items)
-    rad_to_freq = blocks.multiply_const_ff(param.samp_rate / (2 * math.pi))
-    freq_det = analog.pll_freqdet_cf(math.pi/200, param.samp_rate, 0)
+    phase = blocks.complex_to_arg(1)
 
     pc = ecss.phase_converter(param.N)
     cpm = ecss.coherent_phase_modulator(param.N, param.inputs)
 
-    # tb.connect(src_phase_acc, multiply_const)
-    tb.connect(src_phase_acc, throttle)
-    tb.connect(throttle, head)
+    tb.connect(src, arg)
+    tb.connect(arg, head)
     tb.connect(head, dst_src_rad)
     tb.connect(head, pc)
     tb.connect(pc, dst_src_pa)
+ 
     tb.connect(pc, cpm)
     tb.connect(cpm, snr_estimator)
 
     tb.connect((snr_estimator,0), dst_out_cnr)
     tb.connect((snr_estimator,1), dst_out_fft)
     tb.connect(cpm, dst_out_cpm)
-    tb.connect(cpm, freq_det)
-    tb.connect(freq_det, rad_to_freq, dst_freq_det)
+    tb.connect(cpm, phase)
+    tb.connect(phase, dst_phase)
     
     self.tb.run()
 
@@ -199,7 +213,8 @@ def test_accumulator(self, param):
     data_pc.src_int64 = dst_src_pa.data()
     data_pc.out = dst_out_cpm.data()
     data_pc.time = np.linspace(0, (param.items * 1.0 / param.samp_rate), param.items, endpoint=False)
-    data_pc.carrier = dst_freq_det.data()
+    data_pc.phase = dst_phase.data()
+
 
     out = dst_out_fft.data()
     cnr_out = dst_out_cnr.data()
@@ -211,69 +226,71 @@ def test_accumulator(self, param):
 
     return data_pc, data_fft
 
-# def test_accumulator_gain(self, param):
-#     """this function run the defined test, for easier understanding"""
+def test_accumulator_gain(self, param):
+    """this function run the defined test, for easier understanding"""
 
-#     tb = self.tb
-#     data_pc = namedtuple('data_pc', 'src_rad src_int64 out time')
-#     data_fft = namedtuple('data_fft', 'carrier out cnr_out bins')
+    tb = self.tb
+    data_pc = namedtuple('data_pc', 'src_rad src_int64 out carrier phase time')
+    data_fft = namedtuple('data_fft', 'out cnr_out bins')
 
-#     src_ramp = analog.sig_source_f(param.samp_rate, analog.GR_SAW_WAVE, (param.samp_rate * 0.5 / param.items), (2.0 * param.items), (- param.items))
+    # src_ramp = analog.sig_source_f(param.samp_rate, analog.GR_SAW_WAVE, (param.samp_rate * 0.5 / param.items), (2.0 * param.items), (- param.items))
+    # src_phase_acc =blocks.vector_source_f((np.linspace(0, param.step * param.items, param.items, endpoint=True)), False, 1, [])
+    src = analog.sig_source_c(param.samp_rate, analog.GR_COS_WAVE, param.freq , 1, 0)
+    arg = blocks.complex_to_arg(1)
 
-#     throttle = blocks.throttle(gr.sizeof_float*1, param.samp_rate,True)
-#     head = blocks.head(gr.sizeof_float, int (param.items))
+    throttle = blocks.throttle(gr.sizeof_float*1, param.samp_rate, True)
+    head = blocks.head(gr.sizeof_float, int (param.items))
 
-#     dst_src_rad = blocks.vector_sink_f()
-#     dst_src_pa = flaress.vector_sink_int64()
-#     dst_out_cpm = blocks.vector_sink_c()
+    dst_src_rad = blocks.vector_sink_f()
+    dst_src_pa = flaress.vector_sink_int64()
+    dst_out_cpm = blocks.vector_sink_c()
 
-#     gain = ecss.gain_phase_accumulator(param.N, 221, 240)
+    snr_estimator = flaress.snr_estimator_cfv(auto_carrier = True, carrier = True, all_spectrum = True, freq_central = 0, samp_rate = param.samp_rate, nintems = param.fft_size, signal_bw = 0 , noise_bw = param.noise_bw, avg_alpha = 1.0, average = False, win = window.blackmanharris)
+    dst_out_fft = blocks.vector_sink_f(param.fft_size, param.items)
+    dst_out_cnr = blocks.vector_sink_f()
+    dst_freq_det = blocks.vector_sink_f()
+    dst_phase = blocks.vector_sink_f()
 
-#     snr_estimator = flaress.snr_estimator_cfv(auto_carrier = True, carrier = True, all_spectrum = True, freq_central = 0, samp_rate = param.samp_rate, nintems = param.fft_size, signal_bw = 0 , noise_bw = param.noise_bw, avg_alpha = 1.0, average = False, win = window.blackmanharris)
-#     dst_pll_out_fft = blocks.vector_sink_f(param.fft_size, param.items)
-#     dst_pll_out_cnr = blocks.vector_sink_f()
-#     dst_freq_det = blocks.vector_sink_f()
+    phase = blocks.complex_to_arg(1)
 
-#     multiply_const = blocks.multiply_const_ff(param.step / param.items)
-#     freq_det = analog.pll_freqdet_cf(math.pi/200, param.samp_rate, 0)
+    pc = ecss.phase_converter(param.N)
+    cpm = ecss.coherent_phase_modulator(param.N, param.inputs)
+    gain = ecss.gain_phase_accumulator(0, param.uplink, param.downlink)
 
-#     pc = ecss.phase_converter(param.N)
-#     cpm = ecss.coherent_phase_modulator(param.N, param.inputs)
+    tb.connect(src, arg)
+    tb.connect(arg, head)
+    tb.connect(head, dst_src_rad)
+    tb.connect(head, pc)
+    tb.connect(pc, dst_src_pa)
+ 
+    tb.connect(pc, gain)
+    tb.connect(gain, cpm)
+    tb.connect(cpm, snr_estimator)
 
-#     tb.connect(src_ramp, multiply_const)
-#     tb.connect(multiply_const, throttle)
-#     tb.connect(throttle, head)
-#     tb.connect(head, dst_src_rad)
-#     tb.connect(head, pc)
-#     tb.connect(pc, gain)
-#     tb.connect(gain, dst_src_pa)
-#     tb.connect(gain, cpm)
-#     tb.connect(cpm, snr_estimator)
+    tb.connect((snr_estimator,0), dst_out_cnr)
+    tb.connect((snr_estimator,1), dst_out_fft)
+    tb.connect(cpm, dst_out_cpm)
+    tb.connect(cpm, phase)
+    tb.connect(phase, dst_phase)
     
+    self.tb.run()
 
-#     tb.connect((snr_estimator,0), dst_pll_out_cnr)
-#     tb.connect((snr_estimator,1), dst_pll_out_fft)
-#     tb.connect(cpm, dst_out_cpm)
-#     tb.connect(cpm, freq_det)
-#     tb.connect(freq_det, dst_freq_det)
-    
-#     self.tb.run()
+    data_pc.src_rad = dst_src_rad.data()
+    data_pc.src_int64 = dst_src_pa.data()
+    data_pc.out = dst_out_cpm.data()
+    data_pc.time = np.linspace(0, (param.items * 1.0 / param.samp_rate), param.items, endpoint=False)
+    data_pc.phase = dst_phase.data()
 
-#     data_pc.src_rad = dst_src_rad.data()
-#     data_pc.src_int64 = dst_src_pa.data()
-#     data_pc.out = dst_out_cpm.data()
-#     data_fft.carrier = np.mean(freq_detected[(len(freq_detected)/2):]) * param.samp_rate / (2 * math.pi)
-    
-#     out = dst_out_fft.data()
-#     cnr_out = dst_out_cnr.data()
-#     freq_detected = dst_freq_det.data()
-#     # data_fft.out = out[param.items - (param.fft_size / 2) : param.items] + out[param.items - param.fft_size : param.items - (param.fft_size / 2)] #take the last fft_size elements
-#     data_fft.out = out[param.items - param.fft_size : param.items] #take the last fft_size elements
-#     data_fft.cnr_out = cnr_out[-1] #take the last element
-#     data_fft.bins = np.linspace(- (param.samp_rate / 2.0), (param.samp_rate / 2.0), param.fft_size, endpoint=True)
-#     data_fft.carrier = np.mean(freq_detected[:len(freq_detected)]) * param.samp_rate / (2 * math.pi)
 
-#     return data_pc, data_fft
+    out = dst_out_fft.data()
+    cnr_out = dst_out_cnr.data()
+
+    # data_fft.out = out[param.items - (param.fft_size / 2) : param.items] + out[param.items - param.fft_size : param.items - (param.fft_size / 2)] #take the last fft_size elements
+    data_fft.out = out[param.items - param.fft_size : param.items] #take the last fft_size elements
+    data_fft.cnr_out = cnr_out[-1] #take the last element
+    data_fft.bins = np.linspace(- (param.samp_rate / 2.0), (param.samp_rate / 2.0), param.fft_size, endpoint=True)
+
+    return data_pc, data_fft
 
 class qa_coherent_phase_modulator (gr_unittest.TestCase):
 
@@ -289,64 +306,91 @@ class qa_coherent_phase_modulator (gr_unittest.TestCase):
         """test_001_t: with a phase accumulator"""
         param = namedtuple('param', 'samp_rate items fft_size N inputs step noise_bw')
         param.N = 38
-        param.samp_rate = 1024
-        param.items = param.samp_rate * 4
-        param.fft_size = 4096
+        param.samp_rate = 2048 
+        param.items = param.samp_rate 
+        param.fft_size = 1024
         param.inputs = 1
-        param.step = 100 * math.pi   # to express it in rad/s
+        param.freq = 10.0
         param.noise_bw = 1000
 
         print_parameters(param)
 
         data_pe, data_fft = test_accumulator(self, param)
+        
         plot(self,data_pe)
-
         plot_fft(self,data_fft)
 
-        freq = np.mean(data_pe.carrier[(param.items/ 2):])
+        phase = check_phase(data_pe.out)
         
-        self.assertAlmostEqual((param.step / (2 * math.pi)) * param.samp_rate / param.items, freq)
-        print "Frequency measured= %.3f Hz;" %freq
+        #check frequency
+        self.assertAlmostEqual((param.freq * (2 * math.pi) / param.samp_rate) , np.mean(phase))
+        print "-Frequency measured= %f Hz;" %(np.mean(phase) / (2 * math.pi) * param.samp_rate) 
 
-        # pe_min_step , pe_slope = check_pa(data_pe.out, 100)
-        # precision = math.pow(2,(- (param.N - 1))) * math.pi
-        # pe_min_step_rad = (pe_min_step >> (64 - param.N)) * precision
-        # pe_slope_rad = (pe_slope >> (64 - param.N)) * precision
-        # self.assertGreaterEqual(pe_min_step_rad, precision)
-        # print "-Output Slope : %f rad/s;" % pe_slope_rad       # WARNING: this is only a mean
-        # print "-Output Min step : %f rad." % pe_min_step_rad
+        #check phase error
+        self.assertAlmostEqual(np.var(phase), 0)
+        print "-No phase jump found."
 
-    # def test_002_t (self):
-    #     """test_002_t: with a phase accumulator and gain"""
-    #     param = namedtuple('param', 'samp_rate items fft_size N inputs step noise_bw')
-    #     param.N = 38
-    #     param.samp_rate = 4096
-    #     param.items = param.samp_rate 
-    #     param.fft_size = 1024
-    #     param.inputs = 1
-    #     param.step = 10 * math.pi   # to express it in rad/s
-    #     param.noise_bw = 1000
+    def test_002_t (self):
+        """test_002_t: with a phase accumulator at higher frequency"""
+        param = namedtuple('param', 'samp_rate items fft_size N inputs step noise_bw')
+        param.N = 38
+        param.samp_rate = 4096 * 16 
+        param.items = param.samp_rate 
+        param.fft_size = 1024
+        param.inputs = 1
+        param.freq = 1000.0
+        param.noise_bw = 1000
 
-    #     print_parameters(param)
+        print_parameters(param)
 
-    #     data_pe, data_fft = test_accumulator_gain(self, param)
-    #     plot(self,data_pe)
-
-    #     plot_fft(self,data_fft)
+        data_pe, data_fft = test_accumulator(self, param)
         
-    #     self.assertAlmostEqual(param.step / (2 * math.pi), data_fft.carrier)
-    #     print "Frequency measured= %.3f Hz;" %data_fft.carrier
+        plot(self,data_pe)
+        plot_fft(self,data_fft)
 
-    #     # pe_min_step , pe_slope = check_pa(data_pe.out, 100)
-    #     # precision = math.pow(2,(- (param.N - 1))) * math.pi
-    #     # pe_min_step_rad = (pe_min_step >> (64 - param.N)) * precision
-    #     # pe_slope_rad = (pe_slope >> (64 - param.N)) * precision
-    #     # self.assertGreaterEqual(pe_min_step_rad, precision)
-    #     # print "-Output Slope : %f rad/s;" % pe_slope_rad       # WARNING: this is only a mean
-    #     # print "-Output Min step : %f rad." % pe_min_step_rad
+        phase = check_phase(data_pe.out)
+        
+        #check frequency
+        self.assertAlmostEqual((param.freq * (2 * math.pi) / param.samp_rate) , np.mean(phase))
+        print "-Frequency measured= %f Hz;" %(np.mean(phase) / (2 * math.pi) * param.samp_rate) 
+
+        #check phase error
+        self.assertAlmostEqual(np.var(phase), 0)
+        print "-No phase jump found."
+
+    def test_003_t (self):
+        """test_003_t: with a phase accumulator and gain"""
+        param = namedtuple('param', 'samp_rate items fft_size N inputs step noise_bw uplink downlink')
+        param.N = 38
+        param.samp_rate = 2048 
+        param.items = param.samp_rate 
+        param.fft_size = 1024
+        param.inputs = 1
+        param.freq = 10.0
+        param.noise_bw = 1000
+        param.uplink = 221
+        param.downlink = 240
+
+        print_parameters(param)
+
+        data_pe, data_fft = test_accumulator_gain(self, param)
+        
+        plot(self,data_pe)
+        plot_fft(self,data_fft)
+
+        phase = check_phase(data_pe.out[1:]) #to consider the delay of gain phase accumulator
+        
+        #check frequency
+        self.assertAlmostEqual(((param.freq * param.downlink / param.uplink) * (2 * math.pi) / param.samp_rate) , np.mean(phase))
+        print "-Frequency measured= %f Hz;" %(np.mean(phase) / (2 * math.pi) * param.samp_rate) 
+
+        #check phase error
+        self.assertAlmostEqual(np.var(phase), 0)
+        print "-No phase jump found."
+
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_coherent_phase_modulator)
     runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_2')
     runner.run(suite)
-    #gr_unittest.TestProgram()
+    # gr_unittest.TestProgram()
