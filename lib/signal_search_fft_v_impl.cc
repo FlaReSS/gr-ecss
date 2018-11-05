@@ -139,6 +139,7 @@ int signal_search_fft_v_impl::general_work(int noutput_items,
                      pmt::intern("pll")           // Value
         );
 
+        average_reset();
         first = false;
       }
       out_items++;

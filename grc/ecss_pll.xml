@@ -10,8 +10,9 @@
   <callback>set_fre_central($freq_central)</callback>
   <callback>set_bw($bw)</callback>
   <param>
-    <name>sample rate</name>
+    <name>Sampling Rate</name>
     <key>samp_rate</key>
+    <value>samp_rate</value>
     <type>real</type>
   </param>
   <param>

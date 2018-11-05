@@ -84,6 +84,8 @@ namespace gr{
       uint out_items = 0;
       uint i = 0;
 
+      // int max = d_size * d_size;
+
       for (i = 0; i < noutput_items; i+= d_size)
       {
         
@@ -109,16 +111,17 @@ namespace gr{
           right_avg = goertzel.right;
         }
 
-        // if(debug<4000)
-        //   std::cout << "ratio: " << ratio << std::endl;
-        // debug++;
+        // if(central_avg > max || left_avg > max || right_avg > max){
+        //   std::cout << "central_avg: " << central_avg << std::endl;
+        //   std::cout << "left_avg: " << left_avg << std::endl;
+        //   std::cout << "right_avg: " << right_avg << std::endl;
 
+        // }
 
+        
         if ((central_avg > (left_avg * d_threshold)) && (central_avg > (right_avg * d_threshold)))
         {
-          // std::cout << "goertzel.central: " << goertzel.central << std::endl;
-          // std::cout << "goertzel.left: " << goertzel.left << std::endl;
-          // std::cout << "goertzel.right: " << goertzel.right << std::endl;
+
           memcpy(&out[i], &in[i], sizeof(gr_complex) * d_size);
           if (first == true)
           {
@@ -129,6 +132,7 @@ namespace gr{
             );
 
             first = false;
+            average_reset();
           }
           out_items += d_size;
         }

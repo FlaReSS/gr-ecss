@@ -262,8 +262,6 @@ def test_fft(self, data):
     throttle = blocks.throttle(gr.sizeof_gr_complex*1, data.samp_rate,True)
     head = blocks.head(gr.sizeof_gr_complex, int (data.items))
 
-
-
     snr_src = flaress.snr_estimator_cfv(auto_carrier = True, carrier = True, all_spectrum = True, freq_central = 0, samp_rate = data.samp_rate, nintems = data.fft_size, signal_bw = 0 , noise_bw = data.bw, avg_alpha = 1.0, average = False, win = window.blackmanharris)
 
     snr_out= flaress.snr_estimator_cfv(auto_carrier = True, carrier = True, all_spectrum = True, freq_central = 0, samp_rate = data.samp_rate, nintems = data.fft_size, signal_bw = 0 , noise_bw = data.bw, avg_alpha = 1.0, average = False, win = window.blackmanharris)

@@ -29,25 +29,26 @@
      class agc_impl : public agc
      {
       private:
-        float d_attack_time;		// adjustment rate
+        float d_settling_time;		// adjustment rate
         float d_reference;	// reference value
         float d_gain;		// current gain
+        float d_maximum_gain;
         float d_samp_rate;
 
       public:
-       agc_impl(float attack_time, float reference, float gain, float samp_rate);
+       agc_impl(float settling_time, float reference, float initial_gain, float maximum_gain, float samp_rate);
        ~agc_impl();
 
        int work(int noutput_items,
           gr_vector_const_void_star &input_items,
           gr_vector_void_star &output_items);
 
-       float attack_time() const;
-       float reference() const;
-       float gain() const;
-       void set_attack_time(float attack_time);
+       float get_settling_time() const;
+       float get_reference() const;
+       float get_maximum_gain() const;
+       void set_settling_time(float settling_time);
        void set_reference(float reference);
-       void set_gain(float gain);
+       void set_maximum_gain(float maximum_gain);
      };
    } // namespace ecss
  } // namespace gr

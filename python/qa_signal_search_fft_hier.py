@@ -8,7 +8,7 @@ from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 from gnuradio.filter import firdes
 from collections import namedtuple
-import ecss
+import ecss_swig as ecss
 import flaress
 import math, time, datetime, os, abc, sys, pmt
 import runner, threading
@@ -55,7 +55,7 @@ def test_sine(self, param):
 
     signal_search = ecss.signal_search_fft_hier(param.fft_size, param.decimation, Average, firdes.WIN_BLACKMAN_hARRIS, param.f_central, param.bw, param.average, param.threshold, param.samp_rate)
 
-    agc = ecss.agc(0.01, 1, 1, param.samp_rate)
+    agc = ecss.agc(10, 1, 1, 65536, param.samp_rate)
 
     # ecss_signal_search_fft_v = ecss.signal_search_fft_v(param.fft_size, param.decimation, Average, firdes.WIN_BLACKMAN_hARRIS, param.f_central, param.bw, param.average, param.threshold, param.samp_rate)
     # blocks_stream_to_vector = blocks.stream_to_vector(gr.sizeof_gr_complex*1, param.fft_size * param.decimation)
@@ -69,7 +69,7 @@ def test_sine(self, param):
     tb.connect(agc, dst_source)
     tb.connect(agc, signal_search)
     tb.connect(signal_search, dst_out)
-    
+
     # throttle.set_max_noutput_items (param.samp_rate)
     # throttle.set_min_noutput_items (param.samp_rate)
 
@@ -114,6 +114,7 @@ class qa_signal_search_fft_hier (gr_unittest.TestCase):
         self.assertEqual(len(data_sine.out), len(data_sine.src))
         self.assertEqual(len(data_sine.tags), 1)
         self.assertTrue(compare_tags(data_sine.tags[0], expected_tags[0]))
+        self.assertComplexTuplesAlmostEqual(data_sine.out, data_sine.src)
 
 
     def test_002_t (self):
@@ -136,8 +137,9 @@ class qa_signal_search_fft_hier (gr_unittest.TestCase):
 
         data_sine = test_sine(self, param)
 
-        self.assertGreaterEqual(len(data_sine.out), len(data_sine.src))
+        self.assertEqual(len(data_sine.out), len(data_sine.src))
         self.assertEqual(len(data_sine.tags), 1)
+        self.assertComplexTuplesAlmostEqual(data_sine.out, data_sine.src)
         
     def test_003_t (self):
         """test_003_t: with a input sine without noise outside BW of PLL"""
@@ -195,3 +197,6 @@ if __name__ == '__main__':
     runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_2')
     runner.run(suite)
     #gr_unittest.TestProgram()
+     
+
+

@@ -26,39 +26,30 @@
 #include "agc_impl.h"
 #include <math.h>
 
-#define MAX_GAIN 65536
-
 namespace gr {
   namespace ecss {
 
     agc::sptr
-    agc::make(float attack_time, float reference, float gain, float samp_rate)
+    agc::make(float settling_time, float reference, float initial_gain, float maximum_gain, float samp_rate)
     {
       return gnuradio::get_initial_sptr
-        (new agc_impl(attack_time, reference, gain, samp_rate));
+        (new agc_impl(settling_time, reference, initial_gain, maximum_gain, samp_rate));
     }
 
     /*
      * The private constructor
      */
-    agc_impl::agc_impl(float attack_time, float reference, float gain, float samp_rate)
+    agc_impl::agc_impl(float settling_time, float reference, float initial_gain, float maximum_gain, float samp_rate)
       : gr::sync_block("agc",
               gr::io_signature::make(1, 1, sizeof(gr_complex)),
               gr::io_signature::make(1, 1, sizeof(gr_complex))),
-              d_attack_time(attack_time), d_reference(reference),
-              d_gain(gain), d_samp_rate(samp_rate)
-    {
-        set_attack_time(attack_time);
-        set_reference(reference);
-        set_gain(gain);
-    }
+              d_settling_time(settling_time), d_reference(reference),
+              d_gain(std::log(initial_gain)), d_samp_rate(samp_rate),
+              d_maximum_gain(std::log(maximum_gain))
+    {}
 
-    /*
-     * Our virtual destructor.
-     */
     agc_impl::~agc_impl()
-    {
-    }
+    {}
 
     int
     agc_impl::work(int noutput_items,
@@ -67,15 +58,17 @@ namespace gr {
     {
           const gr_complex *in = (const gr_complex*)input_items[0];
           gr_complex *out = (gr_complex*)output_items[0];
-          float rate= (2.95 / (d_samp_rate * d_attack_time));
+          double rate= (2950 / (d_samp_rate * d_settling_time)); //settling time expressed in milliseconds
 
           for(int i = 0; i < noutput_items; i++) {
               out[i]= in[i] * std::exp(d_gain);
-              d_gain +=   rate * (std::log(d_reference) - std::log (std::sqrt(out[i].real()*out[i].real() + out[i].imag()*out[i].imag())));
-              // out[i] = in[i] * d_gain ;
-              // d_gain +=  rate * (d_reference - std::sqrt(out[i].real()*out[i].real() + out[i].imag()*out[i].imag()));
-              if(MAX_GAIN > 0.0 && d_gain > MAX_GAIN) {
-                  d_gain = MAX_GAIN;
+              d_gain += rate * (std::log(d_reference) - std::log (std::sqrt(out[i].real()*out[i].real() + out[i].imag()*out[i].imag())));
+              
+              if (d_gain > d_maximum_gain){
+                  d_gain = d_maximum_gain;
+              }
+              if (d_gain < -d_maximum_gain){
+                  d_gain = -d_maximum_gain;
               }
           }
 
@@ -83,12 +76,12 @@ namespace gr {
     }
 
 
-    float agc_impl::attack_time() const      { return d_attack_time; }
-  	float agc_impl::reference() const      { return d_reference; }
-  	float agc_impl::gain() const      { return d_gain;  }
-    void agc_impl::set_attack_time(float attack_time) { d_attack_time = attack_time; }
+    float agc_impl::get_settling_time() const      { return d_settling_time; }
+  	float agc_impl::get_reference() const      { return d_reference; }
+  	float agc_impl::get_maximum_gain() const      { return std::exp(d_maximum_gain);  }
+    void agc_impl::set_settling_time(float settling_time) { d_settling_time = settling_time; }
   	void agc_impl::set_reference(float reference) { d_reference = reference; }
-  	void agc_impl::set_gain(float gain) { d_gain = gain; }
+  	void agc_impl::set_maximum_gain(float maximum_gain) { d_maximum_gain = std::log(maximum_gain); }
 
 
 

@@ -8,6 +8,7 @@ from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 from collections import namedtuple
 import ecss_swig as ecss
+from gnuradio import fec
 import runner
 import math, time, datetime, os, abc, sys
 import numpy as np
@@ -120,10 +121,11 @@ class qa_modulator (gr_unittest.TestCase):
         self.tb = None
         self.pdf.finalize_pdf()
 
-    def test_001_t (self):
-        """test_001_t: with repetition of 2"""
-        param = namedtuple('param', 'data_src bit_rate samp_rate')
 
+    def test_001_t (self):
+        """test_001_t: modulator check"""
+        param = namedtuple('param', 'data_src bit_rate samp_rate')
+        tb = self.tb
         
         param.bit_rate = 1000
         param.samp_rate = 2000
@@ -131,9 +133,47 @@ class qa_modulator (gr_unittest.TestCase):
 
         print_parameters(param)
 
-        data_out = test_modulator(self, param)
+        encoder_variable = fec.cc_encoder_make(1784, 7, 2, ([109,79]), 0, fec.CC_STREAMING, True)
 
-        print data_out
+        src =  blocks.file_source(gr.sizeof_char*1, '../python/test_files/CADU.bin', False)
+        src_expected =  blocks.file_source(gr.sizeof_char*1, '../python/test_files/Convolutionally_encoded_CADU.bin', False)
+        pack1 = blocks.unpack_k_bits_bb(8)
+        pack2 = blocks.unpack_k_bits_bb(8)
+
+        dst = blocks.vector_sink_b()
+        dst_expected = blocks.vector_sink_b()
+        head = blocks.head(gr.sizeof_char, 1784 * 2)
+        conv = fec.extended_encoder(encoder_obj_list=encoder_variable, threading='capillary', puncpat='11')
+
+        tb.connect(src, pack1)
+        tb.connect(pack1, conv)   
+        tb.connect(conv, dst) 
+        tb.connect(src_expected, pack2)
+        tb.connect(pack2, dst_expected)
+
+        self.tb.run()
+
+        data_out = dst.data()
+        expected_data = dst_expected.data()
+
+        self.assertFloatTuplesAlmostEqual(data_out, expected_data)
+        print "- Data correctly encoded."
+
+
+    # def test_010_t (self):
+    #     """test_010_t: with repetition of 2"""
+    #     param = namedtuple('param', 'data_src bit_rate samp_rate')
+
+        
+    #     param.bit_rate = 1000
+    #     param.samp_rate = 2000
+    #     param.data_src = (0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1)
+
+    #     print_parameters(param)
+
+    #     data_out = test_modulator(self, param)
+
+    #     print data_out
 
 
 

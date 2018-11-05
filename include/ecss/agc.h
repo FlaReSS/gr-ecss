@@ -50,17 +50,18 @@ namespace gr {
         *
         * \param samp_rate Sampling rate of signal.
         * \param reference rms value of the output.
-        * \param gain initial gain of the AGC.
-        * \param attack_time is the expected attack/settling time of the AGC.
+        * \param initial_gain initial gain of the AGC.
+        * \param maximum_gain maximum gain of the AGC.
+        * \param settling_time is the expected attack/settling time of the AGC.
        */
-      static sptr make(float attack_time, float reference, float gain, float samp_rate);
+      static sptr make(float settling_time, float reference, float initial_gain, float maximum_gain, float samp_rate);
 
-      virtual float attack_time() const=0;
-      virtual float reference() const=0;
-      virtual float gain() const=0;
-      virtual void set_attack_time(float attack_time)=0;
+      virtual float get_settling_time() const=0;
+      virtual float get_reference() const=0;
+      virtual float get_maximum_gain() const=0;
+      virtual void set_settling_time(float settling_time)=0;
       virtual void set_reference(float reference)=0;
-      virtual void set_gain(float gain)=0;
+      virtual void set_maximum_gain(float maximum_gain)=0;
     };
 
   } // namespace ecss

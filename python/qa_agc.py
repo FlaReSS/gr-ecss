@@ -51,8 +51,8 @@ class Pdf_class(object):
             d['ModDate'] = datetime.datetime.today()
 
 def print_parameters(data):
-    to_print = "\p Aref= %.1f V; t_settlig= %.3f ms; Ain_max_rms= %.2f V; Ain_min_rms= %.2f V; f_samp= %.1f Hz; f_in_sine= %.1f Hz \p" \
-        %(data.reference, (data.settling_time / 1000), (data.input_amplitude_max), (data.input_amplitude_min), data.samp_rate, data.freq_sine)
+    to_print = "\p Aref= %.1f V; Noise = %.1f Vrms; t_settlig= %.3f ms; Ain_max_rms= %.2f V; Ain_min_rms= %.2f V; f_samp= %.1f Hz; f_in_sine= %.1f Hz \p" \
+        %(data.reference, data.noise, (data.settling_time / 1000), (data.input_amplitude_max), (data.input_amplitude_min), data.samp_rate, data.freq_sine)
     print to_print
 
 def plot(self, data, reference, error, zero, settling_time):
@@ -121,6 +121,9 @@ def test_sine(self, param):
 
     src_square = analog.sig_source_f(param.samp_rate, analog.GR_SQR_WAVE,
                                param.freq_square, ((param.input_amplitude_max - param.input_amplitude_min) / math.sqrt(2)), (param.input_amplitude_min / math.sqrt(2)) )
+    src_noise = analog.noise_source_c(analog.GR_GAUSSIAN, param.noise, 0)
+
+    adder = blocks.add_vcc(1)                           
 
     multiply_const = blocks.multiply_const_ff(-1)
     multiply_complex = blocks.multiply_cc()
@@ -132,13 +135,16 @@ def test_sine(self, param):
 
     head = blocks.head(gr.sizeof_gr_complex, int (param.N))
 
-    agc = ecss.agc(param.settling_time, param.reference, 1, param.samp_rate)
+    agc = ecss.agc(param.settling_time, param.reference, 1.0, 65536.0, param.samp_rate)
 
     tb.connect(src_square, (float_to_complex, 0))
     tb.connect(src_square, multiply_const)
     tb.connect(multiply_const, (float_to_complex, 1))
 
-    tb.connect(src_sine, (multiply_complex, 0))
+    tb.connect(src_sine, (adder, 0))
+    tb.connect(src_noise, (adder, 1))
+
+    tb.connect(adder, (multiply_complex, 0))
     tb.connect(float_to_complex, (multiply_complex, 1))
 
     tb.connect(multiply_complex, head)
@@ -217,10 +223,10 @@ def transient_evaluation(self, data, param, error, time_error_measure):
     if (found == False):
         end = start
 
-    data_transient.settling_time_ms = (end - start) * 1000.0 / (param.samp_rate)
+    data_transient.settling_time = (end - start) * 1000.0 / (param.samp_rate)
 
 
-    plot(self, data_plot, param.reference, error, (start *1.0 / param.samp_rate), data_transient.settling_time_ms)
+    plot(self, data_plot, param.reference, error, (start *1.0 / param.samp_rate), data_transient.settling_time)
 
     return data_transient
 
@@ -236,15 +242,16 @@ class qa_agc (gr_unittest.TestCase):
 
     def test_001_t (self):
         """test_001_t: positive step of 10 times"""
-        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N')
+        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N noise')
 
         param.reference = 1.0
-        param.settling_time = 0.01
+        param.settling_time = 10.0
         param.input_amplitude_max = 100
         param.input_amplitude_min = 10
+        param.noise = 0         
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
-        param.freq_square = 1.0 / (20 * param.settling_time)
+        param.freq_square = 1000.0 / (20 * param.settling_time)
         param.N = param.samp_rate / param.freq_square
 
         print_parameters(param)
@@ -255,26 +262,27 @@ class qa_agc (gr_unittest.TestCase):
         data_sine = test_sine(self, param)
         data_transient  = transient_evaluation(self, data_sine, param, error, time_error_measure)
 
-        self.assertLessEqual(data_transient.settling_time_ms, 30)
-        self.assertGreaterEqual(data_transient.settling_time_ms, 10)
+        self.assertLessEqual(data_transient.settling_time, 30)
+        self.assertGreaterEqual(data_transient.settling_time, 10)
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, error * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, error * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time_ms
+        print "-Settling time: %.3f ms" % data_transient.settling_time
         print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
         print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
 
     def test_002_t (self):
         """test_002_t: positive step of 100 times"""
-        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N')
+        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N noise')
 
         param.reference = 1.0
-        param.settling_time = 0.01
+        param.settling_time = 10.0
         param.input_amplitude_max = 1000
         param.input_amplitude_min = 10
+        param.noise = 0        
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
-        param.freq_square = 1.0 / (20 * param.settling_time)
+        param.freq_square = 1000.0 / (20 * param.settling_time)
         param.N = param.samp_rate / param.freq_square
 
         print_parameters(param)
@@ -285,26 +293,27 @@ class qa_agc (gr_unittest.TestCase):
         data_sine = test_sine(self, param)
         data_transient  = transient_evaluation(self, data_sine, param, error, time_error_measure)
 
-        self.assertLessEqual(data_transient.settling_time_ms, 30)
-        self.assertGreaterEqual(data_transient.settling_time_ms, 10)
+        self.assertLessEqual(data_transient.settling_time, 30)
+        self.assertGreaterEqual(data_transient.settling_time, 10)
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, error * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, error * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time_ms
+        print "-Settling time: %.3f ms" % data_transient.settling_time
         print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
         print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
 
     def test_003_t (self):
         """test_003_t: positive step of 1000 times"""
-        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N')
+        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N noise')
 
         param.reference = 1.0
-        param.settling_time = 0.01
+        param.settling_time = 10.0
         param.input_amplitude_max = 10000
         param.input_amplitude_min = 10
+        param.noise = 0         
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
-        param.freq_square = 1.0 / (20 * param.settling_time)
+        param.freq_square = 1000.0 / (20 * param.settling_time)
         param.N = param.samp_rate / param.freq_square
 
         print_parameters(param)
@@ -315,26 +324,27 @@ class qa_agc (gr_unittest.TestCase):
         data_sine = test_sine(self, param)
         data_transient  = transient_evaluation(self, data_sine, param, error, time_error_measure)
 
-        self.assertLessEqual(data_transient.settling_time_ms, 30)
-        self.assertGreaterEqual(data_transient.settling_time_ms, 10)
+        self.assertLessEqual(data_transient.settling_time, 30)
+        self.assertGreaterEqual(data_transient.settling_time, 10)
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, error * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, error * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time_ms
+        print "-Settling time: %.3f ms" % data_transient.settling_time
         print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
         print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
 
     def test_004_t (self):
         """test_004_t: positive small step"""
-        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N')
+        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N noise')
 
         param.reference = 1.0
-        param.settling_time = 0.01
+        param.settling_time = 10.0
         param.input_amplitude_max = 10
-        param.input_amplitude_min = 11
+        param.input_amplitude_min = 11                
+        param.noise = 0         
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
-        param.freq_square = 1.0 / (20 * param.settling_time)
+        param.freq_square = 1000.0 / (20 * param.settling_time)
         param.N = param.samp_rate / param.freq_square
 
         print_parameters(param)
@@ -345,26 +355,27 @@ class qa_agc (gr_unittest.TestCase):
         data_sine = test_sine(self, param)
         data_transient  = transient_evaluation(self, data_sine, param, error, time_error_measure)
 
-        self.assertLessEqual(data_transient.settling_time_ms, 30)
-        # self.assertGreaterEqual(data_transient.settling_time_ms, 10)
+        self.assertLessEqual(data_transient.settling_time, 30)
+        # self.assertGreaterEqual(data_transient.settling_time, 10)
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, error * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, error * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time_ms
+        print "-Settling time: %.3f ms" % data_transient.settling_time
         print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
         print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
 
     def test_005_t (self):
         """test_005_t: negative step of 10 times"""
-        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N')
+        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N noise')
 
         param.reference = 1.0
-        param.settling_time = 0.01
+        param.settling_time = 10.0
         param.input_amplitude_max = 10
         param.input_amplitude_min = 100
+        param.noise = 0         
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
-        param.freq_square = 1.0 / (20 * param.settling_time)
+        param.freq_square = 1000.0 / (20 * param.settling_time)
         param.N = param.samp_rate / param.freq_square
 
         print_parameters(param)
@@ -375,26 +386,27 @@ class qa_agc (gr_unittest.TestCase):
         data_sine = test_sine(self, param)
         data_transient  = transient_evaluation(self, data_sine, param, error, time_error_measure)
 
-        self.assertLessEqual(data_transient.settling_time_ms, 30)
-        self.assertGreaterEqual(data_transient.settling_time_ms, 10)
+        self.assertLessEqual(data_transient.settling_time, 30)
+        self.assertGreaterEqual(data_transient.settling_time, 10)
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, error * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, error * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time_ms
+        print "-Settling time: %.3f ms" % data_transient.settling_time
         print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
         print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
 
     def test_006_t (self):
         """test_006_t: negative step of 100 times"""
-        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N')
+        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N noise')
 
         param.reference = 1.0
-        param.settling_time = 0.01
+        param.settling_time = 10.0
         param.input_amplitude_max = 10
         param.input_amplitude_min = 1000
+        param.noise = 0         
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
-        param.freq_square = 1.0 / (20 * param.settling_time)
+        param.freq_square = 1000.0 / (20 * param.settling_time)
         param.N = param.samp_rate / param.freq_square
 
         print_parameters(param)
@@ -405,26 +417,27 @@ class qa_agc (gr_unittest.TestCase):
         data_sine = test_sine(self, param)
         data_transient  = transient_evaluation(self, data_sine, param, error, time_error_measure)
 
-        self.assertLessEqual(data_transient.settling_time_ms, 30)
-        self.assertGreaterEqual(data_transient.settling_time_ms, 10)
+        self.assertLessEqual(data_transient.settling_time, 30)
+        self.assertGreaterEqual(data_transient.settling_time, 10)
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, error * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, error * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time_ms
+        print "-Settling time: %.3f ms" % data_transient.settling_time
         print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
         print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
 
     def test_007_t (self):
         """test_007_t: negative step of 1000 times"""
-        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N')
+        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N noise')
 
         param.reference = 1.0
-        param.settling_time = 0.01
+        param.settling_time = 10.0
         param.input_amplitude_max = 10
         param.input_amplitude_min = 10000
+        param.noise = 0         
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
-        param.freq_square = 1.0 / (20 * param.settling_time)
+        param.freq_square = 1000.0 / (20 * param.settling_time)
         param.N = param.samp_rate / param.freq_square
 
         print_parameters(param)
@@ -435,12 +448,230 @@ class qa_agc (gr_unittest.TestCase):
         data_sine = test_sine(self, param)
         data_transient  = transient_evaluation(self, data_sine, param, error, time_error_measure)
 
-        self.assertLessEqual(data_transient.settling_time_ms, 30)
-        self.assertGreaterEqual(data_transient.settling_time_ms, 10)
+        self.assertLessEqual(data_transient.settling_time, 30)
+        self.assertGreaterEqual(data_transient.settling_time, 10)
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, error * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, error * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time_ms
+        print "-Settling time: %.3f ms" % data_transient.settling_time
+        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
+        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+
+
+    def test_008_t (self):
+        """test_008_t: positive step of 10 times with noise"""
+        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N noise')
+
+        param.reference = 1.0
+        param.settling_time = 10.0
+        param.input_amplitude_max = 100
+        param.input_amplitude_min = 10
+        param.noise = 0.1         
+        param.samp_rate = 10000
+        param.freq_sine = param.samp_rate / 10
+        param.freq_square = 1000.0 / (20 * param.settling_time)
+        param.N = param.samp_rate / param.freq_square
+
+        print_parameters(param)
+
+        time_error_measure = 0.05
+        error = 0.05
+
+        data_sine = test_sine(self, param)
+        data_transient  = transient_evaluation(self, data_sine, param, error, time_error_measure)
+
+        self.assertLessEqual(data_transient.settling_time, 100)
+        self.assertGreaterEqual(data_transient.settling_time, 10)
+        self.assertEqual(data_transient.stable_start, True)
+        self.assertLessEqual(data_transient.error_percentage_mean_start, (error + param.noise) * 100)
+        self.assertLessEqual(data_transient.error_percentage_mean_end, (error + param.noise) * 100)
+        print "-Settling time: %.3f ms" % data_transient.settling_time
+        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
+        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+
+    def test_009_t (self):
+        """test_009_t: positive step of 100 times with noise"""
+        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N noise')
+
+        param.reference = 1.0
+        param.settling_time = 10.0
+        param.input_amplitude_max = 1000
+        param.input_amplitude_min = 10
+        param.noise = 0.1         
+        param.samp_rate = 10000
+        param.freq_sine = param.samp_rate / 10
+        param.freq_square = 1000.0 / (20 * param.settling_time)
+        param.N = param.samp_rate / param.freq_square
+
+        print_parameters(param)
+
+        time_error_measure = 0.05
+        error = 0.05
+
+        data_sine = test_sine(self, param)
+        data_transient  = transient_evaluation(self, data_sine, param, error, time_error_measure)
+
+        self.assertLessEqual(data_transient.settling_time, 100)
+        self.assertGreaterEqual(data_transient.settling_time, 10)
+        self.assertEqual(data_transient.stable_start, True)
+        self.assertLessEqual(data_transient.error_percentage_mean_start, (error + param.noise) * 100)
+        self.assertLessEqual(data_transient.error_percentage_mean_end, (error + param.noise) * 100)
+        print "-Settling time: %.3f ms" % data_transient.settling_time
+        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
+        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+
+    def test_010_t (self):
+        """test_010_t: positive step of 1000 times with noise"""
+        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N noise')
+
+        param.reference = 1.0
+        param.settling_time = 10.0
+        param.input_amplitude_max = 10000
+        param.input_amplitude_min = 10
+        param.noise = 0.1         
+        param.samp_rate = 10000
+        param.freq_sine = param.samp_rate / 10
+        param.freq_square = 1000.0 / (20 * param.settling_time)
+        param.N = param.samp_rate / param.freq_square
+
+        print_parameters(param)
+
+        time_error_measure = 0.05
+        error = 0.05
+
+        data_sine = test_sine(self, param)
+        data_transient  = transient_evaluation(self, data_sine, param, error, time_error_measure)
+
+        self.assertLessEqual(data_transient.settling_time, 100)
+        self.assertGreaterEqual(data_transient.settling_time, 10)
+        self.assertEqual(data_transient.stable_start, True)
+        self.assertLessEqual(data_transient.error_percentage_mean_start, (error + param.noise) * 100)
+        self.assertLessEqual(data_transient.error_percentage_mean_end, (error + param.noise) * 100)
+        print "-Settling time: %.3f ms" % data_transient.settling_time
+        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
+        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+
+    def test_011_t (self):
+        """test_011_t: positive small step with noise"""
+        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N noise')
+
+        param.reference = 1.0
+        param.settling_time = 10.0
+        param.input_amplitude_max = 10
+        param.input_amplitude_min = 11
+        param.noise = 0.1         
+        param.samp_rate = 10000
+        param.freq_sine = param.samp_rate / 10
+        param.freq_square = 1000.0 / (20 * param.settling_time)
+        param.N = param.samp_rate / param.freq_square
+
+        print_parameters(param)
+
+        time_error_measure = 0.05
+        error = 0.05
+
+        data_sine = test_sine(self, param)
+        data_transient  = transient_evaluation(self, data_sine, param, error, time_error_measure)
+
+        self.assertLessEqual(data_transient.settling_time, 100)
+        # self.assertGreaterEqual(data_transient.settling_time, 10)
+        self.assertEqual(data_transient.stable_start, True)
+        self.assertLessEqual(data_transient.error_percentage_mean_start, (error + param.noise) * 100)
+        self.assertLessEqual(data_transient.error_percentage_mean_end, (error + param.noise) * 100)
+        print "-Settling time: %.3f ms" % data_transient.settling_time
+        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
+        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+
+    def test_012_t (self):
+        """test_012_t: negative step of 10 times with noise"""
+        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N noise')
+
+        param.reference = 1.0
+        param.settling_time = 10.0
+        param.input_amplitude_max = 10
+        param.input_amplitude_min = 100
+        param.noise = 0.1         
+        param.samp_rate = 10000
+        param.freq_sine = param.samp_rate / 10
+        param.freq_square = 1000.0 / (20 * param.settling_time)
+        param.N = param.samp_rate / param.freq_square
+
+        print_parameters(param)
+
+        time_error_measure = 0.05
+        error = 0.05
+
+        data_sine = test_sine(self, param)
+        data_transient  = transient_evaluation(self, data_sine, param, error, time_error_measure)
+
+        self.assertLessEqual(data_transient.settling_time, 100)
+        self.assertGreaterEqual(data_transient.settling_time, 10)
+        self.assertEqual(data_transient.stable_start, True)
+        self.assertLessEqual(data_transient.error_percentage_mean_start, (error + param.noise) * 100)
+        self.assertLessEqual(data_transient.error_percentage_mean_end, (error + param.noise) * 100)
+        print "-Settling time: %.3f ms" % data_transient.settling_time
+        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
+        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+
+    def test_013_t (self):
+        """test_013_t: negative step of 100 times with noise"""
+        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N noise')
+
+        param.reference = 1.0
+        param.settling_time = 10.0
+        param.input_amplitude_max = 10
+        param.input_amplitude_min = 1000
+        param.noise = 0.1         
+        param.samp_rate = 10000
+        param.freq_sine = param.samp_rate / 10
+        param.freq_square = 1000.0 / (20 * param.settling_time)
+        param.N = param.samp_rate / param.freq_square
+
+        print_parameters(param)
+
+        time_error_measure = 0.05
+        error = 0.05
+
+        data_sine = test_sine(self, param)
+        data_transient  = transient_evaluation(self, data_sine, param, error, time_error_measure)
+
+        self.assertLessEqual(data_transient.settling_time, 100)
+        self.assertGreaterEqual(data_transient.settling_time, 10)
+        self.assertEqual(data_transient.stable_start, True)
+        self.assertLessEqual(data_transient.error_percentage_mean_start, (error + param.noise) * 100)
+        self.assertLessEqual(data_transient.error_percentage_mean_end, (error + param.noise) * 100)
+        print "-Settling time: %.3f ms" % data_transient.settling_time
+        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
+        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+
+    def test_014_t (self):
+        """test_014_t: negative step of 1000 times with noise"""
+        param = namedtuple('param', 'reference settling_time input_amplitude_max input_amplitude_min samp_rate freq_sine freq_square N noise')
+
+        param.reference = 1.0
+        param.settling_time = 10.0
+        param.input_amplitude_max = 10
+        param.input_amplitude_min = 10000
+        param.noise = 0.1         
+        param.samp_rate = 10000
+        param.freq_sine = param.samp_rate / 10
+        param.freq_square = 1000.0 / (20 * param.settling_time)
+        param.N = param.samp_rate / param.freq_square
+
+        print_parameters(param)
+
+        time_error_measure = 0.05
+        error = 0.05
+
+        data_sine = test_sine(self, param)
+        data_transient  = transient_evaluation(self, data_sine, param, error, time_error_measure)
+
+        self.assertLessEqual(data_transient.settling_time, 100)
+        self.assertGreaterEqual(data_transient.settling_time, 10)
+        self.assertEqual(data_transient.stable_start, True)
+        self.assertLessEqual(data_transient.error_percentage_mean_start, (error + param.noise) * 100)
+        self.assertLessEqual(data_transient.error_percentage_mean_end, (error + param.noise) * 100)
+        print "-Settling time: %.3f ms" % data_transient.settling_time
         print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
         print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
 
