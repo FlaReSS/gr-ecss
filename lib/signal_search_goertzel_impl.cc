@@ -289,6 +289,7 @@ namespace gr{
 
     void 
     signal_search_goertzel_impl::set_freq_cutoff(float freq_cutoff){
+      d_freq_cutoff = freq_cutoff;
       d_iir_central.set_taps(M_PI * freq_cutoff / d_samp_rate);
       d_iir_left.set_taps(M_PI * freq_cutoff / d_samp_rate);
       d_iir_right.set_taps(M_PI * freq_cutoff / d_samp_rate);

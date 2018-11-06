@@ -37,6 +37,7 @@ class signal_search_fft_v_impl : public signal_search_fft_v
 {
 private:
   bool first;
+  bool d_enable;
   bool d_carrier;
   bool d_average;
   float d_samp_rate;
@@ -83,7 +84,7 @@ private:
   void average_reset();
 
 public:
-  signal_search_fft_v_impl(int fftsize, int decimation, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);
+  signal_search_fft_v_impl(bool enable, int fftsize, int decimation, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);
   ~signal_search_fft_v_impl();
 
   int general_work(int noutput_items,
@@ -98,14 +99,14 @@ public:
   bool get_average() const;
   int get_decimation() const;
   int get_fftsize() const;
+  bool get_enable() const;
 
   void set_freq_central(float freq_central);
   void set_bandwidth(float bandwidth);
   void set_freq_cutoff(float freq_cutoff);
   void set_threshold(float threshold);
   void set_average(bool average);
-  // void set_fftsize(int fftsize);
-  // void set_decimation(int decimation);
+  void set_enable(bool enable);
 };
 
 } // namespace ecss

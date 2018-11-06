@@ -23,7 +23,7 @@
 #include <ecss/api.h>
 #include <gnuradio/block.h>
 
-    namespace gr {
+namespace gr {
   namespace ecss {
 
   /*!

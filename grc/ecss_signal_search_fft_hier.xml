@@ -5,13 +5,21 @@
   <category>[ecss]</category>
   <import>import ecss</import>
   <import>from gnuradio.filter import firdes</import>
-  <make>ecss.signal_search_fft_hier($fftsize, $decimation, $average, $wintype, $freq_central, $bandwidth, $freq_cutoff, $threshold, $samp_rate)</make>
+  <make>ecss.signal_search_fft_hier($enable, $fftsize, $decimation, $average, $wintype, $freq_central, $bandwidth, $freq_cutoff, $threshold, $samp_rate)</make>
   <callback>set_freq_central($freq_central)</callback>
   <callback>set_bandwidth($bandwidth)</callback>
   <callback>set_freq_cutoff($freq_cutoff)</callback>
   <callback>set_threshold($threshold)</callback>
   <callback>set_average($average)</callback>
   <callback>set_carrier($carrier)</callback>
+  <callback>set_enable($enable)</callback>
+
+  <param>
+    <name>Enable</name>
+    <key>enable</key>
+    <value>True</value>
+    <type>bool</type>
+  </param>
 
   <param>
     <name>Window Type</name>
@@ -52,30 +60,35 @@
   <param>
     <name>FFT size</name>
     <key>fftsize</key>
+    <value>1024</value>
     <type>int</type>
   </param>
 
   <param>
     <name>Decimation</name>
     <key>decimation</key>
+    <value>1</value>
     <type>int</type>
   </param>
 
   <param>
     <name>Central frequency of the signal</name>
     <key>freq_central</key>
+    <value>0.0</value>
     <type>real</type>
   </param>
+
   <param>
     <name>Bandwidth of the signal</name>
     <key>bandwidth</key>
+    <value>2000.0</value>
     <type>real</type>
   </param>
 
   <param>
     <name>Average</name>
     <key>average</key>
-    <value>True</value>
+    <value>False</value>
     <type>bool</type>
     <option>
       <name>Yes</name>
@@ -90,16 +103,20 @@
   <param>
     <name>Frequency cut-off (average)</name>
     <key>freq_cutoff</key>
+    <value>100.0</value>
     <type>real</type>
   </param>
   <param>
     <name>Threshold [dB]</name>
     <key>threshold</key>
+    <value>10.0</value>
     <type>real</type>
   </param>
+
   <param>
     <name>samp_rate</name>
     <key>samp_rate</key>
+    <value>samp_rate</value>
     <type>real</type>
   </param>
 
@@ -107,6 +124,7 @@
     <name>in</name>
     <type>complex</type>
   </sink>
+  
   <source>
     <name>out</name>
     <type>complex</type>
