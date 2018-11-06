@@ -53,7 +53,7 @@ def test_sine(self, param):
     dst_out = blocks.vector_sink_c()
     null = blocks.null_sink(gr.sizeof_gr_complex*1)
 
-    ecss_signal_search_fft_v = ecss.signal_search_fft_v(param.fft_size, param.decimation, Average, firdes.WIN_BLACKMAN_hARRIS, param.f_central, param.bw, param.average, param.threshold, param.samp_rate)
+    ecss_signal_search_fft_v = ecss.signal_search_fft_v(True, param.fft_size, param.decimation, Average, firdes.WIN_BLACKMAN_hARRIS, param.f_central, param.bw, param.average, param.threshold, param.samp_rate)
     blocks_stream_to_vector = blocks.stream_to_vector(gr.sizeof_gr_complex*1, param.fft_size * param.decimation)
     blocks_vector_to_stream = blocks.vector_to_stream(gr.sizeof_gr_complex*1, param.fft_size * param.decimation)
 

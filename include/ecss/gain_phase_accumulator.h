@@ -51,12 +51,12 @@ namespace gr {
      * \param uplink uplink frequency for evaluate the turn aroun ratio.
      * \param downlink downlink frequency for evaluate the turn aroun ratio.
      */
-    static sptr make(int reset, int uplink, int downlink);
+    static sptr make(bool reset, int uplink, int downlink);
 
     /*!
        * \brief Return reset
        */
-    virtual int get_reset() const = 0;
+    virtual bool get_reset() const = 0;
 
     /*!
        * \brief Return uplink constant
@@ -71,7 +71,7 @@ namespace gr {
     /*!
        * \brief Set reset
        */
-    virtual void set_reset(int reset) = 0;
+    virtual void set_reset(bool reset) = 0;
 
     /*!
        * \brief Set uplink constant

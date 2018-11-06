@@ -31,14 +31,14 @@ namespace gr {
      private:
       int d_uplink;
       int d_downlink;
-      int d_reset;
+      bool d_reset;
       bool first;
       int64_t d_integer_phase;
       int64_t d_integer_phase_step;
       int64_t d_integer_phase_accumulator;
 
     public:
-      gain_phase_accumulator_impl(int reset, int uplink, int downlink);
+      gain_phase_accumulator_impl(bool reset, int uplink, int downlink);
       ~gain_phase_accumulator_impl();
 
       int work(int noutput_items,
@@ -46,11 +46,11 @@ namespace gr {
          gr_vector_void_star &output_items);
 
       
-      int get_reset() const { return d_reset; } 
+      bool get_reset() const { return d_reset; } 
       int get_uplink() const { return d_uplink; }
       int get_downlink() const { return d_downlink; }
 
-      void set_reset(int reset) { d_reset = reset;}
+      void set_reset(bool reset) { d_reset = reset;}
       void set_uplink(int uplink) { d_uplink = uplink; }
       void set_downlink(int downlink) { d_downlink = downlink; }
       

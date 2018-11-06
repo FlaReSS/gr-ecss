@@ -173,7 +173,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         param.noise = 0.0
         param.uplink = 221
         param.downlink = 240
-        param.reset = 0
+        param.reset = True
 
         print_parameters(param)
 
@@ -205,7 +205,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         param.noise = 0.0
         param.uplink = 221
         param.downlink = 2400
-        param.reset = 0
+        param.reset = True
 
         print_parameters(param)
 
@@ -236,7 +236,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         param.noise = 0.0
         param.uplink = 221
         param.downlink = 240
-        param.reset = 0
+        param.reset = True
 
         print_parameters(param)
 
@@ -302,7 +302,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         param.noise = 0.0
         param.uplink = 221
         param.downlink = 240
-        param.reset = 1
+        param.reset = True, 
 
         print_parameters(param)
 

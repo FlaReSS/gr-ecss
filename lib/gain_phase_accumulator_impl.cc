@@ -29,13 +29,13 @@ namespace gr {
   namespace ecss {
 
     gain_phase_accumulator::sptr
-    gain_phase_accumulator::make(int reset, int uplink, int downlink)
+    gain_phase_accumulator::make(bool reset, int uplink, int downlink)
     {
       return gnuradio::get_initial_sptr
         (new gain_phase_accumulator_impl(reset, uplink, downlink));
     }
 
-    gain_phase_accumulator_impl::gain_phase_accumulator_impl(int reset, int uplink, int downlink)
+    gain_phase_accumulator_impl::gain_phase_accumulator_impl(bool reset, int uplink, int downlink)
       : gr::sync_block("gain_phase_accumulator",
               gr::io_signature::make(1, 1, sizeof (int64_t)),
               gr::io_signature::make(1, 1, sizeof (int64_t))),
@@ -60,7 +60,7 @@ namespace gr {
       int64_t gain_integer_phase;      
 
       for (int i = 0; i < noutput_items; i++){
-        if (d_reset == 0) {
+        if (d_reset == false) {
 
           if (first == false)
           {

@@ -12,8 +12,8 @@
 	<param>
 		<name>Reset</name>
 		<key>rst</key>
-		<value>0</value>
-		<type>int</type>
+		<value>False</value>
+		<type>bool</type>
 	</param>
 	<param>
 		<name>uplink</name>
