@@ -54,6 +54,5 @@ GR_ADD_TEST(qa_signal_search_fft_v ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_D
 GR_ADD_TEST(qa_spl_encoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_spl_encoder.py)
 GR_ADD_TEST(qa_spl_decoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_spl_decoder.py)
 GR_ADD_TEST(qa_nrzl_encoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_nrzl_encoder.py)
-GR_ADD_TEST(qa_nrzl_decoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_nrzl_decoder.py)
 GR_ADD_TEST(qa_nrzl_encoder_subcarrier ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_nrzl_encoder_subcarrier.py)
 GR_ADD_TEST(qa_modulator ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_modulator.py)

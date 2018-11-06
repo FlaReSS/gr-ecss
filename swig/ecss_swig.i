@@ -19,7 +19,6 @@
 #include "ecss/spl_encoder.h"
 #include "ecss/spl_decoder.h"
 #include "ecss/nrzl_encoder.h"
-#include "ecss/nrzl_decoder.h"
 #include "ecss/nrzl_encoder_subcarrier.h"
 %}
 
@@ -50,8 +49,7 @@ GR_SWIG_BLOCK_MAGIC2(ecss, spl_encoder);
 GR_SWIG_BLOCK_MAGIC2(ecss, spl_decoder);
 %include "ecss/nrzl_encoder.h"
 GR_SWIG_BLOCK_MAGIC2(ecss, nrzl_encoder);
-%include "ecss/nrzl_decoder.h"
-GR_SWIG_BLOCK_MAGIC2(ecss, nrzl_decoder);
+
 %include "ecss/nrzl_encoder_subcarrier.h"
 GR_SWIG_BLOCK_MAGIC2(ecss, nrzl_encoder_subcarrier);
 

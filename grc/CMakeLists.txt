@@ -29,7 +29,6 @@ install(FILES
     ecss_spl_encoder.xml
     ecss_spl_decoder.xml
     ecss_nrzl_encoder.xml
-    ecss_nrzl_decoder.xml
     ecss_nrzl_encoder_subcarrier.xml
     ecss_modulator.xml
     DESTINATION share/gnuradio/grc/blocks

@@ -34,7 +34,6 @@ install(FILES
     spl_encoder.h
     spl_decoder.h
     nrzl_encoder.h
-    nrzl_decoder.h
     nrzl_encoder_subcarrier.h
     DESTINATION include/ecss
 )

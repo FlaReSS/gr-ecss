@@ -37,7 +37,6 @@ list(APPEND ecss_sources
     spl_encoder_impl.cc
     spl_decoder_impl.cc
     nrzl_encoder_impl.cc
-    nrzl_decoder_impl.cc
     nrzl_encoder_subcarrier_impl.cc
     )
 

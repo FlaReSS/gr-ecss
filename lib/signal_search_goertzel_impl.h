@@ -51,6 +51,7 @@ namespace ecss
       float d_limit;
       bool first;
       bool d_average;
+      bool d_enable;
       float d_samp_rate;
       int d_size;
       float d_threshold;
@@ -70,15 +71,14 @@ namespace ecss
 
       bins double_goertzel_complex(gr_complex *in);
 
-      void create_buffers();
-      void destroy_buffers();
       void average_reset();
       void coeff_eval(float freq_central, float bandwidth);
       void signal_gen(float freq);
+      void set_size();
 
 
     public:
-      signal_search_goertzel_impl(bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);
+      signal_search_goertzel_impl(bool enable, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);
       ~signal_search_goertzel_impl();
 
       // Where all the action really happens
@@ -95,6 +95,7 @@ namespace ecss
       float get_freq_cutoff() const;
       float get_threshold() const;
       bool get_average() const;
+      bool get_enable() const;
       int get_size() const;
 
       void set_freq_central(float freq_central);
@@ -102,7 +103,7 @@ namespace ecss
       void set_freq_cutoff(float freq_cutoff);
       void set_threshold(float threshold);
       void set_average(bool average);
-      void set_size();
+      void set_enable(bool enable);
     };
   } // namespace ecss
 } // namespace gr

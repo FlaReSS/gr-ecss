@@ -34,12 +34,12 @@ namespace gr{
     #endif
 
     signal_search_goertzel::sptr
-    signal_search_goertzel::make(bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
+    signal_search_goertzel::make(bool enable, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
     {
-      return gnuradio::get_initial_sptr(new signal_search_goertzel_impl(average, freq_central, bandwidth, freq_cutoff, threshold, samp_rate));
+      return gnuradio::get_initial_sptr(new signal_search_goertzel_impl(enable, average, freq_central, bandwidth, freq_cutoff, threshold, samp_rate));
     }
 
-    signal_search_goertzel_impl::signal_search_goertzel_impl(bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
+    signal_search_goertzel_impl::signal_search_goertzel_impl(bool enable, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
         : gr::block("signal_search_goertzel",
                     gr::io_signature::make(1, 1, sizeof(gr_complex)),
                     gr::io_signature::make(1, 1, sizeof(gr_complex))),
@@ -49,19 +49,16 @@ namespace gr{
           d_iir_central(M_PI * freq_cutoff / samp_rate),
           d_iir_left(M_PI * freq_cutoff / samp_rate),
           d_iir_right(M_PI * freq_cutoff / samp_rate),
-          d_average(average)
+          d_average(average), d_enable(enable)
     {
-      set_size();
       first = true;
-      create_buffers();
+      set_size();
       average_reset();
-      // signal_gen(d_freq_central);
       coeff_eval(freq_central, bandwidth);
     }
 
     signal_search_goertzel_impl::~signal_search_goertzel_impl()
-    {
-    }
+    {}
 
     void
     signal_search_goertzel_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
@@ -83,66 +80,58 @@ namespace gr{
       float right_avg;
       uint out_items = 0;
       uint i = 0;
-
-      // int max = d_size * d_size;
-
-      for (i = 0; i < noutput_items; i+= d_size)
+      if(d_enable == true)
       {
-        
-        // if (d_freq_central != 0){
-        //   volk_32fc_x2_multiply_32fc(in_shifted_buffer, &in[i], signal_shifter_buffer, d_size);
-        //   goertzel = double_goertzel_complex(in_shifted_buffer, coeff_lateral);
-        // }
-        // else{
-          goertzel = double_goertzel_complex(&in[i]);
-        // }
-
-        if (d_average == true){
-          d_iir_central.filter(goertzel.central);
-          d_iir_left.filter(goertzel.left);
-          d_iir_right.filter(goertzel.right);
-          central_avg = d_iir_central.prev_output();
-          left_avg = d_iir_left.prev_output();
-          right_avg = d_iir_right.prev_output();
-        }
-        else{
-          central_avg = goertzel.central;
-          left_avg = goertzel.left;
-          right_avg = goertzel.right;
-        }
-
-        // if(central_avg > max || left_avg > max || right_avg > max){
-        //   std::cout << "central_avg: " << central_avg << std::endl;
-        //   std::cout << "left_avg: " << left_avg << std::endl;
-        //   std::cout << "right_avg: " << right_avg << std::endl;
-
-        // }
-
-        
-        if ((central_avg > (left_avg * d_threshold)) && (central_avg > (right_avg * d_threshold)))
+        for (i = 0; i < noutput_items; i+= d_size)
         {
+          goertzel = double_goertzel_complex(&in[i]);
 
-          memcpy(&out[i], &in[i], sizeof(gr_complex) * d_size);
-          if (first == true)
-          {
-            add_item_tag(0,                           // Port number
-                         nitems_written(0) + (i), // Offset
-                         pmt::intern("reset"),        // Key
-                         pmt::intern("pll")           // Value
-            );
+          if (d_average == true){
+            d_iir_central.filter(goertzel.central);
+            d_iir_left.filter(goertzel.left);
+            d_iir_right.filter(goertzel.right);
 
-            first = false;
-            average_reset();
+            central_avg = d_iir_central.prev_output();
+            left_avg = d_iir_left.prev_output();
+            right_avg = d_iir_right.prev_output();
           }
-          out_items += d_size;
+          else{
+            central_avg = goertzel.central;
+            left_avg = goertzel.left;
+            right_avg = goertzel.right;
+          }
+          
+          if ((central_avg > (left_avg * d_threshold)) && (central_avg > (right_avg * d_threshold)))
+          {
+
+            memcpy(&out[i], &in[i], sizeof(gr_complex) * d_size);
+            if (first == true)
+            {
+              add_item_tag(0,                           // Port number
+                          nitems_written(0) + (i), // Offset
+                          pmt::intern("reset"),        // Key
+                          pmt::intern("pll")           // Value
+              );
+
+              first = false;
+              average_reset();
+            }
+            out_items += d_size;
+          }
+          else{
+            first = true;
+          }
         }
-        else{
-          first = true;
-        }
+        
+        consume_each(i);
+        return out_items;
       }
-      
-      consume_each(i);
-      return out_items;
+      else
+      {
+        memcpy(&out[0], &in[0], sizeof(gr_complex) * noutput_items);
+        consume_each(noutput_items);
+        return noutput_items;
+      }
     }
 
     signal_search_goertzel_impl::bins
@@ -219,14 +208,6 @@ namespace gr{
       real_2i = (Q1_2i - Q2_2i * d_cosine_2);
       imag_2i = (Q2_2i * d_sine_2);
 
-      // magnitude_0r = (Q1_0r * Q1_0r) + (Q2_0r* Q2_0r) - (Q1_0r * Q2_0r * 2);
-      // magnitude_1r = (Q1_1r * Q1_1r)+ (Q2_1r* Q2_1r) - (Q1_1r * Q2_1r * coeff);
-      // // outputr = (magnitude_0r - magnitude_1r);
-
-      // magnitude_0i = (Q1_0i * Q1_0i) + (Q2_0i* Q2_0i) - (Q1_0i * Q2_0i * 2);
-      // magnitude_1i = (Q1_1i * Q1_1i)+ (Q2_1i* Q2_1i) - (Q1_1i * Q2_1i * coeff);
-      // // outputi = (magnitude_0i - magnitude_1i);
-
       outputs.central = ((real_0r - imag_0i) * (real_0r - imag_0i) + (real_0i + imag_0r) * (real_0i + imag_0r));
       outputs.right = ((real_1r - imag_1i) * (real_1r - imag_1i) + (real_1i + imag_1r) * (real_1i + imag_1r));
       outputs.left = ((real_2r - imag_2i) * (real_2r - imag_2i) + (real_2i + imag_2r) * (real_2i + imag_2r));
@@ -241,10 +222,6 @@ namespace gr{
         outputs.left = 0.001;
       }
 
-      // if(magnitude_2 == 0)
-
-      // debug ++;
-      // return (outputr + outputi) / (d_size * d_size);
       return outputs;
     }
 
@@ -270,32 +247,6 @@ namespace gr{
       d_sine_2 = sin((double)((M_TWOPI / d_size) * k_2));
     }
 
-    void
-    signal_search_goertzel_impl::signal_gen(float freq)
-    {
-      double phase=0;
-      double  delta_phase;
-      float t_imag, t_real;
-
-      delta_phase = (double) (M_TWOPI * freq) / d_samp_rate;
-    
-      for(size_t i = 0; i < d_size; i++)
-      {
-        
-        if (abs(phase) > M_PI)
-        {
-          while (phase > M_PI)
-            phase -= 2 * M_PI;
-
-          while (phase < -M_PI)
-            phase += 2 * M_PI;
-        }
-        gr::sincosf((float)phase, &t_imag, &t_real);
-        signal_shifter_buffer[i] = gr_complex(t_real, -t_imag);
-        phase += delta_phase;
-      }
-    }
-
     float
     signal_search_goertzel_impl::get_freq_central() const { return d_freq_central; }
 
@@ -311,22 +262,23 @@ namespace gr{
     bool
     signal_search_goertzel_impl::get_average() const { return d_average; }
 
+    bool
+    signal_search_goertzel_impl::get_enable() const { return d_enable; }
+
     int
     signal_search_goertzel_impl::get_size() const { return d_size; }
 
-
     void 
     signal_search_goertzel_impl::set_freq_central(float freq_central){
-      //!WARNING to complete
       if (abs(freq_central) >= (d_samp_rate / (2)))
       {
-        throw std::out_of_range("signal search: invalid frequency central. Must be between -(samp_rate / decimation) / 2 and (samp_rate) / 2");
+        throw std::out_of_range("signal search: invalid frequency central. Must be between -(samp_rate / 2) and +(samp_rate / 2)");
       }
       d_freq_central = freq_central;
     }
+
     void 
     signal_search_goertzel_impl::set_bandwidth(float bandwidth){
-      //!WARNING to complete
       if (bandwidth >= d_samp_rate || bandwidth < 0)
       {
         throw std::out_of_range("signal search: invalid bandwidth. Must be positive and lower than samp_rate.");
@@ -337,7 +289,9 @@ namespace gr{
 
     void 
     signal_search_goertzel_impl::set_freq_cutoff(float freq_cutoff){
-      //!WARNING to complete
+      d_iir_central.set_taps(M_PI * freq_cutoff / d_samp_rate);
+      d_iir_left.set_taps(M_PI * freq_cutoff / d_samp_rate);
+      d_iir_right.set_taps(M_PI * freq_cutoff / d_samp_rate);
       average_reset();
     }
 
@@ -353,6 +307,11 @@ namespace gr{
     }
 
     void 
+    signal_search_goertzel_impl::set_enable(bool enable){
+      d_enable = enable;
+    }
+
+    void 
     signal_search_goertzel_impl::set_size(){
       d_size = (int)(d_samp_rate / d_bandwidth);
       if (d_size > 4096 || d_size <= 0)
@@ -361,23 +320,6 @@ namespace gr{
         d_size = 4096;
       }
       d_limit = d_size * d_size * 0.405;
-    }
-
-    void
-    signal_search_goertzel_impl::create_buffers()
-    {
-      in_shifted_buffer = (gr_complex *)volk_malloc(d_size * sizeof(gr_complex), volk_get_alignment());
-      memset(in_shifted_buffer, 0, d_size * sizeof(gr_complex));
-
-      signal_shifter_buffer = (gr_complex *)volk_malloc(d_size * sizeof(gr_complex), volk_get_alignment());
-      memset(signal_shifter_buffer, 0, d_size * sizeof(gr_complex));
-    }
-
-    void
-    signal_search_goertzel_impl::destroy_buffers()
-    {
-      volk_free(in_shifted_buffer);
-      volk_free(signal_shifter_buffer);
     }
 
     void
