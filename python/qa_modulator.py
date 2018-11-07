@@ -133,17 +133,18 @@ class qa_modulator (gr_unittest.TestCase):
 
         print_parameters(param)
 
-        encoder_variable = fec.cc_encoder_make(1784, 7, 2, ([109,79]), 0, fec.CC_STREAMING, True)
+        encoder_variable = fec.cc_encoder_make(1, 7, 2, ([79,-109]), 0, fec.CC_STREAMING, False)
 
-        src =  blocks.file_source(gr.sizeof_char*1, '../python/test_files/CADU.bin', False)
+        src =  blocks.file_source(gr.sizeof_char*1, '../python/test_files/CADU_incl_ASM.bin', False)
         src_expected =  blocks.file_source(gr.sizeof_char*1, '../python/test_files/Convolutionally_encoded_CADU.bin', False)
         pack1 = blocks.unpack_k_bits_bb(8)
         pack2 = blocks.unpack_k_bits_bb(8)
 
         dst = blocks.vector_sink_b()
         dst_expected = blocks.vector_sink_b()
-        head = blocks.head(gr.sizeof_char, 1784 * 2)
+        head = blocks.head(gr.sizeof_char, 2040)
         conv = fec.extended_encoder(encoder_obj_list=encoder_variable, threading='capillary', puncpat='11')
+        # conv = fec.encoder(encoder_variable, gr.sizeof_char, gr.sizeof_char)
 
         tb.connect(src, pack1)
         tb.connect(pack1, conv)   
@@ -155,9 +156,19 @@ class qa_modulator (gr_unittest.TestCase):
 
         data_out = dst.data()
         expected_data = dst_expected.data()
+        
+        print len(data_out)
 
         self.assertFloatTuplesAlmostEqual(data_out, expected_data)
-        print "- Data correctly encoded."
+        # for i in range(len(expected_data) - len(data_out)):
+        #     count = 0
+        #     for x in range(len(data_out)):
+        #         if data_out[x] == expected_data[i + x]:
+        #             count = count + 1
+        #         if data_out[x] != expected_data[i + x]:
+        #             count = 0
+        #     if count >= 2000:
+        #         print "found", len(data_out), i, count
 
 
     # def test_010_t (self):

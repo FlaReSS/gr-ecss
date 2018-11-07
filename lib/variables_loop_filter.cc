@@ -40,12 +40,12 @@ namespace gr {
     
     double omega_2 = M_TWOPI * n_freq_2;
     double loop_bw_2 = omega_2 * sqrt( 1 + 2* damp_2 + sqrt(pow((2*damp_2*damp_2 + 1),2.0) + 1));
-    double denom_2 = (4.0 + 4.0 * damp_2 * loop_bw_2 * samp + loop_bw_2 * loop_bw_2 * samp * samp);
+    double denom_2 = (4.0 + 4.0 * damp_2 * loop_bw_2 / samp + loop_bw_2 * loop_bw_2 / (samp * samp));
 
-    double coeff1_2 = (8 * damp_2 * loop_bw_2 * samp) / denom_2;
+    double coeff1_2 = (8 * damp_2 * loop_bw_2) / (denom_2 * samp);
     coefficients.push_back(coeff1_2);
 
-    double coeff2_2 = (2 * damp_2 * damp_2 * loop_bw_2 * loop_bw_2 * samp * samp) / denom_2;
+    double coeff2_2 = (2 * damp_2 * damp_2 * loop_bw_2 * loop_bw_2) / (denom_2 * samp * samp);
     coefficients.push_back(coeff2_2);
 
     double omega_3 = M_TWOPI * n_freq_3;

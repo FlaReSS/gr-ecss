@@ -80,6 +80,9 @@ namespace gr{
       float right_avg;
       uint out_items = 0;
       uint i = 0;
+
+
+      
       if(d_enable == true)
       {
         for (i = 0; i < noutput_items; i+= d_size)
@@ -122,9 +125,11 @@ namespace gr{
             first = true;
           }
         }
-        
+        std::cout<<"out_items: "<<out_items<<std::endl;
+        std::cout<<"i: "<<i<<std::endl;
         consume_each(i);
         return out_items;
+        
       }
       else
       {
@@ -228,23 +233,28 @@ namespace gr{
     void
     signal_search_goertzel_impl::coeff_eval(float freq_central, float bandwidth)
     {
-      float k_0 = (float)(((d_size * freq_central) / d_samp_rate));
+      int k_0 = round(((d_size * freq_central) / d_samp_rate));
 
       d_coeff_0 = 2 * cos((double)((M_TWOPI / d_size) * k_0));
       d_cosine_0 = cos((double)((M_TWOPI / d_size) * k_0));
       d_sine_0 = sin((double)((M_TWOPI / d_size) * k_0));
 
-      float k_1 = (float)(((d_size * (freq_central + bandwidth*1.01)) / d_samp_rate));
+      int k_1 = round(((d_size * (freq_central + bandwidth)) / d_samp_rate));
 
       d_coeff_1 = 2 * cos((double)((M_TWOPI / d_size) * k_1));
       d_cosine_1 = cos((double)((M_TWOPI / d_size) * k_1));
       d_sine_1 = sin((double)((M_TWOPI / d_size) * k_1));
 
-      float k_2 = (float)(((d_size * (freq_central - bandwidth*1.01)) / d_samp_rate));
+      int k_2 = round(((d_size * (freq_central - bandwidth)) / d_samp_rate));
 
       d_coeff_2 = 2 * cos((double)((M_TWOPI / d_size) * k_2));
       d_cosine_2 = cos((double)((M_TWOPI / d_size) * k_2));
       d_sine_2 = sin((double)((M_TWOPI / d_size) * k_2));
+
+      // std::cout<<"d_size: "<<d_size<<std::endl;
+      // std::cout<<"k_0: "<<k_0<<std::endl;
+      // std::cout<<"k_1: "<<k_1<<std::endl;
+      // std::cout<<"k_2: "<<k_2<<std::endl;
     }
 
     float
