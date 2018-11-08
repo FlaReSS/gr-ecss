@@ -77,4 +77,8 @@
     <name>out</name>
     <type>complex</type>
   </source>
+  <source>
+    <name>flag</name>
+    <type>byte</type>
+  </source>
 </block>

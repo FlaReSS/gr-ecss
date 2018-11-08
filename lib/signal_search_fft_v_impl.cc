@@ -76,11 +76,6 @@ namespace gr
       gr_complex *in = (gr_complex *)input_items[0];
       gr_complex *out = (gr_complex *)output_items[0];
 
-      // if(d_n_out > 1)
-      // {
-      //   char *flag = (char *)output_items[0];
-      // }
-
       int item_read;
       int temp_signal_band_max_index;
       uint out_items = 0;
@@ -169,7 +164,6 @@ namespace gr
       else
       {
         memcpy(&out[0], &in[0], sizeof(gr_complex) * noutput_items * d_fftsize * d_decimation);
-        // memset(flag, 1, sizeof(char) * noutput_items * d_fftsize * d_decimation);
         consume_each(noutput_items);
         return noutput_items;
       }     

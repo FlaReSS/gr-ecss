@@ -33,16 +33,16 @@ namespace gr{
     #define M_TWOPI (2.0*M_PI)
     #endif
 
-    signal_search_goertzel::sptr
-    signal_search_goertzel::make(bool enable, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
-    {
-      return gnuradio::get_initial_sptr(new signal_search_goertzel_impl(enable, average, freq_central, bandwidth, freq_cutoff, threshold, samp_rate));
+  signal_search_goertzel::sptr
+  signal_search_goertzel::make(bool enable, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
+  {
+    return gnuradio::get_initial_sptr(new signal_search_goertzel_impl(enable, average, freq_central, bandwidth, freq_cutoff, threshold, samp_rate));
     }
 
     signal_search_goertzel_impl::signal_search_goertzel_impl(bool enable, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
         : gr::block("signal_search_goertzel",
                     gr::io_signature::make(1, 1, sizeof(gr_complex)),
-                    gr::io_signature::make(1, 1, sizeof(gr_complex))),
+                    gr::io_signature::make2(1, 2, sizeof(gr_complex), sizeof(char))),
           d_freq_central(freq_central),
           d_bandwidth(bandwidth), d_freq_cutoff(freq_cutoff),
           d_threshold(std::pow(10.0, (threshold / 10))), d_samp_rate(samp_rate),
@@ -74,16 +74,18 @@ namespace gr{
     {
       gr_complex *in = (gr_complex *) input_items[0];
       gr_complex *out = (gr_complex *)output_items[0];
+      char *flag = (char *)output_items[1];
+      
       bins goertzel;
       float central_avg;
       float left_avg;
       float right_avg;
       uint out_items = 0;
-      uint in_items = 0;
+      uint i = 0;
 
       if(d_enable == true)
       {
-        for (uint i = 0; i < noutput_items; i += d_size)
+        for (i = 0; i < (noutput_items - d_size); i += d_size)
         {
           goertzel = double_goertzel_complex(&in[i]);
 
@@ -105,46 +107,43 @@ namespace gr{
           if ((central_avg > (left_avg * d_threshold)) && (central_avg > (right_avg * d_threshold)))
           {
             out_items += d_size;
-            if (out_items <= noutput_items)
+            memcpy(&out[i], &in[i], sizeof(gr_complex) * d_size);
+            memset(&flag[i], 1, sizeof(char) * d_size);
+            if (first == true)
             {
-              memcpy(&out[i], &in[i], sizeof(gr_complex) * d_size);
-              if (first == true)
-              {
-                add_item_tag(0,                           // Port number
-                            nitems_written(0) + (i), // Offset
-                            pmt::intern("reset"),        // Key
-                            pmt::intern("pll")           // Value
-                );
+              add_item_tag(0,                           // Port number
+                          nitems_written(0) + (i), // Offset
+                          pmt::intern("reset"),        // Key
+                          pmt::intern("pll")           // Value
+              );
 
-                first = false;
-                average_reset();
-              }
-            }
-            else
-            {
-              out_items -= d_size;
+              first = false;
+              average_reset();
             }
           }
           else
           {
             first = true;
+            memset(&flag[i], 0, sizeof(char) * d_size);
           }
-          in_items = i;
         }
 
-        if (out_items > in_items)
+        if (out_items > i || i > noutput_items)
         {
-          std::cout << "out_items > in_items: " << out_items << " > " << in_items << std::endl;
+          std::cout << "out_items > i: " << out_items << " > " << i << std::endl;
           // out_items = in_items;
         }
 
-        consume_each(in_items);
-        return out_items;
+        consume_each(i);
+        produce(0, out_items);
+        produce(1, i);
+        return WORK_CALLED_PRODUCE;
       }
       else
       {
         memcpy(&out[0], &in[0], sizeof(gr_complex) * noutput_items);
         consume_each(noutput_items);
+        memset(flag, 1, sizeof(char) * noutput_items);
         return noutput_items;
       }
     }
