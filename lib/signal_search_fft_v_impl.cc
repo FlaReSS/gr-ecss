@@ -76,13 +76,18 @@ namespace gr
       gr_complex *in = (gr_complex *)input_items[0];
       gr_complex *out = (gr_complex *)output_items[0];
 
-      int temp_signal_band_max_index;
-      int out_items = 0;
+      // if(d_n_out > 1)
+      // {
+      //   char *flag = (char *)output_items[0];
+      // }
+
       int item_read;
-      int i = 0;
-      
+      int temp_signal_band_max_index;
+      uint out_items = 0;
+      uint in_items = 0;
+
       if (d_enable == true) {
-        for (i = 0; i < noutput_items; i++)
+        for (uint i = 0; i < noutput_items; i++)
         {
 
           int index = i * d_fftsize * d_decimation;
@@ -126,31 +131,45 @@ namespace gr
 
           if (signal_band_avg > (d_threshold * noise_band_avg))
           {
-            memcpy(&out[index], &in[index], sizeof(gr_complex) * d_fftsize * d_decimation);
-            if (first == true)
-            {
-              add_item_tag(0,                           // Port number
-                          nitems_written(0) + (index), // Offset
-                          pmt::intern("reset"),        // Key
-                          pmt::intern("pll")           // Value
-              );
-
-              average_reset();
-              first = false;
-            }
             out_items++;
+            if (out_items <= noutput_items)
+            {
+              memcpy(&out[index], &in[index], sizeof(gr_complex) * d_fftsize * d_decimation);
+              if (first == true)
+              {
+                add_item_tag(0,                           // Port number
+                             nitems_written(0) + (index), // Offset
+                             pmt::intern("reset"),        // Key
+                             pmt::intern("pll")           // Value
+                );
+
+                average_reset();
+                first = false;
+              }
+            }
+            else
+            {
+              out_items--;
+            }
           }
           else
           {
             first = true;
           }
+          in_items = i;
         }
-        consume_each(i);
+
+        if (out_items > noutput_items)
+        {
+          std::cout << "out_items > noutput_items: " << out_items << " > " << noutput_items << std::endl;
+        }
+        consume_each(noutput_items);
         return out_items;
       }
       else
       {
         memcpy(&out[0], &in[0], sizeof(gr_complex) * noutput_items * d_fftsize * d_decimation);
+        // memset(flag, 1, sizeof(char) * noutput_items * d_fftsize * d_decimation);
         consume_each(noutput_items);
         return noutput_items;
       }     

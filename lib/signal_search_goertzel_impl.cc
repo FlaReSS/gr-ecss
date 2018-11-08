@@ -79,13 +79,11 @@ namespace gr{
       float left_avg;
       float right_avg;
       uint out_items = 0;
-      uint i = 0;
+      uint in_items = 0;
 
-
-      
       if(d_enable == true)
       {
-        for (i = 0; i < noutput_items; i+= d_size)
+        for (uint i = 0; i < noutput_items; i += d_size)
         {
           goertzel = double_goertzel_complex(&in[i]);
 
@@ -106,30 +104,42 @@ namespace gr{
           
           if ((central_avg > (left_avg * d_threshold)) && (central_avg > (right_avg * d_threshold)))
           {
-
-            memcpy(&out[i], &in[i], sizeof(gr_complex) * d_size);
-            if (first == true)
-            {
-              add_item_tag(0,                           // Port number
-                          nitems_written(0) + (i), // Offset
-                          pmt::intern("reset"),        // Key
-                          pmt::intern("pll")           // Value
-              );
-
-              first = false;
-              average_reset();
-            }
             out_items += d_size;
+            if (out_items <= noutput_items)
+            {
+              memcpy(&out[i], &in[i], sizeof(gr_complex) * d_size);
+              if (first == true)
+              {
+                add_item_tag(0,                           // Port number
+                            nitems_written(0) + (i), // Offset
+                            pmt::intern("reset"),        // Key
+                            pmt::intern("pll")           // Value
+                );
+
+                first = false;
+                average_reset();
+              }
+            }
+            else
+            {
+              out_items -= d_size;
+            }
           }
-          else{
+          else
+          {
             first = true;
           }
+          in_items = i;
         }
-        std::cout<<"out_items: "<<out_items<<std::endl;
-        std::cout<<"i: "<<i<<std::endl;
-        consume_each(i);
+
+        if (out_items > in_items)
+        {
+          std::cout << "out_items > in_items: " << out_items << " > " << in_items << std::endl;
+          // out_items = in_items;
+        }
+
+        consume_each(in_items);
         return out_items;
-        
       }
       else
       {
