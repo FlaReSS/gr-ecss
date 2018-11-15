@@ -173,7 +173,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         param.noise = 0.0
         param.uplink = 221
         param.downlink = 240
-        param.reset = True
+        param.reset = False
 
         print_parameters(param)
 
@@ -205,7 +205,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         param.noise = 0.0
         param.uplink = 221
         param.downlink = 2400
-        param.reset = True
+        param.reset = False
 
         print_parameters(param)
 
@@ -236,7 +236,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         param.noise = 0.0
         param.uplink = 221
         param.downlink = 240
-        param.reset = True
+        param.reset = False
 
         print_parameters(param)
 
@@ -268,7 +268,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         param.noise = 0.0
         param.uplink = 221
         param.downlink = 240
-        param.reset = 0
+        param.reset = False
 
         print_parameters(param)
 
@@ -302,7 +302,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         param.noise = 0.0
         param.uplink = 221
         param.downlink = 240
-        param.reset = True, 
+        param.reset = True
 
         print_parameters(param)
 
@@ -312,7 +312,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         def _probe_func_probe():
             time.sleep(1) #in the middle of one block of items, to be more sure that both functions are executed in the at the same time.
             try:
-                gain.set_reset(0)
+                gain.set_reset(False)
                 debug_switch.debug_nitems()
                 self.debug_reset = gain.get_reset()
             except AttributeError:

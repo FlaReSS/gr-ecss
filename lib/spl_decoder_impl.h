@@ -28,12 +28,12 @@ namespace gr {
     class spl_decoder_impl : public spl_decoder
     {
      private:
-       int d_decimation;
-       float *first_half;
-       float *second_half;
+       int d_clock;
+       void toggle_clock();
+       int data_converter(float in);
 
      public:
-      spl_decoder_impl(float bit_rate, float samp_rate);
+      spl_decoder_impl();
       ~spl_decoder_impl();
 
       // Where all the action really happens

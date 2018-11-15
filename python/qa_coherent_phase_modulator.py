@@ -255,7 +255,7 @@ def test_accumulator_gain(self, param):
 
     pc = ecss.phase_converter(param.N)
     cpm = ecss.coherent_phase_modulator(param.N, param.inputs)
-    gain = ecss.gain_phase_accumulator(0, param.uplink, param.downlink)
+    gain = ecss.gain_phase_accumulator(False, param.uplink, param.downlink)
 
     tb.connect(src, arg)
     tb.connect(arg, head)

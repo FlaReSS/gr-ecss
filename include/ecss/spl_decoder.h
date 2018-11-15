@@ -52,10 +52,8 @@
     /*!
       * \brief SP-L encoder.
       *
-      * \param samp_rate Sampling rate of the input signal.
-      * \param bit_rate Bit rate of the output signal.
       */
-    static sptr make(float bit_rate, float samp_rate);
+    static sptr make();
     };
 
   } // namespace ecss

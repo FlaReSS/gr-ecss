@@ -4,21 +4,7 @@
   <key>ecss_spl_decoder</key>
   <category>[ecss]</category>
   <import>import ecss</import>
-  <make>ecss.spl_decoder($bit_rate, $samp_rate)</make>
-
-  <param>
-    <name>Samp Rate</name>
-    <key>samp_rate</key>
-    <value>samp_rate</value>
-    <type>real</type>
-  </param>
-
-  <param>
-    <name>Bit Rate</name>
-    <key>bit_rate</key>
-    <value>bit_rate</value>
-    <type>real</type>
-  </param>
+  <make>ecss.spl_decoder()</make>
 
   <sink>
     <name>in</name>
