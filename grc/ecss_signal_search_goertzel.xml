@@ -80,5 +80,6 @@
   <source>
     <name>flag</name>
     <type>byte</type>
+    <optional>1</optional>
   </source>
 </block>

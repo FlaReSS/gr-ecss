@@ -74,8 +74,9 @@ namespace gr{
     {
       gr_complex *in = (gr_complex *) input_items[0];
       gr_complex *out = (gr_complex *)output_items[0];
-      char *flag = (char *)output_items[1];
-      
+      // char *flag = (char *)output_items[1];
+      char *flag = output_items.size() >= 2 ? (char *)output_items[1] : NULL;
+
       bins goertzel;
       float central_avg;
       float left_avg;
@@ -103,12 +104,17 @@ namespace gr{
             left_avg = goertzel.left;
             right_avg = goertzel.right;
           }
+
+          // std::cout<<"central_avg: "<<central_avg<<std::endl;
+          // std::cout<<"right_avg: "<<right_avg<<std::endl;
+          // std::cout<<"left_avg: "<<left_avg<<std::endl;
           
           if ((central_avg > (left_avg * d_threshold)) && (central_avg > (right_avg * d_threshold)))
           {
             out_items += d_size;
             memcpy(&out[i], &in[i], sizeof(gr_complex) * d_size);
-            memset(&flag[i], 1, sizeof(char) * d_size);
+            if (flag != NULL)
+              memset(&flag[i], 1, sizeof(char) * d_size);
             if (first == true)
             {
               add_item_tag(0,                           // Port number
@@ -124,7 +130,8 @@ namespace gr{
           else
           {
             first = true;
-            memset(&flag[i], 0, sizeof(char) * d_size);
+            if (flag != NULL)
+              memset(&flag[i], 0, sizeof(char) * d_size);
           }
         }
 
@@ -136,14 +143,16 @@ namespace gr{
 
         consume_each(i);
         produce(0, out_items);
-        produce(1, i);
+        if (flag != NULL)
+          produce(1, i);
         return WORK_CALLED_PRODUCE;
       }
       else
       {
         memcpy(&out[0], &in[0], sizeof(gr_complex) * noutput_items);
         consume_each(noutput_items);
-        memset(flag, 1, sizeof(char) * noutput_items);
+        if (flag != NULL)
+          memset(flag, 1, sizeof(char) * noutput_items);
         return noutput_items;
       }
     }
@@ -259,11 +268,6 @@ namespace gr{
       d_coeff_2 = 2 * cos((double)((M_TWOPI / d_size) * k_2));
       d_cosine_2 = cos((double)((M_TWOPI / d_size) * k_2));
       d_sine_2 = sin((double)((M_TWOPI / d_size) * k_2));
-
-      // std::cout<<"d_size: "<<d_size<<std::endl;
-      // std::cout<<"k_0: "<<k_0<<std::endl;
-      // std::cout<<"k_1: "<<k_1<<std::endl;
-      // std::cout<<"k_2: "<<k_2<<std::endl;
     }
 
     float

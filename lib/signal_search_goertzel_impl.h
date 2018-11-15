@@ -34,9 +34,9 @@ namespace ecss
     private:
       struct bins
       {
-        float central;
-        float left;
-        float right;
+        double central;
+        double left;
+        double right;
       };
 
       float d_coeff_0;
@@ -58,12 +58,12 @@ namespace ecss
       float d_bandwidth;
       float d_freq_cutoff;
       float d_freq_central;
-      float central_band_p, central_band_avg;
-      float left_band_p, left_band_avg;
-      float right_band_p, right_band_avg;
-      filter::single_pole_iir<float, float, float> d_iir_central;
-      filter::single_pole_iir<float, float, float> d_iir_left;
-      filter::single_pole_iir<float, float, float> d_iir_right;
+      double central_band_p, central_band_avg;
+      double left_band_p, left_band_avg;
+      double right_band_p, right_band_avg;
+      filter::single_pole_iir<double, double, double> d_iir_central;
+      filter::single_pole_iir<double, double, double> d_iir_left;
+      filter::single_pole_iir<double, double, double> d_iir_right;
       gr_complex *in_shifted_buffer;
       gr_complex *signal_shifter_buffer;
 
