@@ -48,7 +48,7 @@ namespace gr {
     pll_impl::pll_impl(float samp_rate, int order, int N, const std::vector<double> &coefficients, float freq_central, float bw)
         : gr::sync_block("pll",
                          gr::io_signature::make(1, 1, sizeof(gr_complex)),
-                         gr::io_signature::makev(4, 4, iosig)),
+                         gr::io_signature::makev(1, 4, iosig)),
           d_order(order), d_N(N), d_integer_phase(0), d_integer_phase_denormalized(0),
           branch_2_3_max(((freq_central + (bw / 2)) * M_TWOPI) / d_samp_rate), branch_2_3_min(((freq_central - (bw / 2)) * M_TWOPI) / d_samp_rate),
           branch_3_par(0), branch_2_3_par(0), branch_2_3(0), d_samp_rate(samp_rate),
@@ -75,9 +75,12 @@ namespace gr {
     {
       const gr_complex *input = (gr_complex*)input_items[0];
       gr_complex *output = (gr_complex*)output_items[0];
-      float *frq =(float*)output_items[1];
-      float *phase_out =(float*)output_items[2];
-      int64_t *phase_accumulator =(int64_t*)output_items[3];
+      // float *frq =(float*)output_items[1];
+      // float *phase_out =(float*)output_items[2];
+      // int64_t *phase_accumulator =(int64_t*)output_items[3];
+      float *frq = output_items.size() >= 2 ? (float *)output_items[1] : NULL;
+      float *phase_out = output_items.size() >= 3 ? (float *)output_items[2] : NULL;
+      int64_t *phase_accumulator = output_items.size() >= 4 ? (int64_t *)output_items[3] : NULL;
 
       gr_complexd feedback;
       double module, error;
@@ -102,16 +105,20 @@ namespace gr {
            }
          }
 
-         phase_accumulator[i] = d_integer_phase;
+         if (phase_accumulator != NULL)
+           phase_accumulator[i] = d_integer_phase;
          gr::sincos(d_integer_phase_denormalized, &t_imag, &t_real);
          feedback = (gr_complexd)input[i] * gr_complexd(t_real, -t_imag);
          output[i] = (gr_complex)feedback;
          error = phase_detector(feedback);
 
-         phase_out[i] = error;
+         if (phase_out != NULL)
+           phase_out[i] = error;
+
          filter_out = advance_loop(error);
 
-         frq[i] = branch_2_3 * d_samp_rate / M_TWOPI;
+         if (frq != NULL)
+           frq[i] = branch_2_3 * d_samp_rate / M_TWOPI;
          filter_out_limited = frequency_limit(filter_out);
 
          integer_step_phase = integer_phase_converter(filter_out_limited);
