@@ -4,7 +4,7 @@
   <key>ecss_modulator</key>
   <category>[ecss]</category>
   <import>import ecss</import>
-  <make>ecss.modulator($ndim, $dim1, $dim2, $framebits, $k, $rate, $polys, $state_start, $mode, $padding, $samp_rate, $bit_rate, $sel_convolutional, $sel_encoder, $sel_srrc, $threading.arg, $puncpat, $roll_off, $num_taps, $sine, $freq_sub)</make>
+  <make>ecss.modulator($framebits, $k, $rate, $polys, $state_start, $mode, $padding, $samp_rate, $bit_rate, $sel_convolutional, $sel_encoder, $sel_srrc, $roll_off, $num_taps, $sine, $freq_sub)</make>
 
   <param>
     <name>Type Encoder</name>
@@ -93,7 +93,7 @@
     <hide>#if (int($sel_encoder()) >= 2) then 'none' else 'all' #</hide>
   </param>
   
-  <param>
+  <!-- <param>
     <name>CE: Parallelism</name>
     <key>ndim</key>
     <value>0</value>
@@ -111,9 +111,9 @@
       <name>2</name>
       <key>2</key>
     </option>
-  </param>
+  </param> -->
 
-  <param>
+  <!-- <param>
     <name>CE: Dimension 1</name>
     <key>dim1</key>
     <value>1</value>
@@ -127,7 +127,7 @@
     <value>1</value>
     <type>int</type>
     <hide>#if (int($ndim()) >= 2) then 'none' else 'all' #</hide>
-  </param>
+  </param> -->
 
   <param>
     <name>CE: Frame Bits</name>
@@ -208,7 +208,7 @@
         <key>True</key>
     </option>
   </param>
-
+<!-- 
   <param>
     <name>CE: Threading Type</name>
     <key>threading</key>
@@ -237,7 +237,7 @@
     <value>'11'</value>
     <type>string</type>
     <hide>#if (int($sel_convolutional()) >= 1) then 'all' else 'none' #</hide>
-  </param>
+  </param> -->
 
   <param>
 		<name>RRC Filter: Roll-off factor</name>

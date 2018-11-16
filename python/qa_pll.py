@@ -54,6 +54,77 @@ class Pdf_class(object):
             d['CreationDate'] = datetime.datetime(2018, 8, 21)
             d['ModDate'] = datetime.datetime.today()
 
+def plot(self, data_pll):
+    """this function create a defined graph for the pll with the data input and outputs"""
+
+    plt.rcParams['text.usetex'] = True
+    real = []
+    imag = []
+
+    for i in xrange (len(data_pll.out)):
+        real.append(data_pll.out[i].real)
+        imag.append(data_pll.out[i].imag)
+
+    out_re = np.asarray(real)
+    out_im = np.asarray(imag)
+
+    freq = np.asarray(data_pll.freq)
+    pe = np.asarray(data_pll.pe)
+    pa = np.asarray(data_pll.pa)
+    time = np.asarray(data_pll.time)
+
+    fig, (ax1, ax3, ax4, ax5) = plt.subplots(4)
+
+    ax1.set_xlabel('Time [s]')
+    ax1.set_ylabel('Real', color='r')
+    ax1.set_title("Out",  fontsize=20)
+    ax1.plot(time, out_re, color='r', scalex=True, scaley=True, linewidth=1)
+    # l2 = ax1.axvspan(xmin = (zero + 0.01), xmax = (zero + 0.03), color='m', alpha= 0.1)
+    # l3 = ax1.axvline(x = (zero + settling_time), color='m', linewidth=2, linestyle='--')
+    # ax1.text(0.99,0.01,"Settling time: " + str(settling_time) + "s", horizontalalignment='right', verticalalignment='bottom',color='m',transform=ax1.transAxes)
+    ax1.tick_params(axis='y', labelcolor='red')
+    ax1.grid(True)
+
+    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+
+    ax2.set_ylabel('Imag', color='b')  # we already handled the x-label with ax1
+    ax2.plot(time, out_im, color='b', scalex=True, scaley=True, linewidth=1)
+    # l1 = ax2.axhspan(ymin=(reference - error * reference), ymax=(reference + error * reference), color='c', alpha= 0.1)
+    ax2.tick_params(axis='y', labelcolor='blue')
+
+    ax3.set_xlabel('Time [s]')
+    ax3.set_ylabel ('frequency [Hz]', color='r')
+    ax3.set_title("freq", fontsize=20)
+    ax3.plot(time, freq, color='r', scalex=True, scaley=True, linewidth=1)
+    ax3.tick_params(axis='y', labelcolor='red')
+    ax3.grid(True)
+
+    ax4.set_xlabel('Time [s]')
+    ax4.set_ylabel ('Phase Error [rad]', color='r')
+    ax4.set_title("pe", fontsize=20)
+    #ax4.set_ylim(ymin = -0.01, ymax = 0.01)
+    ax4.plot(time, pe, color='r', scalex=True, scaley=True, linewidth=1)
+    ax4.tick_params(axis='y', labelcolor='red')
+    ax4.grid(True)
+
+    ax5.set_xlabel('Time [s]')
+    ax5.set_ylabel ('Phase Accumulator', color='r')
+    ax5.set_title("pa", fontsize=20)
+    ax5.plot(time, pa, color='r', scalex=True, scaley=True, linewidth=1)
+    ax5.tick_params(axis='y', labelcolor='red')
+    ax5.grid(True)
+
+    name_test = self.id().split("__main__.")[1]
+    name_test_usetex = name_test.replace('_', '\_').replace('.', ': ')
+
+    fig.suptitle(name_test_usetex, fontsize=30)
+    # fig.tight_layout()  # otherwise the right y-label is slightly clipped
+    fig.subplots_adjust(hspace=0.6, top=0.85, bottom=0.15)
+    # plt.legend((l1, l2, l3), ('error range', 'settling time range', 'settling time'), loc='lower center', bbox_to_anchor=(0.5, -0.5), fancybox=True, shadow=True, ncol=3)
+
+    # plt.show()
+    self.pdf.add_to_pdf(fig)
+
 def plot_fft(self, data_fft):
     """this function create a defined graph with the data inputs"""
 
@@ -169,77 +240,6 @@ def check_pa(data_out, N, items):
                 slope = slope + rad_slope
 
     return ((minimum_step >> (64 - N)) * precision), (slope / items)
-
-def plot(self, data_pll):
-    """this function create a defined graph for the pll with the data input and outputs"""
-
-    plt.rcParams['text.usetex'] = True
-    real = []
-    imag = []
-
-    for i in xrange (len(data_pll.out)):
-        real.append(data_pll.out[i].real)
-        imag.append(data_pll.out[i].imag)
-
-    out_re = np.asarray(real)
-    out_im = np.asarray(imag)
-
-    freq = np.asarray(data_pll.freq)
-    pe = np.asarray(data_pll.pe)
-    pa = np.asarray(data_pll.pa)
-    time = np.asarray(data_pll.time)
-
-    fig, (ax1, ax3, ax4, ax5) = plt.subplots(4)
-
-    ax1.set_xlabel('Time [s]')
-    ax1.set_ylabel('Real', color='r')
-    ax1.set_title("Out",  fontsize=20)
-    ax1.plot(time, out_re, color='r', scalex=True, scaley=True, linewidth=1)
-    # l2 = ax1.axvspan(xmin = (zero + 0.01), xmax = (zero + 0.03), color='m', alpha= 0.1)
-    # l3 = ax1.axvline(x = (zero + settling_time), color='m', linewidth=2, linestyle='--')
-    # ax1.text(0.99,0.01,"Settling time: " + str(settling_time) + "s", horizontalalignment='right', verticalalignment='bottom',color='m',transform=ax1.transAxes)
-    ax1.tick_params(axis='y', labelcolor='red')
-    ax1.grid(True)
-
-    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
-
-    ax2.set_ylabel('Imag', color='b')  # we already handled the x-label with ax1
-    ax2.plot(time, out_im, color='b', scalex=True, scaley=True, linewidth=1)
-    # l1 = ax2.axhspan(ymin=(reference - error * reference), ymax=(reference + error * reference), color='c', alpha= 0.1)
-    ax2.tick_params(axis='y', labelcolor='blue')
-
-    ax3.set_xlabel('Time [s]')
-    ax3.set_ylabel ('frequency [Hz]', color='r')
-    ax3.set_title("freq", fontsize=20)
-    ax3.plot(time, freq, color='r', scalex=True, scaley=True, linewidth=1)
-    ax3.tick_params(axis='y', labelcolor='red')
-    ax3.grid(True)
-
-    ax4.set_xlabel('Time [s]')
-    ax4.set_ylabel ('Phase Error [rad]', color='r')
-    ax4.set_title("pe", fontsize=20)
-    #ax4.set_ylim(ymin = -0.01, ymax = 0.01)
-    ax4.plot(time, pe, color='r', scalex=True, scaley=True, linewidth=1)
-    ax4.tick_params(axis='y', labelcolor='red')
-    ax4.grid(True)
-
-    ax5.set_xlabel('Time [s]')
-    ax5.set_ylabel ('Phase Accumulator', color='r')
-    ax5.set_title("pa", fontsize=20)
-    ax5.plot(time, pa, color='r', scalex=True, scaley=True, linewidth=1)
-    ax5.tick_params(axis='y', labelcolor='red')
-    ax5.grid(True)
-
-    name_test = self.id().split("__main__.")[1]
-    name_test_usetex = name_test.replace('_', '\_').replace('.', ': ')
-
-    fig.suptitle(name_test_usetex, fontsize=30)
-    # fig.tight_layout()  # otherwise the right y-label is slightly clipped
-    fig.subplots_adjust(hspace=0.6, top=0.85, bottom=0.15)
-    # plt.legend((l1, l2, l3), ('error range', 'settling time range', 'settling time'), loc='lower center', bbox_to_anchor=(0.5, -0.5), fancybox=True, shadow=True, ncol=3)
-
-    # plt.show()
-    self.pdf.add_to_pdf(fig)
 
 def print_parameters(data):
     to_print = "\p Order = %d; Coeff1 (2nd order) = %f; Coeff2 (2nd order) = %f; Coeff4 (2nd order) = %f; Coeff1 (3rd order) = %f; Coeff2 (3rd order) = %f; Coeff3 (3rd order) = %f; Frequency central = %.2f Hz; Bandwidth = %.2f Hz; Sample rate = %d Hz; Input frequency = %d Hz; Input noise = %.2f V \p" \
@@ -378,12 +378,12 @@ class qa_pll (gr_unittest.TestCase):
         param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
 
         param.order = 2
-        param.coeff1_2 = 0.021
-        param.coeff2_2 = 0.000022
+        param.coeff1_2 = 0.00535454
+        param.coeff2_2 = 1.46674e-05
         param.coeff2_4 = 1
-        param.coeff1_3 = 0.0038
-        param.coeff2_3 = 0.000002
-        param.coeff3_3 = 0.0000000009
+        param.coeff1_3 = 0.00459022
+        param.coeff2_3 = 2.90389e-06
+        param.coeff3_3 = 1.59133e-09
         param.f_central = 500
         param.bw = 500
         param.N = 38
@@ -400,8 +400,8 @@ class qa_pll (gr_unittest.TestCase):
 
         param.items = param.samp_rate
 
-        data_fft = test_fft(self, param)
-        plot_fft(self,data_fft)
+        # data_fft = test_fft(self, param)
+        # plot_fft(self,data_fft)
 
         #check output 'out'
         out_settling_time_index, out_real_error_max, out_imag_error_max = check_complex(data_sine.out, 1, 0, 0.1, 10, 100)
@@ -438,19 +438,19 @@ class qa_pll (gr_unittest.TestCase):
         param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
 
         param.order = 2
-        param.coeff1_2 = 0.021
-        param.coeff2_2 = 0.000022
+        param.coeff1_2 = 0.00535454
+        param.coeff2_2 = 1.46674e-05
         param.coeff2_4 = 1
-        param.coeff1_3 = 0.0038
-        param.coeff2_3 = 0.000002
-        param.coeff3_3 = 0.0000000009
+        param.coeff1_3 = 0.00459022
+        param.coeff2_3 = 2.90389e-06
+        param.coeff3_3 = 1.59133e-09
         param.f_central = 500
         param.bw = 500
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 4
-        param.items = param.samp_rate / 10 * 4
-        param.freq = 750
+        param.items = param.samp_rate * 1.3
+        param.freq = 749
         param.noise = 0
 
         print_parameters(param)
@@ -460,8 +460,8 @@ class qa_pll (gr_unittest.TestCase):
 
         param.items = param.samp_rate * 2
 
-        data_fft = test_fft(self, param)
-        plot_fft(self,data_fft)
+        # data_fft = test_fft(self, param)
+        # plot_fft(self,data_fft)
 
         #check output 'out'
         out_settling_time_index, out_real_error_max, out_imag_error_max = check_complex(data_sine.out, 1, 0, 0.1, 10, 100)
@@ -498,19 +498,19 @@ class qa_pll (gr_unittest.TestCase):
         param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
 
         param.order = 2
-        param.coeff1_2 = 0.021
-        param.coeff2_2 = 0.000022
+        param.coeff1_2 = 0.00535454
+        param.coeff2_2 = 1.46674e-05
         param.coeff2_4 = 1
-        param.coeff1_3 = 0.0038
-        param.coeff2_3 = 0.000002
-        param.coeff3_3 = 0.0000000009
+        param.coeff1_3 = 0.00459022
+        param.coeff2_3 = 2.90389e-06
+        param.coeff3_3 = 1.59133e-09
         param.f_central = 500
         param.bw = 500
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 4
-        param.items = param.samp_rate * 3 / 2
-        param.freq = 751
+        param.items = param.samp_rate * 1.5
+        param.freq = 760
         param.noise = 0
 
         print_parameters(param)
@@ -520,8 +520,8 @@ class qa_pll (gr_unittest.TestCase):
 
         param.items = 4096 * 8
 
-        data_fft = test_fft(self, param)
-        plot_fft(self,data_fft)
+        # data_fft = test_fft(self, param)
+        # plot_fft(self,data_fft)
 
         #check output 'out'
         out_settling_time_index, out_real_error_max, out_imag_error_max = check_complex(data_sine.out, 1, 0, 0.1, 10, 100)
@@ -544,9 +544,7 @@ class qa_pll (gr_unittest.TestCase):
         #check output 'pa'
         pa_min_step , pa_slope = check_pa(data_sine.pa, param.N , 10)
         precision = math.pow(2,(- (param.N - 1))) * math.pi
-        self.assertAlmostEqual(pa_slope , ((param.freq * (2 * math.pi)) / param.samp_rate), 3)
         self.assertGreaterEqual(pa_min_step, precision)
-        print "-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate)
         print "-Output Min step : %f rad." % pa_min_step
 
     def test_004_t (self):
@@ -556,12 +554,12 @@ class qa_pll (gr_unittest.TestCase):
         data_pll = namedtuple('data_pll', 'src out freq pe pa time')
 
         param.order = 2
-        param.coeff1_2 = 0.021
-        param.coeff2_2 = 0.000022
+        param.coeff1_2 = 0.00535454
+        param.coeff2_2 = 1.46674e-05
         param.coeff2_4 = 1
-        param.coeff1_3 = 0.0038
-        param.coeff2_3 = 0.000002
-        param.coeff3_3 = 0.0000000009
+        param.coeff1_3 = 0.00459022
+        param.coeff2_3 = 2.90389e-06
+        param.coeff3_3 = 1.59133e-09
         param.f_central = 500
         param.bw = 1000
         param.N = 38
@@ -627,19 +625,19 @@ class qa_pll (gr_unittest.TestCase):
         data_pll = namedtuple('data_pll', 'src out freq pe pa time')
 
         param.order = 2
-        param.coeff1_2 = 0.021
-        param.coeff2_2 = 0.000022
+        param.coeff1_2 = 0.00535454
+        param.coeff2_2 = 1.46674e-05
         param.coeff2_4 = 1
-        param.coeff1_3 = 0.0038
-        param.coeff2_3 = 0.000002
-        param.coeff3_3 = 0.0000000009
+        param.coeff1_3 = 0.00459022
+        param.coeff2_3 = 2.90389e-06
+        param.coeff3_3 = 1.59133e-09
         param.f_central = 500
         param.bw = 1500
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096
         param.items = param.samp_rate * 6
-        param.freq = 600
+        param.freq = 550
         param.noise = 0
 
         print_parameters(param)
@@ -705,8 +703,8 @@ class qa_pll (gr_unittest.TestCase):
 
         param.items = 4096 * 8
 
-        data_fft = test_fft(self, param)
-        plot_fft(self,data_fft)
+        # data_fft = test_fft(self, param)
+        # plot_fft(self,data_fft)
 
         #check the switch
         self.assertEqual(len(switch), 1)
@@ -752,21 +750,21 @@ class qa_pll (gr_unittest.TestCase):
         data_pll = namedtuple('data_pll', 'src out freq pe pa time')
 
         param.order = 2
-        param.coeff1_2 = 0.021
-        param.coeff2_2 = 0.000022
+        param.coeff1_2 = 0.00535454
+        param.coeff2_2 = 1.46674e-05
         param.coeff2_4 = 1
-        param.coeff1_3 = 0.0038
-        param.coeff2_3 = 0.000002
-        param.coeff3_3 = 0.0000000009
+        param.coeff1_3 = 0.00459022
+        param.coeff2_3 = 2.90389e-06
+        param.coeff3_3 = 1.59133e-09
         param.f_central = 500
         param.bw = 500
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 40
         param.items = param.samp_rate * 2
-        param.freq_min = 0
-        param.freq_max = 1000
-        param.sweep = 1000
+        param.freq_min = 0.0
+        param.freq_max = 1000.0
+        param.sweep = 1000.0
 
         print_parameters = "\p Order = %d; Coeff1 (2nd order) = %f; Coeff2 (2nd order) = %f; Coeff4 (2nd order) = %f; Coeff1 (3rd order) = %f; Coeff2 (3rd order) = %f; Coeff3 (3rd order) = %f; Frequency central = %.2f Hz; Bandwidth = %.2f Hz; Sample rate = %d Hz; Input frequency min = %d Hz; Input frequency max = %d Hz; Input frequency sweep = %.2f Hz/s; \p" \
             %(param.order, param.coeff1_2, param.coeff2_2, param.coeff2_4, param.coeff1_3, param.coeff2_3, param.coeff3_3, param.f_central, param.bw, param.samp_rate, param.freq_min, param.freq_max, param.sweep)
@@ -867,31 +865,31 @@ class qa_pll (gr_unittest.TestCase):
         print "-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms
         print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
 
-        #check output 'pa'
-        pa_min_step , pa_slope = check_pa(data_pll.pa, param.N , 10)
-        precision = math.pow(2,(- (param.N - 1))) * math.pi
-        self.assertAlmostEqual(pa_slope , ((param.freq * (2 * math.pi)) / param.samp_rate), 3)
-        self.assertGreaterEqual(pa_min_step, precision)
-        print "-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate)
-        print "-Output Min step : %f rad." % pa_min_step
+        # #check output 'pa'
+        # pa_min_step , pa_slope = check_pa(data_sine.pa, param.N , 10)
+        # precision = math.pow(2,(- (param.N - 1))) * math.pi
+        # self.assertAlmostEqual(pa_slope , ((param.freq * (2 * math.pi)) / param.samp_rate), 3)
+        # self.assertGreaterEqual(pa_min_step, precision)
+        # print "-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate)
+        # print "-Output Min step : %f rad." % pa_min_step
 
     def test_007_t (self):
         """test_007_t: with a input sine with noise in the central BW of PLL"""
         param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
 
         param.order = 2
-        param.coeff1_2 = 0.021
-        param.coeff2_2 = 0.000022
+        param.coeff1_2 = 0.00535454
+        param.coeff2_2 = 1.46674e-05
         param.coeff2_4 = 1
-        param.coeff1_3 = 0.0038
-        param.coeff2_3 = 0.000002
-        param.coeff3_3 = 0.0000000009
+        param.coeff1_3 = 0.00459022
+        param.coeff2_3 = 2.90389e-06
+        param.coeff3_3 = 1.59133e-09
         param.f_central = 500
         param.bw = 500.0
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 4
-        param.items = param.samp_rate / 10 * 4
+        param.items = param.samp_rate *0.7
         param.freq = 600
         param.noise = 1.0
 
@@ -902,8 +900,8 @@ class qa_pll (gr_unittest.TestCase):
 
         param.items = param.samp_rate
 
-        data_fft = test_fft(self, param)
-        plot_fft(self,data_fft)
+        # data_fft = test_fft(self, param)
+        # plot_fft(self,data_fft)
 
         #CNR evaluation
         print "-CNR input to PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)))
@@ -918,7 +916,7 @@ class qa_pll (gr_unittest.TestCase):
         print "-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max
 
         #check output 'pe'
-        pe_settling_time_index, pe_error_max = check_float(data_sine.pe, 0, 0.1, 10, 100)
+        pe_settling_time_index, pe_error_max = check_float(data_sine.pe, 0, 1, 10, 100)
         pe_settling_time_ms = (1.0 / param.samp_rate) * pe_settling_time_index * 1000.0
         self.assertLess(pe_settling_time_ms, np.inf) #errors are intrinsically asserted
         print "-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms
@@ -934,7 +932,7 @@ class qa_pll (gr_unittest.TestCase):
         #check output 'pa'
         pa_min_step , pa_slope = check_pa(data_sine.pa, param.N , 10)
         precision = math.pow(2,(- (param.N - 1))) * math.pi
-        self.assertAlmostEqual(pa_slope , ((param.freq * (2 * math.pi)) / param.samp_rate), 3)
+        self.assertAlmostEqual(pa_slope , ((param.freq * (2 * math.pi)) / param.samp_rate), 2)
         self.assertGreaterEqual(pa_min_step, precision)
         print "-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate)
         print "-Output Min step : %f rad." % pa_min_step
@@ -944,19 +942,19 @@ class qa_pll (gr_unittest.TestCase):
         param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
 
         param.order = 2
-        param.coeff1_2 = 0.021
-        param.coeff2_2 = 0.000022
+        param.coeff1_2 = 0.00535454
+        param.coeff2_2 = 1.46674e-05
         param.coeff2_4 = 1
-        param.coeff1_3 = 0.0038
-        param.coeff2_3 = 0.000002
-        param.coeff3_3 = 0.0000000009
+        param.coeff1_3 = 0.00459022
+        param.coeff2_3 = 2.90389e-06
+        param.coeff3_3 = 1.59133e-09
         param.f_central = 500
         param.bw = 500
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 4
-        param.items = param.samp_rate / 10 * 8
-        param.freq = 750
+        param.items = param.samp_rate * 3.5
+        param.freq = 749
         param.noise = 1.0
 
         print_parameters(param)
@@ -966,15 +964,15 @@ class qa_pll (gr_unittest.TestCase):
 
         param.items = param.samp_rate * 2
 
-        data_fft = test_fft(self, param)
-        plot_fft(self,data_fft)
+        # data_fft = test_fft(self, param)
+        # plot_fft(self,data_fft)
 
         #CNR evaluation
         print "-CNR input to PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)))
         print "-CNR in the equivalent bandwidth of PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)) + 10.0*math.log10((1.0 * param.samp_rate)/param.bw))
 
         #check output 'out'
-        out_settling_time_index, out_real_error_max, out_imag_error_max = check_complex(data_sine.out, 1, 0, 0.5, 10, 100)
+        out_settling_time_index, out_real_error_max, out_imag_error_max = check_complex(data_sine.out, 1, 0, 1.5, 10, 100)
         out_settling_time_ms = (1.0 / param.samp_rate) * out_settling_time_index * 1000.0
         self.assertLess(out_settling_time_ms, np.inf) #errors are intrinsically asserted
         print "-Output 'Out' Settling time : %f ms;" % out_settling_time_ms
@@ -982,7 +980,7 @@ class qa_pll (gr_unittest.TestCase):
         print "-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max
 
         #check output 'pe'
-        pe_settling_time_index, pe_error_max = check_float(data_sine.pe, 0, 0.1, 10, 100)
+        pe_settling_time_index, pe_error_max = check_float(data_sine.pe, 0, 1, 10, 100)
         pe_settling_time_ms = (1.0 / param.samp_rate) * pe_settling_time_index * 1000.0
         self.assertLess(pe_settling_time_ms, np.inf) #errors are intrinsically asserted
         print "-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms
@@ -1008,19 +1006,19 @@ class qa_pll (gr_unittest.TestCase):
         param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
 
         param.order = 2
-        param.coeff1_2 = 0.021
-        param.coeff2_2 = 0.000022
+        param.coeff1_2 = 0.00535454
+        param.coeff2_2 = 1.46674e-05
         param.coeff2_4 = 1
-        param.coeff1_3 = 0.0038
-        param.coeff2_3 = 0.000002
-        param.coeff3_3 = 0.0000000009
+        param.coeff1_3 = 0.00459022
+        param.coeff2_3 = 2.90389e-06
+        param.coeff3_3 = 1.59133e-09
         param.f_central = 500
         param.bw = 500
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 4
-        param.items = param.samp_rate 
-        param.freq = 751
+        param.items = param.samp_rate * 4.5
+        param.freq = 760
         param.noise = 1.0
 
         print_parameters(param)
@@ -1030,15 +1028,15 @@ class qa_pll (gr_unittest.TestCase):
 
         param.items = 4096 * 8
 
-        data_fft = test_fft(self, param)
-        plot_fft(self,data_fft)
+        # data_fft = test_fft(self, param)
+        # plot_fft(self,data_fft)
 
         #CNR evaluation
         print "-CNR input to PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)))
         print "-CNR in the equivalent bandwidth of PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)) + 10.0*math.log10((1.0 * param.samp_rate)/param.bw))
 
         #check output 'out'
-        out_settling_time_index, out_real_error_max, out_imag_error_max = check_complex(data_sine.out, 1, 0, 0.5, 10, 100)
+        out_settling_time_index, out_real_error_max, out_imag_error_max = check_complex(data_sine.out, 1, 0, 1.5, 10, 100)
         out_settling_time_ms = (1.0 / param.samp_rate) * out_settling_time_index * 1000.0
         self.assertEqual(out_settling_time_ms, np.inf) #have to be be inf (so, unlocked), errors are intrinsically asserted
         print "-Output 'Out' Settling time : %f ms;" % out_settling_time_ms
@@ -1050,7 +1048,7 @@ class qa_pll (gr_unittest.TestCase):
         print "-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms
 
         #check output 'freq'
-        freq_settling_time_index, freq_error_max = check_float(data_sine.freq, param.freq, (param.freq * 0.05), 10, 100) #check if the measured output frequency is the same of the input signal ± 5%
+        freq_settling_time_index, freq_error_max = check_float(data_sine.freq, param.freq, (param.freq * 0.01), 10, 100) #check if the measured output frequency is the same of the input signal ± 5%
         freq_settling_time_ms = (1.0 / param.samp_rate) * freq_settling_time_index * 1000.0
         self.assertEqual(freq_settling_time_ms, np.inf) #have to be be inf (so, unlocked), errors are intrinsically asserted
         print "-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms
@@ -1058,7 +1056,6 @@ class qa_pll (gr_unittest.TestCase):
         #check output 'pa'
         pa_min_step , pa_slope = check_pa(data_sine.pa, param.N , 10)
         precision = math.pow(2,(- (param.N - 1))) * math.pi
-        self.assertAlmostEqual(pa_slope , ((param.freq * (2 * math.pi)) / param.samp_rate), 3)
         self.assertGreaterEqual(pa_min_step, precision)
         print "-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate)
         print "-Output Min step : %f rad." % pa_min_step
@@ -1071,19 +1068,19 @@ class qa_pll (gr_unittest.TestCase):
         data_pll = namedtuple('data_pll', 'src out freq pe pa time')
 
         param.order = 2
-        param.coeff1_2 = 0.021
-        param.coeff2_2 = 0.000022
+        param.coeff1_2 = 0.0535454
+        param.coeff2_2 = 1.46674e-04
         param.coeff2_4 = 1
-        param.coeff1_3 = 0.0038
-        param.coeff2_3 = 0.000002
-        param.coeff3_3 = 0.0000000009
+        param.coeff1_3 = 0.00459022
+        param.coeff2_3 = 2.90389e-06
+        param.coeff3_3 = 1.59133e-09
         param.f_central = 500
         param.bw = 1500
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096
         param.items = param.samp_rate * 7
-        param.freq = 600
+        param.freq = 550
         param.noise = 1.0
 
         print_parameters(param)
@@ -1149,8 +1146,8 @@ class qa_pll (gr_unittest.TestCase):
 
         param.items = 4096 * 8
 
-        data_fft = test_fft(self, param)
-        plot_fft(self,data_fft)
+        # data_fft = test_fft(self, param)
+        # plot_fft(self,data_fft)
 
         #CNR evaluation
         print "-CNR input to PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)))
@@ -1178,14 +1175,14 @@ class qa_pll (gr_unittest.TestCase):
         print "-Output 'pe' absolute maximum error: %.3f;" % pe_error_max
 
         #check output 'out'
-        freq_settling_time_index, freq_error_max = check_float(data_pll.freq, param.freq, (param.freq * 0.1), 10, 100) #check if the measured output frequency is the same of the input signal ± 5%
+        freq_settling_time_index, freq_error_max = check_float(data_pll.freq, param.freq, (param.freq * 0.05), 10, 100) #check if the measured output frequency is the same of the input signal ± 5%
         freq_settling_time_ms = (1.0 / param.samp_rate) * freq_settling_time_index * 1000.0
         self.assertLess(freq_settling_time_ms, np.inf) #errors are intrinsically asserted
         print "-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms
         print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
 
         #check output 'pa'
-        pa_min_step , pa_slope = check_pa(data_sine.pa, param.N , 10)
+        pa_min_step , pa_slope = check_pa(data_pll.pa, param.N , 10)
         precision = math.pow(2,(- (param.N - 1))) * math.pi
         self.assertAlmostEqual(pa_slope , ((param.freq * (2 * math.pi)) / param.samp_rate), 3)
         self.assertGreaterEqual(pa_min_step, precision)
@@ -1200,21 +1197,21 @@ class qa_pll (gr_unittest.TestCase):
         data_pll = namedtuple('data_pll', 'src out freq pe pa time')
 
         param.order = 2
-        param.coeff1_2 = 0.021
-        param.coeff2_2 = 0.000022
+        param.coeff1_2 = 0.00535454
+        param.coeff2_2 = 1.46674e-05
         param.coeff2_4 = 1
-        param.coeff1_3 = 0.0038
-        param.coeff2_3 = 0.000002
-        param.coeff3_3 = 0.0000000009
+        param.coeff1_3 = 0.00459022
+        param.coeff2_3 = 2.90389e-06
+        param.coeff3_3 = 1.59133e-09
         param.f_central = 500
         param.bw = 500
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 40
         param.items = param.samp_rate * 2
-        param.freq_min = 0
-        param.freq_max = 1000
-        param.sweep = 1000
+        param.freq_min = 0.0
+        param.freq_max = 1000.0
+        param.sweep = 1000.0
         param.noise = 1.0
 
         print_parameters = "\p Order = %d; Coeff1 (2nd order) = %f; Coeff2 (2nd order) = %f; Coeff4 (2nd order) = %f; Coeff1 (3rd order) = %f; Coeff2 (3rd order) = %f; Coeff3 (3rd order) = %f; Frequency central = %.2f Hz; Bandwidth = %.2f Hz; Sample rate = %d Hz; Input frequency min = %d Hz; Input frequency max = %d Hz; Input frequency sweep = %.2f Hz/s; Noise amplitude = %.1f\p" \
@@ -1312,7 +1309,7 @@ class qa_pll (gr_unittest.TestCase):
         print "-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max
 
         #check output 'pe'
-        pe_settling_time_index, pe_error_max = check_float(data_pll.pe, 0, 0.5, 10, 100)
+        pe_settling_time_index, pe_error_max = check_float(data_pll.pe, 0, 1, 10, 100)
         pe_settling_time_ms = (1.0 / param.samp_rate) * pe_settling_time_index * 1000.0
         self.assertLess(pe_settling_time_ms, np.inf) #errors are intrinsically asserted
         print "-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms
@@ -1325,13 +1322,13 @@ class qa_pll (gr_unittest.TestCase):
         print "-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms
         print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
 
-        #check output 'pa'
-        pa_min_step , pa_slope = check_pa(data_pll.pa, param.N , 10)
-        precision = math.pow(2,(- (param.N - 1))) * math.pi
-        self.assertAlmostEqual(pa_slope , ((param.freq * (2 * math.pi)) / param.samp_rate), 3)
-        self.assertGreaterEqual(pa_min_step, precision)
-        print "-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate)
-        print "-Output Min step : %f rad." % pa_min_step
+        # #check output 'pa'
+        # pa_min_step , pa_slope = check_pa(data_sine.pa, param.N , 10)
+        # precision = math.pow(2,(- (param.N - 1))) * math.pi
+        # self.assertAlmostEqual(pa_slope , ((param.freq * (2 * math.pi)) / param.samp_rate), 3)
+        # self.assertGreaterEqual(pa_min_step, precision)
+        # print "-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate)
+        # print "-Output Min step : %f rad." % pa_min_step
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_pll)

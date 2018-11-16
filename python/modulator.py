@@ -29,7 +29,7 @@ class modulator(gr.hier_block2):
     """
     docstring for block modulator
     """
-    def __init__(self, ndim, dim1, dim2, framebits, k, rate, polys, state_start, mode, padding, samp_rate, bit_rate, sel_convolutional, sel_encoder, sel_srrc, threading, puncpat, roll_off, num_taps, sine, freq_sub):
+    def __init__(self, framebits, k, rate, polys, state_start, mode, padding, samp_rate, bit_rate, sel_convolutional, sel_encoder, sel_srrc, roll_off, num_taps, sine, freq_sub):
         gr.hier_block2.__init__(self,
             "modulator",
             gr.io_signature(1, 1, gr.sizeof_char),  # Input signature
@@ -54,20 +54,20 @@ class modulator(gr.hier_block2):
         self.sel_encoder = sel_encoder
         self.sel_srrc = sel_srrc
 
-        self.threading = threading
-        self.puncpat = puncpat
+        self.threading = 'capillary'
+        self.puncpat = '11'
         self.roll_off = roll_off
         self.num_taps = num_taps
         
         self.sine = sine
         self.freq_sub = freq_sub
 
-        if ndim == 0 :
-            self.encoder_variable =  fec.cc_encoder_make(self.framebits, self.k, self.rate, self.polys, self.state_start, self.mode, self.padding)
-        elif ndim == 1:
-            self.encoder_variable =  map( (lambda a: fec.cc_encoder_make(self.framebits, self.k, self.rate, self.polys, self.state_start, self.mode, self.padding)), range(0, dim1) ); #slurp
-        else:
-            self.encoder_variable = map( (lambda b: map( ( lambda a: fec.cc_encoder_make(self.framebits, self.k, self.rate, self.polys, self.state_start, self.mode, self.padding)), range(0, dim2) ) ), range(0, dim1)); #slurp
+        # if ndim == 0 :
+        self.encoder_variable =  fec.cc_encoder_make(self.framebits, self.k, self.rate, self.polys, self.state_start, self.mode, self.padding)
+        # elif ndim == 1:
+        #     self.encoder_variable =  map( (lambda a: fec.cc_encoder_make(self.framebits, self.k, self.rate, self.polys, self.state_start, self.mode, self.padding)), range(0, dim1) ); #slurp
+        # else:
+        #     self.encoder_variable = map( (lambda b: map( ( lambda a: fec.cc_encoder_make(self.framebits, self.k, self.rate, self.polys, self.state_start, self.mode, self.padding)), range(0, dim2) ) ), range(0, dim1)); #slurp
 
         ##################################################
         # Blocks

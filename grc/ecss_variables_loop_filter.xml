@@ -5,8 +5,8 @@
   <category>[ecss]</category>
   <import>from ecss import variables_loop_filter</import>
 
-  <var_make>self.$(id) = $(id) = variables_loop_filter.coefficients($natural_freq_2, $damping_2, $index_m_3, $natural_freq_3, $damping_3, $samp_rate)</var_make>
-  <var_value>variables_loop_filter.coefficients($natural_freq_2, $damping_2, $index_m_3, $natural_freq_3, $damping_3, $samp_rate)</var_value>
+  <var_make>self.$(id) = $(id) = variables_loop_filter.coefficients($natural_freq_2, $damping_2, $epsilon, $index_m_3, $natural_freq_3, $damping_3, $samp_rate)</var_make>
+  <var_value>variables_loop_filter.coefficients($natural_freq_2, $damping_2, $epsilon, $index_m_3, $natural_freq_3, $damping_3, $samp_rate)</var_value>
   <make></make>
 
   <param>
@@ -15,8 +15,13 @@
     <type>real</type>
   </param>
   <param>
-    <name>Damping (2n order)</name>
+    <name>Damping (2nd order)</name>
     <key>damping_2</key>
+    <type>real</type>
+  </param>
+    <param>
+    <name>Epsilon (2nd order)</name>
+    <key>epsilon</key>
     <type>real</type>
   </param>
   <param>
