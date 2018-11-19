@@ -51,7 +51,6 @@
 
     /*!
       * \brief SP-L encoder.
-      *
       */
     static sptr make();
     };

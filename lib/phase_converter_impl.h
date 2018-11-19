@@ -32,7 +32,11 @@ namespace gr {
       double precision;
       int d_N;
 
-     public:
+      double phase_wrap(double);
+      int64_t double_to_integer(double double_value);
+      double normalization(double phase);
+
+    public:
       phase_converter_impl(int N);
       ~phase_converter_impl();
 
@@ -40,10 +44,6 @@ namespace gr {
       int work(int noutput_items,
          gr_vector_const_void_star &input_items,
          gr_vector_void_star &output_items);
-
-      double phase_wrap(double);
-      int64_t double_to_integer(double double_value);
-      double normalization(double phase);
 
     };
 

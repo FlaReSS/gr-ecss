@@ -27,19 +27,19 @@ namespace gr {
 
     class spl_encoder_impl : public spl_encoder
     {
-     private:
-      float *rising_edge;
-      float *falling_edge;
-      int d_interpolation;
+      private:
+        float *rising_edge;
+        float *falling_edge;
+        int d_interpolation;
 
-    public:
-      spl_encoder_impl(float bit_rate, float samp_rate);
-      ~spl_encoder_impl();
+      public:
+        spl_encoder_impl(float bit_rate, float samp_rate);
+        ~spl_encoder_impl();
 
-      // Where all the action really happens
-      int work(int noutput_items,
-         gr_vector_const_void_star &input_items,
-         gr_vector_void_star &output_items);
+        // Where all the action really happens
+        int work(int noutput_items,
+          gr_vector_const_void_star &input_items,
+          gr_vector_void_star &output_items);
     };
 
   } // namespace ecss

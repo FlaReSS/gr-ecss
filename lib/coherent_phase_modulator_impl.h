@@ -33,6 +33,12 @@ namespace gr {
       int d_n_inputs;
       double precision;
 
+      /*! \brief Integer phase converter
+      *
+      * converts the filter output into integer mathematics
+      */
+      double NCO_denormalization(int64_t step_phase);
+
      public:
       coherent_phase_modulator_impl(int N, int n_inputs);
       ~coherent_phase_modulator_impl();
@@ -41,7 +47,6 @@ namespace gr {
          gr_vector_const_void_star &input_items,
          gr_vector_void_star &output_items);
 
-      double NCO_denormalization(int64_t step_phase);
     };
 
   } // namespace ecss

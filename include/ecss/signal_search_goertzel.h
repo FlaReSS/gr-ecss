@@ -61,20 +61,90 @@ namespace gr {
             * \param threshold it is the minimum difference that must to be between the central band and the lateral ones in order to discriminate if there is
         */
         static sptr make(bool enable, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);
-        
+
+        /*******************************************************************
+        * GET FUNCTIONS
+        *******************************************************************/
+
+        /*!
+         * \brief Returns the set central frequency.
+         */
         virtual float get_freq_central() const = 0;
+
+        /*!
+         * \brief Returns the set bandwidth.
+         */
         virtual float get_bandwidth() const = 0;
+
+        /*!
+         * \brief Returns the set average cut-off frequency.
+         */
         virtual float get_freq_cutoff() const = 0;
+
+        /*!
+         * \brief Returns the set threshold.
+         */
         virtual float get_threshold() const = 0;
+
+        /*!
+         * \brief Returns the set average policy (if enabled or not).
+         */
         virtual bool get_average() const = 0;
+
+        /*!
+         * \brief Returns the set block policy (if enabled or not).
+         */
         virtual bool get_enable() const = 0;
+
+        /*!
+         * \brief Returns the set fft size.
+         */
         virtual int get_size() const = 0;
 
+        /*******************************************************************
+        * SET FUNCTIONS
+        *******************************************************************/
+
+        /*!
+         * \brief Set central frequency.
+         *
+         * \param freq_central    (float) new frequency central
+         */
         virtual void set_freq_central(float freq_central) = 0;
+
+        /*!
+         * \brief Set bandwidth
+         *
+         * \param bandwidth    (float) new bandwidth
+         */
         virtual void set_bandwidth(float bandwidth) = 0;
+
+        /*!
+         * \brief Set average frequency cut-off
+         *
+         * \param freq_cutoff    (float) new average frequency cut-off
+         */
         virtual void set_freq_cutoff(float freq_cutoff) = 0;
-        virtual void set_threshold(float threshold) = 0;
+
+        /*!
+         * \brief Set threshold
+         *
+         * \param threshold    (float) new threshold
+         */
+        virtual void set_threshold(float threshold) = 0;\
+
+        /*!
+         * \brief Set average (to enable or not)
+         *
+         * \param average    (bool) new average
+         */
         virtual void set_average(bool average) = 0;
+
+        /*!
+         * \brief Set block enable (to enable or not)
+         *
+         * \param enable    (bool) new enable
+         */
         virtual void set_enable(bool enable) = 0;
     };
   } // namespace ecss

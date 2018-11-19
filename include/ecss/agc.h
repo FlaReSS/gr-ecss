@@ -32,7 +32,7 @@ namespace gr {
      * \brief AGC Log-based.
      * \ingroup ecss
      *
-     * \details This block generates a complex output signal which is the input complex signal adjusted (amplified or attenuated)in order to become
+     * \details This block generates a complex output signal which is the input complex signal adjusted (amplified or attenuated) in order to become
      * an output signal of fixed rms value.
      * The output rms value will be the value of the reference parameter.
      * In order to be more user friendly, it is possible to set the settling time of the AGC.
@@ -49,18 +49,58 @@ namespace gr {
         * \brief Make a AGC Log-based.
         *
         * \param samp_rate Sampling rate of signal.
-        * \param reference rms value of the output.
+        * \param reference rms expected value of the output.
         * \param initial_gain initial gain of the AGC.
         * \param maximum_gain maximum gain of the AGC.
         * \param settling_time is the expected attack/settling time of the AGC.
        */
       static sptr make(float settling_time, float reference, float initial_gain, float maximum_gain, float samp_rate);
 
+      /*******************************************************************
+      * GET FUNCTIONS
+      *******************************************************************/
+
+      /*!
+        * \brief Returns the set settling time
+        */
       virtual float get_settling_time() const=0;
+
+      /*!
+        * \brief Returns the set reference value
+        */
       virtual float get_reference() const=0;
+
+      /*!
+        * \brief Returns the set maximum gain
+        */
       virtual float get_maximum_gain() const=0;
+
+      /*******************************************************************
+      * SET FUNCTIONS
+      *******************************************************************/
+
+      /*!
+       * \brief Set the settling time (expressed in ms) of AGC.
+       *
+       * \details
+       * Sets the internal gain in order to get the wanted settling time.
+       *
+       * \param settling_time (float) new settling time
+       */
       virtual void set_settling_time(float settling_time)=0;
+
+      /*!
+       * \brief Set the reference value of AGC.
+       *
+       * \param reference (float) new reference
+       */
       virtual void set_reference(float reference)=0;
+
+      /*!
+       * \brief Set the maximum gain value of AGC.
+       *
+       * \param maximum_gain (float) new maximum gain
+       */
       virtual void set_maximum_gain(float maximum_gain)=0;
     };
 

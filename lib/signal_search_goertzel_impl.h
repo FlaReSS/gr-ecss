@@ -68,14 +68,11 @@ namespace ecss
       gr_complex *signal_shifter_buffer;
 
       float coeff_lateral;
-
       bins double_goertzel_complex(gr_complex *in);
-
       void average_reset();
       void coeff_eval(float freq_central, float bandwidth);
       void signal_gen(float freq);
       void set_size();
-
 
     public:
       signal_search_goertzel_impl(bool enable, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);

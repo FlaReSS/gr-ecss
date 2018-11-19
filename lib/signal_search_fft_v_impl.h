@@ -30,86 +30,86 @@
 
 namespace gr
 {
-namespace ecss
-{
+  namespace ecss
+  {
 
-class signal_search_fft_v_impl : public signal_search_fft_v
-{
-private:
-  bool first;
-  bool d_enable;
-  bool d_carrier;
-  bool d_average;
-  float d_samp_rate;
-  int d_decimation;
-  float d_threshold;
-  float d_bandwidth;
-  float d_freq_cutoff;
-  float d_freq_central;
-  float noise_band_p, noise_band_avg;
-  float signal_band_p, signal_band_avg;
-  int d_fftsize;
-  int d_fftsize_half;
-  int bw_items;
-  int searching_first_items;
-  filter::firdes::win_type d_wintype;
-  std::vector<float> d_window;
-  // filter::firdes d_firdes;
-  // filter::fir_filter_ccc d_band_pass;
-  filter::single_pole_iir<float, float, float> d_iir_signal;
-  filter::single_pole_iir<float, float, float> d_iir_noise;
+    class signal_search_fft_v_impl : public signal_search_fft_v
+    {
+      private:
+        bool first;
+        bool d_enable;
+        bool d_carrier;
+        bool d_average;
+        float d_samp_rate;
+        int d_decimation;
+        float d_threshold;
+        float d_bandwidth;
+        float d_freq_cutoff;
+        float d_freq_central;
+        float noise_band_p, noise_band_avg;
+        float signal_band_p, signal_band_avg;
+        int d_fftsize;
+        int d_fftsize_half;
+        int bw_items;
+        int searching_first_items;
+        filter::firdes::win_type d_wintype;
+        std::vector<float> d_window;
+        // filter::firdes d_firdes;
+        // filter::fir_filter_ccc d_band_pass;
+        filter::single_pole_iir<float, float, float> d_iir_signal;
+        filter::single_pole_iir<float, float, float> d_iir_noise;
 
-  filter::kernel::pfb_arb_resampler_ccf *pfb_decimator;
-  // std::vector<gr_complex> d_new_taps;
-  fft::fft_complex *d_fft;
+        filter::kernel::pfb_arb_resampler_ccf *pfb_decimator;
+        // std::vector<gr_complex> d_new_taps;
+        fft::fft_complex *d_fft;
 
-  gr_complex *d_residbuf;
-  double *d_magbuf;
-  double *d_pdu_magbuf;
-  float *searching_band;
-  float *signal_band_acc;
-  uint32_t *signal_band_max_index;
-  float *noise_band_acc;
-  float *d_tmpbuf;
-  float *d_fbuf;
+        gr_complex *d_residbuf;
+        double *d_magbuf;
+        double *d_pdu_magbuf;
+        float *searching_band;
+        float *signal_band_acc;
+        uint32_t *signal_band_max_index;
+        float *noise_band_acc;
+        float *d_tmpbuf;
+        float *d_fbuf;
 
-  std::vector<gr_complex> in_decimated;
+        std::vector<gr_complex> in_decimated;
 
-  void fft(float *data_out, const gr_complex *data_in, int size);
+        void fft(float *data_out, const gr_complex *data_in, int size);
 
-  void create_buffers();
-  void destroy_buffers();
-  void buildwindow();
-  void items_eval();
-  void average_reset();
+        void create_buffers();
+        void destroy_buffers();
+        void buildwindow();
+        void items_eval();
+        void average_reset();
 
-public:
-  signal_search_fft_v_impl(bool enable, int fftsize, int decimation, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);
-  ~signal_search_fft_v_impl();
+      public:
+      signal_search_fft_v_impl(bool enable, int fftsize, int decimation, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);
+      ~signal_search_fft_v_impl();
 
-  int general_work(int noutput_items,
-                   gr_vector_int &ninput_items,
-                   gr_vector_const_void_star &input_items,
-                   gr_vector_void_star &output_items);
+      int general_work(int noutput_items,
+                      gr_vector_int &ninput_items,
+                      gr_vector_const_void_star &input_items,
+                      gr_vector_void_star &output_items);
 
-  float get_freq_central() const;
-  float get_bandwidth() const;
-  float get_freq_cutoff() const;
-  float get_threshold() const;
-  bool get_average() const;
-  int get_decimation() const;
-  int get_fftsize() const;
-  bool get_enable() const;
+      float get_freq_central() const;
+      float get_bandwidth() const;
+      float get_freq_cutoff() const;
+      float get_threshold() const;
+      bool get_average() const;
+      int get_decimation() const;
+      int get_fftsize() const;
+      bool get_enable() const;
 
-  void set_freq_central(float freq_central);
-  void set_bandwidth(float bandwidth);
-  void set_freq_cutoff(float freq_cutoff);
-  void set_threshold(float threshold);
-  void set_average(bool average);
-  void set_enable(bool enable);
-};
+      void set_freq_central(float freq_central);
+      void set_bandwidth(float bandwidth);
+      void set_freq_cutoff(float freq_cutoff);
+      void set_threshold(float threshold);
+      void set_average(bool average);
+      void set_enable(bool enable);
+    };
 
-} // namespace ecss
+  } // namespace ecss
 } // namespace gr
 
 #endif /* INCLUDED_ECSS_SIGNAL_SEARCH_FFT_V_IMPL_H */

@@ -27,19 +27,19 @@ namespace gr {
 
     class spl_decoder_impl : public spl_decoder
     {
-     private:
-       int d_clock;
-       void toggle_clock();
-       int data_converter(float in);
+      private:
+        int d_clock;
+        void toggle_clock();
+        int data_converter(float in);
 
-     public:
-      spl_decoder_impl();
-      ~spl_decoder_impl();
+      public:
+        spl_decoder_impl();
+        ~spl_decoder_impl();
 
-      // Where all the action really happens
-      int work(int noutput_items,
-         gr_vector_const_void_star &input_items,
-         gr_vector_void_star &output_items);
+        // Where all the action really happens
+        int work(int noutput_items,
+            gr_vector_const_void_star &input_items,
+            gr_vector_void_star &output_items);
     };
 
   } // namespace ecss

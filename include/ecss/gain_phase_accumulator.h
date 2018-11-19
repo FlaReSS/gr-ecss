@@ -53,6 +53,10 @@ namespace gr {
      */
     static sptr make(bool reset, int uplink, int downlink);
 
+    /*******************************************************************
+    * GET FUNCTIONS
+    *******************************************************************/
+
     /*!
        * \brief Return reset
        */
@@ -67,6 +71,10 @@ namespace gr {
        * \brief Return downlink constant
        */
     virtual int get_downlink() const = 0;
+
+    /*******************************************************************
+    * SET FUNCTIONS
+    *******************************************************************/
 
     /*!
        * \brief Set reset

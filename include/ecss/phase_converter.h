@@ -32,7 +32,7 @@ namespace gr {
      *
      * \ingroup ecss
      *
-     * \details     This block converts the phase input in a int64 normalized output.
+     * \details This block converts the phase input in a int64 normalized output.
      * Furthermore, this block allows to reduce the accuracy (setting the number of bits N) of the mathematics in order to simulate properly a real behavior.
      * Finally, this block is designed for work together with the coherent phase modulator OOT of the ecss module.
      * Pay attention that the input is considered as radiant (suggested to be in the range [-pi; pi], but an wrapping function is done internally). The output is the input value, normalized by pi, rounded and multiplied by 2^(64-N) in order to be suitable as input for an "integer accumulator".

@@ -62,18 +62,126 @@ namespace gr {
        */
       static sptr make(float samp_rate, int order, int N, const std::vector<double> &coefficients, float freq_central, float bw);
 
+
+      /*******************************************************************
+      * SET FUNCTIONS
+      *******************************************************************/
+
+      /*!
+        * \brief Set the precision of the PLL.
+        *
+        * \details
+        * Sets the internal number of bits.
+        * This value is set only at the start.
+        *
+        * \param N    (int) new number of bits
+        */
+      virtual void set_N(int N) = 0;
+
+      /*!
+        * \brief Set the loop filter order.
+        *
+        * \details
+        * Sets the loop filter's order.
+        *
+        * This value should really only be set by adjusting the loop
+        * bandwidth and damping factor.
+        *
+        * \param order (int) new loop filer order
+        */
       virtual void set_order(int order) = 0;
 
+      /*!
+        * \brief Set the loop gain coefficients.
+        *
+        * \details
+        * Sets the loop filter's coefficient gain parameters.
+        *
+        * This values should really only be set by adjusting the loop
+        * bandwidth and damping factor.
+        *
+        * \param coefficients (double) new coefficients
+        */
       virtual void set_coefficients(const std::vector<double> &coefficients) = 0;
+
+      /*!
+        * \brief Set the control loop's frequency.
+        *
+        * \details
+        * Sets the control loop's frequency. While this is normally
+        * updated by the inner loop of the algorithm, it could be
+        * useful to manually initialize, set, or reset this under
+        * certain circumstances.
+        *
+        * \param freq    (float) new frequency
+        */
       virtual void set_frequency(float freq) = 0;
+
+      /*!
+        * \brief Set the control loop's phase.
+        *
+        * \details
+        * Sets the control loop's phase. While this is normally
+        * updated by the inner loop of the algorithm, it could be
+        * useful to manually initialize, set, or reset this under
+        * certain circumstances.
+        *
+        * \param phase (float) new phase
+        */
       virtual void set_phase(float phase) = 0;
+
+      /*!
+        * \brief Set the control loop's central frequency.
+        *
+        * \details
+        * Set the central frequency the control loop can track.
+        *
+        * \param freq (float) new central frequency
+        */
       virtual void set_freq_central(float freq) = 0;
+
+      /*!
+        * \brief Set the control loop's bandwidth.
+        *
+        * \details
+        * Set the bandwidth the control loop can track.
+        *
+        * \param bw (float) new bandwidth
+        */
       virtual void set_bw(float bw) = 0;
 
+      /*******************************************************************
+      * GET FUNCTIONS
+      *******************************************************************/
+
+      /*!
+        * \brief Returns the loop gain order.
+        */
       virtual int get_order() const = 0;
+
+      /*!
+        * \brief Returns the loop gain coefficients.
+        */
       virtual std::vector<double> get_coefficients() const = 0;
+
+      /*!
+        * \brief Get the control loop's frequency estimated.
+        */
+      virtual float get_frequency() const = 0;
+
+      /*!
+        * \brief Get the control loop's phase estimate.
+        */
       virtual float get_phase() const = 0;
+
+      /*!
+        * \brief Get the control loop's central frequency.
+        */
       virtual float get_freq_central() const = 0;
+
+      /*!
+        * \brief Get the control loop's bandwidth.
+        */
       virtual float get_bw() const = 0;
     };
 
