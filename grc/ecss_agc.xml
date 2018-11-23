@@ -20,6 +20,7 @@
   <param>
     <name>Output reference</name>
     <key>reference</key>
+    <value>1.0</value>
     <type>real</type>
   </param>
 

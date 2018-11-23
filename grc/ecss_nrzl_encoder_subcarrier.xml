@@ -24,7 +24,7 @@
   <param>
     <name>Sub-carrier frequency</name>
     <key>freq_sub</key>
-    <value>16000</value>
+    <value>8000.0</value>
     <type>real</type>
   </param>
 

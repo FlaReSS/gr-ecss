@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <block>
-  <name>Variables loop Filter</name>
+  <name>Variables Loop Filter</name>
   <key>variables_loop_filter</key>
   <category>[ecss]</category>
   <import>from ecss import variables_loop_filter</import>

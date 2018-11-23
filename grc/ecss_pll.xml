@@ -18,26 +18,31 @@
   <param>
     <name>order</name>
     <key>order</key>
+    <value>2</value>
     <type>int</type>
   </param>
   <param>
     <name>N of bits</name>
     <key>N</key>
+    <value>38</value>
     <type>int</type>
   </param>
 <param>
   <name>Coefficients</name>
   <key>coefficients</key>
+  <value>coefficients</value>
   <type>float_vector</type>
 </param>
   <param>
     <name>Frequecy central</name>
     <key>freq_central</key>
+    <value>0.0</value>
     <type>real</type>
   </param>
   <param>
     <name>Bandwidth</name>
     <key>bw</key>
+    <value>1000.0</value>
     <type>real</type>
   </param>
 

@@ -250,7 +250,7 @@
 	<param>
 		<name>RRC Filter: Num Taps</name>
 		<key>num_taps</key>
-		<value>11*samp_rate</value>
+		<value>samp_rate/11</value>
 		<type>int</type>
     <hide>#if (int($sel_srrc()) >= 1) then 'all' else 'none' #</hide>
 	</param>

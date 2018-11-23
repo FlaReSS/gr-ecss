@@ -19,6 +19,7 @@
 # 
 from gnuradio import gr
 from gnuradio import digital
+from gnuradio import block
 from gnuradio import filter
 from gnuradio.filter import firdes
 import ecss
@@ -29,11 +30,11 @@ class demodulator(gr.hier_block2):
     """
     docstring for block modulator
     """
-    def __init__(self, cl_loop_bandwidth, cl_order, cl_freq_sub, ss_sps, ss_loop_bandwidth, ss_ted_gain, ss_damping, ss_max_dev, ss_out_ss, ss_interpolatin, ss_ted_type, ss_nfilter, ss_pfb_mf_taps, sel_costas, sel_spl, samp_rate, type):
+    def __init__(self, cl_loop_bandwidth, cl_order, cl_freq_sub, ss_sps, ss_loop_bandwidth, ss_ted_gain, ss_damping, ss_max_dev, ss_out_ss, ss_interpolatin, ss_ted_type, ss_nfilter, ss_pfb_mf_taps, sel_costas, sel_spl, samp_rate):
         gr.hier_block2.__init__(self,
             "demodulator",
-            gr.io_signature(1, 1, gr.sizeof_char),  # Input signature
-            gr.io_signature(1, 1, gr.sizeof_float)) # Output signature
+            gr.io_signature(1, 1, gr.sizeof_float),  # Input signature
+            gr.io_signature(1, 1, gr.sizeof_char)) # Output signature
 
         ##################################################
         # Variables
@@ -71,17 +72,19 @@ class demodulator(gr.hier_block2):
         self.hilbert = filter.hilbert_fc(65, firdes.WIN_HAMMING, 6.76)
         self.null_complex = blocks.null_sink(gr.sizeof_gr_complex*1)
         self.null_float = blocks.null_sink(gr.sizeof_float*1)
+        self.to_char = blocks.float_to_uchar()
+        self.unpack = blocks.unpack_k_bits_bb()
       
 
         ##################################################
         # Connections
         ##################################################
 
-        if (sel_costas == 1):
-            if (type == 0):
-                self.connect(self, (self.multiply, 0))
-            else:
-                self.connect(self, self.hilbert,(self.multiply, 0))
+        if (sel_costas == 0):
+            # if (type == 0):
+            #     self.connect(self, (self.multiply, 0))
+            # else:
+            self.connect(self, self.hilbert,(self.multiply, 0))
 
             self.connect(self.signal_gen, (self.multiply, 1))
             self.connect(self.multiply, self.costas_loop_cc)
@@ -91,7 +94,7 @@ class demodulator(gr.hier_block2):
         else:
             self.connect(self, self.digital_sync)
         
-        if (sel_spl == 1):
-            self.connect(self.digital_sync, self.spl_dencoder, self)
+        if (sel_spl == 0):
+            self.connect(self.digital_sync, self.to_char, self.unpack, self.spl_dencoder, self)
         else:
-            self.connect(self.digital_sync, self)
+            self.connect(self.digital_sync, self.to_char, self.unpack, self)

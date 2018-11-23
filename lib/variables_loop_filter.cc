@@ -40,15 +40,15 @@ namespace gr {
       std::vector<double> coefficients;
       
       double omega_2 = M_TWOPI * n_freq_2;
-      double denom_2 = (4.0 * (1 - epsilon) + 4.0 * (1 - epsilon) * damp_2 * omega_2 / samp + (1- epsilon) * omega_2 * omega_2 / (samp * samp));
+      double denom_2 = (4.0 * (1 - epsilon) + 4.0 * (1 - epsilon) * damp_2 * (omega_2 / samp) + (1- epsilon) * (omega_2 / samp) * (omega_2 / samp));
 
-      double coeff1_2 = (4 * epsilon + 4 * ( 2 - epsilon) * damp_2 * omega_2 / samp - epsilon * omega_2 * omega_2 / (samp * samp)) / denom_2 ;
+      double coeff1_2 = ((-4 * epsilon) + (4 * ( 2 - epsilon) * damp_2 * (omega_2 / samp)) - (epsilon * (omega_2 / samp) * (omega_2 / samp))) / denom_2 ;
       coefficients.push_back(coeff1_2);
 
-      double coeff2_2 = (4 * epsilon + 4 * ( epsilon * epsilon - 2 *epsilon) * damp_2 * omega_2 / samp + (epsilon * epsilon - 4 * epsilon + 4) * omega_2 * omega_2 / (samp * samp)) / denom_2 ;
+      double coeff2_2 = ((4 * epsilon) + (4 * ( epsilon * epsilon - 2 * epsilon) * damp_2 * (omega_2 / samp)) + ((epsilon * epsilon - 4 * epsilon + 4) * (omega_2 / samp) * (omega_2 / samp))) / denom_2 ;
       coefficients.push_back(coeff2_2);
 
-      double coeff4_2 = 1 - epsilon;
+      double coeff4_2 = (1 - epsilon);
       coefficients.push_back(coeff4_2);
 
       double omega_3 = M_TWOPI * n_freq_3;

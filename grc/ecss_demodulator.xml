@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <block>
-  <name>Deodulator</name>
+  <name>Demodulator</name>
   <key>ecss_demodulator</key>
   <category>[ecss]</category>
   <import>import ecss</import>
   <import>from gnuradio import digital</import>
   <import>from gnuradio import filter</import>
-  <make>ecss.demodulator($cl_loop_bandwidth, $cl_order, $freq_sub, $ss_sps, $ss_loop_bandwidth, $ss_ted_gain, $ss_damping, $ss_max_dev, $ss_out_ss, $ss_interpolatin, $ss_ted_type, $ss_nfilter, $ss_pfb_mf_taps, $sel_costas, $sel_spl, $type)</make>
+  <make>ecss.demodulator($cl_loop_bandwidth, $cl_order, $freq_sub, $ss_sps, $ss_loop_bandwidth, $ss_ted_gain, $ss_damping, $ss_max_dev, $ss_out_ss, $ss_interpolatin, $ss_ted_type, $ss_nfilter, $ss_pfb_mf_taps, $sel_costas, $sel_spl)</make>
 
-  <param>
+  <!-- <param>
     <name>InputType</name>
     <key>type</key>
     <type>enum</type>
@@ -24,7 +24,7 @@
         <opt>input:float</opt>
         <opt>output:float</opt>
     </option>
-  </param>
+  </param> -->
 
 
   <param>
@@ -34,11 +34,11 @@
     <type>enum</type>
     <option>
       <name>On</name>
-      <key>1</key>
+      <key>0</key>
     </option>
     <option>
       <name>Off</name>
-      <key>0</key>
+      <key>1</key>
     </option>
   </param>
 
@@ -49,11 +49,11 @@
     <type>enum</type>
     <option>
       <name>On</name>
-      <key>1</key>
+      <key>0</key>
     </option>
     <option>
       <name>Off</name>
-      <key>0</key>
+      <key>1</key>
     </option>
   </param>
 
@@ -112,7 +112,7 @@
       <key>constellation</key>
       <value>digital.constellation_bpsk().base()</value>
       <type>raw</type>
-      <hide>$ted_type.hide_constellation</hide>
+      <hide>$ss_ted_type.hide_constellation</hide>
   </param>
   <param>
       <name>Samples per Symbol</name>
@@ -188,21 +188,6 @@
       <hide>$ss_interpolatin.hide_pfb_mf_taps</hide>
   </param>
   
-  <param>
-    <name>Sub-carrier frequency</name>
-    <key>sine</key>
-    <value>True</value>
-    <type>bool</type>
-    <hide>#if (int($sel_encoder()) >= 2) then 'none' else 'all' #</hide>
-    <option>
-      <name>Sine</name>
-      <key>True</key>
-    </option>
-    <option>
-      <name>Square</name>
-      <key>False</key>
-    </option>
-  </param>
   
   <param>
     <name>CL: Sub-carrier frequency</name>
@@ -231,11 +216,11 @@
 
   <sink>
       <name>in</name>
-      <type>$type.input</type>
+      <type>float</type>
   </sink>
 
   <source>
     <name>out</name>
-    <type>float</type>
+    <type>byte</type>
   </source>
 </block>

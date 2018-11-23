@@ -9,11 +9,13 @@
   <param>
     <name>number of bits</name>
     <key>N</key>
+    <value>38</value>
     <type>int</type>
   </param>
   <param>
     <name>number of inputs</name>
     <key>n_inputs</key>
+    <value>1</value>
     <type>int</type>
   </param>
 

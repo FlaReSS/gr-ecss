@@ -9,6 +9,7 @@
   <param>
     <name>number of bits</name>
     <key>N</key>
+    <value>38</value>
     <type>int</type>
   </param>
 
