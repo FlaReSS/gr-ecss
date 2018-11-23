@@ -59,10 +59,10 @@ def plot(self, data_tar):
 
     plt.rcParams['text.usetex'] = True
 
-    # phase_source = np.asarray(data_tar.phase_source[:len(data_tar.phase_output)])
-    # phase_output = np.asarray(data_tar.phase_output)
-    phase_source = np.asarray(data_tar.phase_source[126000:130000])
-    phase_output = np.asarray(data_tar.phase_output[126000:130000])    
+    phase_source = np.asarray(data_tar.phase_source)
+    phase_output = np.asarray(data_tar.phase_output)
+    # phase_source = np.asarray(data_tar.phase_source[100000:180000])
+    # phase_output = np.asarray(data_tar.phase_output[100000:180000])    
 
     time = np.asarray(data_tar.time)
 
@@ -105,9 +105,6 @@ class qa_validation_test (gr_unittest.TestCase):
     def tearDown (self):
         self.tb = None
         self.pdf.finalize_pdf()
-
-    def test_001_t (self):
-        """test_001_t: file generation"""
 
 
     def test_002_t (self):
@@ -161,14 +158,16 @@ class qa_validation_test (gr_unittest.TestCase):
         data_tar.tar = dst_tar.data()
         data_tar.time = np.linspace(0, (len(data_tar.phase_output) * 1.0 / samp_rate), len(data_tar.phase_output), endpoint=False)
         
+        print len(data_tar.phase_output), len(data_tar.phase_source)
+        
         # for i in range(len(data_tar.phase_output)):
         #     if data_tar.phase_output[i] != 0:
         #         print i
         #         break
 
-        # plot(self, data_tar)
-        self.assertAlmostEqual(np.mean(data_tar.tar[127000:]), (240.0/221.0),6)
-        self.assertAlmostEqual(np.var(data_tar.tar[127000:]), 0.0)
+        plot(self, data_tar)
+        # self.assertAlmostEqual(np.mean(data_tar.tar[127000:]), (240.0/221.0),6)
+        # self.assertAlmostEqual(np.var(data_tar.tar[127000:]), 0.0)
 
 
 

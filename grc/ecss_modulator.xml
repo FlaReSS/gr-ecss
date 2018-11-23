@@ -4,7 +4,7 @@
   <key>ecss_modulator</key>
   <category>[ecss]</category>
   <import>import ecss</import>
-  <make>ecss.modulator($framebits, $k, $rate, $polys, $state_start, $mode, $padding, $samp_rate, $bit_rate, $sel_convolutional, $sel_encoder, $sel_srrc, $roll_off, $num_taps, $sine, $freq_sub)</make>
+  <make>ecss.modulator($k, $rate, $polys, $state_start, $padding, $samp_rate, $bit_rate, $sel_convolutional, $sel_encoder, $sel_srrc, $roll_off, $num_taps, $sine, $freq_sub)</make>
 
   <param>
     <name>Type Encoder</name>
@@ -129,13 +129,13 @@
     <hide>#if (int($ndim()) >= 2) then 'none' else 'all' #</hide>
   </param> -->
 
-  <param>
+  <!-- <param>
     <name>CE: Frame Bits</name>
     <key>framebits</key>
     <value>2048</value>
     <type>int</type>
     <hide>#if (int($sel_convolutional()) >= 1) then 'all' else 'none' #</hide>
-  </param>
+  </param> -->
 
   <param>
     <name>CE: Constraint Length (K)</name>
@@ -156,7 +156,7 @@
   <param>
     <name>CE: Polynomials</name>
     <key>polys</key>
-    <value>[79,109]</value>
+    <value>[79,-109]</value>
     <type>int_vector</type>
     <hide>#if (int($sel_convolutional()) >= 1) then 'all' else 'none' #</hide>
   </param>
@@ -169,7 +169,7 @@
     <hide>#if (int($sel_convolutional()) >= 1) then 'all' else 'none' #</hide>
   </param>
 
-  <param>
+  <!-- <param>
     <name>CE: Streaming Behavior</name>
     <key>mode</key>
     <value></value>
@@ -191,7 +191,7 @@
         <name>Truncated</name>
         <key>fec.CC_TRUNCATED</key>
     </option>
-  </param>
+  </param> -->
 
   <param>
     <name>CE: Byte Padding</name>

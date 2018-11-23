@@ -29,7 +29,7 @@ class modulator(gr.hier_block2):
     """
     docstring for block modulator
     """
-    def __init__(self, framebits, k, rate, polys, state_start, mode, padding, samp_rate, bit_rate, sel_convolutional, sel_encoder, sel_srrc, roll_off, num_taps, sine, freq_sub):
+    def __init__(self, k, rate, polys, state_start, padding, samp_rate, bit_rate, sel_convolutional, sel_encoder, sel_srrc, roll_off, num_taps, sine, freq_sub):
         gr.hier_block2.__init__(self,
             "modulator",
             gr.io_signature(1, 1, gr.sizeof_char),  # Input signature
@@ -39,12 +39,12 @@ class modulator(gr.hier_block2):
         # Variables
         ##################################################
         
-        self.framebits = framebits
+        self.framebits = 1
         self.k = k
         self.rate = rate
         self.polys = polys
         self.state_start = state_start
-        self.mode = mode
+        self.mode = fec.CC_STREAMING
         self.padding = padding
 
         self.samp_rate = samp_rate
@@ -80,8 +80,7 @@ class modulator(gr.hier_block2):
         self.selector_encoder_out = flaress.selector(gr.sizeof_float*1, self.sel_encoder, 3, 1)
 
         self.convolutional_encoder = fec.extended_encoder(encoder_obj_list=self.encoder_variable, threading=self.threading, puncpat=self.puncpat)
-        self.root_raised_cosine_filter = filter.fir_filter_fff(1, firdes.root_raised_cosine(
-        	1, self.samp_rate, self.bit_rate, self.roll_off, self.num_taps)) #symbol rate =  bit rate
+        self.root_raised_cosine_filter = filter.fir_filter_fff(1, firdes.root_raised_cosine(1, self.samp_rate, self.bit_rate, self.roll_off, self.num_taps)) #symbol rate =  bit rate
 
         self.spl_encoder = ecss.spl_encoder(self.bit_rate, self.samp_rate)
         self.nrzl_encoder_subcarrier = ecss.nrzl_encoder_subcarrier(self.sine, self.freq_sub, self.bit_rate, self.samp_rate)

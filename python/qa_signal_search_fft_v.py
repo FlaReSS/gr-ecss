@@ -94,7 +94,7 @@ class qa_signal_search_fft_v (gr_unittest.TestCase):
         self.tb = None
     
     def test_001_t (self):
-        """test_001_t: with a input sine without noise in the central BW of PLL"""
+        """test_001_t: with a input sine without noise in the central BW"""
         param = namedtuple('param', 'f_central bw samp_rate items average cutoff threshold decimation fft_size freq noise')
 
         param.f_central = 0
@@ -122,7 +122,7 @@ class qa_signal_search_fft_v (gr_unittest.TestCase):
 
 
     def test_002_t (self):
-        """test_002_t: with a input sine without noise on border BW of PLL"""
+        """test_002_t: with a input sine without noise on border BW"""
         param = namedtuple('param', 'f_central bw samp_rate items average cutoff threshold decimation fft_size freq noise')
 
         param.f_central = 0
@@ -146,7 +146,7 @@ class qa_signal_search_fft_v (gr_unittest.TestCase):
         self.assertComplexTuplesAlmostEqual(data_sine.out, data_sine.src)
         
     def test_003_t (self):
-        """test_003_t: with a input sine without noise outside BW of PLL"""
+        """test_003_t: with a input sine without noise outside BW"""
         param = namedtuple('param', 'f_central bw samp_rate items average cutoff threshold decimation fft_size freq noise')
 
         param.f_central = 0
@@ -169,7 +169,7 @@ class qa_signal_search_fft_v (gr_unittest.TestCase):
         self.assertEqual(len(data_sine.tags), 0)
 
     def test_004_t (self):
-        """test_004_t: with a input sine with noise in the central BW of PLL"""
+        """test_004_t: with a input sine with noise in the central BW"""
         param = namedtuple('param', 'f_central bw samp_rate items average cutoff threshold freq noise')
 
         param = namedtuple('param', 'f_central bw samp_rate items average cutoff threshold decimation fft_size freq noise')

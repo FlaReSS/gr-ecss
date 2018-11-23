@@ -1,0 +1,241 @@
+<?xml version="1.0"?>
+<block>
+  <name>Deodulator</name>
+  <key>ecss_demodulator</key>
+  <category>[ecss]</category>
+  <import>import ecss</import>
+  <import>from gnuradio import digital</import>
+  <import>from gnuradio import filter</import>
+  <make>ecss.demodulator($cl_loop_bandwidth, $cl_order, $freq_sub, $ss_sps, $ss_loop_bandwidth, $ss_ted_gain, $ss_damping, $ss_max_dev, $ss_out_ss, $ss_interpolatin, $ss_ted_type, $ss_nfilter, $ss_pfb_mf_taps, $sel_costas, $sel_spl, $type)</make>
+
+  <param>
+    <name>InputType</name>
+    <key>type</key>
+    <type>enum</type>
+    <option>
+        <name>Complex</name>
+        <key>0</key>
+        <opt>input:complex</opt>
+        <opt>output:complex</opt>
+    </option>
+    <option>
+        <name>Float</name>
+        <key>1</key>
+        <opt>input:float</opt>
+        <opt>output:float</opt>
+    </option>
+  </param>
+
+
+  <param>
+    <name>SPL decoder</name>
+    <key>sel_spl</key>
+    <value>0</value>
+    <type>enum</type>
+    <option>
+      <name>On</name>
+      <key>1</key>
+    </option>
+    <option>
+      <name>Off</name>
+      <key>0</key>
+    </option>
+  </param>
+
+  <param>
+    <name>Costas Loop</name>
+    <key>sel_costas</key>
+    <value>1</value>
+    <type>enum</type>
+    <option>
+      <name>On</name>
+      <key>1</key>
+    </option>
+    <option>
+      <name>Off</name>
+      <key>0</key>
+    </option>
+  </param>
+
+  <param>
+    <name>Timing Error Detector</name>
+    <key>ss_ted_type</key>
+    <type>enum</type>
+    <option>
+        <name>Mueller and Müller</name>
+        <key>digital.TED_MUELLER_AND_MULLER</key>
+        <opt>hide_constellation:part</opt>
+    </option>
+    <option>
+        <name>Modified Mueller and Müller</name>
+        <key>digital.TED_MOD_MUELLER_AND_MULLER</key>
+        <opt>hide_constellation:part</opt>
+    </option>
+    <option>
+        <name>Zero Crossing</name>
+        <key>digital.TED_ZERO_CROSSING</key>
+        <opt>hide_constellation:part</opt>
+    </option>
+    <option>
+        <name>Gardner</name>
+        <key>digital.TED_GARDNER</key>
+        <opt>hide_constellation:all</opt>
+    </option>
+    <option>
+        <name>Early-Late</name>
+        <key>digital.TED_EARLY_LATE</key>
+        <opt>hide_constellation:all</opt>
+    </option>
+    <option>
+        <name>D'Andrea and Mengali Gen MSK</name>
+        <key>digital.TED_DANDREA_AND_MENGALI_GEN_MSK</key>
+        <opt>hide_constellation:all</opt>
+    </option>
+    <option>
+        <name>Mengali and D'Andrea GMSK</name>
+        <key>digital.TED_MENGALI_AND_DANDREA_GMSK</key>
+        <opt>hide_constellation:all</opt>
+    </option>
+    <option>
+        <name>y[n]y'[n] Maximum Likelihood</name>
+        <key>digital.TED_SIGNAL_TIMES_SLOPE_ML</key>
+        <opt>hide_constellation:all</opt>
+    </option>
+    <option>
+        <name>sgn(y[n])y'[n] Maximum Likelihood</name>
+        <key>digital.TED_SIGNUM_TIMES_SLOPE_ML</key>
+        <opt>hide_constellation:all</opt>
+    </option>
+  </param>
+  <param>
+      <name>TED Slicer Constellation</name>
+      <key>constellation</key>
+      <value>digital.constellation_bpsk().base()</value>
+      <type>raw</type>
+      <hide>$ted_type.hide_constellation</hide>
+  </param>
+  <param>
+      <name>Samples per Symbol</name>
+      <key>ss_sps</key>
+      <value>sps</value>
+      <type>real</type>
+  </param>
+  <param>
+      <name>Expected TED Gain</name>
+      <key>ss_ted_gain</key>
+      <value>1.0</value>
+      <type>real</type>
+  </param>
+  <param>
+      <name>Loop Bandwidth</name>
+      <key>ss_loop_bandwidth</key>
+      <value>0.045</value>
+      <type>real</type>
+  </param>
+  <param>
+      <name>Damping Factor</name>
+      <key>ss_damping</key>
+      <value>1.0</value>
+      <type>real</type>
+  </param>
+  <param>
+      <name>Maximum Deviation</name>
+      <key>ss_max_dev</key>
+      <value>1.5</value>
+      <type>real</type>
+  </param>
+  <param>
+      <name>Output Samples/Symbol</name>
+      <key>ss_out_ss</key>
+      <value>1</value>
+      <type>int</type>
+  </param>
+  <param>
+    <name>Interpolating Resampler</name>
+    <key>ss_interpolatin</key>
+    <type>enum</type>
+    <option>
+        <name>MMSE, 8 tap FIR</name>
+        <key>digital.IR_MMSE_8TAP</key>
+        <opt>hide_nfilters:all</opt>
+        <opt>hide_pfb_mf_taps:all</opt>
+    </option>
+    <option>
+        <name>Polyphase Filterbank, MMSE</name>
+        <key>digital.IR_PFB_NO_MF</key>
+        <opt>hide_nfilters:</opt>
+        <opt>hide_pfb_mf_taps:all</opt>
+    </option>
+    <option>
+        <name>Polyphase Filterbank, MF</name>
+        <key>digital.IR_PFB_MF</key>
+        <opt>hide_nfilters:</opt>
+        <opt>hide_pfb_mf_taps:</opt>
+    </option>
+  </param>
+  <param>
+      <name>Filterbank Arms</name>
+      <key>ss_nfilter</key>
+      <value>128</value>
+      <type>int</type>
+      <hide>$ss_interpolatin.hide_nfilters</hide>
+  </param>
+  <param>
+      <name>PFB MF Taps</name>
+      <key>ss_pfb_mf_taps</key>
+      <value>[]</value>
+      <type>real_vector</type>
+      <hide>$ss_interpolatin.hide_pfb_mf_taps</hide>
+  </param>
+  
+  <param>
+    <name>Sub-carrier frequency</name>
+    <key>sine</key>
+    <value>True</value>
+    <type>bool</type>
+    <hide>#if (int($sel_encoder()) >= 2) then 'none' else 'all' #</hide>
+    <option>
+      <name>Sine</name>
+      <key>True</key>
+    </option>
+    <option>
+      <name>Square</name>
+      <key>False</key>
+    </option>
+  </param>
+  
+  <param>
+    <name>CL: Sub-carrier frequency</name>
+    <key>freq_sub</key>
+    <value>16000</value>
+    <type>real</type>
+    <hide>#if (int($sel_costas()) >= 1) then 'all' else 'none' #</hide>
+  </param>
+  
+  <param>
+    <name>CL: Loop Bandwidth</name>
+    <key>loop_bandwidth</key>
+    <value>6.28/100</value>
+    <type>real</type>
+    <hide>#if (int($sel_costas()) >= 1) then 'all' else 'none' #</hide>
+  </param>
+
+  <param>
+    <name>CL: order</name>
+    <key>order</key>
+    <value>2</value>
+    <type>int</type>
+    <hide>#if (int($sel_costas()) >= 1) then 'all' else 'none' #</hide>
+  </param>
+
+
+  <sink>
+      <name>in</name>
+      <type>$type.input</type>
+  </sink>
+
+  <source>
+    <name>out</name>
+    <type>float</type>
+  </source>
+</block>

@@ -106,7 +106,7 @@ namespace gr {
               phase += 2 * M_PI;
           }
           positive[i] = sin(phase);
-          negative[i] = cos(phase);
+          negative[i] = -positive[i];
           phase += delta_phase;
         }
       }
