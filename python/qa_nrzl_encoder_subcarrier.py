@@ -51,7 +51,7 @@ class Pdf_class(object):
             d['ModDate'] = datetime.datetime.today()
 
 def print_parameters(data):
-    to_print = "\p Bit rate= %d V; f_samp= %.1f Hz; f_sub-carrier= %.1f Hz\p" \
+    to_print = "\p Bit rate= %d bps; f_samp= %.1f Hz; f_sub-carrier= %.1f Hz\p" \
         %(data.bit_rate, data.samp_rate, data.freq_sub)
     print to_print
 
