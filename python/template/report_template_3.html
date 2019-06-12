@@ -47,9 +47,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for eachTestCase, param, stack, status, errorType, errorMessage in tests_results %}
+                            {% for eachTestCase, param, stack, status, errorType, images, errorMessage in tests_results %}
                                 <tr class='{{status}}'>
-                                    <td class="col-xs-3">{{eachTestCase}}</td>
+                                    <td rowspan="2" class="col-xs-3">{{eachTestCase}}</td>
                                     <td class="col-xs-4">{{param}}</td>
                                     {% if "success" != status %}
                                         <!-- <tr style="display:none;"> -->
@@ -72,14 +72,24 @@
                                             {% else %}
                                                 Error
                                             {% endif %}
-                                        </span>
-                                        <!-- {% if "success" not in status %}
-                                            &nbsp<button class="btn btn-default btn-xs">View</button>
-                                        {% endif %} -->
-                                    </td>
-                                </tr>
+                                        </span>                                                         
 
-                                <!-- <img src="/home/amir/gr-ecss/python/template/test.png" alt="Simply Easy Learning" width="200" height="80"> -->
+                                    </td>
+                                    <tr>
+                                        <td colspan="3" class="col-xs-12">
+                                            <!-- <button onclick="myFunction()">Show plot</button> -->
+                                            <!-- <div id="myDIV" style="display: none;"> -->
+                                                    {% for image in images %}
+                                                        {% if "NULL" == image %}
+                                                            no graphs generated for this test 
+                                                        {% else %}
+                                                            <img src={{image}} width="100%">
+                                                        {% endif %}
+                                                    {% endfor %}
+                                            <!-- </div> -->
+                                        </td>
+                                      </tr>
+
 
                             {% endfor %}
                             <tr>
@@ -92,6 +102,7 @@
                             </tr>
                         </tbody>
                     </table>
+                    
             </div>
         </div>
     </div>
@@ -127,3 +138,14 @@
      margin-top: 2cm;
   }
 </style>
+
+<script>
+        function myFunction() {
+          var x = document.getElementById("myDIV");
+          if (x.style.display === "none") {
+            x.style.display = "block";
+          } else {
+            x.style.display = "none";
+          }
+        }
+</script>

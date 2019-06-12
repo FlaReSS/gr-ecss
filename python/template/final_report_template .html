@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{testcase_name}}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    </head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <h2 class="text-capitalize">{{testcase_name}}</h2>
+                  <p class="top-one">
+                     <p class='attribute'><strong>Date: </strong>{{headers.start_time}}</p>
+                  </p>
+            </div>
+        </div>
+        <p class="top-one">
+           {{description}}
+        </p>
+        <div class="row">
+            <div class="col-xs-12 col-sm-10 col-md-10">
+              <p class="top-one">
+                  <table class='table table-hover table-responsive'>
+                      <thead>
+                          <tr>
+                              <th>Tests List</th>
+                              <th>Status</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          {% for eachTestCase, status in tests_results %}
+                              <tr class='{{status}}'>
+                                  <td class="col-xs-7">{{eachTestCase}}</td>
+                                  <td class="col-xs-3">{{status}}</td>
+                              </tr>
+                          {% endfor %}
+                      </tbody>
+                  </table>
+                  </p>
+            </div>
+        </div>
+    </div>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('td').on('click', '.btn', function(e){
+                e.preventDefault();
+                var $this = $(this);
+                var $nextRow = $this.closest('tr').next('tr');
+                $nextRow.slideToggle("fast");
+                $this.text(function(i, text){
+                    if (text === 'View') {
+                        return 'Hide';
+                    } else {
+                        return 'View';
+                    };
+                });
+            });
+        });
+    </script> -->
+</body>
+</html>
+
+<style>
+  .bottom-one {
+     margin-bottom: 1cm;
+  }
+</style>
+
+<style>
+  .top-one {
+     margin-top: 1cm;
+  }
+</style>
+
+<style>
+  .bottom-three {
+     margin-bottom: 3cm;
+  }
+</style>

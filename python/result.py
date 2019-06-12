@@ -12,6 +12,8 @@ DEFAULT_TEMPLATE_1 = os.path.join(os.path.dirname(__file__), "template",
                                 "report_template_1.html")
 DEFAULT_TEMPLATE_2 = os.path.join(os.path.dirname(__file__), "template",
                                 "report_template_2.html")
+DEFAULT_TEMPLATE_3 = os.path.join(os.path.dirname(__file__), "template",
+                                "report_template_3.html")
 
 
 def load_template(template):
@@ -28,6 +30,9 @@ def load_template(template):
         if not file:
             if (template == 'DEFAULT_TEMPLATE_2'):
                 with open(DEFAULT_TEMPLATE_2, "r") as f:
+                    file = f.read()
+            elif (template == 'DEFAULT_TEMPLATE_3'):
+                with open(DEFAULT_TEMPLATE_3, "r") as f:
                     file = f.read()
             else :
                 with open(DEFAULT_TEMPLATE_1, "r") as f:
@@ -63,7 +68,7 @@ class _TestInfo(object):
         self.outcome = outcome
         self.elapsed_time = 0
         self.err = err
-        self.stdout, self.parameters = self.test_result.getOutputs(test_result)
+        self.stdout, self.all_images, self.parameters = self.test_result.getOutputs(test_result)
         self.stderr = test_result._stderr_data
 
         self.test_description = self.test_result.getDescription(test_method)
@@ -125,15 +130,27 @@ class _HtmlTestResult(_TextTestResult):
         self.callback = callback
 
     def getOutputs(self, test):
-        """ Return the test outputs of the test, and check if there are parameters. """
+        """ Return the test outputs of the test, and check if there are parameters and images. """
         outputs = test._stdout_data
-        if outputs.startswith("\p"):
-            parameters = (outputs.split("\p"))[1].split("\p")[0]
-            outputs = outputs.split("\p")[2]
-            return outputs, parameters
+        if outputs.startswith("\parameters"):
+            parameters = (outputs.split("\parameters"))[1].split("\parameters")[0]
+            outputs = outputs.split("\parameters")[2]
+
+            if outputs.find("\images") != -1:
+                all_images = (outputs.split("\images"))[1].split("\images")[0]
+                outputs = outputs.split("\images")[2]
+            else:
+                all_images = 'NULL'
+            return outputs, all_images, parameters
         else:
             parameters = "no parameters"
-            return outputs, parameters
+
+            if outputs.find("\images") != -1:
+                all_images = (outputs.split("\images"))[1].split("\images")[0]
+                outputs = outputs.split("\images")[2]
+            else:
+                all_images = "no images"
+            return outputs, all_images, parameters
 
     def getDescription(self, test):
         """ Return the test description if not have test name. """
@@ -396,6 +413,7 @@ class _HtmlTestResult(_TextTestResult):
         test_name = self._test_method_name(testCase.test_id)
         test_description = testCase.test_description.replace(";", ";<br />").replace(":", ":<br />")
         desc = test_description or test_name
+        images = []
 
         if (testCase.stdout.decode('latin-1').startswith("\n") == True):
             out_messages = testCase.stdout.decode('latin-1').replace("\n", "" , 1)
@@ -403,6 +421,10 @@ class _HtmlTestResult(_TextTestResult):
             out_messages = testCase.stdout.decode('latin-1')
 
         param = testCase.parameters.decode('latin-1').replace(";", ";<br />")
+
+        images = testCase.all_images.decode('latin-1').split(";")
+
+
         stack= out_messages.replace("\n", "<br />") + testCase.stderr.decode('latin-1')
 
         status = ('success', 'danger', 'warning', 'info')[testCase.outcome-1]
@@ -413,9 +435,13 @@ class _HtmlTestResult(_TextTestResult):
             error_message = testCase.err[1]
         else:
             error_message = testCase.err
+        
 
         if(template == 'DEFAULT_TEMPLATE_2'):
             return test_cases_list.append([desc, param, stack, status, error_type, error_message])
+
+        elif(template == 'DEFAULT_TEMPLATE_3'):
+            return test_cases_list.append([desc, param, stack, status, error_type, images, error_message])
 
         else:
             return test_cases_list.append([desc, stack, status, error_type, error_message])
