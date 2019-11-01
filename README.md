@@ -7,7 +7,7 @@ HOW TO INSTALL NEW GROUP OF OOT BLOCKS:
 (notice that "prefix" must be the same directory where is GNURADIO. The default PyBOMBS path is "prefix").
 Run this commands in the main directory of the OOT group.
 
-PyBOMBS instsallation:
+PyBOMBS installation:
 
     source ~/prefix/setup_env.sh  
     mkdir build  
@@ -52,22 +52,6 @@ the command to run the tests is (in the build dir):
 the command to run one specific test with more info is (in the build dir):
 
 ctest -R qa_AGC -VV  
-
-
-    cd ~
-    wget http://libvolk.org/releases/volk-1.3.tar.gz
-    tar -xzvf volk-1.3.tar.gz
-    cd volk-1.3
-    mkdir build && cd build
-    cmake ..
-    make
-    sudo make install
-
-
-
-
-
-
 
 
 
