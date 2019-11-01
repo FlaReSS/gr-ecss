@@ -24,7 +24,7 @@ apt-get installation:
 mkdir build   
 cd build  
 cmake  
-make  
+make ../
 make test  
 sudo make install  
 sudo ldconfig  
