@@ -52,3 +52,29 @@ the command to run one specific test with more info is (in the build dir):
 
 ctest -R qa_AGC -VV  
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+if you want to install the OOT Module in an older version of GnuRadio Companion, for example 3.7.9, it is important to update the cmake file and make sure you have correctly installed the volk library:
+Build and install Volk
+
+    cd ~
+    wget http://libvolk.org/releases/volk-1.3.tar.gz
+    tar -xzvf volk-1.3.tar.gz
+    cd volk-1.3
+    mkdir build && cd build
+    cmake ..
+    make
+    sudo make install
+
