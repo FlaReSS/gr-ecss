@@ -56,11 +56,6 @@ ctest -R qa_AGC -VV
 
 
 
-
-
-
-
-
 if you want to install the OOT Module in an older version of GnuRadio Companion, for example 3.7.9, it is important to update the cmake file and make sure you have correctly installed the volk library:
 Build and install Volk
 
@@ -72,4 +67,15 @@ Build and install Volk
     cmake ..
     make
     sudo make install
+    
+    
+DEPENDENCIES:
+wkhtmltopdf 0.12.1:
+
+    sudo wget https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.1/wkhtmltox-0.12.1_linux-trusty-amd64.deb
+    sudo dpkg -i wkhtmltox_0.12.5-1.xenial_amd64.deb
+
+PDFKit:
+
+    pip install pdfkit
 
