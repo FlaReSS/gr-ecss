@@ -17,6 +17,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 plt.rcParams.update({'figure.max_open_warning': 0})
+import base64
+from io import BytesIO
 
 class Pdf_class(object):
     """this class can print a single pdf for all the tests"""
@@ -57,8 +59,6 @@ class Pdf_class(object):
 def plot(self, data_tar):
     """this function create a defined graph for the pll with the data input and outputs"""
 
-    plt.rcParams['text.usetex'] = True
-
     phase_source = np.asarray(data_tar.phase_source)
     phase_output = np.asarray(data_tar.phase_output)
     # phase_source = np.asarray(data_tar.phase_source[100000:180000])
@@ -86,11 +86,18 @@ def plot(self, data_tar):
 
 
     name_test = self.id().split("__main__.")[1]
-    name_test_usetex = name_test.replace('_', '\_').replace('.', ': ')
+    name_test_usetex = name_test.replace('.', ': ')
 
     fig.suptitle(name_test_usetex, fontsize=30)
     # fig.tight_layout()  # otherwise the right y-label is slightly clipped
     fig.subplots_adjust(hspace=0.6, top=0.85, bottom=0.15)
+
+
+    tmpfile = BytesIO()
+    fig.savefig(tmpfile, format='png')
+    fig_encoded = base64.b64encode(tmpfile.getvalue())
+    print("/im!{}/im!".format(fig_encoded.decode("utf-8")))#add in th template
+
 
     plt.show()
     # self.pdf.add_to_pdf(fig)

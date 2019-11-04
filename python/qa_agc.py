@@ -13,6 +13,8 @@ import math, time, datetime, os, abc, sys
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+import base64
+from io import BytesIO
 
 class Pdf_class(object):
     """this class can print a single pdf for all the tests"""
@@ -51,14 +53,12 @@ class Pdf_class(object):
             d['ModDate'] = datetime.datetime.today()
 
 def print_parameters(data):
-    to_print = "\p Aref= %.1f V; Noise = %.1f Vrms; t_settlig= %.3f ms; Ain_max_rms= %.2f V; Ain_min_rms= %.2f V; f_samp= %.1f Hz; f_in_sine= %.1f Hz \p" \
+    to_print = "/pr!Aref= %.1f V; Noise = %.1f Vrms; t_settlig= %.3f ms; Ain_max_rms= %.2f V; Ain_min_rms= %.2f V; f_samp= %.1f Hz; f_in_sine= %.1f Hz/pr!" \
         %(data.reference, data.noise, (data.settling_time / 1000), (data.input_amplitude_max), (data.input_amplitude_min), data.samp_rate, data.freq_sine)
     print to_print
 
 def plot(self, data, reference, error, zero, settling_time):
     """this function create a defined graph with the data inputs"""
-
-    plt.rcParams['text.usetex'] = True
 
     out_real = np.asarray(data.out_real)
     out_rms = np.asarray(data.out_rms)
@@ -98,13 +98,18 @@ def plot(self, data, reference, error, zero, settling_time):
     ax4.plot(time, in_rms, color='b', scalex=True, scaley=True)
     ax4.tick_params(axis='y', labelcolor='blue')
 
-    name_test = self.id().split("__main__.")[1]
-    name_test_usetex = name_test.replace('_', '\_').replace('.', ': ')
+    name_test = self.id().split("__main__.")[1].replace('.', ': ')
 
-    fig.suptitle(name_test_usetex, fontsize=30)
+    fig.suptitle(name_test, fontsize=30)
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
     fig.subplots_adjust(hspace=0.35, top=0.85, bottom=0.15)
     plt.legend((l1, l2, l3), ('error range', 'settling time range', 'settling time'), loc='lower center', bbox_to_anchor=(0.5, -0.5), fancybox=True, shadow=True, ncol=3)
+
+    tmpfile = BytesIO()
+    fig.savefig(tmpfile, format='png')
+    fig_encoded = base64.b64encode(tmpfile.getvalue())
+    print("/im!{}/im!".format(fig_encoded.decode("utf-8")))#add in th template
+
 
     
     # plt.show()
@@ -677,6 +682,6 @@ class qa_agc (gr_unittest.TestCase):
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_agc)
-    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_2')
+    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_3')
     runner.run(suite)
     #gr_unittest.TestProgram()

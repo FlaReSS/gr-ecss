@@ -13,6 +13,8 @@ import flaress
 import math, time, datetime, os, abc, sys, pmt
 import runner, threading
 import numpy as np
+import base64
+from io import BytesIO
 
 def make_tag(key, value, offset, srcid=None):
     tag = gr.tag_t()
@@ -27,7 +29,7 @@ def compare_tags(a, b):
     return a.offset == b.offset and pmt.equal(a.key, b.key) and pmt.equal(a.value, b.value)
 
 def print_parameters(data):
-    to_print = "\p Frequency central = %.2f Hz; Bandwidth = %.2f Hz; Average = %s; Frequency cut-off (average) = %.1f; Sample rate = %d Hz; Input frequency = %d Hz; Input noise = %.2f V; Threshold = %.1f dB \p" \
+    to_print = "\pr!Frequency central = %.2f Hz; Bandwidth = %.2f Hz; Average = %s; Frequency cut-off (average) = %.1f; Sample rate = %d Hz; Input frequency = %d Hz; Input noise = %.2f V; Threshold = %.1f dB\pr!" \
         %(data.f_central, data.bw, data.average, data.cutoff, data.samp_rate, data.freq, data.noise, data.threshold)
     print to_print
 

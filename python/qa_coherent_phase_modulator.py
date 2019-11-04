@@ -15,6 +15,8 @@ import runner, threading
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+import base64
+from io import BytesIO
 
 class Pdf_class(object):
     """this class can print a single pdf for all the tests"""
@@ -53,14 +55,13 @@ class Pdf_class(object):
             d['ModDate'] = datetime.datetime.today()
 
 def print_parameters(data):
-    to_print = "\p Sample rate = %d Hz; Number of Bits = %d; FFT Size = %d; Number of Inputs  = %d; Frequency input = %.1f Hz \p" \
+    to_print = "/pr!Sample rate = %d Hz; Number of Bits = %d; FFT Size = %d; Number of Inputs  = %d; Frequency input = %.1f Hz/pr!" \
         %(data.samp_rate, data.N, data.fft_size, data.inputs, data.freq)
     print to_print
 
 def plot(self, data_cpm):
     """this function create a defined graph for the pll with the data input and output"""
 
-    plt.rcParams['text.usetex'] = True
     real = []
     imag = []
 
@@ -113,11 +114,17 @@ def plot(self, data_cpm):
 
 
     name_test = self.id().split("__main__.")[1]
-    name_test_usetex = name_test.replace('_', '\_').replace('.', ': ')
+    name_test_usetex = name_test.replace('.', ': ')
 
     fig.suptitle(name_test_usetex, fontsize=30)
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
     fig.subplots_adjust(hspace=0.6, top=0.85, bottom=0.15)
+
+    tmpfile = BytesIO()
+    fig.savefig(tmpfile, format='png')
+    fig_encoded = base64.b64encode(tmpfile.getvalue())
+    print("/im!{}/im!".format(fig_encoded.decode("utf-8")))#add in th template
+
 
     # plt.show()
     self.pdf.add_to_pdf(fig)

@@ -17,6 +17,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 plt.rcParams.update({'figure.max_open_warning': 0})
+import base64
+from io import BytesIO
 
 class Pdf_class(object):
     """this class can print a single pdf for all the tests"""
@@ -57,7 +59,6 @@ class Pdf_class(object):
 def plot(self, data_pll):
     """this function create a defined graph for the pll with the data input and outputs"""
 
-    plt.rcParams['text.usetex'] = True
     real = []
     imag = []
 
@@ -115,7 +116,7 @@ def plot(self, data_pll):
     ax5.grid(True)
 
     name_test = self.id().split("__main__.")[1]
-    name_test_usetex = name_test.replace('_', '\_').replace('.', ': ')
+    name_test_usetex = name_test.replace('.', ': ')
 
     fig.suptitle(name_test_usetex, fontsize=30)
     # fig.tight_layout()  # otherwise the right y-label is slightly clipped
@@ -159,6 +160,11 @@ def plot_fft(self, data_fft):
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
     fig.subplots_adjust(hspace=0.6, top=0.85, bottom=0.15)
     # plt.legend((l1, l2, l3), ('error range', 'settling time range', 'settling time'), loc='lower center', bbox_to_anchor=(0.5, -0.5), fancybox=True, shadow=True, ncol=3)
+
+    tmpfile = BytesIO()
+    fig.savefig(tmpfile, format='png')
+    fig_encoded = base64.b64encode(tmpfile.getvalue())
+    print("/im!{}/im!".format(fig_encoded.decode("utf-8")))#add in th template
 
     # plt.show()
     self.pdf.add_to_pdf(fig)
@@ -242,7 +248,7 @@ def check_pa(data_out, N, items):
     return ((minimum_step >> (64 - N)) * precision), (slope / items)
 
 def print_parameters(data):
-    to_print = "\p Order = %d; Coeff1 (2nd order) = %f; Coeff2 (2nd order) = %f; Coeff4 (2nd order) = %f; Coeff1 (3rd order) = %f; Coeff2 (3rd order) = %f; Coeff3 (3rd order) = %f; Frequency central = %.2f Hz; Bandwidth = %.2f Hz; Sample rate = %d Hz; Input frequency = %d Hz; Input noise = %.2f V \p" \
+    to_print = "\pr!Order = %d; Coeff1 (2nd order) = %f; Coeff2 (2nd order) = %f; Coeff4 (2nd order) = %f; Coeff1 (3rd order) = %f; Coeff2 (3rd order) = %f; Coeff3 (3rd order) = %f; Frequency central = %.2f Hz; Bandwidth = %.2f Hz; Sample rate = %d Hz; Input frequency = %d Hz; Input noise = %.2f V\pr!" \
         %(data.order, data.coeff1_2, data.coeff2_2, data.coeff2_4, data.coeff1_3, data.coeff2_3, data.coeff3_3, data.f_central, data.bw, data.samp_rate, data.freq, data.noise)
     print to_print
 

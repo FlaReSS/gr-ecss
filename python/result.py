@@ -25,7 +25,7 @@ def load_template(template):
             with open(template, "r") as f:
                 file = f.read()
     except Exception as err:
-        print("Loading Default Template", sep="\n")
+        print("Loading Template", sep="\n")
     finally:
         if not file:
             if (template == 'DEFAULT_TEMPLATE_2'):
@@ -130,27 +130,37 @@ class _HtmlTestResult(_TextTestResult):
         self.callback = callback
 
     def getOutputs(self, test):
-        """ Return the test outputs of the test, and check if there are parameters and images. """
+        """ Return the test outputs of the test, and check if there are expected results or final results. """
         outputs = test._stdout_data
-        if outputs.startswith("\parameters"):
-            parameters = (outputs.split("\parameters"))[1].split("\parameters")[0]
-            outputs = outputs.split("\parameters")[2]
+        parameters = "" 
+        images = []
 
-            if outputs.find("\images") != -1:
-                all_images = (outputs.split("\images"))[1].split("\images")[0]
-                outputs = outputs.split("\images")[2]
-            else:
-                all_images = 'NULL'
-            return outputs, all_images, parameters
+        # print(outputs)
+        
+        if(outputs.find("/pr!") != -1):
+            parameters = (outputs.split("/pr!"))[1].split("/pr!")[0]
+            outputs = outputs.split("/pr!")[2]
+            if(parameters.startswith(" ")):
+                parameters = parameters[1:]
+            if(parameters.find(" ;")):
+                if(parameters.find("  ;")):
+                    parameters.replace("  ;", ";")
+                else:
+                    parameters.replace(" ;", ";")
         else:
             parameters = "no parameters"
+        
 
-            if outputs.find("\images") != -1:
-                all_images = (outputs.split("\images"))[1].split("\images")[0]
-                outputs = outputs.split("\images")[2]
-            else:
-                all_images = "no images"
-            return outputs, all_images, parameters
+        if(outputs.find("/im!") != -1):
+            temp_outputs = outputs.split("/im!")[1::2]
+            for substring in temp_outputs:
+                print(substring)
+                outputs = outputs.replace("/im!{}/im!".format(substring),"")
+                images.append(substring)
+        else:
+            images.append('NULL')
+
+        return outputs, images, parameters
 
     def getDescription(self, test):
         """ Return the test description if not have test name. """
@@ -413,19 +423,18 @@ class _HtmlTestResult(_TextTestResult):
         test_name = self._test_method_name(testCase.test_id)
         test_description = testCase.test_description.replace(";", ";<br />").replace(":", ":<br />")
         desc = test_description or test_name
-        images = []
 
-        if (testCase.stdout.decode('latin-1').startswith("\n") == True):
-            out_messages = testCase.stdout.decode('latin-1').replace("\n", "" , 1)
+        if (testCase.stdout.startswith("\n") == True):
+            out_messages = testCase.stdout.replace("\n", "" , 1)
         else:
-            out_messages = testCase.stdout.decode('latin-1')
+            out_messages = testCase.stdout
 
-        param = testCase.parameters.decode('latin-1').replace(";", ";<br />")
+        param = testCase.parameters.replace(";", ";<br />")
 
-        images = testCase.all_images.decode('latin-1').split(";")
+        images = testCase.all_images
 
 
-        stack= out_messages.replace("\n", "<br />") + testCase.stderr.decode('latin-1')
+        stack= out_messages.replace("\n", "<br />") + testCase.stderr
 
         status = ('success', 'danger', 'warning', 'info')[testCase.outcome-1]
 

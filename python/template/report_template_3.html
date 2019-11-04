@@ -56,6 +56,7 @@
                                             <td class="col-xs-7">
                                                 <p>{{errorType}}</p>
                                                 <p>{{errorMessage}}</p>
+                                                <p>{{stack}}</p>
                                             </td>
 
                                     {% else %}
@@ -83,7 +84,9 @@
                                                         {% if "NULL" == image %}
                                                             no graphs generated for this test 
                                                         {% else %}
-                                                            <img src={{image}} width="100%">
+                                                        <!-- <p>{{image}}</p> -->
+                                                        <img style="display: block; margin-left: auto; margin-right: auto;" src="data:image/png;base64,{{image}}" alt="" width="640" height="" />
+                                                            <!-- <img src={{image}} width="100%"> -->
                                                         {% endif %}
                                                     {% endfor %}
                                             <!-- </div> -->

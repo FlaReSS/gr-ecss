@@ -53,8 +53,6 @@ class Pdf_class(object):
 def plot(self, data_out, data_src):
     """this function create a defined graph with the data inputs"""
 
-    plt.rcParams['text.usetex'] = True
-
     fig, (ax1, ax2) = plt.subplots(2, sharey=True)
 
     ax1.set_xlabel('Time unit')
@@ -72,7 +70,7 @@ def plot(self, data_out, data_src):
     ax2.grid(True)
 
     name_test = self.id().split("__main__.")[1]
-    name_test_usetex = name_test.replace('_', '\_').replace('.', ': ')
+    name_test_usetex = name_test.replace('.', ': ')
 
     fig.suptitle(name_test_usetex, fontsize=30)
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
