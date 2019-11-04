@@ -1,8 +1,9 @@
-#gr-ecss
+# gr-ecss
 
-##HOW TO INSTALL NEW GROUP OF OOT BLOCKS: (notice that "prefix" must be the same directory where is GNURADIO. The default PyBOMBS path is "prefix"). Run this commands in the main directory of the OOT group.
+## HOW TO INSTALL NEW GROUP OF OOT BLOCKS
+(notice that "prefix" must be the same directory where is GNURADIO. The default PyBOMBS path is "prefix"). Run this commands in the main directory of the OOT group.
 
-###PyBOMBS installation:
+### PyBOMBS installation:
 
     source ~/prefix/setup_env.sh  
     mkdir build  
@@ -13,7 +14,7 @@
     sudo make install  
     sudo ldconfig  
 
-###apt-get installation:
+### apt-get installation:
 
     mkdir build   
     cd build  
@@ -23,7 +24,7 @@
     sudo make install  
     sudo ldconfig  
 
-###MAC OS X installation (from MacPort):
+### MAC OS X installation (from MacPort):
 
     mkdir build  
     cd build  
@@ -32,7 +33,7 @@
     make test  
     sudo make install  
 
-##HOW TO TEST NEW GROUP OF OOT BLOCKS
+## HOW TO TEST NEW GROUP OF OOT BLOCKS
 create a new folder/directory in the main directory of the OOT group (ex gr_ecss) named: "test log" (in that folder will be put the log files)
 
 the command to run the tests is (in the build dir):
@@ -55,12 +56,12 @@ if you want to install the OOT Module in an older version of GnuRadio Companion,
     sudo make install
     
     
-##DEPENDENCIES
+## DEPENDENCIES
 
-####wkhtmltopdf 0.12.1:
+#### wkhtmltopdf 0.12.1:
 
     sudo wget https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.1/wkhtmltox-0.12.1_linux-trusty-amd64.deb
     sudo dpkg -i wkhtmltox_0.12.5-1.xenial_amd64.deb
-####PDFKit:
+#### PDFKit:
 
     pip install pdfkit
