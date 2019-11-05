@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # Copyright 2018 Antonio Miraglia - ISISpace .
@@ -55,7 +55,7 @@ class Pdf_class(object):
 def print_parameters(data):
     to_print = "/pr!Bit rate= %d bps; f_samp= %.1f Hz; f_sub-carrier= %.1f Hz/pr!" \
         %(data.bit_rate, data.samp_rate, data.freq_sub)
-    print to_print
+    print (to_print)
 
 def plot(self, data_out, data_src):
     """this function create a defined graph with the data inputs"""
@@ -89,8 +89,8 @@ def plot(self, data_out, data_src):
     print("/im!{}/im!".format(fig_encoded.decode("utf-8")))#add in th template
 
     
-    plt.show()
-    # self.pdf.add_to_pdf(fig)
+    # plt.show()
+    self.pdf.add_to_pdf(fig)
 
 def test_nrlz(self, param):
     """this function run the defined test, for easier understanding"""
@@ -166,7 +166,7 @@ class qa_nrzl_encoder_subcarrier (gr_unittest.TestCase):
         data_out, expected_data = test_subcarrier(self, param, analog.GR_SIN_WAVE, 1, 0)
 
         self.assertFloatTuplesAlmostEqual(data_out, expected_data, 4)
-        print "- Data correctly encoded."
+        print ("- Data correctly encoded.")
 
     def test_002_t (self):
         """test_002_t: check cosine wave"""
@@ -183,7 +183,7 @@ class qa_nrzl_encoder_subcarrier (gr_unittest.TestCase):
         data_out, expected_data = test_subcarrier(self, param, analog.GR_COS_WAVE, 1, 0)
 
         self.assertFloatTuplesAlmostEqual(data_out, expected_data, 4)
-        print "- Data correctly encoded."
+        print ("- Data correctly encoded.")
 
     def test_003_t (self):
         """test_003_t: check square wave"""
@@ -200,7 +200,7 @@ class qa_nrzl_encoder_subcarrier (gr_unittest.TestCase):
         data_out, expected_data = test_subcarrier(self, param, analog.GR_SQR_WAVE, 2, -1)
 
         self.assertFloatTuplesAlmostEqual(data_out, expected_data)
-        print "- Data correctly encoded."
+        print ("- Data correctly encoded.")
 
     def test_004_t (self):
         """test_004_t: check negative square wave"""
@@ -217,7 +217,7 @@ class qa_nrzl_encoder_subcarrier (gr_unittest.TestCase):
         data_out, expected_data = test_subcarrier(self, param, analog.GR_SQR_WAVE, -2, 1)
 
         self.assertFloatTuplesAlmostEqual(data_out, expected_data)
-        print "- Data correctly encoded."
+        print ("- Data correctly encoded.")
 
     def test_005_t (self):
         """test_005_t: sine wave with data"""
@@ -238,7 +238,7 @@ class qa_nrzl_encoder_subcarrier (gr_unittest.TestCase):
         plot(self, data_out, param.data_src)
 
         self.assertFloatTuplesAlmostEqual(data_out, expected_data)
-        print "- Data correctly encoded."
+        print ("- Data correctly encoded.")
 
     def test_006_t (self):
         """test_006_t: square wave with data"""
@@ -259,11 +259,11 @@ class qa_nrzl_encoder_subcarrier (gr_unittest.TestCase):
         plot(self, data_out, param.data_src)
 
         self.assertFloatTuplesAlmostEqual(data_out, expected_data)
-        print "- Data correctly encoded."
+        print ("- Data correctly encoded.")
 
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_nrzl_encoder_subcarrier)
-    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_2')
+    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_3')
     runner.run(suite)
     # gr_unittest.TestProgram()

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # Copyright 2018 Antonio Miraglia - ISISpace .
@@ -57,7 +57,7 @@ class Pdf_class(object):
 def print_parameters(data):
     to_print = "/pr!Sample rate = %d Hz; Number of Bits = %d; Uplink = %d; Downlink = %d; Phase step Value = %f rad; Phase step noise = %.3f Vrms/pr!" \
         %(data.samp_rate, data.N, data.uplink, data.downlink, (data.value / data.items) , data.noise)
-    print to_print
+    print (to_print)
 
 def check_integer_phase(data_out, N, items):
     """this function checks the integer phase accumulator output. It checks the minimum step and the slope of a defined number of items"""
@@ -195,11 +195,11 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         self.assertAlmostEqual((tar * src_slope), gain_slope )
         self.assertAlmostEqual((tar * src_min_step), gain_min_step)
 
-        print "-Input Slope : %f rad/s;" % (src_slope * param.samp_rate)
-        print "-Input Min step : %f rad;" % src_min_step
-        print "-Turn Around Ration : %f;" % tar
-        print "-Output Slope : %f rad/s;" % (gain_slope * param.samp_rate)
-        print "-Output Min step : %f rad." % gain_min_step
+        print ("-Input Slope : %f rad/s;" % (src_slope * param.samp_rate))
+        print ("-Input Min step : %f rad;" % src_min_step)
+        print ("-Turn Around Ration : %f;" % tar)
+        print ("-Output Slope : %f rad/s;" % (gain_slope * param.samp_rate))
+        print ("-Output Min step : %f rad." % gain_min_step)
 
     def test_002_t (self):
         """test_002_t: wrapping test with higher ratio"""
@@ -225,11 +225,11 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         self.assertAlmostEqual((tar * src_slope), gain_slope )
         self.assertAlmostEqual((tar * src_min_step), gain_min_step)
 
-        print "-Input Slope : %f rad/s;" % (src_slope * param.samp_rate)
-        print "-Input Min step : %f rad;" % src_min_step
-        print "-Turn Around Ration : %f;" % tar
-        print "-Output Slope : %f rad/s;" % (gain_slope * param.samp_rate)
-        print "-Output Min step : %f rad." % gain_min_step
+        print ("-Input Slope : %f rad/s;" % (src_slope * param.samp_rate))
+        print ("-Input Min step : %f rad;" % src_min_step)
+        print ("-Turn Around Ration : %f;" % tar)
+        print ("-Output Slope : %f rad/s;" % (gain_slope * param.samp_rate))
+        print ("-Output Min step : %f rad." % gain_min_step)
 
 
     def test_003_t (self):
@@ -257,11 +257,11 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         self.assertAlmostEqual((tar * src_slope), gain_slope )
         self.assertAlmostEqual((tar * src_min_step), gain_min_step)
 
-        print "-Input Slope : %f rad/s;" % (src_slope * param.samp_rate)
-        print "-Input Min step : %f rad;" % src_min_step
-        print "-Turn Around Ration : %f;" % tar
-        print "-Output Slope : %f rad/s;" % (gain_slope * param.samp_rate)
-        print "-Output Min step : %f rad." % gain_min_step
+        print ("-Input Slope : %f rad/s;" % (src_slope * param.samp_rate))
+        print ("-Input Min step : %f rad;" % src_min_step)
+        print ("-Turn Around Ration : %f;" % tar)
+        print ("-Output Slope : %f rad/s;" % (gain_slope * param.samp_rate))
+        print ("-Output Min step : %f rad." % gain_min_step)
 
 
     def test_004_t (self):
@@ -289,11 +289,11 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         self.assertAlmostEqual((tar * src_slope), gain_slope, 1)
         self.assertAlmostEqual((tar * src_min_step), gain_min_step, 1)
 
-        print "-Input Slope : %f rad/s;" % (src_slope * param.samp_rate)
-        print "-Input Min step : %f rad;" % src_min_step
-        print "-Turn Around Ration : %f;" % tar
-        print "-Output Slope : %f rad/s;" % (gain_slope * param.samp_rate)
-        print "-Output Min step : %f rad." % gain_min_step
+        print ("-Input Slope : %f rad/s;" % (src_slope * param.samp_rate))
+        print ("-Input Min step : %f rad;" % src_min_step)
+        print ("-Turn Around Ration : %f;" % tar)
+        print ("-Output Slope : %f rad/s;" % (gain_slope * param.samp_rate))
+        print ("-Output Min step : %f rad." % gain_min_step)
 
     def test_005_t (self):
         """test_005_t: reset switch in the middle of the simulation"""
@@ -365,8 +365,8 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         #check the switch
         self.assertEqual(len(switch), 1)
         self.assertEqual(self.debug_reset, 0)
-        print "-Final reset value of the gain phase accumulator: %d;" %self.debug_reset
-        print "-Set function received at the moment (of the simulation): %.2f s;" % (switch[0] * (1.0 / param.samp_rate))
+        print ("-Final reset value of the gain phase accumulator: %d;" %self.debug_reset)
+        print ("-Set function received at the moment (of the simulation): %.2f s;" % (switch[0] * (1.0 / param.samp_rate)))
 
         #check the value after reset
         self.assertEqual(data_gain.src[switch[0]], data_gain.out[switch[0]])
@@ -378,15 +378,15 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
 
         self.assertAlmostEqual((tar * src_slope), gain_slope, 2)
         self.assertAlmostEqual((tar * src_min_step), gain_min_step, 2)
-        print "-Input Slope : %f rad/s;" % (src_slope * param.samp_rate)
-        print "-Input Min step : %f rad;" % src_min_step
-        print "-Turn Around Ration : %f;" % tar
-        print "-Output Slope : %f rad/s;" % (gain_slope * param.samp_rate)
-        print "-Output Min step : %f rad." % gain_min_step
+        print ("-Input Slope : %f rad/s;" % (src_slope * param.samp_rate))
+        print ("-Input Min step : %f rad;" % src_min_step)
+        print ("-Turn Around Ration : %f;" % tar)
+        print ("-Output Slope : %f rad/s;" % (gain_slope * param.samp_rate))
+        print ("-Output Min step : %f rad." % gain_min_step)
 
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_gain_phase_accumulator)
-    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_2')
+    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_3')
     runner.run(suite)
     #gr_unittest.TestProgram()

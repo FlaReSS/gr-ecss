@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # Copyright 2018 Antonio Miraglia - ISISpace .
@@ -62,7 +62,7 @@ def plot(self, data_pll):
     real = []
     imag = []
 
-    for i in xrange (len(data_pll.out)):
+    for i in xrange(len(data_pll.out)):
         real.append(data_pll.out[i].real)
         imag.append(data_pll.out[i].imag)
 
@@ -123,13 +123,17 @@ def plot(self, data_pll):
     fig.subplots_adjust(hspace=0.6, top=0.85, bottom=0.15)
     # plt.legend((l1, l2, l3), ('error range', 'settling time range', 'settling time'), loc='lower center', bbox_to_anchor=(0.5, -0.5), fancybox=True, shadow=True, ncol=3)
 
+    tmpfile = BytesIO()
+    fig.savefig(tmpfile, format='png')
+    fig_encoded = base64.b64encode(tmpfile.getvalue())
+    print("/im!{}/im!".format(fig_encoded.decode("utf-8")))#add in th template
+
+
     # plt.show()
     self.pdf.add_to_pdf(fig)
 
 def plot_fft(self, data_fft):
     """this function create a defined graph with the data inputs"""
-
-    plt.rcParams['text.usetex'] = True
 
     src = np.asarray(data_fft.src)
     out = np.asarray(data_fft.out)
@@ -248,9 +252,9 @@ def check_pa(data_out, N, items):
     return ((minimum_step >> (64 - N)) * precision), (slope / items)
 
 def print_parameters(data):
-    to_print = "\pr!Order = %d; Coeff1 (2nd order) = %f; Coeff2 (2nd order) = %f; Coeff4 (2nd order) = %f; Coeff1 (3rd order) = %f; Coeff2 (3rd order) = %f; Coeff3 (3rd order) = %f; Frequency central = %.2f Hz; Bandwidth = %.2f Hz; Sample rate = %d Hz; Input frequency = %d Hz; Input noise = %.2f V\pr!" \
+    to_print = "/pr!Order = %d; Coeff1 (2nd order) = %f; Coeff2 (2nd order) = %f; Coeff4 (2nd order) = %f; Coeff1 (3rd order) = %f; Coeff2 (3rd order) = %f; Coeff3 (3rd order) = %f; Frequency central = %.2f Hz; Bandwidth = %.2f Hz; Sample rate = %d Hz; Input frequency = %d Hz; Input noise = %.2f V/pr!" \
         %(data.order, data.coeff1_2, data.coeff2_2, data.coeff2_4, data.coeff1_3, data.coeff2_3, data.coeff3_3, data.f_central, data.bw, data.samp_rate, data.freq, data.noise)
-    print to_print
+    print (to_print)
 
 def test_fft(self, data):
     """this function run the defined test, for easier understanding"""
@@ -413,31 +417,31 @@ class qa_pll (gr_unittest.TestCase):
         out_settling_time_index, out_real_error_max, out_imag_error_max = check_complex(data_sine.out, 1, 0, 0.1, 10, 100)
         out_settling_time_ms = (1.0 / param.samp_rate) * out_settling_time_index * 1000.0
         self.assertLess(out_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'Out' Settling time : %f ms;" % out_settling_time_ms
-        print "-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max
-        print "-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max
+        print ("-Output 'Out' Settling time : %f ms;" % out_settling_time_ms)
+        print ("-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max)
+        print ("-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max)
 
         #check output 'pe'
         pe_settling_time_index, pe_error_max = check_float(data_sine.pe, 0, 0.1, 10, 100)
         pe_settling_time_ms = (1.0 / param.samp_rate) * pe_settling_time_index * 1000.0
         self.assertLess(pe_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms
-        print "-Output 'pe' absolute maximum error: %.3f;" % pe_error_max
+        print ("-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms)
+        print ("-Output 'pe' absolute maximum error: %.3f;" % pe_error_max)
 
         #check output 'freq'
         freq_settling_time_index, freq_error_max = check_float(data_sine.freq, param.freq, (param.freq * 0.05), 10, 1000) #check if the measured output frequency is the same of the input signal ± 5%
         freq_settling_time_ms = (1.0 / param.samp_rate) * freq_settling_time_index * 1000.0
         self.assertLess(freq_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms
-        print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
+        print ("-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms)
+        print ("-Output 'freq' absolute maximum error: %.3f;" % freq_error_max)
 
         #check output 'pa'
         pa_min_step , pa_slope = check_pa(data_sine.pa, param.N , 10)
         precision = math.pow(2,(- (param.N - 1))) * math.pi
         self.assertAlmostEqual(pa_slope , ((param.freq * (2 * math.pi)) / param.samp_rate), 3)
         self.assertGreaterEqual(pa_min_step, precision)
-        print "-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate)
-        print "-Output Min step : %f rad." % pa_min_step
+        print ("-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate))
+        print ("-Output Min step : %f rad." % pa_min_step)
 
     def test_002_t (self):
         """test_002_t: with a input sine without noise in the boundary BW of PLL"""
@@ -473,31 +477,31 @@ class qa_pll (gr_unittest.TestCase):
         out_settling_time_index, out_real_error_max, out_imag_error_max = check_complex(data_sine.out, 1, 0, 0.1, 10, 100)
         out_settling_time_ms = (1.0 / param.samp_rate) * out_settling_time_index * 1000.0
         self.assertLess(out_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'Out' Settling time : %f ms;" % out_settling_time_ms
-        print "-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max
-        print "-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max
+        print ("-Output 'Out' Settling time : %f ms;" % out_settling_time_ms)
+        print ("-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max)
+        print ("-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max)
 
         #check output 'pe'
         pe_settling_time_index, pe_error_max = check_float(data_sine.pe, 0, 0.1, 10, 100)
         pe_settling_time_ms = (1.0 / param.samp_rate) * pe_settling_time_index * 1000.0
         self.assertLess(pe_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms
-        print "-Output 'pe' absolute maximum error: %.3f;" % pe_error_max
+        print ("-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms)
+        print ("-Output 'pe' absolute maximum error: %.3f;" % pe_error_max)
 
         #check output 'freq'
         freq_settling_time_index, freq_error_max = check_float(data_sine.freq, param.freq, (param.freq * 0.05), 10, 100) #check if the measured output frequency is the same of the input signal ± 5%
         freq_settling_time_ms = (1.0 / param.samp_rate) * freq_settling_time_index * 1000.0
         self.assertLess(freq_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms
-        print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
+        print ("-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms)
+        print ("-Output 'freq' absolute maximum error: %.3f;" % freq_error_max)
 
         #check output 'pa'
         pa_min_step , pa_slope = check_pa(data_sine.pa, param.N , 10)
         precision = math.pow(2,(- (param.N - 1))) * math.pi
         self.assertAlmostEqual(pa_slope , ((param.freq * (2 * math.pi)) / param.samp_rate), 3)
         self.assertGreaterEqual(pa_min_step, precision)
-        print "-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate)
-        print "-Output Min step : %f rad." % pa_min_step
+        print ("-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate))
+        print ("-Output Min step : %f rad." % pa_min_step)
 
     def test_003_t (self):
         """test_003_t: with a sine without noise out of the BW of PLL"""
@@ -533,25 +537,25 @@ class qa_pll (gr_unittest.TestCase):
         out_settling_time_index, out_real_error_max, out_imag_error_max = check_complex(data_sine.out, 1, 0, 0.1, 10, 100)
         out_settling_time_ms = (1.0 / param.samp_rate) * out_settling_time_index * 1000.0
         self.assertEqual(out_settling_time_ms, np.inf) #have to be be inf (so, unlocked), errors are intrinsically asserted
-        print "-Output 'Out' Settling time : %f ms;" % out_settling_time_ms
+        print ("-Output 'Out' Settling time : %f ms;" % out_settling_time_ms)
 
         #check output 'pe'
         pe_settling_time_index, pe_error_max = check_float(data_sine.pe, 0, 0.1, 10, 100)
         pe_settling_time_ms = (1.0 / param.samp_rate) * pe_settling_time_index * 1000.0
         self.assertEqual(pe_settling_time_ms, np.inf) #have to be be inf (so, unlocked), errors are intrinsically asserted
-        print "-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms
+        print ("-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms)
 
         #check output 'freq'
         freq_settling_time_index, freq_error_max = check_float(data_sine.freq, param.freq, (param.freq * 0.005), 10, 100) #check if the measured output frequency is the same of the input signal ± 5%
         freq_settling_time_ms = (1.0 / param.samp_rate) * freq_settling_time_index * 1000.0
         self.assertEqual(freq_settling_time_ms, np.inf) #have to be be inf (so, unlocked), errors are intrinsically asserted
-        print "-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms
+        print ("-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms)
 
         #check output 'pa'
         pa_min_step , pa_slope = check_pa(data_sine.pa, param.N , 10)
         precision = math.pow(2,(- (param.N - 1))) * math.pi
         self.assertGreaterEqual(pa_min_step, precision)
-        print "-Output Min step : %f rad." % pa_min_step
+        print ("-Output Min step : %f rad." % pa_min_step)
 
     def test_004_t (self):
         """test_004_t: reset tag in the middle of the simulation"""
@@ -621,7 +625,7 @@ class qa_pll (gr_unittest.TestCase):
         self.assertAlmostEqual(data_pll.freq[param.items / 2], param.f_central, 0) #only the integer part
         self.assertAlmostEqual(data_pll.pa[param.items / 2], 0)
 
-        print "-Reset tag received at the moment: %.3f ms." % (param.items / 2 * (1000.0 / param.samp_rate))
+        print ("-Reset tag received at the moment: %.3f ms." % (param.items / 2 * (1000.0 / param.samp_rate)))
 
     def test_005_t (self):
         """test_005_t: switch from the second order to the third order"""
@@ -715,38 +719,38 @@ class qa_pll (gr_unittest.TestCase):
         #check the switch
         self.assertEqual(len(switch), 1)
         self.assertEqual(self.debug_order, 3)
-        print "-Final order of the pll: %d;" %self.debug_order
-        print "-Set function received at the moment (of the simulation): %.2f s;" % (switch[0] * (1.0 / param.samp_rate))
+        print ("-Final order of the pll: %d;" %self.debug_order)
+        print ("-Set function received at the moment (of the simulation): %.2f s;" % (switch[0] * (1.0 / param.samp_rate)))
 
         #check output 'out'
         out_settling_time_index, out_real_error_max, out_imag_error_max = check_complex(data_pll.out, 1, 0, 0.1, 10, 100)
         out_settling_time_ms = (1.0 / param.samp_rate) * out_settling_time_index * 1000.0
         self.assertLess(out_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'Out' Settling time : %f ms;" % out_settling_time_ms
-        print "-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max
-        print "-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max
+        print ("-Output 'Out' Settling time : %f ms;" % out_settling_time_ms)
+        print ("-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max)
+        print ("-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max)
 
         #check output 'out'
         pe_settling_time_index, pe_error_max = check_float(data_pll.pe, 0, 0.1, 10, 100)
         pe_settling_time_ms = (1.0 / param.samp_rate) * pe_settling_time_index * 1000.0
         self.assertLess(pe_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms
-        print "-Output 'pe' absolute maximum error: %.3f;" % pe_error_max
+        print ("-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms)
+        print ("-Output 'pe' absolute maximum error: %.3f;" % pe_error_max)
 
         #check output 'out'
         freq_settling_time_index, freq_error_max = check_float(data_pll.freq, param.freq, (param.freq * 0.05), 10, 100) #check if the measured output frequency is the same of the input signal ± 5%
         freq_settling_time_ms = (1.0 / param.samp_rate) * freq_settling_time_index * 1000.0
         self.assertLess(freq_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms
-        print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
+        print ("-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms)
+        print ("-Output 'freq' absolute maximum error: %.3f;" % freq_error_max)
 
         #check output 'pa'
         pa_min_step , pa_slope = check_pa(data_pll.pa, param.N , 10)
         precision = math.pow(2,(- (param.N - 1))) * math.pi
         self.assertAlmostEqual(pa_slope , ((param.freq * (2 * math.pi)) / param.samp_rate), 3)
         self.assertGreaterEqual(pa_min_step, precision)
-        print "-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate)
-        print "-Output Min step : %f rad." % pa_min_step
+        print ("-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate))
+        print ("-Output Min step : %f rad." % pa_min_step)
 
     def test_006_t (self):
         """test_006_t: frequency sweep input"""
@@ -774,7 +778,7 @@ class qa_pll (gr_unittest.TestCase):
 
         print_parameters = "\p Order = %d; Coeff1 (2nd order) = %f; Coeff2 (2nd order) = %f; Coeff4 (2nd order) = %f; Coeff1 (3rd order) = %f; Coeff2 (3rd order) = %f; Coeff3 (3rd order) = %f; Frequency central = %.2f Hz; Bandwidth = %.2f Hz; Sample rate = %d Hz; Input frequency min = %d Hz; Input frequency max = %d Hz; Input frequency sweep = %.2f Hz/s; \p" \
             %(param.order, param.coeff1_2, param.coeff2_2, param.coeff2_4, param.coeff1_3, param.coeff2_3, param.coeff3_3, param.f_central, param.bw, param.samp_rate, param.freq_min, param.freq_max, param.sweep)
-        print print_parameters
+        print (print_parameters)
 
         pll = ecss.pll(param.samp_rate, param.order, param.N, [param.coeff1_2, param.coeff2_2, param.coeff2_4, param.coeff1_3, param.coeff2_3, param.coeff3_3], param.f_central, param.bw)
 
@@ -811,7 +815,6 @@ class qa_pll (gr_unittest.TestCase):
 
         plot(self, data_pll)
 
-        plt.rcParams['text.usetex'] = True
         real = []
         imag = []
 
@@ -845,6 +848,11 @@ class qa_pll (gr_unittest.TestCase):
         fig.suptitle(name_test_usetex, fontsize=30)
         fig.tight_layout()  # otherwise the right y-label is slightly clipped
         fig.subplots_adjust(hspace=0.6, top=0.85, bottom=0.15)
+            
+        tmpfile = BytesIO()
+        fig.savefig(tmpfile, format='png')
+        fig_encoded = base64.b64encode(tmpfile.getvalue())
+        print("/im!{}/im!".format(fig_encoded.decode("utf-8")))#add in th template
 
         # plt.show()
         self.pdf.add_to_pdf(fig)
@@ -853,31 +861,31 @@ class qa_pll (gr_unittest.TestCase):
         out_settling_time_index, out_real_error_max, out_imag_error_max = check_complex(data_pll.out, 1, 0, 0.1, 10, 100)
         out_settling_time_ms = (1.0 / param.samp_rate) * out_settling_time_index * 1000.0
         self.assertLess(out_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'Out' Settling time : %f ms;" % out_settling_time_ms
-        print "-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max
-        print "-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max
+        print ("-Output 'Out' Settling time : %f ms;" % out_settling_time_ms)
+        print ("-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max)
+        print ("-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max)
 
         #check output 'pe'
         pe_settling_time_index, pe_error_max = check_float(data_pll.pe, 0, 0.1, 10, 100)
         pe_settling_time_ms = (1.0 / param.samp_rate) * pe_settling_time_index * 1000.0
         self.assertLess(pe_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms
-        print "-Output 'pe' absolute maximum error: %.3f;" % pe_error_max
+        print ("-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms)
+        print ("-Output 'pe' absolute maximum error: %.3f;" % pe_error_max)
 
         #check output 'freq'
         freq_settling_time_index, freq_error_max = check_float(data_pll.freq, ((param.freq_max - param.freq_min) / 2), (((param.freq_max - param.freq_min) / 2) * 0.05), 10, 100) #check if the measured output frequency is the same of the input signal ± 5%
         freq_settling_time_ms = (1.0 / param.samp_rate) * freq_settling_time_index * 1000.0
         self.assertLess(freq_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms
-        print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
+        print ("-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms)
+        print ("-Output 'freq' absolute maximum error: %.3f;" % freq_error_max)
 
         # #check output 'pa'
         # pa_min_step , pa_slope = check_pa(data_sine.pa, param.N , 10)
         # precision = math.pow(2,(- (param.N - 1))) * math.pi
         # self.assertAlmostEqual(pa_slope , ((param.freq * (2 * math.pi)) / param.samp_rate), 3)
         # self.assertGreaterEqual(pa_min_step, precision)
-        # print "-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate)
-        # print "-Output Min step : %f rad." % pa_min_step
+        # print ("-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate))
+        # print ("-Output Min step : %f rad." % pa_min_step)
 
     def test_007_t (self):
         """test_007_t: with a input sine with noise in the central BW of PLL"""
@@ -910,38 +918,38 @@ class qa_pll (gr_unittest.TestCase):
         # plot_fft(self,data_fft)
 
         #CNR evaluation
-        print "-CNR input to PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)))
-        print "-CNR in the equivalent bandwidth of PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)) + 10.0*math.log10((1.0 * param.samp_rate)/param.bw))
-
+        print ("-CNR input to PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0))))
+        print ("-CNR in the equivalent bandwidth of PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)) + 10.0*math.log10((1.0 * param.samp_rate)/param.bw))
+)
         #check output 'out'
         out_settling_time_index, out_real_error_max, out_imag_error_max = check_complex(data_sine.out, 1, 0, 1.5, 10, 100)
         out_settling_time_ms = (1.0 / param.samp_rate) * out_settling_time_index * 1000.0
         self.assertLess(out_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'Out' Settling time : %f ms;" % out_settling_time_ms
-        print "-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max
-        print "-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max
+        print ("-Output 'Out' Settling time : %f ms;" % out_settling_time_ms)
+        print ("-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max)
+        print ("-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max)
 
         #check output 'pe'
         pe_settling_time_index, pe_error_max = check_float(data_sine.pe, 0, 1, 10, 100)
         pe_settling_time_ms = (1.0 / param.samp_rate) * pe_settling_time_index * 1000.0
         self.assertLess(pe_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms
-        print "-Output 'pe' absolute maximum error: %.3f;" % pe_error_max
+        print ("-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms)
+        print ("-Output 'pe' absolute maximum error: %.3f;" % pe_error_max)
 
         #check output 'freq'
         freq_settling_time_index, freq_error_max = check_float(data_sine.freq, param.freq, (param.freq * 0.1), 10, 100) #check if the measured output frequency is the same of the input signal ± 5%
         freq_settling_time_ms = (1.0 / param.samp_rate) * freq_settling_time_index * 1000.0
         self.assertLess(freq_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms
-        print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
+        print ("-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms)
+        print ("-Output 'freq' absolute maximum error: %.3f;" % freq_error_max)
 
         #check output 'pa'
         pa_min_step , pa_slope = check_pa(data_sine.pa, param.N , 10)
         precision = math.pow(2,(- (param.N - 1))) * math.pi
         self.assertAlmostEqual(pa_slope , ((param.freq * (2 * math.pi)) / param.samp_rate), 2)
         self.assertGreaterEqual(pa_min_step, precision)
-        print "-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate)
-        print "-Output Min step : %f rad." % pa_min_step
+        print ("-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate))
+        print ("-Output Min step : %f rad." % pa_min_step)
 
     def test_008_t (self):
         """test_008_t: with a input sine with noise in the boundary BW of PLL"""
@@ -974,38 +982,38 @@ class qa_pll (gr_unittest.TestCase):
         # plot_fft(self,data_fft)
 
         #CNR evaluation
-        print "-CNR input to PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)))
-        print "-CNR in the equivalent bandwidth of PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)) + 10.0*math.log10((1.0 * param.samp_rate)/param.bw))
-
+        print ("-CNR input to PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0))))
+        print ("-CNR in the equivalent bandwidth of PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)) + 10.0*math.log10((1.0 * param.samp_rate)/param.bw))
+)
         #check output 'out'
         out_settling_time_index, out_real_error_max, out_imag_error_max = check_complex(data_sine.out, 1, 0, 1.5, 10, 100)
         out_settling_time_ms = (1.0 / param.samp_rate) * out_settling_time_index * 1000.0
         self.assertLess(out_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'Out' Settling time : %f ms;" % out_settling_time_ms
-        print "-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max
-        print "-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max
+        print ("-Output 'Out' Settling time : %f ms;" % out_settling_time_ms)
+        print ("-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max)
+        print ("-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max)
 
         #check output 'pe'
         pe_settling_time_index, pe_error_max = check_float(data_sine.pe, 0, 1, 10, 100)
         pe_settling_time_ms = (1.0 / param.samp_rate) * pe_settling_time_index * 1000.0
         self.assertLess(pe_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms
-        print "-Output 'pe' absolute maximum error: %.3f;" % pe_error_max
+        print ("-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms)
+        print ("-Output 'pe' absolute maximum error: %.3f;" % pe_error_max)
 
         #check output 'freq'
         freq_settling_time_index, freq_error_max = check_float(data_sine.freq, param.freq, (param.freq * 0.1), 10, 100) #check if the measured output frequency is the same of the input signal ± 5%
         freq_settling_time_ms = (1.0 / param.samp_rate) * freq_settling_time_index * 1000.0
         self.assertLess(freq_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms
-        print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
+        print ("-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms)
+        print ("-Output 'freq' absolute maximum error: %.3f;" % freq_error_max)
 
         #check output 'pa'
         pa_min_step , pa_slope = check_pa(data_sine.pa, param.N , 10)
         precision = math.pow(2,(- (param.N - 1))) * math.pi
         self.assertAlmostEqual(pa_slope , ((param.freq * (2 * math.pi)) / param.samp_rate), 3)
         self.assertGreaterEqual(pa_min_step, precision)
-        print "-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate)
-        print "-Output Min step : %f rad." % pa_min_step
+        print ("-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate))
+        print ("-Output Min step : %f rad." % pa_min_step)
 
     def test_009_t (self):
         """test_009_t: with a sine with noise out of the BW of PLL"""
@@ -1038,33 +1046,33 @@ class qa_pll (gr_unittest.TestCase):
         # plot_fft(self,data_fft)
 
         #CNR evaluation
-        print "-CNR input to PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)))
-        print "-CNR in the equivalent bandwidth of PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)) + 10.0*math.log10((1.0 * param.samp_rate)/param.bw))
-
+        print ("-CNR input to PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0))))
+        print ("-CNR in the equivalent bandwidth of PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)) + 10.0*math.log10((1.0 * param.samp_rate)/param.bw))
+)
         #check output 'out'
         out_settling_time_index, out_real_error_max, out_imag_error_max = check_complex(data_sine.out, 1, 0, 1.5, 10, 100)
         out_settling_time_ms = (1.0 / param.samp_rate) * out_settling_time_index * 1000.0
         self.assertEqual(out_settling_time_ms, np.inf) #have to be be inf (so, unlocked), errors are intrinsically asserted
-        print "-Output 'Out' Settling time : %f ms;" % out_settling_time_ms
+        print ("-Output 'Out' Settling time : %f ms;" % out_settling_time_ms)
 
         #check output 'pe'
         pe_settling_time_index, pe_error_max = check_float(data_sine.pe, 0, 0.5, 10, 100)
         pe_settling_time_ms = (1.0 / param.samp_rate) * pe_settling_time_index * 1000.0
         self.assertEqual(pe_settling_time_ms, np.inf) #have to be be inf (so, unlocked), errors are intrinsically asserted
-        print "-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms
+        print ("-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms)
 
         #check output 'freq'
         freq_settling_time_index, freq_error_max = check_float(data_sine.freq, param.freq, (param.freq * 0.01), 10, 100) #check if the measured output frequency is the same of the input signal ± 5%
         freq_settling_time_ms = (1.0 / param.samp_rate) * freq_settling_time_index * 1000.0
         self.assertEqual(freq_settling_time_ms, np.inf) #have to be be inf (so, unlocked), errors are intrinsically asserted
-        print "-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms
+        print ("-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms)
 
         #check output 'pa'
         pa_min_step , pa_slope = check_pa(data_sine.pa, param.N , 10)
         precision = math.pow(2,(- (param.N - 1))) * math.pi
         self.assertGreaterEqual(pa_min_step, precision)
-        print "-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate)
-        print "-Output Min step : %f rad." % pa_min_step
+        print ("-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate))
+        print ("-Output Min step : %f rad." % pa_min_step)
 
     def test_010_t (self):
         """test_010_t: switch from the second order to the third order with noise"""
@@ -1156,44 +1164,44 @@ class qa_pll (gr_unittest.TestCase):
         # plot_fft(self,data_fft)
 
         #CNR evaluation
-        print "-CNR input to PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)))
-        print "-CNR in the equivalent bandwidth of PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)) + 10.0*math.log10((1.0 * param.samp_rate)/param.bw))
-
+        print ("-CNR input to PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0))))
+        print ("-CNR in the equivalent bandwidth of PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)) + 10.0*math.log10((1.0 * param.samp_rate)/param.bw))
+)
         #check the switch
         self.assertEqual(len(switch), 1)
         self.assertEqual(self.debug_order, 3)
-        print "-Final order of the pll: %d;" %self.debug_order
-        print "-Set function received at the moment (of the simulation): %.2f s;" % (switch[0] * (1.0 / param.samp_rate))
+        print ("-Final order of the pll: %d;" %self.debug_order)
+        print ("-Set function received at the moment (of the simulation): %.2f s;" % (switch[0] * (1.0 / param.samp_rate)))
 
         #check output 'out'
         out_settling_time_index, out_real_error_max, out_imag_error_max = check_complex(data_pll.out, 1, 0, 0.5, 10, 100)
         out_settling_time_ms = (1.0 / param.samp_rate) * out_settling_time_index * 1000.0
         self.assertLess(out_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'Out' Settling time : %f ms;" % out_settling_time_ms
-        print "-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max
-        print "-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max
+        print ("-Output 'Out' Settling time : %f ms;" % out_settling_time_ms)
+        print ("-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max)
+        print ("-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max)
 
         #check output 'out'
         pe_settling_time_index, pe_error_max = check_float(data_pll.pe, 0, 0.5, 10, 100)
         pe_settling_time_ms = (1.0 / param.samp_rate) * pe_settling_time_index * 1000.0
         self.assertLess(pe_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms
-        print "-Output 'pe' absolute maximum error: %.3f;" % pe_error_max
+        print ("-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms)
+        print ("-Output 'pe' absolute maximum error: %.3f;" % pe_error_max)
 
         #check output 'out'
         freq_settling_time_index, freq_error_max = check_float(data_pll.freq, param.freq, (param.freq * 0.05), 10, 100) #check if the measured output frequency is the same of the input signal ± 5%
         freq_settling_time_ms = (1.0 / param.samp_rate) * freq_settling_time_index * 1000.0
         self.assertLess(freq_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms
-        print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
+        print ("-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms)
+        print ("-Output 'freq' absolute maximum error: %.3f;" % freq_error_max)
 
         #check output 'pa'
         pa_min_step , pa_slope = check_pa(data_pll.pa, param.N , 10)
         precision = math.pow(2,(- (param.N - 1))) * math.pi
         self.assertAlmostEqual(pa_slope , ((param.freq * (2 * math.pi)) / param.samp_rate), 3)
         self.assertGreaterEqual(pa_min_step, precision)
-        print "-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate)
-        print "-Output Min step : %f rad." % pa_min_step
+        print ("-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate))
+        print ("-Output Min step : %f rad." % pa_min_step)
 
     def test_011_t (self):
         """test_011_t: frequency sweep input with noise"""
@@ -1222,7 +1230,7 @@ class qa_pll (gr_unittest.TestCase):
 
         print_parameters = "\p Order = %d; Coeff1 (2nd order) = %f; Coeff2 (2nd order) = %f; Coeff4 (2nd order) = %f; Coeff1 (3rd order) = %f; Coeff2 (3rd order) = %f; Coeff3 (3rd order) = %f; Frequency central = %.2f Hz; Bandwidth = %.2f Hz; Sample rate = %d Hz; Input frequency min = %d Hz; Input frequency max = %d Hz; Input frequency sweep = %.2f Hz/s; Noise amplitude = %.1f\p" \
             %(param.order, param.coeff1_2, param.coeff2_2, param.coeff2_4, param.coeff1_3, param.coeff2_3, param.coeff3_3, param.f_central, param.bw, param.samp_rate, param.freq_min, param.freq_max, param.sweep, param.noise)
-        print print_parameters
+        print (print_parameters)
 
         pll = ecss.pll(param.samp_rate, param.order, param.N, [param.coeff1_2, param.coeff2_2, param.coeff2_4, param.coeff1_3, param.coeff2_3, param.coeff3_3], param.f_central, param.bw)
 
@@ -1264,7 +1272,6 @@ class qa_pll (gr_unittest.TestCase):
 
         plot(self, data_pll)
 
-        plt.rcParams['text.usetex'] = True
         real = []
         imag = []
 
@@ -1299,45 +1306,51 @@ class qa_pll (gr_unittest.TestCase):
         fig.tight_layout()  # otherwise the right y-label is slightly clipped
         fig.subplots_adjust(hspace=0.6, top=0.85, bottom=0.15)
 
+        tmpfile = BytesIO()
+        fig.savefig(tmpfile, format='png')
+        fig_encoded = base64.b64encode(tmpfile.getvalue())
+        print("/im!{}/im!".format(fig_encoded.decode("utf-8")))#add in th template
+
+
         # plt.show()
         self.pdf.add_to_pdf(fig)
 
         #CNR evaluation
-        print "-CNR input to PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)))
-        print "-CNR in the equivalent bandwidth of PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)) + 10.0*math.log10((1.0 * param.samp_rate)/param.bw))
-
+        print ("-CNR input to PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0))))
+        print ("-CNR in the equivalent bandwidth of PLL: %f dB;" % (10.0*math.log10(0.5/ math.pow(param.noise ,2.0)) + 10.0*math.log10((1.0 * param.samp_rate)/param.bw))
+)
         #check output 'out'
         out_settling_time_index, out_real_error_max, out_imag_error_max = check_complex(data_pll.out, 1, 0, 0.5, 10, 100)
         out_settling_time_ms = (1.0 / param.samp_rate) * out_settling_time_index * 1000.0
         self.assertLessEqual(out_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'Out' Settling time : %f ms;" % out_settling_time_ms
-        print "-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max
-        print "-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max
+        print ("-Output 'Out' Settling time : %f ms;" % out_settling_time_ms)
+        print ("-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max)
+        print ("-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max)
 
         #check output 'pe'
         pe_settling_time_index, pe_error_max = check_float(data_pll.pe, 0, 1, 10, 100)
         pe_settling_time_ms = (1.0 / param.samp_rate) * pe_settling_time_index * 1000.0
         self.assertLess(pe_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms
-        print "-Output 'pe' absolute maximum error: %.3f;" % pe_error_max
+        print ("-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms)
+        print ("-Output 'pe' absolute maximum error: %.3f;" % pe_error_max)
 
         #check output 'freq'
         freq_settling_time_index, freq_error_max = check_float(data_pll.freq, ((param.freq_max - param.freq_min) / 2), (((param.freq_max - param.freq_min) / 2) * 0.1), 10, 100) #check if the measured output frequency is the same of the input signal ± 5%
         freq_settling_time_ms = (1.0 / param.samp_rate) * freq_settling_time_index * 1000.0
         self.assertLess(freq_settling_time_ms, np.inf) #errors are intrinsically asserted
-        print "-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms
-        print "-Output 'freq' absolute maximum error: %.3f;" % freq_error_max
+        print ("-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms)
+        print ("-Output 'freq' absolute maximum error: %.3f;" % freq_error_max)
 
         # #check output 'pa'
         # pa_min_step , pa_slope = check_pa(data_sine.pa, param.N , 10)
         # precision = math.pow(2,(- (param.N - 1))) * math.pi
         # self.assertAlmostEqual(pa_slope , ((param.freq * (2 * math.pi)) / param.samp_rate), 3)
         # self.assertGreaterEqual(pa_min_step, precision)
-        # print "-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate)
-        # print "-Output Min step : %f rad." % pa_min_step
+        # print ("-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate))
+        # print ("-Output Min step : %f rad." % pa_min_step)
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_pll)
-    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_2')
+    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_3')
     runner.run(suite)
     #gr_unittest.TestProgram()

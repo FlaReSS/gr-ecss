@@ -1318,7 +1318,7 @@ EXTRA_SEARCH_MAPPINGS  =
 # If the GENERATE_LATEX tag is set to YES (the default) Doxygen will
 # generate Latex output.
 
-GENERATE_LATEX         = @enable_latex_docs@
+GENERATE_LATEX         = YES
 
 # The LATEX_OUTPUT tag is used to specify where the LaTeX docs will be put.
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be
@@ -1389,7 +1389,7 @@ PDF_HYPERLINKS         = YES
 # plain latex in the generated Makefile. Set this option to YES to get a
 # higher quality PDF documentation.
 
-USE_PDFLATEX           = NO
+USE_PDFLATEX           = YES
 
 # If the LATEX_BATCHMODE tag is set to YES, doxygen will add the \\batchmode.
 # command to the generated LaTeX files. This will instruct LaTeX to keep
@@ -1517,7 +1517,7 @@ XML_PROGRAMLISTING     = NO
 # If the GENERATE_DOCBOOK tag is set to YES Doxygen will generate DOCBOOK files
 # that can be used to generate PDF.
 
-GENERATE_DOCBOOK       = NO
+GENERATE_DOCBOOK       = YES
 
 # The DOCBOOK_OUTPUT tag is used to specify where the DOCBOOK pages will be put.
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be put in
@@ -1553,7 +1553,7 @@ GENERATE_PERLMOD       = NO
 # the necessary Makefile rules, Perl scripts and LaTeX code to be able
 # to generate PDF and DVI output from the Perl module output.
 
-PERLMOD_LATEX          = NO
+PERLMOD_LATEX          = YES
 
 # If the PERLMOD_PRETTY tag is set to YES the Perl module output will be
 # nicely formatted so it can be parsed by a human reader.

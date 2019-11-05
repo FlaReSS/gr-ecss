@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # Copyright 2018 Antonio Miraglia - ISISpace .
@@ -13,6 +13,8 @@ import math, time, datetime, os, abc, sys
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+import base64
+from io import BytesIO
 
 class Pdf_class(object):
     """this class can print a single pdf for all the tests"""
@@ -75,6 +77,11 @@ def plot(self, data_out, data_src):
     fig.suptitle(name_test_usetex, fontsize=30)
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
     fig.subplots_adjust(hspace=0.35, top=0.85, bottom=0.15)
+
+    tmpfile = BytesIO()
+    fig.savefig(tmpfile, format='png')
+    fig_encoded = base64.b64encode(tmpfile.getvalue())
+    print("/im!{}/im!".format(fig_encoded.decode("utf-8")))#add in th template
     
     # plt.show()
     self.pdf.add_to_pdf(fig)
@@ -122,11 +129,11 @@ class qa_spl_decoder (gr_unittest.TestCase):
         plot(self, data_out, data_src)
 
         self.assertAlmostEqual(data_out, expected_data)
-        print "- Data correctly encoded."
+        print ("- Data correctly encoded.")
 
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_spl_decoder)
-    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_1')
+    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_3')
     runner.run(suite)
     #gr_unittest.TestProgram()

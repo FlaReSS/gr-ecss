@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # Copyright 2018 Antonio Miraglia - ISISpace .
@@ -89,11 +89,11 @@ def plot(self, data):
     print("/im!{}/im!".format(fig_encoded.decode("utf-8")))#add in th template
 
 
-    plt.show()
-    # self.pdf.add_to_pdf(fig)
+    # plt.show()
+    self.pdf.add_to_pdf(fig)
 
 
-class qa_validation_test (gr_unittest.TestCase):
+class qa_demodulator (gr_unittest.TestCase):
 
     def setUp (self):
         self.tb = gr.top_block ()
@@ -103,11 +103,12 @@ class qa_validation_test (gr_unittest.TestCase):
         self.tb = None
         self.pdf.finalize_pdf()
 
-    def test_002_t (self):
+    def test_001_t (self):
         """test_002_t: with a input sine without noise in the boundary BW of PLL"""
 
         tb = self.tb
         data = namedtuple('data', 'phase_output time')
+        srcdir = os.environ['srcdir']
         
         ##################################################
         # Variables
@@ -118,7 +119,7 @@ class qa_validation_test (gr_unittest.TestCase):
         # Blocks
         ##################################################
         blocks_throttle_0 = blocks.throttle(gr.sizeof_float*1, samp_rate,True)
-        blocks_file_source_0 = blocks.file_source(gr.sizeof_float*1, '../python/test_files/phase_error_PLL_datasw150kHz_swr32kHz-s_tc4kbps_mi', False)
+        blocks_file_source_0 = blocks.file_source(gr.sizeof_float*1, os.path.join(srcdir, "test_files", "phase_error_PLL_datasw150kHz_swr32kHz-s_tc4kbps_mi"), False)
         blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
         dst_output = blocks.vector_sink_f()
 
@@ -137,10 +138,8 @@ class qa_validation_test (gr_unittest.TestCase):
         
 
 
-
-
 if __name__ == '__main__':
-    suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_validation_test)
-    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_1')
+    suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_demodulator)
+    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_3')
     runner.run(suite)
     #gr_unittest.TestProgram()

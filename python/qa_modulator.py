@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # Copyright 2018 Antonio Miraglia - ISISpace .
@@ -15,6 +15,8 @@ import math, time, datetime, os, abc, sys
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+import base64
+from io import BytesIO
 
 class Pdf_class(object):
     """this class can print a single pdf for all the tests"""
@@ -53,14 +55,12 @@ class Pdf_class(object):
             d['ModDate'] = datetime.datetime.today()
 
 def print_parameters(data):
-    to_print = "\p Bit rate= %d V; f_samp= %.1f Hz\p" \
+    to_print = "/pr!Bit rate= %d V; f_samp= %.1f Hz/pr!" \
         %(data.bit_rate, data.samp_rate)
-    print to_print
+    print (to_print)
 
 def plot(self, data_out, data_src):
     """this function create a defined graph with the data inputs"""
-
-    plt.rcParams['text.usetex'] = True
 
     fig, (ax1, ax2) = plt.subplots(2, sharey=True)
 
@@ -84,6 +84,12 @@ def plot(self, data_out, data_src):
     fig.suptitle(name_test_usetex, fontsize=30)
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
     fig.subplots_adjust(hspace=0.35, top=0.85, bottom=0.15)
+
+    tmpfile = BytesIO()
+    fig.savefig(tmpfile, format='png')
+    fig_encoded = base64.b64encode(tmpfile.getvalue())
+    print("/im!{}/im!".format(fig_encoded.decode("utf-8")))#add in th template
+
     
     # plt.show()
     self.pdf.add_to_pdf(fig)
@@ -93,14 +99,13 @@ def test_modulator(self, param):
 
     tb = self.tb
 
-    src =  blocks.file_source(gr.sizeof_char*1, '../python/test_files/CADU.bin', False)
+    srcdir = os.environ['srcdir']
+
+    src =  blocks.file_source(gr.sizeof_char*1, os.path.join(srcdir, "test_files", "CADU.bin"), False)
     pack = blocks.unpack_k_bits_bb(8)
 
-
     dst = blocks.vector_sink_b()
-
     head = blocks.head(gr.sizeof_char, len(param.data_src))
-
     nrzl = ecss.nrzl_encoder(param.bit_rate, param.samp_rate)
 
     tb.connect(src, pack)
@@ -136,8 +141,10 @@ class qa_modulator (gr_unittest.TestCase):
 
         encoder_variable = fec.cc_encoder_make(1, 7, 2, ([79,-109]), 0, fec.CC_STREAMING, False)
 
-        src =  blocks.file_source(gr.sizeof_char*1, '../python/test_files/CADU_incl_ASM.bin', False)
-        src_expected =  blocks.file_source(gr.sizeof_char*1, '../python/test_files/Convolutionally_encoded_CADU.bin', False)
+        srcdir = os.environ['srcdir']
+
+        src =  blocks.file_source(gr.sizeof_char*1, os.path.join(srcdir, "test_files", "CADU_incl_ASM.bin"), False)
+        src_expected =  blocks.file_source(gr.sizeof_char*1,os.path.join(srcdir, "test_files", "Convolutionally_encoded_CADU.bin"), False)
         pack1 = blocks.unpack_k_bits_bb(8)
         pack2 = blocks.unpack_k_bits_bb(8)
 
@@ -158,7 +165,7 @@ class qa_modulator (gr_unittest.TestCase):
         data_out = dst.data()
         expected_data = dst_expected.data()
         
-        print len(data_out)
+        print (len(data_out))
 
         self.assertFloatTuplesAlmostEqual(data_out, expected_data)
         # for i in range(len(expected_data) - len(data_out)):
@@ -191,6 +198,6 @@ class qa_modulator (gr_unittest.TestCase):
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_modulator)
-    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_2')
+    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_3')
     runner.run(suite)
     #gr_unittest.TestProgram()

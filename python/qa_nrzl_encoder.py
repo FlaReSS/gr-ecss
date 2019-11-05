@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # Copyright 2018 Antonio Miraglia - ISISpace .
@@ -55,7 +55,7 @@ class Pdf_class(object):
 def print_parameters(data):
     to_print = "/pr!Bit rate= %d V; f_samp= %.1f Hz/pr!" \
         %(data.bit_rate, data.samp_rate)
-    print to_print
+    print (to_print)
 
 def plot(self, data_out, data_src):
     """this function create a defined graph with the data inputs"""
@@ -140,7 +140,7 @@ class qa_nrzl_encoder (gr_unittest.TestCase):
         plot(self, data_out, param.data_src)
 
         self.assertAlmostEqual(data_out, expected_data)
-        print "- Data correctly encoded."
+        print ("- Data correctly encoded.")
 
     def test_002_t (self):
         """test_002_t: with repetition of 4"""
@@ -158,12 +158,12 @@ class qa_nrzl_encoder (gr_unittest.TestCase):
         plot(self, data_out, param.data_src)
 
         self.assertAlmostEqual(data_out, expected_data)
-        print "- Data correctly encoded."
+        print ("- Data correctly encoded.")
 
 
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_nrzl_encoder)
-    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_2')
+    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_3')
     runner.run(suite)
     #gr_unittest.TestProgram()

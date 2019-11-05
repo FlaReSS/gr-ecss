@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #  GNU GENERAL PUBLIC LICENSE
 #
@@ -57,7 +57,7 @@ class Pdf_class(object):
 def print_parameters(data):
     to_print = "/pr!Sample rate = %d Hz; Number of Bits = %d; FFT Size = %d; Number of Inputs  = %d; Frequency input = %.1f Hz/pr!" \
         %(data.samp_rate, data.N, data.fft_size, data.inputs, data.freq)
-    print to_print
+    print (to_print)
 
 def plot(self, data_cpm):
     """this function create a defined graph for the pll with the data input and output"""
@@ -131,8 +131,6 @@ def plot(self, data_cpm):
 
 def plot_fft(self, data_fft):
     """this function create a defined graph with the data inputs"""
-
-    plt.rcParams['text.usetex'] = True
 
     out = np.asarray(data_fft.out)
     bins = np.asarray(data_fft.bins)
@@ -331,11 +329,11 @@ class qa_coherent_phase_modulator (gr_unittest.TestCase):
         
         #check frequency
         self.assertAlmostEqual((param.freq * (2 * math.pi) / param.samp_rate) , np.mean(phase))
-        print "-Frequency measured= %f Hz;" %(np.mean(phase) / (2 * math.pi) * param.samp_rate) 
+        print ("-Frequency measured= %f Hz;" %(np.mean(phase) / (2 * math.pi) * param.samp_rate))
 
         #check phase error
         self.assertAlmostEqual(np.var(phase), 0)
-        print "-No phase jump found."
+        print ("-No phase jump found.")
 
     def test_002_t (self):
         """test_002_t: with a phase accumulator at higher frequency"""
@@ -359,11 +357,11 @@ class qa_coherent_phase_modulator (gr_unittest.TestCase):
         
         #check frequency
         self.assertAlmostEqual((param.freq * (2 * math.pi) / param.samp_rate) , np.mean(phase))
-        print "-Frequency measured= %f Hz;" %(np.mean(phase) / (2 * math.pi) * param.samp_rate) 
+        print ("-Frequency measured= %f Hz;" %(np.mean(phase) / (2 * math.pi) * param.samp_rate))
 
         #check phase error
         self.assertAlmostEqual(np.var(phase), 0)
-        print "-No phase jump found."
+        print ("-No phase jump found.")
 
     def test_003_t (self):
         """test_003_t: with a phase accumulator and gain"""
@@ -389,15 +387,15 @@ class qa_coherent_phase_modulator (gr_unittest.TestCase):
         
         #check frequency
         self.assertAlmostEqual(((param.freq * param.downlink / param.uplink) * (2 * math.pi) / param.samp_rate) , np.mean(phase))
-        print "-Frequency measured= %f Hz;" %(np.mean(phase) / (2 * math.pi) * param.samp_rate) 
+        print ("-Frequency measured= %f Hz;" %(np.mean(phase) / (2 * math.pi) * param.samp_rate)) 
 
         #check phase error
         self.assertAlmostEqual(np.var(phase), 0)
-        print "-No phase jump found."
+        print ("-No phase jump found.")
 
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_coherent_phase_modulator)
-    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_2')
+    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_3')
     runner.run(suite)
     # gr_unittest.TestProgram()

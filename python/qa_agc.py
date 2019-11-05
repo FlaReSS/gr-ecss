@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # Copyright 2018 Antonio Miraglia - ISISpace .
@@ -55,7 +55,7 @@ class Pdf_class(object):
 def print_parameters(data):
     to_print = "/pr!Aref= %.1f V; Noise = %.1f Vrms; t_settlig= %.3f ms; Ain_max_rms= %.2f V; Ain_min_rms= %.2f V; f_samp= %.1f Hz; f_in_sine= %.1f Hz/pr!" \
         %(data.reference, data.noise, (data.settling_time / 1000), (data.input_amplitude_max), (data.input_amplitude_min), data.samp_rate, data.freq_sine)
-    print to_print
+    print (to_print)
 
 def plot(self, data, reference, error, zero, settling_time):
     """this function create a defined graph with the data inputs"""
@@ -272,9 +272,9 @@ class qa_agc (gr_unittest.TestCase):
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, error * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, error * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time
-        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
-        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+        print ("-Settling time: %.3f ms" % data_transient.settling_time)
+        print ("-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start)
+        print ("-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end)
 
     def test_002_t (self):
         """test_002_t: positive step of 100 times"""
@@ -303,9 +303,9 @@ class qa_agc (gr_unittest.TestCase):
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, error * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, error * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time
-        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
-        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+        print ("-Settling time: %.3f ms" % data_transient.settling_time)
+        print ("-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start)
+        print ("-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end)
 
     def test_003_t (self):
         """test_003_t: positive step of 1000 times"""
@@ -334,9 +334,9 @@ class qa_agc (gr_unittest.TestCase):
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, error * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, error * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time
-        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
-        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+        print ("-Settling time: %.3f ms" % data_transient.settling_time)
+        print ("-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start)
+        print ("-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end)
 
     def test_004_t (self):
         """test_004_t: positive small step"""
@@ -365,9 +365,9 @@ class qa_agc (gr_unittest.TestCase):
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, error * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, error * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time
-        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
-        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+        print ("-Settling time: %.3f ms" % data_transient.settling_time)
+        print ("-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start)
+        print ("-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end)
 
     def test_005_t (self):
         """test_005_t: negative step of 10 times"""
@@ -396,9 +396,9 @@ class qa_agc (gr_unittest.TestCase):
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, error * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, error * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time
-        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
-        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+        print ("-Settling time: %.3f ms" % data_transient.settling_time)
+        print ("-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start)
+        print ("-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end)
 
     def test_006_t (self):
         """test_006_t: negative step of 100 times"""
@@ -427,9 +427,9 @@ class qa_agc (gr_unittest.TestCase):
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, error * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, error * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time
-        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
-        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+        print ("-Settling time: %.3f ms" % data_transient.settling_time)
+        print ("-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start)
+        print ("-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end)
 
     def test_007_t (self):
         """test_007_t: negative step of 1000 times"""
@@ -458,9 +458,9 @@ class qa_agc (gr_unittest.TestCase):
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, error * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, error * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time
-        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
-        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+        print ("-Settling time: %.3f ms" % data_transient.settling_time)
+        print ("-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start)
+        print ("-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end)
 
 
     def test_008_t (self):
@@ -490,9 +490,9 @@ class qa_agc (gr_unittest.TestCase):
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, (error + param.noise) * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, (error + param.noise) * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time
-        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
-        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+        print ("-Settling time: %.3f ms" % data_transient.settling_time)
+        print ("-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start)
+        print ("-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end)
 
     def test_009_t (self):
         """test_009_t: positive step of 100 times with noise"""
@@ -521,9 +521,9 @@ class qa_agc (gr_unittest.TestCase):
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, (error + param.noise) * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, (error + param.noise) * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time
-        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
-        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+        print ("-Settling time: %.3f ms" % data_transient.settling_time)
+        print ("-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start)
+        print ("-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end)
 
     def test_010_t (self):
         """test_010_t: positive step of 1000 times with noise"""
@@ -552,9 +552,9 @@ class qa_agc (gr_unittest.TestCase):
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, (error + param.noise) * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, (error + param.noise) * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time
-        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
-        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+        print ("-Settling time: %.3f ms" % data_transient.settling_time)
+        print ("-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start)
+        print ("-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end)
 
     def test_011_t (self):
         """test_011_t: positive small step with noise"""
@@ -583,9 +583,9 @@ class qa_agc (gr_unittest.TestCase):
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, (error + param.noise) * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, (error + param.noise) * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time
-        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
-        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+        print ("-Settling time: %.3f ms" % data_transient.settling_time)
+        print ("-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start)
+        print ("-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end)
 
     def test_012_t (self):
         """test_012_t: negative step of 10 times with noise"""
@@ -614,9 +614,9 @@ class qa_agc (gr_unittest.TestCase):
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, (error + param.noise) * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, (error + param.noise) * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time
-        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
-        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+        print ("-Settling time: %.3f ms" % data_transient.settling_time)
+        print ("-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start)
+        print ("-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end)
 
     def test_013_t (self):
         """test_013_t: negative step of 100 times with noise"""
@@ -645,9 +645,9 @@ class qa_agc (gr_unittest.TestCase):
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, (error + param.noise) * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, (error + param.noise) * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time
-        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
-        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+        print ("-Settling time: %.3f ms" % data_transient.settling_time)
+        print ("-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start)
+        print ("-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end)
 
     def test_014_t (self):
         """test_014_t: negative step of 1000 times with noise"""
@@ -676,9 +676,9 @@ class qa_agc (gr_unittest.TestCase):
         self.assertEqual(data_transient.stable_start, True)
         self.assertLessEqual(data_transient.error_percentage_mean_start, (error + param.noise) * 100)
         self.assertLessEqual(data_transient.error_percentage_mean_end, (error + param.noise) * 100)
-        print "-Settling time: %.3f ms" % data_transient.settling_time
-        print "-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start
-        print "-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end
+        print ("-Settling time: %.3f ms" % data_transient.settling_time)
+        print ("-Output error after swing: %.3f%%" % data_transient.error_percentage_mean_start)
+        print ("-Output error before swing: %.3f%%" % data_transient.error_percentage_mean_end)
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_agc)

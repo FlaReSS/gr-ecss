@@ -99,8 +99,8 @@ def plot(self, data_tar):
     print("/im!{}/im!".format(fig_encoded.decode("utf-8")))#add in th template
 
 
-    plt.show()
-    # self.pdf.add_to_pdf(fig)
+    # plt.show()
+    self.pdf.add_to_pdf(fig)
 
 
 class qa_validation_test (gr_unittest.TestCase):
@@ -114,11 +114,15 @@ class qa_validation_test (gr_unittest.TestCase):
         self.pdf.finalize_pdf()
 
 
-    def test_002_t (self):
-        """test_002_t: with a input sine without noise in the boundary BW of PLL"""
+    def test_001_t (self):
+        """test_001_t: with a input sine without noise in the boundary BW of PLL"""
 
         tb = self.tb
         data_tar = namedtuple('data_tar', 'phase_source phase_output time tar')
+
+        srcdir = os.environ['srcdir']
+
+        src =  blocks.file_source(gr.sizeof_char*1, os.path.join(srcdir, "test_files", "CADU.bin"), False)
         
         ##################################################
         # Variables
@@ -132,9 +136,9 @@ class qa_validation_test (gr_unittest.TestCase):
         flaress_sine_debug_1 = flaress.sine_debug()
         blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
         blocks_throttle_1 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
-        blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, '../python/test_files/validation_test_output', False)
+        blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, os.path.join(srcdir, "test_files", "validation_test_output"), False)
         blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
-        blocks_file_source_1 = blocks.file_source(gr.sizeof_gr_complex*1, '../python/test_files/validation_test_source', False)
+        blocks_file_source_1 = blocks.file_source(gr.sizeof_gr_complex*1, os.path.join(srcdir, "test_files", "validation_test_source"), False)
         blocks_file_source_1.set_begin_tag(pmt.PMT_NIL)
         blocks_complex_to_arg_1 = blocks.complex_to_arg(1)
         blocks_complex_to_arg_0 = blocks.complex_to_arg(1)
@@ -165,7 +169,7 @@ class qa_validation_test (gr_unittest.TestCase):
         data_tar.tar = dst_tar.data()
         data_tar.time = np.linspace(0, (len(data_tar.phase_output) * 1.0 / samp_rate), len(data_tar.phase_output), endpoint=False)
         
-        print len(data_tar.phase_output), len(data_tar.phase_source)
+        print (len(data_tar.phase_output), len(data_tar.phase_source))
         
         # for i in range(len(data_tar.phase_output)):
         #     if data_tar.phase_output[i] != 0:
@@ -181,6 +185,6 @@ class qa_validation_test (gr_unittest.TestCase):
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_validation_test)
-    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_1')
+    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_3')
     runner.run(suite)
     #gr_unittest.TestProgram()

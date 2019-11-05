@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # Copyright 2018 Antonio Miraglia - ISISpace .
@@ -57,7 +57,7 @@ class Pdf_class(object):
 def print_parameters(data):
     to_print = "\pr!Sample rate = %d Hz; Number of Bits = %d; Minimum Value = %.3f rad; Maximum Value = %.3f rad\pr!" \
         %(data.samp_rate, data.N, data.min_value, data.max_value)
-    print to_print
+    print (to_print)
 
 def check_integer_phase(data_out, N, items):
     """this function checks the integer phase accumulator output. It checks the minimum step and the slope of a defined number of items"""
@@ -185,8 +185,8 @@ class qa_phase_converter (gr_unittest.TestCase):
         self.assertGreaterEqual(pc_min_step, precision)
         self.assertAlmostEqual(pc_slope, src_slope, 5)
 
-        print "-Output Slope : %f rad/s;" % (pc_slope * param.samp_rate)
-        print "-Output Min step : %f rad." % pc_min_step
+        print ("-Output Slope : %f rad/s;" % (pc_slope * param.samp_rate))
+        print ("-Output Min step : %f rad." % pc_min_step)
 
     def test_002_t (self):
         """test_002_t: precision test"""
@@ -210,12 +210,12 @@ class qa_phase_converter (gr_unittest.TestCase):
         self.assertGreaterEqual(pc_min_step, precision)
         self.assertAlmostEqual(pc_slope, src_slope, 5)
 
-        print "-Output Slope : %f rad/s;" % (pc_slope * param.samp_rate)
-        print "-Output Min step : %f rad." % pc_min_step
+        print ("-Output Slope : %f rad/s;" % (pc_slope * param.samp_rate))
+        print ("-Output Min step : %f rad." % pc_min_step)
 
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_phase_converter)
-    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_2')
+    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_3')
     runner.run(suite)
     #gr_unittest.TestProgram()
