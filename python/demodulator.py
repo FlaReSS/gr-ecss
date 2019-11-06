@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # 
 # Copyright 2018 Antonio Miraglia - ISISpace.
 # 
@@ -19,7 +20,8 @@
 # 
 from gnuradio import gr
 from gnuradio import digital
-from gnuradio import block
+from gnuradio import blocks
+from gnuradio import analog
 from gnuradio import filter
 from gnuradio.filter import firdes
 import ecss
@@ -28,9 +30,9 @@ import sys
 
 class demodulator(gr.hier_block2):
     """
-    docstring for block modulator
+    docstring for block demodulator
     """
-    def __init__(self, cl_loop_bandwidth, cl_order, cl_freq_sub, ss_sps, ss_loop_bandwidth, ss_ted_gain, ss_damping, ss_max_dev, ss_out_ss, ss_interpolatin, ss_ted_type, ss_nfilter, ss_pfb_mf_taps, sel_costas, sel_spl, samp_rate):
+    def __init__(self, cl_loop_bandwidth, cl_order, cl_freq_sub, ss_sps, ss_loop_bandwidth, ss_ted_gain, ss_damping, ss_max_dev, ss_out_ss, ss_interpolation, ss_ted_type, ss_nfilter, ss_pfb_mf_taps, sel_costas, sel_spl, samp_rate):
         gr.hier_block2.__init__(self,
             "demodulator",
             gr.io_signature(1, 1, gr.sizeof_float),  # Input signature
@@ -49,19 +51,20 @@ class demodulator(gr.hier_block2):
         self.ss_damping = fec.ss_damping
         self.ss_max_dev = ss_max_dev
         self.ss_out_ss = ss_out_ss
-        self.ss_interpolatin = ss_interpolatin
+        self.ss_interpolation = ss_interpolation
         self.ss_ted_type = ss_ted_type
         self.ss_nfilter = ss_nfilter
         self.ss_pfb_mf_taps = ss_pfb_mf_taps
 
         self.sel_costas = sel_costas
         self.sel_spl = sel_spl
+        self.samp_rate = samp_rate
 
         ##################################################
         # Blocks
         ##################################################
 
-        self.digital_sync = digital.symbol_sync_ff(self.ss_ted_type, self.ss_sps, self.ss_loop_bandwidth, self.ss_damping, self.ss_ted_gain, self.ss_max_dev, self.ss_out_ss, self.ss_interpolatin, digital.IR_PFB_MF, self.ss_nfilter, (self.ss_pfb_mf_taps))
+        self.digital_sync = digital.symbol_sync_ff(self.ss_ted_type, self.ss_sps, self.ss_loop_bandwidth, self.ss_damping, self.ss_ted_gain, self.ss_max_dev, self.ss_out_ss, self.ss_interpolation, digital.IR_PFB_MF, self.ss_nfilter, (self.ss_pfb_mf_taps))
 
         self.spl_dencoder = ecss.spl_dencoder()
 
@@ -74,11 +77,12 @@ class demodulator(gr.hier_block2):
         self.null_float = blocks.null_sink(gr.sizeof_float*1)
         self.to_char = blocks.float_to_uchar()
         self.unpack = blocks.unpack_k_bits_bb()
-      
 
         ##################################################
         # Connections
         ##################################################
+
+        self.connect(self, self)
 
         if (sel_costas == 0):
             # if (type == 0):

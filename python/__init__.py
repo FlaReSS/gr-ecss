@@ -36,5 +36,6 @@ except ImportError:
 
 from signal_search_fft_hier import signal_search_fft_hier
 from modulator import modulator
+from demodulator import demodulator
 
 #

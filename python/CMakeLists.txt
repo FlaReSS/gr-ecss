@@ -33,8 +33,8 @@ GR_PYTHON_INSTALL(
     FILES
     __init__.py
     signal_search_fft_hier.py
-    demodulator.py 
-    modulator.py DESTINATION ${GR_PYTHON_DIR}/ecss
+    modulator.py
+    demodulator.py DESTINATION ${GR_PYTHON_DIR}/ecss
 )
 
 ########################################################################
@@ -57,5 +57,5 @@ GR_ADD_TEST(qa_spl_decoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_s
 GR_ADD_TEST(qa_nrzl_encoder ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_nrzl_encoder.py)
 GR_ADD_TEST(qa_nrzl_encoder_subcarrier ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_nrzl_encoder_subcarrier.py)
 GR_ADD_TEST(qa_modulator ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_modulator.py)
-GR_ADD_TEST(qa_demodulator ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_demodulator.py)
 GR_ADD_TEST(qa_validation_test ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_validation_test.py)
+GR_ADD_TEST(qa_demodulator ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_demodulator.py)
