@@ -31,6 +31,5 @@ install(FILES
     ecss_nrzl_encoder.xml
     ecss_nrzl_encoder_subcarrier.xml
     ecss_modulator.xml
-    ecss_demodulator.xml
-    DESTINATION share/gnuradio/grc/blocks
+    ecss_demodulator.xml DESTINATION share/gnuradio/grc/blocks
 )
