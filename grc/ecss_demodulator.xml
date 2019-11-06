@@ -6,26 +6,7 @@
   <import>import ecss</import>
   <import>from gnuradio import digital</import>
   <import>from gnuradio import filter</import>
-  <make>ecss.demodulator($cl_loop_bandwidth, $cl_order, $freq_sub, $ss_sps, $ss_loop_bandwidth, $ss_ted_gain, $ss_damping, $ss_max_dev, $ss_out_ss, $ss_interpolatin, $ss_ted_type, $ss_nfilter, $ss_pfb_mf_taps, $sel_costas, $sel_spl)</make>
-
-  <!-- <param>
-    <name>InputType</name>
-    <key>type</key>
-    <type>enum</type>
-    <option>
-        <name>Complex</name>
-        <key>0</key>
-        <opt>input:complex</opt>
-        <opt>output:complex</opt>
-    </option>
-    <option>
-        <name>Float</name>
-        <key>1</key>
-        <opt>input:float</opt>
-        <opt>output:float</opt>
-    </option>
-  </param> -->
-
+  <make>ecss.demodulator($cl_loop_bandwidth, $cl_order, $cl_freq_sub, $ss_sps, $ss_loop_bandwidth, $ss_ted_gain, $ss_damping, $ss_max_dev, $ss_out_ss, $ss_interpolation, $ss_ted_type, $ss_nfilter, $ss_pfb_mf_taps, $sel_costas, $sel_spl, $samp_rate)</make>
 
   <param>
     <name>SPL decoder</name>
@@ -152,7 +133,7 @@
   </param>
   <param>
     <name>Interpolating Resampler</name>
-    <key>ss_interpolatin</key>
+    <key>ss_interpolation</key>
     <type>enum</type>
     <option>
         <name>MMSE, 8 tap FIR</name>
@@ -178,20 +159,20 @@
       <key>ss_nfilter</key>
       <value>128</value>
       <type>int</type>
-      <hide>$ss_interpolatin.hide_nfilters</hide>
+      <hide>$ss_interpolation.hide_nfilters</hide>
   </param>
   <param>
       <name>PFB MF Taps</name>
       <key>ss_pfb_mf_taps</key>
       <value>[]</value>
       <type>real_vector</type>
-      <hide>$ss_interpolatin.hide_pfb_mf_taps</hide>
+      <hide>$ss_interpolation.hide_pfb_mf_taps</hide>
   </param>
   
   
   <param>
     <name>CL: Sub-carrier frequency</name>
-    <key>freq_sub</key>
+    <key>cl_freq_sub</key>
     <value>16000</value>
     <type>real</type>
     <hide>#if (int($sel_costas()) >= 1) then 'all' else 'none' #</hide>
@@ -199,7 +180,7 @@
   
   <param>
     <name>CL: Loop Bandwidth</name>
-    <key>loop_bandwidth</key>
+    <key>cl_loop_bandwidth</key>
     <value>6.28/100</value>
     <type>real</type>
     <hide>#if (int($sel_costas()) >= 1) then 'all' else 'none' #</hide>
@@ -207,10 +188,17 @@
 
   <param>
     <name>CL: order</name>
-    <key>order</key>
+    <key>cl_order</key>
     <value>2</value>
     <type>int</type>
     <hide>#if (int($sel_costas()) >= 1) then 'all' else 'none' #</hide>
+  </param>
+
+  <param>
+    <name>Sample Rate</name>
+    <key>samp_rate</key>
+    <value>samp_rate</value>
+    <type>real</type>
   </param>
 
 
