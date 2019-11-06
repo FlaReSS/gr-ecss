@@ -32,7 +32,7 @@ class demodulator(gr.hier_block2):
     """
     docstring for block demodulator
     """
-    def __init__(self, cl_loop_bandwidth, cl_order, cl_freq_sub, ss_sps, ss_loop_bandwidth, ss_ted_gain, ss_damping, ss_max_dev, ss_out_ss, ss_interpolation, ss_ted_type, ss_nfilter, ss_pfb_mf_taps, sel_costas, sel_spl, samp_rate):
+    def __init__(self, k, cl_loop_bandwidth, cl_order, cl_freq_sub, ss_sps, ss_loop_bandwidth, ss_ted_gain, ss_damping, ss_max_dev, ss_out_ss, ss_interpolation, ss_ted_type, ss_constellation, ss_nfilter, ss_pfb_mf_taps, sel_costas, sel_spl, samp_rate):
         gr.hier_block2.__init__(self,
             "demodulator",
             gr.io_signature(1, 1, gr.sizeof_float),  # Input signature
@@ -41,6 +41,7 @@ class demodulator(gr.hier_block2):
         ##################################################
         # Variables
         ##################################################
+        self.k = k
         self.cl_loop_bandwidth = cl_loop_bandwidth
         self.cl_order = cl_order
         self.cl_freq_sub = cl_freq_sub
@@ -48,11 +49,12 @@ class demodulator(gr.hier_block2):
         self.ss_sps = ss_sps
         self.ss_loop_bandwidth = ss_loop_bandwidth
         self.ss_ted_gain = ss_ted_gain
-        self.ss_damping = fec.ss_damping
+        self.ss_damping = ss_damping
         self.ss_max_dev = ss_max_dev
         self.ss_out_ss = ss_out_ss
         self.ss_interpolation = ss_interpolation
         self.ss_ted_type = ss_ted_type
+        self.ss_constellation = ss_constellation
         self.ss_nfilter = ss_nfilter
         self.ss_pfb_mf_taps = ss_pfb_mf_taps
 
@@ -64,9 +66,9 @@ class demodulator(gr.hier_block2):
         # Blocks
         ##################################################
 
-        self.digital_sync = digital.symbol_sync_ff(self.ss_ted_type, self.ss_sps, self.ss_loop_bandwidth, self.ss_damping, self.ss_ted_gain, self.ss_max_dev, self.ss_out_ss, self.ss_interpolation, digital.IR_PFB_MF, self.ss_nfilter, (self.ss_pfb_mf_taps))
+        self.digital_sync = digital.symbol_sync_ff(self.ss_ted_type, self.ss_sps, self.ss_loop_bandwidth, self.ss_damping, self.ss_ted_gain, self.ss_max_dev, self.ss_out_ss, self.ss_constellation, self.ss_interpolation, self.ss_nfilter, (self.ss_pfb_mf_taps))
 
-        self.spl_dencoder = ecss.spl_dencoder()
+        self.spl_decoder = ecss.spl_decoder()
 
         self.costas_loop_cc = digital.costas_loop_cc(self.cl_loop_bandwidth, self.cl_order, False)
         self.signal_gen = analog.sig_source_c(samp_rate, analog.GR_SIN_WAVE, self.cl_freq_sub , 1, 0)
@@ -76,13 +78,11 @@ class demodulator(gr.hier_block2):
         self.null_complex = blocks.null_sink(gr.sizeof_gr_complex*1)
         self.null_float = blocks.null_sink(gr.sizeof_float*1)
         self.to_char = blocks.float_to_uchar()
-        self.unpack = blocks.unpack_k_bits_bb()
+        self.unpack = blocks.unpack_k_bits_bb(k)
 
         ##################################################
         # Connections
         ##################################################
-
-        self.connect(self, self)
 
         if (sel_costas == 0):
             # if (type == 0):
@@ -99,6 +99,6 @@ class demodulator(gr.hier_block2):
             self.connect(self, self.digital_sync)
         
         if (sel_spl == 0):
-            self.connect(self.digital_sync, self.to_char, self.unpack, self.spl_dencoder, self)
+            self.connect(self.digital_sync, self.spl_decoder, self.unpack, self)
         else:
             self.connect(self.digital_sync, self.to_char, self.unpack, self)

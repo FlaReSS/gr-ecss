@@ -6,7 +6,13 @@
   <import>import ecss</import>
   <import>from gnuradio import digital</import>
   <import>from gnuradio import filter</import>
-  <make>ecss.demodulator($cl_loop_bandwidth, $cl_order, $cl_freq_sub, $ss_sps, $ss_loop_bandwidth, $ss_ted_gain, $ss_damping, $ss_max_dev, $ss_out_ss, $ss_interpolation, $ss_ted_type, $ss_nfilter, $ss_pfb_mf_taps, $sel_costas, $sel_spl, $samp_rate)</make>
+  <make>ecss.demodulator($k, $cl_loop_bandwidth, $cl_order, $cl_freq_sub, $ss_sps, $ss_loop_bandwidth, $ss_ted_gain, $ss_damping, $ss_max_dev, $ss_out_ss, $ss_interpolation, $ss_ted_type, $ss_constellation, $ss_nfilter, $ss_pfb_mf_taps, $sel_costas, $sel_spl, $samp_rate)</make>
+
+  <param>
+    <name>K bits to unpack</name>
+    <key>k</key>
+    <type>int</type>
+  </param>
 
   <param>
     <name>SPL decoder</name>
@@ -90,7 +96,7 @@
   </param>
   <param>
       <name>TED Slicer Constellation</name>
-      <key>constellation</key>
+      <key>ss_constellation</key>
       <value>digital.constellation_bpsk().base()</value>
       <type>raw</type>
       <hide>$ss_ted_type.hide_constellation</hide>
