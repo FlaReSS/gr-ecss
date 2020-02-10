@@ -18,18 +18,18 @@
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
 install(FILES
-    ecss_agc.xml
-    ecss_pll.xml
-    ecss_coherent_phase_modulator.xml
-    ecss_phase_converter.xml
-    ecss_variables_loop_filter.xml
-    ecss_gain_phase_accumulator.xml
-    ecss_signal_search_goertzel.xml
-    ecss_signal_search_fft_hier.xml
-    ecss_spl_encoder.xml
-    ecss_spl_decoder.xml
-    ecss_nrzl_encoder.xml
-    ecss_nrzl_encoder_subcarrier.xml
-    ecss_modulator.xml
-    ecss_demodulator.xml DESTINATION share/gnuradio/grc/blocks
+    ecss_agc.block.yml
+    ecss_pll.block.yml
+    ecss_coherent_phase_modulator.block.yml
+    ecss_phase_converter.block.yml
+    ecss_variables_loop_filter.block.yml
+    ecss_gain_phase_accumulator.block.yml
+    ecss_signal_search_goertzel.block.yml
+    ecss_signal_search_fft_hier.block.yml
+    ecss_spl_encoder.block.yml
+    ecss_spl_decoder.block.yml
+    ecss_nrzl_encoder.block.yml
+    ecss_nrzl_encoder_subcarrier.block.yml
+    ecss_modulator.block.yml
+    ecss_demodulator.block.yml DESTINATION share/gnuradio/grc/blocks
 )

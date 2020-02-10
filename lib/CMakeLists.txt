@@ -23,8 +23,6 @@
 ########################################################################
 include(GrPlatform) #define LIB_SUFFIX
 
-include_directories(${Boost_INCLUDE_DIR})
-link_directories(${Boost_LIBRARY_DIRS})
 list(APPEND ecss_sources
     agc_impl.cc
     pll_impl.cc
@@ -47,7 +45,11 @@ if(NOT ecss_sources)
 endif(NOT ecss_sources)
 
 add_library(gnuradio-ecss SHARED ${ecss_sources})
-target_link_libraries(gnuradio-ecss ${Boost_LIBRARIES} ${GNURADIO_ALL_LIBRARIES})
+target_link_libraries(gnuradio-ecss gnuradio::gnuradio-runtime)
+target_include_directories(gnuradio-ecss
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+    PUBLIC $<INSTALL_INTERFACE:include>
+    )
 set_target_properties(gnuradio-ecss PROPERTIES DEFINE_SYMBOL "gnuradio_ecss_EXPORTS")
 
 if(APPLE)
@@ -60,31 +62,7 @@ endif(APPLE)
 # Install built library files
 ########################################################################
 include(GrMiscUtils)
-GR_LIBRARY_FOO(gnuradio-ecss RUNTIME_COMPONENT "ecss_runtime" DEVEL_COMPONENT "ecss_devel")
-
-########################################################################
-# Build and register unit test
-########################################################################
-include(GrTest)
-
-include_directories(${CPPUNIT_INCLUDE_DIRS})
-
-list(APPEND test_ecss_sources
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_ecss.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/qa_ecss.cc
-)
-
-add_executable(test-ecss ${test_ecss_sources})
-
-target_link_libraries(
-  test-ecss
-  ${GNURADIO_RUNTIME_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${CPPUNIT_LIBRARIES}
-  gnuradio-ecss
-)
-
-GR_ADD_TEST(test_ecss test-ecss)
+GR_LIBRARY_FOO(gnuradio-ecss)
 
 ########################################################################
 # Print summary
