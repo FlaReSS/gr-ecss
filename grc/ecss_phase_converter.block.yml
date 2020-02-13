@@ -17,6 +17,9 @@ inputs:
 outputs:
 -   domain: stream
     dtype: s64
+-   domain: message
+    id: async_out
+    optional: True
 asserts:
 - ${ N >= 1 and N <= 52 }
 

@@ -22,9 +22,14 @@
 #include "config.h"
 #endif
 
-#include <gnuradio/io_signature.h>
 #include "phase_converter_impl.h"
-#include <math.h>
+
+#include <gnuradio/io_signature.h>
+
+#include <pmt/pmt.h>
+#include <boost/bind.hpp>
+
+#include <cmath>
 
 namespace gr {
   namespace ecss {
@@ -48,6 +53,7 @@ namespace gr {
               d_N(N)
     {
       precision = pow(2,(- (N - 1)));
+      this->message_port_register_out(pmt::mp("async_out"));
     }
 
     phase_converter_impl::~phase_converter_impl()
@@ -69,6 +75,8 @@ namespace gr {
         integer_phase = double_to_integer(phase_normalized);
         out[i] = (integer_phase << (64 - d_N));
       }
+      pmt::pmt_t out_msg = pmt::init_s64vector(noutput_items, out);
+      this->message_port_pub(pmt::mp("async_out"), out_msg);
       return noutput_items;
     }
 

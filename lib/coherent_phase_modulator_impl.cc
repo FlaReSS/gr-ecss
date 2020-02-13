@@ -22,11 +22,20 @@
 #include "config.h"
 #endif
 
+#include "coherent_phase_modulator_impl.h"
+
 #include <gnuradio/io_signature.h>
 #include <gnuradio/sincos.h>
 #include <gnuradio/math.h>
-#include <math.h>
-#include "coherent_phase_modulator_impl.h"
+#include <gnuradio/buffer.h>
+
+#include <pmt/pmt.h>
+#include <boost/bind.hpp>
+
+#include <cmath>
+
+// debug
+#include <iostream>
 
 namespace gr {
   namespace ecss {
@@ -49,10 +58,27 @@ namespace gr {
               d_N(N), d_n_inputs(n_inputs)
     {
       precision = pow(2,(- (N - 1)));
+
+      // Add async message input port to handle sporadic data transfer
+      this->message_port_register_in(pmt::mp("async_in"));
+      this->set_msg_handler(pmt::mp("async_in"), boost::bind(&coherent_phase_modulator_impl::handle_async_in, this, _1));
+      d_async_buffer = gr::make_buffer(16384*64, sizeof(int64_t));
+      d_reader = gr::buffer_add_reader(d_async_buffer, 0);
     }
 
     coherent_phase_modulator_impl::~coherent_phase_modulator_impl()
     {}
+
+    void coherent_phase_modulator_impl::handle_async_in(pmt::pmt_t input_msg){
+      // We expect a vector of int64_t here
+      std::vector<int64_t> my_data = pmt::s64vector_elements(input_msg);
+      if (d_async_buffer->space_available() < my_data.size()){
+          std::cout << "Panic: too little space!" << std::endl;
+          return;
+      }
+      std::memcpy(d_async_buffer->write_pointer(), &my_data[0], my_data.size() * sizeof(int64_t));
+      d_async_buffer->update_write_pointer(my_data.size());
+    }
 
     int
     coherent_phase_modulator_impl::work(int noutput_items,
@@ -75,6 +101,10 @@ namespace gr {
 
         for(int y = 0; y < d_n_inputs; y++) {
           integer_phase += in[y][i];
+        }
+        if (d_reader->items_available()){
+          integer_phase += (*(int64_t*)(d_reader->read_pointer()));
+          d_reader->update_read_pointer(1);
         }
 
         integer_phase_normalized = NCO_denormalization(integer_phase);

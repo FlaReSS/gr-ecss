@@ -19,6 +19,9 @@ inputs:
 -   domain: stream
     dtype: s64
     multiplicity: ${ n_inputs }
+-   domain: message
+    id: async_in
+    optional: true
 
 outputs:
 -   domain: stream

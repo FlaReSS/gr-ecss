@@ -23,6 +23,10 @@
 
 #include <ecss/coherent_phase_modulator.h>
 
+#include <gnuradio/buffer.h>
+
+#include <pmt/pmt.h>
+
 namespace gr {
   namespace ecss {
 
@@ -32,6 +36,8 @@ namespace gr {
       int d_N;
       int d_n_inputs;
       double precision;
+      gr::buffer_sptr d_async_buffer;
+      gr::buffer_reader_sptr d_reader;
 
       /*! \brief Integer phase converter
       *
@@ -39,6 +45,7 @@ namespace gr {
       */
       double NCO_denormalization(int64_t step_phase);
 
+      void handle_async_in(pmt::pmt_t input_msg);
      public:
       coherent_phase_modulator_impl(int N, int n_inputs);
       ~coherent_phase_modulator_impl();

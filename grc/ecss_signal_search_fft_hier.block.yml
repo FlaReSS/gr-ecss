@@ -73,7 +73,7 @@ templates:
     - set_freq_cutoff(${freq_cutoff})
     - set_threshold(${threshold})
     - set_average(${average})
-    - set_carrier(${carrier})
+    # - set_carrier(${carrier})
     - set_enable(${enable})
 
 file_format: 1
