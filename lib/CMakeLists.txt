@@ -45,7 +45,12 @@ if(NOT ecss_sources)
 endif(NOT ecss_sources)
 
 add_library(gnuradio-ecss SHARED ${ecss_sources})
-target_link_libraries(gnuradio-ecss gnuradio::gnuradio-runtime)
+target_link_libraries(gnuradio-ecss
+  gnuradio::gnuradio-runtime
+  gnuradio::gnuradio-filter
+  gnuradio::gnuradio-fft
+  gnuradio::gnuradio-pmt
+  )
 target_include_directories(gnuradio-ecss
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
     PUBLIC $<INSTALL_INTERFACE:include>
@@ -69,4 +74,3 @@ GR_LIBRARY_FOO(gnuradio-ecss)
 ########################################################################
 message(STATUS "Using install prefix: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "Building for version: ${VERSION} / ${LIBVER}")
-

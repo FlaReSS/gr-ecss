@@ -80,7 +80,7 @@ endif(APPLE)
 ########################################################################
 # Install directories
 ########################################################################
-find_package(Gnuradio "3.8" REQUIRED)
+find_package(Gnuradio "3.8" REQUIRED COMPONENTS runtime filter fft blocks)
 include(GrVersion)
 
 include(GrPlatform) #define LIB_SUFFIX
