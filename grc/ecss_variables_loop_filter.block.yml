@@ -28,12 +28,12 @@ parameters:
 -   id: samp_rate
     label: Sampling rate
     dtype: int
-value: ${ variables_loop_filter.coefficients(natural_freq_2, damping_2, epsilon, index_m_3,
+value: ${ ecss.variables_loop_filter.coefficients(natural_freq_2, damping_2, epsilon, index_m_3,
     natural_freq_3, damping_3, samp_rate) }
 
 templates:
-    imports: from ecss import variables_loop_filter
-    var_make: self.${id} = ${id} = variables_loop_filter.coefficients(${natural_freq_2},
+    imports: import ecss
+    var_make: self.${id} = ${id} = ecss.variables_loop_filter.coefficients(${natural_freq_2},
         ${damping_2}, ${epsilon}, ${index_m_3}, ${natural_freq_3}, ${damping_3}, ${samp_rate})
 
 file_format: 1
