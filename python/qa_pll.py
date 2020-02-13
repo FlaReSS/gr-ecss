@@ -62,7 +62,7 @@ def plot(self, data_pll):
     real = []
     imag = []
 
-    for i in xrange(len(data_pll.out)):
+    for i in range(len(data_pll.out)):
         real.append(data_pll.out[i].real)
         imag.append(data_pll.out[i].imag)
 
@@ -183,7 +183,7 @@ def check_complex(data_out, real_final, imag_final, error, error_items, max_erro
     real_error_max = 0
     settling_time_index = np.inf
 
-    for i in reversed(xrange (len(data_out))):
+    for i in reversed(range (len(data_out))):
         if (abs(data_out[i].real - real_final) > abs(real_error_max)) and (i > (len(data_out) - max_error_items)):
             real_error_max = abs(data_out[i].real - real_final)
 
@@ -210,7 +210,7 @@ def check_float(data_out, final, error, error_items, max_error_items):
         
     settling_time_index = np.inf
     error_max = 0
-    for i in reversed(xrange (len(data_out))):
+    for i in reversed(range (len(data_out))):
         if (abs(data_out[i] - final) > abs(error_max)) and (i > (len(data_out) - max_error_items)):
             error_max = abs(data_out[i] - final)
 
@@ -229,10 +229,10 @@ def check_float(data_out, final, error, error_items, max_error_items):
 def check_pa(data_out, N, items):
     """this function checks the int64 data from the pll. It checks the minimum step and the slope of a defined number of items"""
 
-    minimum_step = sys.maxint
+    minimum_step = sys.maxsize
     precision = math.pow(2,(- (N - 1))) * math.pi
     slope = 0
-    for i in reversed(xrange (len(data_out))):
+    for i in reversed(range (len(data_out))):
         if i > 0:
             if (abs(data_out[i] - data_out[i - 1]) < abs(minimum_step)):
                 if abs(data_out[i] - data_out[i - 1]) != 0:
@@ -575,7 +575,7 @@ class qa_pll (gr_unittest.TestCase):
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 4
-        param.items = param.samp_rate / 2
+        param.items = int(param.samp_rate // 2)
         param.freq = 550
         param.noise = 0
 
@@ -622,10 +622,10 @@ class qa_pll (gr_unittest.TestCase):
         plot(self,data_pll)
 
         #the reset tag initializes the pll at the central frequency (so all the internal registers of the loop filter) and sets to zero the phase accumulator
-        self.assertAlmostEqual(data_pll.freq[param.items / 2], param.f_central, 0) #only the integer part
-        self.assertAlmostEqual(data_pll.pa[param.items / 2], 0)
+        self.assertAlmostEqual(data_pll.freq[param.items // 2], param.f_central, 0) #only the integer part
+        self.assertAlmostEqual(data_pll.pa[param.items // 2], 0)
 
-        print ("-Reset tag received at the moment: %.3f ms." % (param.items / 2 * (1000.0 / param.samp_rate)))
+        print ("-Reset tag received at the moment: %.3f ms." % (param.items // 2 * (1000 // param.samp_rate)))
 
     def test_005_t (self):
         """test_005_t: switch from the second order to the third order"""
@@ -818,7 +818,7 @@ class qa_pll (gr_unittest.TestCase):
         real = []
         imag = []
 
-        for i in xrange (len(data_pll.src)):
+        for i in range (len(data_pll.src)):
             real.append(data_pll.src[i].real)
             imag.append(data_pll.src[i].imag)
 
@@ -1275,7 +1275,7 @@ class qa_pll (gr_unittest.TestCase):
         real = []
         imag = []
 
-        for i in xrange (len(data_pll.src)):
+        for i in range (len(data_pll.src)):
             real.append(data_pll.src[i].real)
             imag.append(data_pll.src[i].imag)
 

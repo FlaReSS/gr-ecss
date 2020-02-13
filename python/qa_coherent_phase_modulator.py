@@ -65,7 +65,7 @@ def plot(self, data_cpm):
     real = []
     imag = []
 
-    for i in xrange (len(data_cpm.out)):
+    for i in range (len(data_cpm.out)):
         real.append(data_cpm.out[i].real)
         imag.append(data_cpm.out[i].imag)
 
@@ -159,7 +159,7 @@ def check_phase(data_out):
     """this function evaluates the derivative of phase input"""
 
     diff = []
-    for i in reversed(xrange (len(data_out))):
+    for i in reversed(range (len(data_out))):
         if i > 0:
             temp = data_out[i] * np.conjugate(data_out[i - 1])
             diff_temp = np.arctan2(temp.imag, temp.real)

@@ -8,7 +8,7 @@ from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 from gnuradio.filter import firdes
 from collections import namedtuple
-import ecss_swig as ecss
+import ecss
 import flaress
 import math, time, datetime, os, abc, sys, pmt
 import runner, threading

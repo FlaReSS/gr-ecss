@@ -188,7 +188,7 @@ def transient_evaluation(self, data, param, error, time_error_measure):
     data_plot.in_real = []
     data_plot.in_rms = []
 
-    for i in reversed(xrange(len(data.src))):
+    for i in reversed(range(len(data.src))):
         rms_in = math.sqrt(data.src[i].real * data.src[i].real + data.src[i].imag * data.src[i].imag)
         rms_out = math.sqrt(data.out[i].real*data.out[i].real + data.out[i].imag*data.out[i].imag)
 
