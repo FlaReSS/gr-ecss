@@ -202,7 +202,7 @@ def test_accumulator(self, param):
     tb.connect(head, dst_src_rad)
     tb.connect(head, pc)
     tb.connect(pc, dst_src_pa)
- 
+
     tb.connect(pc, cpm)
     tb.connect(cpm, snr_estimator)
 
@@ -211,7 +211,7 @@ def test_accumulator(self, param):
     tb.connect(cpm, dst_out_cpm)
     tb.connect(cpm, phase)
     tb.connect(phase, dst_phase)
-    
+
     self.tb.run()
 
     data_pc.src_rad = dst_src_rad.data()
@@ -267,7 +267,7 @@ def test_accumulator_gain(self, param):
     tb.connect(head, dst_src_rad)
     tb.connect(head, pc)
     tb.connect(pc, dst_src_pa)
- 
+
     tb.connect(pc, gain)
     tb.connect(gain, cpm)
     tb.connect(cpm, snr_estimator)
@@ -277,7 +277,7 @@ def test_accumulator_gain(self, param):
     tb.connect(cpm, dst_out_cpm)
     tb.connect(cpm, phase)
     tb.connect(phase, dst_phase)
-    
+
     self.tb.run()
 
     data_pc.src_rad = dst_src_rad.data()
@@ -311,8 +311,8 @@ class qa_coherent_phase_modulator (gr_unittest.TestCase):
         """test_001_t: with a phase accumulator"""
         param = namedtuple('param', 'samp_rate items fft_size N inputs step noise_bw')
         param.N = 38
-        param.samp_rate = 2048 
-        param.items = param.samp_rate 
+        param.samp_rate = 2048
+        param.items = param.samp_rate
         param.fft_size = 1024
         param.inputs = 1
         param.freq = 10.0
@@ -321,12 +321,12 @@ class qa_coherent_phase_modulator (gr_unittest.TestCase):
         print_parameters(param)
 
         data_pe, data_fft = test_accumulator(self, param)
-        
+
         plot(self,data_pe)
         plot_fft(self,data_fft)
 
         phase = check_phase(data_pe.out)
-        
+
         #check frequency
         self.assertAlmostEqual((param.freq * (2 * math.pi) / param.samp_rate) , np.mean(phase))
         print ("-Frequency measured= %f Hz;" %(np.mean(phase) / (2 * math.pi) * param.samp_rate))
@@ -339,8 +339,8 @@ class qa_coherent_phase_modulator (gr_unittest.TestCase):
         """test_002_t: with a phase accumulator at higher frequency"""
         param = namedtuple('param', 'samp_rate items fft_size N inputs step noise_bw')
         param.N = 38
-        param.samp_rate = 4096 * 16 
-        param.items = param.samp_rate 
+        param.samp_rate = 4096 * 16
+        param.items = param.samp_rate
         param.fft_size = 1024
         param.inputs = 1
         param.freq = 1000.0
@@ -349,12 +349,12 @@ class qa_coherent_phase_modulator (gr_unittest.TestCase):
         print_parameters(param)
 
         data_pe, data_fft = test_accumulator(self, param)
-        
+
         plot(self,data_pe)
         plot_fft(self,data_fft)
 
         phase = check_phase(data_pe.out)
-        
+
         #check frequency
         self.assertAlmostEqual((param.freq * (2 * math.pi) / param.samp_rate) , np.mean(phase))
         print ("-Frequency measured= %f Hz;" %(np.mean(phase) / (2 * math.pi) * param.samp_rate))
@@ -367,8 +367,8 @@ class qa_coherent_phase_modulator (gr_unittest.TestCase):
         """test_003_t: with a phase accumulator and gain"""
         param = namedtuple('param', 'samp_rate items fft_size N inputs step noise_bw uplink downlink')
         param.N = 38
-        param.samp_rate = 2048 
-        param.items = param.samp_rate 
+        param.samp_rate = 2048
+        param.items = param.samp_rate
         param.fft_size = 1024
         param.inputs = 1
         param.freq = 10.0
@@ -379,15 +379,15 @@ class qa_coherent_phase_modulator (gr_unittest.TestCase):
         print_parameters(param)
 
         data_pe, data_fft = test_accumulator_gain(self, param)
-        
+
         plot(self,data_pe)
         plot_fft(self,data_fft)
 
         phase = check_phase(data_pe.out[1:]) #to consider the delay of gain phase accumulator
-        
+
         #check frequency
         self.assertAlmostEqual(((param.freq * param.downlink / param.uplink) * (2 * math.pi) / param.samp_rate) , np.mean(phase))
-        print ("-Frequency measured= %f Hz;" %(np.mean(phase) / (2 * math.pi) * param.samp_rate)) 
+        print ("-Frequency measured= %f Hz;" %(np.mean(phase) / (2 * math.pi) * param.samp_rate))
 
         #check phase error
         self.assertAlmostEqual(np.var(phase), 0)

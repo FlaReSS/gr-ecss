@@ -71,15 +71,15 @@ def check_integer_phase(data_out, N, items):
                 if abs(data_out[i] - data_out[i - 1]) != 0:
                     minimum_step = abs(data_out[i] - data_out[i - 1])
 
-            if (i > (len(data_out) - items - 1)): 
+            if (i > (len(data_out) - items - 1)):
                 int_slope = (data_out[i] - data_out[i - 1])
                 rad_slope = ((int_slope >> (64 - N)) * precision)
-                
+
                 if (rad_slope >= math.pi):
                     rad_slope = rad_slope - 2 * math.pi
                 if (rad_slope < -math.pi):
                     rad_slope = rad_slope + 2 * math.pi
-                    
+
                 slope = slope + rad_slope
 
     return ((minimum_step >> (64 - N)) * precision), (slope / items)

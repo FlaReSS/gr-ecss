@@ -125,7 +125,7 @@ class qa_spl_encoder (gr_unittest.TestCase):
     def test_001_t (self):
         """test_001_t: without repetition"""
         param = namedtuple('param', 'data_src bit_rate samp_rate')
-        
+
         param.bit_rate = 1000
         param.samp_rate = 2000
         param.data_src = (0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1)
@@ -143,7 +143,7 @@ class qa_spl_encoder (gr_unittest.TestCase):
     def test_002_t (self):
         """test_002_t: with repetition of 2"""
         param = namedtuple('param', 'data_src bit_rate samp_rate')
-        
+
         param.bit_rate = 1000
         param.samp_rate = 4000
         param.data_src = (0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1)

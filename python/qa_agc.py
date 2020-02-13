@@ -128,7 +128,7 @@ def test_sine(self, param):
                                param.freq_square, ((param.input_amplitude_max - param.input_amplitude_min) / math.sqrt(2)), (param.input_amplitude_min / math.sqrt(2)) )
     src_noise = analog.noise_source_c(analog.GR_GAUSSIAN, param.noise, 0)
 
-    adder = blocks.add_vcc(1)                           
+    adder = blocks.add_vcc(1)
 
     multiply_const = blocks.multiply_const_ff(-1)
     multiply_complex = blocks.multiply_cc()
@@ -253,7 +253,7 @@ class qa_agc (gr_unittest.TestCase):
         param.settling_time = 10.0
         param.input_amplitude_max = 100
         param.input_amplitude_min = 10
-        param.noise = 0         
+        param.noise = 0
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
         param.freq_square = 1000.0 / (20 * param.settling_time)
@@ -284,7 +284,7 @@ class qa_agc (gr_unittest.TestCase):
         param.settling_time = 10.0
         param.input_amplitude_max = 1000
         param.input_amplitude_min = 10
-        param.noise = 0        
+        param.noise = 0
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
         param.freq_square = 1000.0 / (20 * param.settling_time)
@@ -315,7 +315,7 @@ class qa_agc (gr_unittest.TestCase):
         param.settling_time = 10.0
         param.input_amplitude_max = 10000
         param.input_amplitude_min = 10
-        param.noise = 0         
+        param.noise = 0
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
         param.freq_square = 1000.0 / (20 * param.settling_time)
@@ -345,8 +345,8 @@ class qa_agc (gr_unittest.TestCase):
         param.reference = 1.0
         param.settling_time = 10.0
         param.input_amplitude_max = 10
-        param.input_amplitude_min = 11                
-        param.noise = 0         
+        param.input_amplitude_min = 11
+        param.noise = 0
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
         param.freq_square = 1000.0 / (20 * param.settling_time)
@@ -377,7 +377,7 @@ class qa_agc (gr_unittest.TestCase):
         param.settling_time = 10.0
         param.input_amplitude_max = 10
         param.input_amplitude_min = 100
-        param.noise = 0         
+        param.noise = 0
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
         param.freq_square = 1000.0 / (20 * param.settling_time)
@@ -408,7 +408,7 @@ class qa_agc (gr_unittest.TestCase):
         param.settling_time = 10.0
         param.input_amplitude_max = 10
         param.input_amplitude_min = 1000
-        param.noise = 0         
+        param.noise = 0
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
         param.freq_square = 1000.0 / (20 * param.settling_time)
@@ -439,7 +439,7 @@ class qa_agc (gr_unittest.TestCase):
         param.settling_time = 10.0
         param.input_amplitude_max = 10
         param.input_amplitude_min = 10000
-        param.noise = 0         
+        param.noise = 0
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
         param.freq_square = 1000.0 / (20 * param.settling_time)
@@ -471,7 +471,7 @@ class qa_agc (gr_unittest.TestCase):
         param.settling_time = 10.0
         param.input_amplitude_max = 100
         param.input_amplitude_min = 10
-        param.noise = 0.1         
+        param.noise = 0.1
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
         param.freq_square = 1000.0 / (20 * param.settling_time)
@@ -502,7 +502,7 @@ class qa_agc (gr_unittest.TestCase):
         param.settling_time = 10.0
         param.input_amplitude_max = 1000
         param.input_amplitude_min = 10
-        param.noise = 0.1         
+        param.noise = 0.1
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
         param.freq_square = 1000.0 / (20 * param.settling_time)
@@ -533,7 +533,7 @@ class qa_agc (gr_unittest.TestCase):
         param.settling_time = 10.0
         param.input_amplitude_max = 10000
         param.input_amplitude_min = 10
-        param.noise = 0.1         
+        param.noise = 0.1
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
         param.freq_square = 1000.0 / (20 * param.settling_time)
@@ -564,7 +564,7 @@ class qa_agc (gr_unittest.TestCase):
         param.settling_time = 10.0
         param.input_amplitude_max = 10
         param.input_amplitude_min = 11
-        param.noise = 0.1         
+        param.noise = 0.1
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
         param.freq_square = 1000.0 / (20 * param.settling_time)
@@ -595,7 +595,7 @@ class qa_agc (gr_unittest.TestCase):
         param.settling_time = 10.0
         param.input_amplitude_max = 10
         param.input_amplitude_min = 100
-        param.noise = 0.1         
+        param.noise = 0.1
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
         param.freq_square = 1000.0 / (20 * param.settling_time)
@@ -626,7 +626,7 @@ class qa_agc (gr_unittest.TestCase):
         param.settling_time = 10.0
         param.input_amplitude_max = 10
         param.input_amplitude_min = 1000
-        param.noise = 0.1         
+        param.noise = 0.1
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
         param.freq_square = 1000.0 / (20 * param.settling_time)
@@ -657,7 +657,7 @@ class qa_agc (gr_unittest.TestCase):
         param.settling_time = 10.0
         param.input_amplitude_max = 10
         param.input_amplitude_min = 10000
-        param.noise = 0.1         
+        param.noise = 0.1
         param.samp_rate = 10000
         param.freq_sine = param.samp_rate / 10
         param.freq_square = 1000.0 / (20 * param.settling_time)

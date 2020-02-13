@@ -88,7 +88,6 @@ def plot(self, data_out, data_src):
     fig_encoded = base64.b64encode(tmpfile.getvalue())
     print("/im!{}/im!".format(fig_encoded.decode("utf-8")))#add in th template
 
-    
     # plt.show()
     self.pdf.add_to_pdf(fig)
 
@@ -154,7 +153,7 @@ class qa_nrzl_encoder_subcarrier (gr_unittest.TestCase):
     def test_001_t (self):
         """test_001_t: check sine wave"""
         param = namedtuple('param', 'data_src bit_rate samp_rate sine freq_sub')
-        
+
         param.bit_rate = 1
         param.samp_rate = 4096
         param.sine = True
@@ -171,7 +170,7 @@ class qa_nrzl_encoder_subcarrier (gr_unittest.TestCase):
     def test_002_t (self):
         """test_002_t: check cosine wave"""
         param = namedtuple('param', 'data_src bit_rate samp_rate sine freq_sub')
-        
+
         param.bit_rate = 1
         param.samp_rate = 4096
         param.sine = True
@@ -188,7 +187,7 @@ class qa_nrzl_encoder_subcarrier (gr_unittest.TestCase):
     def test_003_t (self):
         """test_003_t: check square wave"""
         param = namedtuple('param', 'data_src bit_rate samp_rate sine freq_sub')
-        
+
         param.bit_rate = 1
         param.samp_rate = 4096
         param.sine = False
@@ -205,7 +204,7 @@ class qa_nrzl_encoder_subcarrier (gr_unittest.TestCase):
     def test_004_t (self):
         """test_004_t: check negative square wave"""
         param = namedtuple('param', 'data_src bit_rate samp_rate sine freq_sub')
-        
+
         param.bit_rate = 1
         param.samp_rate = 4096
         param.sine = False
@@ -223,7 +222,7 @@ class qa_nrzl_encoder_subcarrier (gr_unittest.TestCase):
         """test_005_t: sine wave with data"""
         param = namedtuple('param', 'data_src bit_rate samp_rate sine freq_sub')
 
-        
+
         param.bit_rate = 1024
         param.samp_rate = 4096 * 32
         param.sine = True
@@ -244,7 +243,7 @@ class qa_nrzl_encoder_subcarrier (gr_unittest.TestCase):
         """test_006_t: square wave with data"""
         param = namedtuple('param', 'data_src bit_rate samp_rate sine freq_sub')
 
-        
+
         param.bit_rate = 1024
         param.samp_rate = 4096 * 32
         param.sine = False

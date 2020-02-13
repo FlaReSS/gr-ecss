@@ -88,7 +88,6 @@ def plot(self, data_out, data_src):
     fig_encoded = base64.b64encode(tmpfile.getvalue())
     print("/im!{}/im!".format(fig_encoded.decode("utf-8")))#add in th template
 
-    
     # plt.show()
     self.pdf.add_to_pdf(fig)
 
@@ -127,7 +126,7 @@ class qa_nrzl_encoder (gr_unittest.TestCase):
         """test_001_t: with repetition of 2"""
         param = namedtuple('param', 'data_src bit_rate samp_rate')
 
-        
+
         param.bit_rate = 1000
         param.samp_rate = 2000
         param.data_src = (0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1)

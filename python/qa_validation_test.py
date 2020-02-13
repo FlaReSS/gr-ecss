@@ -62,7 +62,7 @@ def plot(self, data_tar):
     phase_source = np.asarray(data_tar.phase_source)
     phase_output = np.asarray(data_tar.phase_output)
     # phase_source = np.asarray(data_tar.phase_source[100000:180000])
-    # phase_output = np.asarray(data_tar.phase_output[100000:180000])    
+    # phase_output = np.asarray(data_tar.phase_output[100000:180000])
 
     time = np.asarray(data_tar.time)
 
@@ -82,7 +82,7 @@ def plot(self, data_tar):
     ax2.set_ylabel('Output [rad]', color='b')  # we already handled the x-label with ax1
     ax2.plot(phase_output, color='b', scalex=True, scaley=True, linewidth=1)
     ax2.tick_params(axis='y', labelcolor='blue')
-    
+
 
 
     name_test = self.id().split("__main__.")[1]
@@ -123,7 +123,7 @@ class qa_validation_test (gr_unittest.TestCase):
         srcdir = os.environ['srcdir']
 
         src =  blocks.file_source(gr.sizeof_char*1, os.path.join(srcdir, "test_files", "CADU.bin"), False)
-        
+
         ##################################################
         # Variables
         ##################################################
@@ -168,9 +168,9 @@ class qa_validation_test (gr_unittest.TestCase):
         data_tar.phase_output = dst_output.data()
         data_tar.tar = dst_tar.data()
         data_tar.time = np.linspace(0, (len(data_tar.phase_output) * 1.0 / samp_rate), len(data_tar.phase_output), endpoint=False)
-        
+
         print (len(data_tar.phase_output), len(data_tar.phase_source))
-        
+
         # for i in range(len(data_tar.phase_output)):
         #     if data_tar.phase_output[i] != 0:
         #         print i

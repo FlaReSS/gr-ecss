@@ -71,15 +71,15 @@ def check_integer_phase(data_out, N, items):
                 if abs(data_out[i] - data_out[i - 1]) != 0:
                     minimum_step = abs(data_out[i] - data_out[i - 1])
 
-            if (i > (len(data_out) - items - 1)): 
+            if (i > (len(data_out) - items - 1)):
                 int_slope = (data_out[i] - data_out[i - 1])
                 rad_slope = ((int_slope >> (64 - N)) * precision)
-                
+
                 if (rad_slope >= math.pi):
                     rad_slope = rad_slope - 2 * math.pi
                 if (rad_slope < -math.pi):
                     rad_slope = rad_slope + 2 * math.pi
-                    
+
                 slope = slope + rad_slope
 
     return ((minimum_step >> (64 - N)) * precision), (slope / items)
@@ -173,7 +173,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         """test_001_t: wrapping test"""
         param = namedtuple('param', 'samp_rate items N noise uplink downlink value reset')
         param.N = 38
-        param.samp_rate = 4096 
+        param.samp_rate = 4096
         param.items = param.samp_rate / 2
         param.value = 10 * math.pi   # to express it in rad/s
         param.noise = 0.0
@@ -189,7 +189,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         src_min_step, src_slope = check_integer_phase(data_gain.src, param.N , 10)
 
         gain_min_step, gain_slope = check_integer_phase(data_gain.out, param.N , 10)
-        
+
         tar = (param.downlink * 1.0 / param.uplink)     #turn around ratio
 
         self.assertAlmostEqual((tar * src_slope), gain_slope )
@@ -205,7 +205,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         """test_002_t: wrapping test with higher ratio"""
         param = namedtuple('param', 'samp_rate items N noise uplink downlink value reset')
         param.N = 38
-        param.samp_rate = 4096 
+        param.samp_rate = 4096
         param.items = param.samp_rate / 2
         param.value = 10 * math.pi   # to express it in rad/s
         param.noise = 0.0
@@ -236,7 +236,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         """test_003_t: wrapping test with higher slope"""
         param = namedtuple('param', 'samp_rate items N noise uplink downlink value reset')
         param.N = 38
-        param.samp_rate = 4096 
+        param.samp_rate = 4096
         param.items = param.samp_rate / 2
         param.value = 100 * math.pi   # to express it in rad/s
         param.noise = 0.0
@@ -251,7 +251,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
 
         src_min_step, src_slope = check_integer_phase(data_gain.src, param.N , 10)
         gain_min_step, gain_slope = check_integer_phase(data_gain.out, param.N , 10)
-        
+
         tar = (param.downlink * 1.0 / param.uplink)     #turn around ratio
 
         self.assertAlmostEqual((tar * src_slope), gain_slope )
@@ -268,7 +268,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         """test_004_t: precision test"""
         param = namedtuple('param', 'samp_rate items N noise uplink downlink value reset')
         param.N = 4
-        param.samp_rate = 4096 
+        param.samp_rate = 4096
         param.items = param.samp_rate / 2
         param.value = 10 * math.pi   # to express it in rad/s
         param.noise = 0.0
@@ -283,7 +283,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
 
         src_min_step, src_slope = check_integer_phase(data_gain.src, param.N , 10)
         gain_min_step, gain_slope = check_integer_phase(data_gain.out, param.N , 10)
-        
+
         tar = (param.downlink * 1.0 / param.uplink)     #turn around ratio
 
         self.assertAlmostEqual((tar * src_slope), gain_slope, 1)
@@ -302,7 +302,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
         data_gain = namedtuple('data_gain', 'src out time')
         param = namedtuple('param', 'samp_rate items N noise uplink downlink value reset')
         param.N = 38
-        param.samp_rate = 4096 
+        param.samp_rate = 4096
         param.items = param.samp_rate * 3
         param.value = math.pi / 200   # to express it in rad/s
         param.noise = 0.0
@@ -373,7 +373,7 @@ class qa_gain_phase_accumulator (gr_unittest.TestCase):
 
         #check slope
         src_min_step, src_slope = check_integer_phase(data_gain.src, param.N , 10)
-        gain_min_step, gain_slope = check_integer_phase(data_gain.out, param.N , 10)        
+        gain_min_step, gain_slope = check_integer_phase(data_gain.out, param.N , 10)
         tar = (param.downlink * 1.0 / param.uplink)     #turn around ratio
 
         self.assertAlmostEqual((tar * src_slope), gain_slope, 2)

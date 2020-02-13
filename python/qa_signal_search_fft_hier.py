@@ -44,7 +44,7 @@ def test_sine(self, param):
 
     src_sine =analog.sig_source_c(param.samp_rate, analog.GR_COS_WAVE, param.freq, amplitude, offset)
     src_noise = analog.noise_source_c(analog.GR_GAUSSIAN, param.noise, offset)
-    
+
     adder = blocks.add_vcc(1)
     throttle = blocks.throttle(gr.sizeof_gr_complex*1, param.samp_rate,True)
     head = blocks.head(gr.sizeof_gr_complex, int (param.items))
@@ -89,7 +89,7 @@ class qa_signal_search_fft_hier (gr_unittest.TestCase):
 
     def tearDown (self):
         self.tb = None
-    
+
     def test_001_t (self):
         """test_001_t: with a input sine without noise in the central BW"""
         param = namedtuple('param', 'f_central bw samp_rate items average cutoff threshold decimation fft_size freq noise')
@@ -97,9 +97,9 @@ class qa_signal_search_fft_hier (gr_unittest.TestCase):
         param.f_central = 0
         param.bw = 1000
         param.average = False
-        param.cutoff = 1000 
+        param.cutoff = 1000
         param.samp_rate = 4096 * 8
-        param.items = param.samp_rate 
+        param.items = param.samp_rate
         param.freq = 0
         param.threshold = 10
         param.noise = 0
@@ -125,9 +125,9 @@ class qa_signal_search_fft_hier (gr_unittest.TestCase):
         param.f_central = 0
         param.bw = 1000
         param.average = False
-        param.cutoff = 1000 
+        param.cutoff = 1000
         param.samp_rate = 4096 * 8
-        param.items = param.samp_rate 
+        param.items = param.samp_rate
         param.freq = 500
         param.threshold = 10
         param.noise = 0
@@ -141,7 +141,7 @@ class qa_signal_search_fft_hier (gr_unittest.TestCase):
         self.assertEqual(len(data_sine.out), len(data_sine.src))
         self.assertEqual(len(data_sine.tags), 1)
         self.assertComplexTuplesAlmostEqual(data_sine.out, data_sine.src)
-        
+
     def test_003_t (self):
         """test_003_t: with a input sine without noise outside BW"""
         param = namedtuple('param', 'f_central bw samp_rate items average cutoff threshold decimation fft_size freq noise')
@@ -149,9 +149,9 @@ class qa_signal_search_fft_hier (gr_unittest.TestCase):
         param.f_central = 0
         param.bw = 1000
         param.average = False
-        param.cutoff = 1000 
+        param.cutoff = 1000
         param.samp_rate = 4096 * 8
-        param.items = param.samp_rate 
+        param.items = param.samp_rate
         param.freq = 550
         param.threshold = 10
         param.noise = 0
@@ -174,9 +174,9 @@ class qa_signal_search_fft_hier (gr_unittest.TestCase):
         param.f_central = 0
         param.bw = 1000
         param.average = False
-        param.cutoff = 1000 
+        param.cutoff = 1000
         param.samp_rate = 4096 * 8
-        param.items = param.samp_rate 
+        param.items = param.samp_rate
         param.freq = 0
         param.threshold = 10
         param.noise = 1
@@ -190,7 +190,7 @@ class qa_signal_search_fft_hier (gr_unittest.TestCase):
         self.assertGreaterEqual(len(data_sine.src), len(data_sine.out))
         self.assertGreater(len(data_sine.out), 0)
         self.assertGreaterEqual(len(data_sine.tags), 1)
-    
+
 
 
 if __name__ == '__main__':
@@ -198,6 +198,3 @@ if __name__ == '__main__':
     runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_2')
     runner.run(suite)
     #gr_unittest.TestProgram()
-     
-
-

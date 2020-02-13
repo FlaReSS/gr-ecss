@@ -59,7 +59,7 @@ class Pdf_class(object):
 def plot(self, data):
     """this function create a defined graph for the pll with the data input and outputs"""
 
-    phase_output = np.asarray(data.phase_output)    
+    phase_output = np.asarray(data.phase_output)
 
     time = np.asarray(data.time)
 
@@ -73,7 +73,7 @@ def plot(self, data):
     ax1.grid(True)
     ax1.axhline(y = (-8.5e-9 - 2.8241251), color='m', linewidth=0.5, linestyle='--')
 
-    
+
 
 
     name_test = self.id().split("__main__.")[1]
@@ -109,7 +109,7 @@ class qa_demodulator (gr_unittest.TestCase):
         tb = self.tb
         data = namedtuple('data', 'phase_output time')
         srcdir = os.environ['srcdir']
-        
+
         ##################################################
         # Variables
         ##################################################
@@ -135,7 +135,7 @@ class qa_demodulator (gr_unittest.TestCase):
         data.time = np.linspace(0, (len(data.phase_output) * 1.0 / samp_rate), len(data.phase_output), endpoint=False)
 
         plot(self, data)
-        
+
 
 
 if __name__ == '__main__':

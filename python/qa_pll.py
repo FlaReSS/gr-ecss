@@ -193,7 +193,7 @@ def check_complex(data_out, real_final, imag_final, error, error_items, max_erro
         if (abs(data_out[i].real - real_final) > abs(error)) or (abs(data_out[i].imag - imag_final) > abs(error)):  #have to be at least 5 items in that range
             count = 0
             for j in range(error_items):
-                if (abs(data_out[i-j].real - real_final) > abs(error)) or (abs(data_out[i-j].imag - imag_final) > abs(error)):  
+                if (abs(data_out[i-j].real - real_final) > abs(error)) or (abs(data_out[i-j].imag - imag_final) > abs(error)):
                     count = count + 1
                 else:
                     break
@@ -207,7 +207,7 @@ def check_float(data_out, final, error, error_items, max_error_items):
 
     if (abs(data_out[-1] - final) > abs(error)): #check if is reached the final value at the end
         return np.inf, np.inf
-        
+
     settling_time_index = np.inf
     error_max = 0
     for i in reversed(range (len(data_out))):
@@ -238,10 +238,10 @@ def check_pa(data_out, N, items):
                 if abs(data_out[i] - data_out[i - 1]) != 0:
                     minimum_step = abs(data_out[i] - data_out[i - 1])
 
-            if (i > (len(data_out) - items - 1)): 
+            if (i > (len(data_out) - items - 1)):
                 int_slope = (data_out[i] - data_out[i - 1])
                 rad_slope = ((int_slope >> (64 - N)) * precision)
-                
+
                 if (rad_slope >= math.pi):
                     rad_slope = rad_slope - 2 * math.pi
                 if (rad_slope < -math.pi):
@@ -333,7 +333,7 @@ def test_sine(self, data):
 
     src_sine = analog.sig_source_c(data.samp_rate, analog.GR_SIN_WAVE, data.freq, amplitude, offset)
     src_noise = analog.noise_source_c(analog.GR_GAUSSIAN, data.noise, offset)
-    
+
     adder = blocks.add_vcc(1)
     throttle = blocks.throttle(gr.sizeof_gr_complex*1, data.samp_rate,True)
     head = blocks.head(gr.sizeof_gr_complex, int (data.items))
@@ -356,7 +356,7 @@ def test_sine(self, data):
     tb.connect((pll, 1), dst_pll_freq)
     tb.connect((pll, 2), dst_pll_pe)
     tb.connect((pll, 3), dst_pll_pa)
-    
+
 
     # throttle.set_max_noutput_items (data.samp_rate)
     # throttle.set_min_noutput_items (data.samp_rate)
@@ -848,7 +848,7 @@ class qa_pll (gr_unittest.TestCase):
         fig.suptitle(name_test_usetex, fontsize=30)
         fig.tight_layout()  # otherwise the right y-label is slightly clipped
         fig.subplots_adjust(hspace=0.6, top=0.85, bottom=0.15)
-            
+
         tmpfile = BytesIO()
         fig.savefig(tmpfile, format='png')
         fig_encoded = base64.b64encode(tmpfile.getvalue())
@@ -1247,7 +1247,7 @@ class qa_pll (gr_unittest.TestCase):
         dst_pll_out = blocks.vector_sink_c()
         dst_pll_freq = blocks.vector_sink_f()
         dst_pll_pe = blocks.vector_sink_f()
-        dst_pll_pa = flaress.vector_sink_int64()         
+        dst_pll_pa = flaress.vector_sink_int64()
 
         tb.connect(src_sweep, vco)
         tb.connect(vco, (adder, 0))

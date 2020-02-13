@@ -110,7 +110,7 @@ def test_modulator(self, param):
 
     tb.connect(src, pack)
     tb.connect(pack, dst)
-    
+
 
     self.tb.run()
 
@@ -132,7 +132,7 @@ class qa_modulator (gr_unittest.TestCase):
         """test_001_t: modulator check"""
         param = namedtuple('param', 'data_src bit_rate samp_rate')
         tb = self.tb
-        
+
         param.bit_rate = 1000
         param.samp_rate = 2000
         param.data_src = (0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1)
@@ -155,8 +155,8 @@ class qa_modulator (gr_unittest.TestCase):
         # conv = fec.encoder(encoder_variable, gr.sizeof_char, gr.sizeof_char)
 
         tb.connect(src, pack1)
-        tb.connect(pack1, conv)   
-        tb.connect(conv, dst) 
+        tb.connect(pack1, conv)
+        tb.connect(conv, dst)
         tb.connect(src_expected, pack2)
         tb.connect(pack2, dst_expected)
 
@@ -164,7 +164,7 @@ class qa_modulator (gr_unittest.TestCase):
 
         data_out = dst.data()
         expected_data = dst_expected.data()
-        
+
         print (len(data_out))
 
         self.assertFloatTuplesAlmostEqual(data_out, expected_data)
@@ -183,7 +183,7 @@ class qa_modulator (gr_unittest.TestCase):
     #     """test_010_t: with repetition of 2"""
     #     param = namedtuple('param', 'data_src bit_rate samp_rate')
 
-        
+
     #     param.bit_rate = 1000
     #     param.samp_rate = 2000
     #     param.data_src = (0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1)
