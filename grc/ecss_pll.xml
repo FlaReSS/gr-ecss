@@ -63,7 +63,7 @@
   </source>
 
   <source>
-    <name>phase accumulator</name>
+    <name>phase delta</name>
     <type>s64</type>
     <optional>1</optional>
   </source>

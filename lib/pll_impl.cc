@@ -76,10 +76,10 @@ namespace gr {
       gr_complex *output = (gr_complex*)output_items[0];
       // float *frq =(float*)output_items[1];
       // float *phase_out =(float*)output_items[2];
-      // int64_t *phase_accumulator =(int64_t*)output_items[3];
+      // int64_t *phase_delta =(int64_t*)output_items[3];
       float *frq = output_items.size() >= 2 ? (float *)output_items[1] : NULL;
       float *phase_out = output_items.size() >= 3 ? (float *)output_items[2] : NULL;
-      int64_t *phase_accumulator = output_items.size() >= 4 ? (int64_t *)output_items[3] : NULL;
+      int64_t *phase_delta = output_items.size() >= 4 ? (int64_t *)output_items[3] : NULL;
 
       gr_complexd feedback;
       double module, error;
@@ -104,8 +104,8 @@ namespace gr {
            }
          }
 
-         if (phase_accumulator != NULL)
-           phase_accumulator[i] = d_integer_phase;
+         if (phase_delta != NULL)
+           phase_delta[i] = d_integer_phase;
          gr::sincos(d_integer_phase_denormalized, &t_imag, &t_real);
          feedback = (gr_complexd)input[i] * gr_complexd(t_real, -t_imag);
          output[i] = (gr_complex)feedback;
