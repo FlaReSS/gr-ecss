@@ -4,8 +4,7 @@
   <key>ecss_pll</key>
   <category>[ecss]</category>
   <import>import ecss</import>
-  <make>ecss.pll($samp_rate, $order, $N, $coefficients, $freq_central, $bw)</make>
-  <callback>set_order($order)</callback>
+  <make>ecss.pll($samp_rate, $N, $coefficients, $freq_central, $bw)</make>
   <callback>set_coefficients($coefficients)</callback>
   <callback>set_fre_central($freq_central)</callback>
   <callback>set_bw($bw)</callback>
@@ -14,12 +13,6 @@
     <key>samp_rate</key>
     <value>samp_rate</value>
     <type>real</type>
-  </param>
-  <param>
-    <name>order</name>
-    <key>order</key>
-    <value>2</value>
-    <type>int</type>
   </param>
   <param>
     <name>N of bits</name>
@@ -45,8 +38,6 @@
     <value>1000.0</value>
     <type>real</type>
   </param>
-
-  <check>$order == 2 or $order == 3</check>
   <check>$N &gt;= 1 and $N &lt;= 52</check>
 
   <sink>

@@ -48,7 +48,6 @@ namespace gr {
         * \brief Make a PLL with complex mixer.
         *
         * \param samp_rate Sampling rate of signal.
-        * \param order Loop filter order.
         * \param N number of bits.
         * \param coefficients value of the coefficients in the following order:
         * [0]= the Proportional arm of the second order Loop Filter;
@@ -60,7 +59,7 @@ namespace gr {
         * \param freq_central central value of frequency that PLL can catch.
         * \param bw bandwidth of frequency that PLL can catchl.
        */
-      static sptr make(float samp_rate, int order, int N, const std::vector<double> &coefficients, float freq_central, float bw);
+      static sptr make(float samp_rate, int N, const std::vector<double> &coefficients, float freq_central, float bw);
 
 
       /*******************************************************************
@@ -78,18 +77,7 @@ namespace gr {
         */
       virtual void set_N(int N) = 0;
 
-      /*!
-        * \brief Set the loop filter order.
-        *
-        * \details
-        * Sets the loop filter's order.
-        *
-        * This value should really only be set by adjusting the loop
-        * bandwidth and damping factor.
-        *
-        * \param order (int) new loop filer order
-        */
-      virtual void set_order(int order) = 0;
+
 
       /*!
         * \brief Set the loop gain coefficients.
@@ -154,10 +142,6 @@ namespace gr {
       * GET FUNCTIONS
       *******************************************************************/
 
-      /*!
-        * \brief Returns the loop gain order.
-        */
-      virtual int get_order() const = 0;
 
       /*!
         * \brief Returns the loop gain coefficients.

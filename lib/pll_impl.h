@@ -31,11 +31,10 @@ namespace gr {
     {
       int d_N;
       float d_samp_rate;
-      int d_order;
       int64_t d_integer_phase;
       double d_integer_phase_denormalized;                /*!< Integer value after to be denormalized */
       double precision;
-      double branch_3_par, branch_2_3_par, branch_2_3;
+      double branch_3_par, branch_3, branch_2, branch_2_3;
       double d_freq_central, d_bw;
       double branch_2_3_max, branch_2_3_min;
       std::vector<double> d_coefficients;
@@ -98,15 +97,14 @@ namespace gr {
       double frequency_limit(double step);
 
       public:
-        pll_impl(float samp_rate, int order, int N, const std::vector<double> &coefficients, float freq_central, float bw);
+        pll_impl(float samp_rate, int N, const std::vector<double> &coefficients, float freq_central, float bw);
         ~pll_impl();
 
         int work(int noutput_items,
                  gr_vector_const_void_star &input_items,
                  gr_vector_void_star &output_items);
 
-        void set_N(int N);
-        void set_order(int order);        
+        void set_N(int N);     
         void set_coefficients(const std::vector<double> &coefficients);      
         void set_frequency(float freq);        
         void set_phase(float phase);       
