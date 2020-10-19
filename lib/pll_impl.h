@@ -110,7 +110,6 @@ namespace gr {
         void set_phase(float phase);       
         void set_freq_central(float freq);       
         void set_bw(float bw);
-        int get_order() const;      
         std::vector<double> get_coefficients() const;
         float get_frequency() const;      
         float get_phase() const;       
