@@ -50,10 +50,8 @@ asserts:
 
 templates:
     imports: import ecss
-    make: ecss.pll(${samp_rate}, ${N}, ${coefficients}, ${freq_central},
-        ${bw})
+    make: ecss.pll(${samp_rate}, ${N}, ${coefficients}, ${freq_central},${bw})
     callbacks:
-    - set_order(${order})
     - set_coefficients(${coefficients})
     - set_fre_central(${freq_central})
     - set_bw(${bw})
