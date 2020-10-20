@@ -54,7 +54,7 @@ namespace gr {
           branch_3(0), branch_3_par(0), branch_2(0), branch_2_3(0), d_samp_rate(samp_rate),
           d_freq_central(freq_central), d_bw(bw), d_coefficients(coefficients)
     {
-      
+
       set_tag_propagation_policy(TPP_DONT);
       set_N(N);
       set_coefficients(coefficients);
@@ -183,11 +183,15 @@ namespace gr {
       //     return branch_2_3 + d_coefficients[0] * error;
       // }
 
-      branch_3_par += d_coefficients[2] * error;
-      branch_3 += branch_3_par;
-      branch_2 = d_coefficients[3] * branch_2 + d_coefficients[1] * error;
-      branch_2_3 = branch_2 + branch_3 ;
+      branch_3_par = 0;
+      branch_2_3 = d_coefficients[2] * branch_2_3 + d_coefficients[1] * error;
       return branch_2_3 + d_coefficients[0] * error;
+
+      // branch_3_par += d_coefficients[2] * error;
+      // branch_3 += branch_3_par;
+      // branch_2 = d_coefficients[3] * branch_2 + d_coefficients[1] * error;
+      // branch_2_3 = branch_2 + branch_3 ;
+      // return branch_2_3 + d_coefficients[0] * error;
     }
 
     int64_t
