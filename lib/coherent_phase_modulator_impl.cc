@@ -40,6 +40,7 @@
 namespace gr {
   namespace ecss {
 
+    static const pmt::pmt_t TOKEN_KEY = pmt::string_to_symbol("token_tag");
     #ifndef M_TWOPI
     #define M_TWOPI (2.0*M_PI)
     #endif
@@ -64,6 +65,7 @@ namespace gr {
       this->set_msg_handler(pmt::mp("async_in"), boost::bind(&coherent_phase_modulator_impl::handle_async_in, this, _1));
       d_async_buffer = gr::make_buffer(16384*64, sizeof(int64_t));
       d_reader = gr::buffer_add_reader(d_async_buffer, 0);
+      this->message_port_register_out(pmt::mp("token_out"));
     }
 
     coherent_phase_modulator_impl::~coherent_phase_modulator_impl()
@@ -91,6 +93,16 @@ namespace gr {
       double integer_phase_normalized;
       int64_t integer_phase;
       double oi, oq;
+
+      std::vector<tag_t> tags;
+      for (int n_input = 0; n_input < d_n_inputs; n_input++){
+        get_tags_in_window(tags, n_input, 0, noutput_items);
+        for (const auto &tag : tags){
+          if(pmt::equal(tag.key, TOKEN_KEY)){
+            message_port_pub(pmt::mp("token_out"), pmt::PMT_NIL);
+          }
+        }
+      }
 
       for(int x = 0; x < d_n_inputs; x++) {
         in[x] = (const int64_t *) input_items[x];

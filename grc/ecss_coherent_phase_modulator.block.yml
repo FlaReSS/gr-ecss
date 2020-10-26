@@ -26,6 +26,9 @@ inputs:
 outputs:
 -   domain: stream
     dtype: complex
+-   domain: message
+    id: token_out
+    optional: true
 asserts:
 - ${ n_inputs >= 1 }
 - ${ N >= 1 and N <= 52 }
