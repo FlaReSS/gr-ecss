@@ -1,6 +1,8 @@
 # gr-ecss
 gr-ecss OOT module for GnuRadio
 
+Updated to GNU Radio 3.8, documentation still needs to be updated. 
+
 ### HOW TO INSTALL GNURADIO
 #### PyBOMBS installation:
 It is recommended to install GnuRadio v3.7.13.5, since it is the latest version v3.7 update. In fact, the Gnuradio structure from version v3.8 has changed and therefore the OOT module's compatibility may not be guaranteed in the future versions. 

@@ -47,6 +47,9 @@ set(VERSION_INFO_API_COMPAT    0)
 set(VERSION_INFO_MINOR_VERSION 0)
 set(VERSION_INFO_MAINT_VERSION git)
 
+# force C++11 dialect (needed as of GNU Radio 3.8)
+set(CMAKE_CXX_STANDARD 11)
+
 cmake_policy(SET CMP0011 NEW)
 cmake_policy(SET CMP0012 NEW)
 ########################################################################
