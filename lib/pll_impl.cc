@@ -263,7 +263,7 @@ namespace gr {
     void
     pll_impl::set_coefficients(const std::vector<double> &coefficients)
     {
-      for(size_t i = 0; i < 4; i++)
+      for(size_t i = 0; i < coefficients.size(); i++)
       {
         if (coefficients[i] < 0 || coefficients[i] > 1.0)
         {
