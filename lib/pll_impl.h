@@ -34,9 +34,9 @@ namespace gr {
       int64_t d_integer_phase;
       double d_integer_phase_denormalized;                /*!< Integer value after to be denormalized */
       double precision;
-      double branch_3_par, branch_3, branch_2, branch_2_3;
-      double d_freq_central, d_bw;
-      double branch_2_3_max, branch_2_3_min;
+      double integrator_order_1, integrator_order_2_1, integrator_order_2_2;
+      //double branch_3_par, branch_3, branch_2, branch_2_3;
+      double d_freq_central;
       std::vector<double> d_coefficients;
 
       double mod_2pi(double in);                          /*! Keep the value between -2pi and 2pi */

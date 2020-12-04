@@ -29,6 +29,8 @@
 #include <stdexcept>
 #include "pll_impl.h"
 #include <vector>
+#include <algorithm>
+
 
 namespace gr {
   namespace ecss {
@@ -49,10 +51,9 @@ namespace gr {
         : gr::sync_block("pll",
                          gr::io_signature::make(1, 1, sizeof(gr_complex)),
                          gr::io_signature::makev(1, 4, iosig)),
-          d_N(N), d_integer_phase(0), d_integer_phase_denormalized(0),
-          branch_2_3_max(((freq_central + (bw / 2)) * M_TWOPI) / d_samp_rate), branch_2_3_min(((freq_central - (bw / 2)) * M_TWOPI) / d_samp_rate),
-          branch_3(0), branch_3_par(0), branch_2(0), branch_2_3(0), d_samp_rate(samp_rate),
-          d_freq_central(freq_central), d_bw(bw), d_coefficients(coefficients)
+          d_N(N), d_integer_phase(0), d_integer_phase_denormalized(0),          
+          d_samp_rate(samp_rate),
+          d_freq_central(freq_central), d_coefficients(3, 0.0)
     {
 
       set_tag_propagation_policy(TPP_DONT);
@@ -72,14 +73,14 @@ namespace gr {
                        gr_vector_const_void_star &input_items,
                        gr_vector_void_star &output_items)
     {
-      const gr_complex *input = (gr_complex*)input_items[0];
-      gr_complex *output = (gr_complex*)output_items[0];
-      // float *frq =(float*)output_items[1];
-      // float *phase_out =(float*)output_items[2];
-      // int64_t *phase_delta =(int64_t*)output_items[3];
-      float *frq = output_items.size() >= 2 ? (float *)output_items[1] : NULL;
-      float *phase_out = output_items.size() >= 3 ? (float *)output_items[2] : NULL;
-      int64_t *phase_delta = output_items.size() >= 4 ? (int64_t *)output_items[3] : NULL;
+		// input stream
+		const gr_complex *input = (gr_complex*)input_items[0];
+		// output stream
+		gr_complex *output = (gr_complex*)output_items[0];
+		// optional output signals
+		float *frequency_output = output_items.size() >= 2 ? (float *)output_items[1] : NULL;
+		float *phase_error = output_items.size() >= 3 ? (float *)output_items[2] : NULL;
+		int64_t *phase_delta = output_items.size() >= 4 ? (int64_t *)output_items[3] : NULL;
 
       gr_complexd feedback;
       double module, error;
@@ -89,7 +90,8 @@ namespace gr {
 
       std::vector<tag_t> tags;
 
-      for(int i = 0; i < noutput_items; i++) {
+      for(int i = 0; i < noutput_items; i++) 
+      {
 
          get_tags_in_window( // Note the different method name
              tags, // Tags will be saved here
@@ -104,23 +106,33 @@ namespace gr {
            }
          }
 
-         if (phase_delta != NULL)
-           phase_delta[i] = d_integer_phase;
+		if (phase_delta != NULL)
+		{
+			phase_delta[i] = d_integer_phase;
+		}
+		
          gr::sincos(d_integer_phase_denormalized, &t_imag, &t_real);
          feedback = (gr_complexd)input[i] * gr_complexd(t_real, -t_imag);
          output[i] = (gr_complex)feedback;
          error = phase_detector(feedback);
 
-         if (phase_out != NULL)
-           phase_out[i] = error;
+		// output of the loop filter
+		filter_out = advance_loop(error);
+		
+		// output the phase error, if a signal is connected to the optional port
+		if (phase_error != NULL)
+		{
+			phase_error[i] = error;
+		}		
 
-         filter_out = advance_loop(error);
+		// output the current PLL frequency, if a signal is connected to the optional port
+		if (frequency_output != NULL)
+		{
+			frequency_output[i] = integrator_order_1 * d_samp_rate / M_TWOPI;
+		}
 
-         if (frq != NULL)
-           frq[i] = branch_2_3 * d_samp_rate / M_TWOPI;
-         filter_out_limited = frequency_limit(filter_out);
+         integer_step_phase = integer_phase_converter(filter_out);
 
-         integer_step_phase = integer_phase_converter(filter_out_limited);
          accumulator(integer_step_phase);
 
          NCO_denormalization();
@@ -159,9 +171,12 @@ namespace gr {
     void
     pll_impl::reset()
     {
-      branch_3_par = 0;
-      branch_3 = 0;
-      branch_2_3 = d_freq_central / d_samp_rate * M_TWOPI;
+    std::cout << "Reset" << std::endl;
+    
+      set_frequency(d_freq_central);
+      integrator_order_2_1 = 0;
+      integrator_order_2_2 = 0;
+
       d_integer_phase_denormalized = 0;
       d_integer_phase = 0;
     }
@@ -169,29 +184,13 @@ namespace gr {
     double
     pll_impl::advance_loop(double error)
     {
-      // if (d_order == 3)
-      // {
-      //     branch_3_par += d_coefficients[5] * error;
-      //     branch_2_3_par = d_coefficients[4] * error + branch_3_par;
-      //     branch_2_3 += branch_2_3_par;
-      //     return branch_2_3 + d_coefficients[3] * error;
-      // }
-      // else
-      // {
-      //     branch_3_par = 0;
-      //     branch_2_3 = d_coefficients[2] * branch_2_3 + d_coefficients[1] * error;
-      //     return branch_2_3 + d_coefficients[0] * error;
-      // }
-
-      branch_3_par = 0;
-      branch_2_3 = d_coefficients[2] * branch_2_3 + d_coefficients[1] * error;
-      return branch_2_3 + d_coefficients[0] * error;
-
-      // branch_3_par += d_coefficients[2] * error;
-      // branch_3 += branch_3_par;
-      // branch_2 = d_coefficients[3] * branch_2 + d_coefficients[1] * error;
-      // branch_2_3 = branch_2 + branch_3 ;
-      // return branch_2_3 + d_coefficients[0] * error;
+      integrator_order_1 += d_coefficients[1] * error;
+      integrator_order_2_1 += d_coefficients[2] * error;
+      integrator_order_2_2 += integrator_order_2_1;
+      
+      return d_coefficients[0] * error +		// order 0
+      		 integrator_order_1 +				// order 1
+      		 integrator_order_2_2;				// order 2
     }
 
     int64_t
@@ -230,20 +229,7 @@ namespace gr {
     double
     pll_impl::frequency_limit(double step)
     {
-      if(branch_2_3 > branch_2_3_max)
-      {
-        branch_2_3 = branch_2_3_max;
-        return branch_2_3_max;
-      }
-
-
-      else if(branch_2_3 < branch_2_3_min)
-            {
-              branch_2_3 = branch_2_3_min;
-              return branch_2_3_min;
-            }
-          else
-            return step;
+       return 0.0;
     }
 
     /*******************************************************************
@@ -263,24 +249,30 @@ namespace gr {
     void
     pll_impl::set_coefficients(const std::vector<double> &coefficients)
     {
-      for(size_t i = 0; i < coefficients.size(); i++)
+    std::cout << "Coefficents size " << d_coefficients.size() << std::endl;
+      // zero all coefficients to avoid potential errors
+      for(size_t i = 0; i < d_coefficients.size(); i++)
       {
-        if (coefficients[i] < 0 || coefficients[i] > 1.0)
-        {
-          throw std::out_of_range("pll: invalid coefficients. Must be in [0,1].");
-        }
+        d_coefficients[2] = 0.0;
       }
-      d_coefficients = coefficients;
+      
+      // copy coefficients 
+      for(size_t i = 0; i < std::min(coefficients.size(), d_coefficients.size()); i++)
+      {
+        d_coefficients[i] = coefficients[i];      
+      }
+      std::cout << "Coefficents: " << std::endl;
+      for(size_t i = 0; i < d_coefficients.size(); i++)
+      {
+        std::cout << d_coefficients[i] << std::endl;
+      }
     }
 
     void
     pll_impl::set_frequency(float freq)
     {
-      branch_2_3 = freq / d_samp_rate * M_TWOPI;
-      if(branch_2_3 > branch_2_3_max)
-        branch_2_3 = branch_2_3_max;
-      else if(branch_2_3 < branch_2_3_min)
-        branch_2_3 = branch_2_3_min;
+      integrator_order_1 = freq / d_samp_rate * M_TWOPI;
+      std::cout << "set_frequency " << freq << std::endl;
     }
 
     void
@@ -297,16 +289,13 @@ namespace gr {
     pll_impl::set_freq_central(float freq)
     {
       d_freq_central = freq;
-      branch_2_3_max = ((freq + (d_bw / 2)) * M_TWOPI) / d_samp_rate;
-      branch_2_3_min = ((freq - (d_bw / 2)) * M_TWOPI) / d_samp_rate;
+      std::cout << "set_freq_central " << freq << std::endl;
     }
 
     void
     pll_impl::set_bw(float bw)
     {
-      d_bw = bw;
-      branch_2_3_max = ((d_freq_central + (bw / 2)) * M_TWOPI) / d_samp_rate;
-      branch_2_3_min = ((d_freq_central - (bw / 2)) * M_TWOPI) / d_samp_rate;
+
     }
 
     /*******************************************************************
@@ -323,7 +312,7 @@ namespace gr {
     float
     pll_impl::get_frequency() const
     {
-      return branch_2_3 * d_samp_rate / M_TWOPI;
+      return integrator_order_1 * d_samp_rate / M_TWOPI;
     }
 
     float
@@ -341,7 +330,7 @@ namespace gr {
     float
     pll_impl::get_bw() const
     {
-      return d_bw;
+      return 0;
     }
 
   } /* namespace ecss */
