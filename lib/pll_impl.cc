@@ -55,7 +55,7 @@ namespace gr {
           d_samp_rate(samp_rate),
           d_freq_central(freq_central), d_coefficients(3, 0.0)
     {
-
+		stop = false;
       set_tag_propagation_policy(TPP_DONT);
       set_N(N);
       set_coefficients(coefficients);
@@ -100,11 +100,26 @@ namespace gr {
              (i + 1) // End of relative range
          );
 
-         if (tags.size() > 0) {
-           if (tags[0].value == pmt::intern("reset") && tags[0].key == pmt::intern("pll")) {
-             reset();
-           }
-         }
+		if (tags.size() > 0) 
+		{
+			if (tags[0].value == pmt::intern("reset") && tags[0].key == pmt::intern("pll")) 
+			{
+				reset();
+			}
+			if (tags[0].value == pmt::intern("stop") && tags[0].key == pmt::intern("pll")) 
+			{
+				stop = true;
+				reset();
+			}
+			if (tags[0].value == pmt::intern("start") && tags[0].key == pmt::intern("pll")) 
+			{
+				stop = false;
+			}
+			if (tags[0].value == pmt::intern("start(1e3)") && tags[0].key == pmt::intern("pll")) 
+			{
+				stop = false;
+			}
+		}
 
 		if (phase_delta != NULL)
 		{
@@ -116,14 +131,23 @@ namespace gr {
          output[i] = (gr_complex)feedback;
          error = phase_detector(feedback);
 
-		// output of the loop filter
-		filter_out = advance_loop(error);
-		
 		// output the phase error, if a signal is connected to the optional port
 		if (phase_error != NULL)
 		{
 			phase_error[i] = error;
-		}		
+		}	
+		
+		// if the PLL has been stopped, force the error to zero, this makes sure 
+		// the PLL remains fixed on the center frequency
+		if (stop)
+		{
+			filter_out = 0.0;
+		}
+		else
+		{
+			// output of the loop filter
+			filter_out = advance_loop(error);
+		}
 
 		// output the current PLL frequency, if a signal is connected to the optional port
 		if (frequency_output != NULL)

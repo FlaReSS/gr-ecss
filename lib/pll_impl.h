@@ -44,6 +44,7 @@ namespace gr {
       void NCO_denormalization();
       double phase_detector(gr_complexd sample);
       double magnitude(gr_complexd sample);
+      bool stop;
 
       /*! \brief Integer phase converter
       *
