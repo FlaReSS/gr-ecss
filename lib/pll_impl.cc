@@ -155,7 +155,7 @@ namespace gr {
 			frequency_output[i] = integrator_order_1 * d_samp_rate / M_TWOPI;
 		}
 
-         integer_step_phase = integer_phase_converter(filter_out);
+         integer_step_phase = integer_phase_converter(filter_out + (d_freq_central / d_samp_rate * M_TWOPI));
 
          accumulator(integer_step_phase);
 
@@ -197,7 +197,7 @@ namespace gr {
     {
     std::cout << "Reset" << std::endl;
     
-      set_frequency(d_freq_central);
+      integrator_order_1 = 0;
       integrator_order_2_1 = 0;
       integrator_order_2_2 = 0;
 
@@ -295,7 +295,7 @@ namespace gr {
     void
     pll_impl::set_frequency(float freq)
     {
-      integrator_order_1 = freq / d_samp_rate * M_TWOPI;
+      integrator_order_1 = (freq - d_freq_central) / d_samp_rate * M_TWOPI;
       std::cout << "set_frequency " << freq << std::endl;
     }
 
@@ -336,7 +336,7 @@ namespace gr {
     float
     pll_impl::get_frequency() const
     {
-      return integrator_order_1 * d_samp_rate / M_TWOPI;
+      return d_freq_central + (integrator_order_1 * d_samp_rate / M_TWOPI);
     }
 
     float
