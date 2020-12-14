@@ -24,7 +24,8 @@
 
 
 %include "ecss/agc.h"
-GR_SWIG_BLOCK_MAGIC2(ecss, agc);
+GR_SWIG_BLOCK_MAGIC2_TMPL(ecss, agc_ff, agc<float>);
+GR_SWIG_BLOCK_MAGIC2_TMPL(ecss, agc_cc, agc<gr_complex>);
 
 %include "ecss/pll.h"
 GR_SWIG_BLOCK_MAGIC2(ecss, pll);
