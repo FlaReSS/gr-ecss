@@ -37,13 +37,14 @@ namespace gr {
      * The output rms value will be the value of the reference parameter.
      * In order to be more user friendly, it is possible to set the settling time of the AGC.
      */
+    template <class T>
     class ECSS_API agc : virtual public gr::sync_block
     {
      public:
        /*!
         * \brief Return a shared_ptr to a new instance of ecss::agc.
         */
-      typedef boost::shared_ptr<agc> sptr;
+      typedef boost::shared_ptr<agc<T>> sptr;
 
       /*!
         * \brief Make a AGC Log-based.
@@ -103,6 +104,9 @@ namespace gr {
        */
       virtual void set_maximum_gain(float maximum_gain)=0;
     };
+
+    typedef agc<float> agc_ff;
+    typedef agc<gr_complex> agc_cc;
 
   } // namespace ecss
 } // namespace gr

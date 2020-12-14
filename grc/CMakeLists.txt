@@ -18,7 +18,7 @@
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
 install(FILES
-    ecss_agc.block.yml
+    ecss_agc_xx.block.yml
     ecss_pll.block.yml
     ecss_coherent_phase_modulator.block.yml
     ecss_phase_converter.block.yml
