@@ -24,6 +24,7 @@
 
 #include <gnuradio/io_signature.h>
 #include <gnuradio/sincos.h>
+#include <gnuradio/expj.h>
 #include <math.h>
 #include <gnuradio/math.h>
 #include <stdexcept>
@@ -53,7 +54,7 @@ namespace gr {
                          gr::io_signature::makev(1, 4, iosig)),
           d_N(N), d_integer_phase(0), d_integer_phase_denormalized(0),          
           d_samp_rate(samp_rate),
-          d_freq_central(freq_central), d_coefficients(3, 0.0)
+          d_freq_central(freq_central), d_coefficients(3, 0.0), d_bw(bw)
     {
 		stop = false;
       set_tag_propagation_policy(TPP_DONT);
@@ -82,7 +83,6 @@ namespace gr {
 		float *phase_error = output_items.size() >= 3 ? (float *)output_items[2] : NULL;
 		int64_t *phase_delta = output_items.size() >= 4 ? (int64_t *)output_items[3] : NULL;
 
-      gr_complexd feedback;
       double module, error;
       double filter_out, filter_out_limited;
       double t_imag, t_real;
@@ -125,11 +125,8 @@ namespace gr {
 		{
 			phase_delta[i] = d_integer_phase;
 		}
-		
-         gr::sincos(d_integer_phase_denormalized, &t_imag, &t_real);
-         feedback = (gr_complexd)input[i] * gr_complexd(t_real, -t_imag);
-         output[i] = (gr_complex)feedback;
-         error = phase_detector(feedback);
+    output[i] = input[i] * gr_expj(-d_integer_phase_denormalized);
+    error = phase_detector(output[i]);
 
 		// output the phase error, if a signal is connected to the optional port
 		if (phase_error != NULL)
@@ -152,14 +149,13 @@ namespace gr {
 		// output the current PLL frequency, if a signal is connected to the optional port
 		if (frequency_output != NULL)
 		{
-			frequency_output[i] = integrator_order_1 * d_samp_rate / M_TWOPI;
+			frequency_output[i] = integrator_order_1 * d_samp_rate / M_TWOPI + d_freq_central;
 		}
 
          integer_step_phase = integer_phase_converter(filter_out + (d_freq_central / d_samp_rate * M_TWOPI));
-
          accumulator(integer_step_phase);
-
          NCO_denormalization();
+         
       }
       return noutput_items;
     }
@@ -176,7 +172,7 @@ namespace gr {
     }
 
     double
-    pll_impl::phase_detector(gr_complexd sample)
+    pll_impl::phase_detector(gr_complex sample)
     {
       double sample_phase;
       sample_phase = atan2(sample.imag(),sample.real());
@@ -208,13 +204,32 @@ namespace gr {
     double
     pll_impl::advance_loop(double error)
     {
+      //2nd order
       integrator_order_1 += d_coefficients[1] * error;
+
+      if(d_bw != 0)
+      {
+        if(integrator_order_1 > (d_bw / d_samp_rate * M_TWOPI)/2)
+        {
+              // std::cout << "CLIP UP" << std::endl;
+
+          integrator_order_1 = (d_bw / d_samp_rate * M_TWOPI)/2;
+        }
+        else if(integrator_order_1 < -(d_bw / d_samp_rate * M_TWOPI)/2)
+        {
+              // std::cout << "CLIP DOWN" << std::endl;
+
+          integrator_order_1 = -(d_bw / d_samp_rate * M_TWOPI)/2;
+        }
+      }
+
+      //3rd order
       integrator_order_2_1 += d_coefficients[2] * error;
       integrator_order_2_2 += integrator_order_2_1;
       
-      return d_coefficients[0] * error +		// order 0
-      		 integrator_order_1 +				// order 1
-      		 integrator_order_2_2;				// order 2
+      return d_coefficients[0] * error +		// order 1
+      		 integrator_order_1 +				      // order 2
+      		 integrator_order_2_2;				    // order 3
     }
 
     int64_t
@@ -277,7 +292,7 @@ namespace gr {
       // zero all coefficients to avoid potential errors
       for(size_t i = 0; i < d_coefficients.size(); i++)
       {
-        d_coefficients[2] = 0.0;
+        d_coefficients[i] = 0.0;
       }
       
       // copy coefficients 

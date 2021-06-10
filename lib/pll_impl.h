@@ -31,6 +31,7 @@ namespace gr {
     {
       int d_N;
       float d_samp_rate;
+      float d_bw;
       int64_t d_integer_phase;
       double d_integer_phase_denormalized;                /*!< Integer value after to be denormalized */
       double precision;
@@ -42,7 +43,7 @@ namespace gr {
       double mod_2pi(double in);                          /*! Keep the value between -2pi and 2pi */
       void reset();                                       /*! Reset all the registers */
       void NCO_denormalization();
-      double phase_detector(gr_complexd sample);
+      double phase_detector(gr_complex sample);
       double magnitude(gr_complexd sample);
       bool stop;
 
