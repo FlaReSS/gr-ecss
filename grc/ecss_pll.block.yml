@@ -41,7 +41,7 @@ outputs:
     domain: stream
     dtype: float
     optional: true
--   label: phase accumulator
+-   label: phase delta
     domain: stream
     dtype: s64
     optional: true
