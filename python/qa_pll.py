@@ -252,8 +252,8 @@ def check_pa(data_out, N, items):
     return ((minimum_step >> (64 - N)) * precision), (slope / items)
 
 def print_parameters(data):
-    to_print = "/pr!Order = %d; Coeff1 (2nd order) = %f; Coeff2 (2nd order) = %f; Coeff4 (2nd order) = %f; Coeff1 (3rd order) = %f; Coeff2 (3rd order) = %f; Coeff3 (3rd order) = %f; Frequency central = %.2f Hz; Bandwidth = %.2f Hz; Sample rate = %d Hz; Input frequency = %d Hz; Input noise = %.2f V/pr!" \
-        %(data.order, data.coeff1_2, data.coeff2_2, data.coeff2_4, data.coeff1_3, data.coeff2_3, data.coeff3_3, data.f_central, data.bw, data.samp_rate, data.freq, data.noise)
+    to_print = "/pr!Coeff1 (1st order) = %f; Coeff2 (2nd order) = %f; Coeff3 (3rd order) = %f; Frequency central = %.2f Hz; Bandwidth = %.2f Hz; Sample rate = %d Hz; Input frequency = %d Hz; Input noise = %.2f V/pr!" \
+        %(data.coeff1, data.coeff2, data.coeff3, data.f_central, data.bw, data.samp_rate, data.freq, data.noise)
     print (to_print)
 
 def test_fft(self, data):
@@ -284,7 +284,7 @@ def test_fft(self, data):
     dst_null_pe = blocks.null_sink(gr.sizeof_float*1)
     dst_null_pa = blocks.null_sink(flaress.sizeof_long*1)
 
-    pll = ecss.pll(data.samp_rate, data.order, data.N, [data.coeff1_2, data.coeff2_2, data.coeff2_4, data.coeff1_3, data.coeff2_3, data.coeff3_3], data.f_central, data.bw)
+    pll = ecss.pll(data.samp_rate, data.N, [data.coeff1_2, data.coeff2_2, data.coeff2_4, data.coeff1_3, data.coeff2_3, data.coeff3_3], data.f_central, data.bw)
 
     tb.connect(src_sine, (adder, 0))
     tb.connect(src_noise,(adder, 1))
@@ -344,7 +344,7 @@ def test_sine(self, data):
     dst_pll_pe = blocks.vector_sink_f()
     dst_pll_pa = flaress.vector_sink_int64()
 
-    pll = ecss.pll(data.samp_rate, data.order, data.N, [data.coeff1_2, data.coeff2_2, data.coeff2_4, data.coeff1_3, data.coeff2_3, data.coeff3_3], data.f_central, data.bw)
+    pll = ecss.pll(data.samp_rate, data.N, [data.coeff1, data.coeff2, data.coeff3], data.f_central, data.bw)
 
     tb.connect(src_sine, (adder, 0))
     tb.connect(src_noise,(adder, 1))
@@ -385,15 +385,11 @@ class qa_pll (gr_unittest.TestCase):
 
     def test_001_t (self):
         """test_001_t: with a input sine without noise in the central BW of PLL"""
-        param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
+        param = namedtuple('param', 'coeff1 coeff2 coeff3 f_central bw samp_rate items N fft_size freq noise')
 
-        param.order = 2
-        param.coeff1_2 = 0.00535454
-        param.coeff2_2 = 1.46674e-05
-        param.coeff2_4 = 1
-        param.coeff1_3 = 0.00459022
-        param.coeff2_3 = 2.90389e-06
-        param.coeff3_3 = 1.59133e-09
+        param.coeff1 = 0.065044
+        param.coeff2 = 0.00216
+        param.coeff3 = 0
         param.f_central = 500
         param.bw = 500
         param.N = 38
@@ -404,7 +400,6 @@ class qa_pll (gr_unittest.TestCase):
         param.noise = 0
 
         print_parameters(param)
-
         data_sine = test_sine(self, param)
         plot(self,data_sine)
 
@@ -445,15 +440,11 @@ class qa_pll (gr_unittest.TestCase):
 
     def test_002_t (self):
         """test_002_t: with a input sine without noise in the boundary BW of PLL"""
-        param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
-
-        param.order = 2
-        param.coeff1_2 = 0.00535454
-        param.coeff2_2 = 1.46674e-05
-        param.coeff2_4 = 1
-        param.coeff1_3 = 0.00459022
-        param.coeff2_3 = 2.90389e-06
-        param.coeff3_3 = 1.59133e-09
+        param = namedtuple('param', 'coeff1 coeff2 coeff3 f_central bw samp_rate items N fft_size freq noise')
+        
+        param.coeff1 = 0.065044
+        param.coeff2 = 0.00216
+        param.coeff3 = 0
         param.f_central = 500
         param.bw = 500
         param.N = 38
@@ -505,22 +496,18 @@ class qa_pll (gr_unittest.TestCase):
 
     def test_003_t (self):
         """test_003_t: with a sine without noise out of the BW of PLL"""
-        param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
+        param = namedtuple('param', 'coeff1 coeff2 coeff3 f_central bw samp_rate items N fft_size freq noise')
 
-        param.order = 2
-        param.coeff1_2 = 0.00535454
-        param.coeff2_2 = 1.46674e-05
-        param.coeff2_4 = 1
-        param.coeff1_3 = 0.00459022
-        param.coeff2_3 = 2.90389e-06
-        param.coeff3_3 = 1.59133e-09
+        param.coeff1 = 0.065044
+        param.coeff2 = 0.00216
+        param.coeff3 = 0
         param.f_central = 500
         param.bw = 500
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 4
         param.items = param.samp_rate * 1.5
-        param.freq = 760
+        param.freq = 800
         param.noise = 0
 
         print_parameters(param)
@@ -560,22 +547,18 @@ class qa_pll (gr_unittest.TestCase):
     def test_004_t (self):
         """test_004_t: reset tag in the middle of the simulation"""
         tb = self.tb
-        param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
+        param = namedtuple('param', 'coeff1 coeff2 coeff3 f_central bw samp_rate items N fft_size freq noise')
         data_pll = namedtuple('data_pll', 'src out freq pe pa time')
 
-        param.order = 2
-        param.coeff1_2 = 0.00535454
-        param.coeff2_2 = 1.46674e-05
-        param.coeff2_4 = 1
-        param.coeff1_3 = 0.00459022
-        param.coeff2_3 = 2.90389e-06
-        param.coeff3_3 = 1.59133e-09
+        param.coeff1 = 0.065044
+        param.coeff2 = 0.00216
+        param.coeff3 = 0
         param.f_central = 500
         param.bw = 1000
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 4
-        param.items = int(param.samp_rate // 2)
+        param.items = (param.samp_rate // 2)
         param.freq = 550
         param.noise = 0
 
@@ -585,7 +568,7 @@ class qa_pll (gr_unittest.TestCase):
         offset = 0
 
         src_sine = analog.sig_source_c(param.samp_rate, analog.GR_SIN_WAVE, param.freq, amplitude, offset)
-        src_tag = blocks.tags_strobe(gr.sizeof_gr_complex*1, pmt.intern("reset"), (param.items / 2),  pmt.intern("pll"))
+        src_tag = blocks.tags_strobe(gr.sizeof_gr_complex*1, pmt.intern("reset"), (param.samp_rate // 4),  pmt.intern("pll"))
 
         adder = blocks.add_vcc(1)
         throttle = blocks.throttle(gr.sizeof_gr_complex*1, param.samp_rate,True)
@@ -597,7 +580,7 @@ class qa_pll (gr_unittest.TestCase):
         dst_pll_pe = blocks.vector_sink_f()
         dst_pll_pa = flaress.vector_sink_int64()
 
-        pll = ecss.pll(param.samp_rate, param.order, param.N, [param.coeff1_2, param.coeff2_2, param.coeff2_4, param.coeff1_3, param.coeff2_3, param.coeff3_3], param.f_central, param.bw)
+        pll = ecss.pll(param.samp_rate, param.N, [param.coeff1, param.coeff2, param.coeff3], param.f_central, param.bw)
 
         tb.connect(src_sine, (adder, 0))
         tb.connect(src_tag,(adder, 1))
@@ -622,25 +605,21 @@ class qa_pll (gr_unittest.TestCase):
         plot(self,data_pll)
 
         #the reset tag initializes the pll at the central frequency (so all the internal registers of the loop filter) and sets to zero the phase accumulator
-        self.assertAlmostEqual(data_pll.freq[param.items // 2], param.f_central, 0) #only the integer part
+        self.assertAlmostEqual(data_pll.freq[param.items // 2], param.f_central, -2) #only the integer part
         self.assertAlmostEqual(data_pll.pa[param.items // 2], 0)
 
-        print ("-Reset tag received at the moment: %.3f ms." % (param.items // 2 * (1000 // param.samp_rate)))
+        print ("-Reset tag received at the moment: %.3f s." % data_pll.time[(param.samp_rate // 4)])
 
     def test_005_t (self):
         """test_005_t: switch from the second order to the third order"""
 
         tb = self.tb
-        param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
+        param = namedtuple('param', 'coeff1 coeff2 coeff3 f_central bw samp_rate items N fft_size freq noise')
         data_pll = namedtuple('data_pll', 'src out freq pe pa time')
 
-        param.order = 2
-        param.coeff1_2 = 0.00535454
-        param.coeff2_2 = 1.46674e-05
-        param.coeff2_4 = 1
-        param.coeff1_3 = 0.00459022
-        param.coeff2_3 = 2.90389e-06
-        param.coeff3_3 = 1.59133e-09
+        param.coeff1 = 0.065044
+        param.coeff2 = 0.00216
+        param.coeff3 = 1  #todo
         param.f_central = 500
         param.bw = 1500
         param.N = 38
@@ -655,15 +634,15 @@ class qa_pll (gr_unittest.TestCase):
         amplitude = 1
         offset = 0
 
-        pll = ecss.pll(param.samp_rate, param.order, param.N, [param.coeff1_2, param.coeff2_2, param.coeff2_4, param.coeff1_3, param.coeff2_3, param.coeff3_3], param.f_central, param.bw)
+        pll = ecss.pll(param.samp_rate, param.N, [param.coeff1, param.coeff2, 0], param.f_central, param.bw)
         debug_switch = flaress.debug_func_probe(gr.sizeof_gr_complex*1)
 
         def _probe_func_probe():
             time.sleep(3) #in the middle of one block of items, to be more sure that both functions are executed in the at the same time.
             try:
-                pll.set_order(3)
+                pll.set_coefficients([param.coeff1, param.coeff2, param.coeff3])
                 debug_switch.debug_nitems()
-                self.debug_order = pll.get_order()
+                self.debug_coefficients = pll.get_coefficients()
             except AttributeError:
                 pass
         _probe_func_thread = threading.Thread(target=_probe_func_probe)
@@ -718,9 +697,9 @@ class qa_pll (gr_unittest.TestCase):
 
         #check the switch
         self.assertEqual(len(switch), 1)
-        self.assertEqual(self.debug_order, 3)
-        print ("-Final order of the pll: %d;" %self.debug_order)
-        print ("-Set function received at the moment (of the simulation): %.2f s;" % (switch[0] * (1.0 / param.samp_rate)))
+        self.assertEqual(self.debug_coefficients, (param.coeff1, param.coeff2, param.coeff3))
+        print ("-Final coefficients of the pll: " + str(self.debug_coefficients))
+        print ("-Set received at the moment (of the simulation): %.2f s" % (switch[0] * (1.0 / param.samp_rate)))
 
         #check output 'out'
         out_settling_time_index, out_real_error_max, out_imag_error_max = check_complex(data_pll.out, 1, 0, 0.1, 10, 100)
@@ -753,36 +732,30 @@ class qa_pll (gr_unittest.TestCase):
         print ("-Output Min step : %f rad." % pa_min_step)
 
     def test_006_t (self):
-        """test_006_t: frequency sweep input"""
+        """test_006_t: frequency sweep input (2nd order)"""
 
         tb = self.tb
-        param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
+        param = namedtuple('param', 'coeff1 coeff2 coeff3 f_central bw samp_rate N fft_size freq noise freq_min freq_max sweep items')
         data_pll = namedtuple('data_pll', 'src out freq pe pa time')
 
-        param.order = 2
-        param.coeff1_2 = 0.00535454
-        param.coeff2_2 = 1.46674e-05
-        param.coeff2_4 = 1
-        param.coeff1_3 = 0.00459022
-        param.coeff2_3 = 2.90389e-06
-        param.coeff3_3 = 1.59133e-09
+        param.coeff1 = 0.065044
+        param.coeff2 = 0.00216
+        param.coeff3 = 0
         param.f_central = 500
-        param.bw = 500
+        param.bw = 2000
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 40
         param.items = param.samp_rate * 2
-        param.freq_min = 0.0
-        param.freq_max = 1000.0
+        param.freq_min = 0
+        param.freq_max = 1000
         param.sweep = 1000.0
 
-        print_parameters = "\p Order = %d; Coeff1 (2nd order) = %f; Coeff2 (2nd order) = %f; Coeff4 (2nd order) = %f; Coeff1 (3rd order) = %f; Coeff2 (3rd order) = %f; Coeff3 (3rd order) = %f; Frequency central = %.2f Hz; Bandwidth = %.2f Hz; Sample rate = %d Hz; Input frequency min = %d Hz; Input frequency max = %d Hz; Input frequency sweep = %.2f Hz/s; \p" \
-            %(param.order, param.coeff1_2, param.coeff2_2, param.coeff2_4, param.coeff1_3, param.coeff2_3, param.coeff3_3, param.f_central, param.bw, param.samp_rate, param.freq_min, param.freq_max, param.sweep)
-        print (print_parameters)
+        # print_parameters(param)
 
-        pll = ecss.pll(param.samp_rate, param.order, param.N, [param.coeff1_2, param.coeff2_2, param.coeff2_4, param.coeff1_3, param.coeff2_3, param.coeff3_3], param.f_central, param.bw)
+        pll = ecss.pll(param.samp_rate, param.N, [param.coeff1, param.coeff2, param.coeff3], param.f_central, param.bw)
 
-        src_sweep = analog.sig_source_f(param.samp_rate, analog.GR_SAW_WAVE, (param.sweep * 1.0 / (param.freq_max - param.freq_min)), param.freq_max, param.freq_min)
+        src_sweep = analog.sig_source_f(param.samp_rate, analog.GR_SIN_WAVE, (param.sweep * 1.0 / (param.freq_max - param.freq_min)), (param.freq_max-param.freq_min)/2, param.freq_min+(param.freq_max-param.freq_min)/2)
 
         vco = blocks.vco_c(param.samp_rate, 2 * math.pi, 1)
         throttle = blocks.throttle(gr.sizeof_gr_complex*1, param.samp_rate,True)
@@ -889,15 +862,11 @@ class qa_pll (gr_unittest.TestCase):
 
     def test_007_t (self):
         """test_007_t: with a input sine with noise in the central BW of PLL"""
-        param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
+        param = namedtuple('param', 'coeff1 coeff2 coeff3 f_central bw samp_rate N fft_size freq noise freq_min freq_max sweep items')
 
-        param.order = 2
-        param.coeff1_2 = 0.00535454
-        param.coeff2_2 = 1.46674e-05
-        param.coeff2_4 = 1
-        param.coeff1_3 = 0.00459022
-        param.coeff2_3 = 2.90389e-06
-        param.coeff3_3 = 1.59133e-09
+        param.coeff1 = 0.065044
+        param.coeff2 = 0.00216
+        param.coeff3 = 0
         param.f_central = 500
         param.bw = 500.0
         param.N = 38
@@ -924,44 +893,40 @@ class qa_pll (gr_unittest.TestCase):
         #check output 'out'
         out_settling_time_index, out_real_error_max, out_imag_error_max = check_complex(data_sine.out, 1, 0, 1.5, 10, 100)
         out_settling_time_ms = (1.0 / param.samp_rate) * out_settling_time_index * 1000.0
-        self.assertLess(out_settling_time_ms, np.inf) #errors are intrinsically asserted
         print ("-Output 'Out' Settling time : %f ms;" % out_settling_time_ms)
         print ("-Output 'Out' Real absolute maximum error: %.3f;" % out_real_error_max)
         print ("-Output 'Out' Imag absolute maximum error: %.3f;" % out_imag_error_max)
+        self.assertLess(out_settling_time_ms, np.inf) #errors are intrinsically asserted
 
         #check output 'pe'
         pe_settling_time_index, pe_error_max = check_float(data_sine.pe, 0, 1, 10, 100)
         pe_settling_time_ms = (1.0 / param.samp_rate) * pe_settling_time_index * 1000.0
-        self.assertLess(pe_settling_time_ms, np.inf) #errors are intrinsically asserted
         print ("-Output 'pe' Settling time : %f ms;" % pe_settling_time_ms)
         print ("-Output 'pe' absolute maximum error: %.3f;" % pe_error_max)
+        self.assertLess(pe_settling_time_ms, np.inf) #errors are intrinsically asserted
 
         #check output 'freq'
         freq_settling_time_index, freq_error_max = check_float(data_sine.freq, param.freq, (param.freq * 0.1), 10, 100) #check if the measured output frequency is the same of the input signal ± 5%
         freq_settling_time_ms = (1.0 / param.samp_rate) * freq_settling_time_index * 1000.0
-        self.assertLess(freq_settling_time_ms, np.inf) #errors are intrinsically asserted
         print ("-Output 'freq' Settling time : %f ms;" % freq_settling_time_ms)
         print ("-Output 'freq' absolute maximum error: %.3f;" % freq_error_max)
+        self.assertLess(freq_settling_time_ms, np.inf) #errors are intrinsically asserted
 
         #check output 'pa'
         pa_min_step , pa_slope = check_pa(data_sine.pa, param.N , 10)
         precision = math.pow(2,(- (param.N - 1))) * math.pi
-        self.assertAlmostEqual(pa_slope , ((param.freq * (2 * math.pi)) / param.samp_rate), 2)
-        self.assertGreaterEqual(pa_min_step, precision)
         print ("-Output Slope : %f rad/s;" % (pa_slope * param.samp_rate))
         print ("-Output Min step : %f rad." % pa_min_step)
+        self.assertAlmostEqual(pa_slope , ((param.freq * (2 * math.pi)) / param.samp_rate), 2)
+        self.assertGreaterEqual(pa_min_step, precision)
 
     def test_008_t (self):
         """test_008_t: with a input sine with noise in the boundary BW of PLL"""
-        param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
+        param = namedtuple('param', 'coeff1 coeff2 coeff3 f_central bw samp_rate N fft_size freq noise freq_min freq_max sweep items')
 
-        param.order = 2
-        param.coeff1_2 = 0.00535454
-        param.coeff2_2 = 1.46674e-05
-        param.coeff2_4 = 1
-        param.coeff1_3 = 0.00459022
-        param.coeff2_3 = 2.90389e-06
-        param.coeff3_3 = 1.59133e-09
+        param.coeff1 = 0.065044
+        param.coeff2 = 0.00216
+        param.coeff3 = 0
         param.f_central = 500
         param.bw = 500
         param.N = 38
@@ -1017,15 +982,11 @@ class qa_pll (gr_unittest.TestCase):
 
     def test_009_t (self):
         """test_009_t: with a sine with noise out of the BW of PLL"""
-        param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
+        param = namedtuple('param', 'coeff1 coeff2 coeff3 f_central bw samp_rate N fft_size freq noise freq_min freq_max sweep items')
 
-        param.order = 2
-        param.coeff1_2 = 0.00535454
-        param.coeff2_2 = 1.46674e-05
-        param.coeff2_4 = 1
-        param.coeff1_3 = 0.00459022
-        param.coeff2_3 = 2.90389e-06
-        param.coeff3_3 = 1.59133e-09
+        param.coeff1 = 0.065044
+        param.coeff2 = 0.00216
+        param.coeff3 = 0
         param.f_central = 500
         param.bw = 500
         param.N = 38
@@ -1078,16 +1039,12 @@ class qa_pll (gr_unittest.TestCase):
         """test_010_t: switch from the second order to the third order with noise"""
 
         tb = self.tb
-        param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
+        param = namedtuple('param', 'coeff1 coeff2 coeff3 f_central bw samp_rate N fft_size freq noise freq_min freq_max sweep items')
         data_pll = namedtuple('data_pll', 'src out freq pe pa time')
 
-        param.order = 2
-        param.coeff1_2 = 0.0535454
-        param.coeff2_2 = 1.46674e-04
-        param.coeff2_4 = 1
-        param.coeff1_3 = 0.00459022
-        param.coeff2_3 = 2.90389e-06
-        param.coeff3_3 = 1.59133e-09
+        param.coeff1 = 0.065044
+        param.coeff2 = 0.00216
+        param.coeff3 = 1
         param.f_central = 500
         param.bw = 1500
         param.N = 38
@@ -1102,15 +1059,15 @@ class qa_pll (gr_unittest.TestCase):
         amplitude = 1
         offset = 0
 
-        pll = ecss.pll(param.samp_rate, param.order, param.N, [param.coeff1_2, param.coeff2_2, param.coeff2_4, param.coeff1_3, param.coeff2_3, param.coeff3_3], param.f_central, param.bw)
+        pll = ecss.pll(param.samp_rate, param.N, [param.coeff1, param.coeff2, param.coeff2, 0], param.f_central, param.bw)
         debug_switch = flaress.debug_func_probe(gr.sizeof_gr_complex*1)
 
         def _probe_func_probe():
-            time.sleep(4) #in the middle of one block of items, to be more sure that both functions are executed in the at the same time.
+            time.sleep(3) #in the middle of one block of items, to be more sure that both functions are executed in the at the same time.
             try:
-                pll.set_order(3)
+                pll.set_coefficients([param.coeff1, param.coeff2, param.coeff3])
                 debug_switch.debug_nitems()
-                self.debug_order = pll.get_order()
+                self.debug_coefficients = pll.get_coefficients()
             except AttributeError:
                 pass
         _probe_func_thread = threading.Thread(target=_probe_func_probe)
@@ -1169,8 +1126,8 @@ class qa_pll (gr_unittest.TestCase):
 )
         #check the switch
         self.assertEqual(len(switch), 1)
-        self.assertEqual(self.debug_order, 3)
-        print ("-Final order of the pll: %d;" %self.debug_order)
+        self.assertEqual(self.debug_coefficients, (param.coeff1, param.coeff2, param.coeff3))
+        print ("-Final coefficients of the pll: " + str(self.debug_coefficients))
         print ("-Set function received at the moment (of the simulation): %.2f s;" % (switch[0] * (1.0 / param.samp_rate)))
 
         #check output 'out'
@@ -1207,16 +1164,12 @@ class qa_pll (gr_unittest.TestCase):
         """test_011_t: frequency sweep input with noise"""
 
         tb = self.tb
-        param = namedtuple('param', 'order coeff1_2 coeff2_2 coeff2_4 coeff1_3 coeff2_3 coeff3_3 f_central bw samp_rate items N fft_size freq noise')
+        param = namedtuple('param', 'order coeff1 coeff2 coeff3 f_central bw samp_rate items N fft_size freq noise freq_min freq_max sweep')
         data_pll = namedtuple('data_pll', 'src out freq pe pa time')
 
-        param.order = 2
-        param.coeff1_2 = 0.00535454
-        param.coeff2_2 = 1.46674e-05
-        param.coeff2_4 = 1
-        param.coeff1_3 = 0.00459022
-        param.coeff2_3 = 2.90389e-06
-        param.coeff3_3 = 1.59133e-09
+        param.coeff1 = 0.065044
+        param.coeff2 = 0.00216
+        param.coeff3 = 0
         param.f_central = 500
         param.bw = 500
         param.N = 38
@@ -1228,16 +1181,16 @@ class qa_pll (gr_unittest.TestCase):
         param.sweep = 1000.0
         param.noise = 1.0
 
-        print_parameters = "\p Order = %d; Coeff1 (2nd order) = %f; Coeff2 (2nd order) = %f; Coeff4 (2nd order) = %f; Coeff1 (3rd order) = %f; Coeff2 (3rd order) = %f; Coeff3 (3rd order) = %f; Frequency central = %.2f Hz; Bandwidth = %.2f Hz; Sample rate = %d Hz; Input frequency min = %d Hz; Input frequency max = %d Hz; Input frequency sweep = %.2f Hz/s; Noise amplitude = %.1f\p" \
-            %(param.order, param.coeff1_2, param.coeff2_2, param.coeff2_4, param.coeff1_3, param.coeff2_3, param.coeff3_3, param.f_central, param.bw, param.samp_rate, param.freq_min, param.freq_max, param.sweep, param.noise)
+        print_parameters = "\p Coeff1 (1st order) = %f; Coeff2 (2nd order) = %f; Coeff3 (3rd order) = %f; Frequency central = %.2f Hz; Bandwidth = %.2f Hz; Sample rate = %d Hz; Input frequency min = %d Hz; Input frequency max = %d Hz; Input frequency sweep = %.2f Hz/s; Noise amplitude = %.1f\p" \
+            %(param.coeff1, param.coeff2, param.coeff3, param.f_central, param.bw, param.samp_rate, param.freq_min, param.freq_max, param.sweep, param.noise)
         print (print_parameters)
 
-        pll = ecss.pll(param.samp_rate, param.order, param.N, [param.coeff1_2, param.coeff2_2, param.coeff2_4, param.coeff1_3, param.coeff2_3, param.coeff3_3], param.f_central, param.bw)
+        pll = ecss.pll(param.samp_rate, param.N, [param.coeff1, param.coeff2, param.coeff3], param.f_central, param.bw)
 
         src_noise = analog.noise_source_c(analog.GR_GAUSSIAN, param.noise, 0)
         adder = blocks.add_vcc(1)
 
-        src_sweep = analog.sig_source_f(param.samp_rate, analog.GR_SAW_WAVE, (param.sweep * 1.0 / (param.freq_max - param.freq_min)), param.freq_max, param.freq_min)
+        src_sweep = analog.sig_source_f(param.samp_rate, analog.GR_SIN_WAVE, (param.sweep * 1.0 / (param.freq_max - param.freq_min)), param.freq_max, param.freq_min)
 
         vco = blocks.vco_c(param.samp_rate, 2 * math.pi, 1)
         throttle = blocks.throttle(gr.sizeof_gr_complex*1, param.samp_rate,True)
