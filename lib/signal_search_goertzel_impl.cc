@@ -111,17 +111,18 @@ namespace gr{
           
           if ((central_avg > (left_avg * d_threshold)) && (central_avg > (right_avg * d_threshold)))
           {
-            out_items += d_size;
             memcpy(&out[i], &in[i], sizeof(gr_complex) * d_size);
             if (flag != NULL)
+            {
               memset(&flag[i], 1, sizeof(char) * d_size);
+            }
             if (first == true)
             {
               add_item_tag(0,                           // Port number
                           nitems_written(0) + (i), // Offset
                           pmt::intern("reset"),        // Key
                           pmt::intern("pll")           // Value
-              );
+            );
 
               first = false;
               average_reset();
@@ -129,23 +130,14 @@ namespace gr{
           }
           else
           {
+            memset(&out[i], 0, sizeof(gr_complex) * d_size);
             first = true;
             if (flag != NULL)
               memset(&flag[i], 0, sizeof(char) * d_size);
           }
         }
-
-        if (out_items > i || i > noutput_items)
-        {
-          std::cout << "out_items > i: " << out_items << " > " << i << std::endl;
-          // out_items = in_items;
-        }
-
         consume_each(i);
-        produce(0, out_items);
-        if (flag != NULL)
-          produce(1, i);
-        return WORK_CALLED_PRODUCE;
+        return i;
       }
       else
       {
