@@ -27,7 +27,8 @@ install(FILES
     pll.h
     coherent_phase_modulator.h
     phase_converter.h
-    variables_loop_filter.h
+    variables_loop_filter_3rdorder.h
+    variables_loop_filter_2ndorder.h
     gain_phase_accumulator.h
     signal_search_goertzel.h
     signal_search_fft_v.h
