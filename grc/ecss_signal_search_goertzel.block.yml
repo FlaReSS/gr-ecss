@@ -39,6 +39,10 @@ parameters:
 inputs:
 -   domain: stream
     dtype: complex
+-   label: lock_in
+    domain: message
+    id: lock_in
+    optional: true
 
 outputs:
 -   domain: stream

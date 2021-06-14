@@ -32,6 +32,10 @@ namespace ecss
   class signal_search_goertzel_impl : public signal_search_goertzel
   {
     private:
+      bool d_state = false; //false: squelch | true: passthrough
+      bool d_locked = false;
+      void handle_lockmsg(pmt::pmt_t msg);
+
       struct bins
       {
         double central;

@@ -55,10 +55,32 @@ namespace gr{
       set_size();
       average_reset();
       coeff_eval(freq_central, bandwidth);
+      message_port_register_in(pmt::mp("lock_in"));
+      set_msg_handler(pmt::mp("lock_in"), [this](pmt::pmt_t msg) { this->handle_lockmsg(msg); });
     }
 
     signal_search_goertzel_impl::~signal_search_goertzel_impl()
     {}
+
+    void 
+    signal_search_goertzel_impl::handle_lockmsg(pmt::pmt_t msg)
+    {
+      if(pmt::eqv(msg, pmt::mp("LOCK")) )
+      {
+        if(d_state == true) //only accept 'lock' when output is actually on
+        {
+          d_locked = true;
+          // std::cout<< "GOERTZEL LOCK RECEIVED " << std::endl;
+        }
+      }
+      else if(pmt::eqv(msg, pmt::mp("UNLOCK")) )
+      {
+        d_locked = false;
+        first = true;   //next goertzel trigger will be the first one, hence reset pll
+        // std::cout<< "GOERTZEL UNLOCK RECEIVED " << std::endl;
+      }
+      return;
+    }
 
     void
     signal_search_goertzel_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
@@ -111,6 +133,15 @@ namespace gr{
           
           if ((central_avg > (left_avg * d_threshold)) && (central_avg > (right_avg * d_threshold)))
           {
+            d_state = true;
+          }
+          else
+          {
+            d_state = false;
+          }
+
+          if(d_state || d_locked) //ouptut on Goertzel hit OR if PLL is locked
+          {
             memcpy(&out[i], &in[i], sizeof(gr_complex) * d_size);
             if (flag != NULL)
             {
@@ -118,20 +149,20 @@ namespace gr{
             }
             if (first == true)
             {
+              std::cout<<"INSERTING PLL RESET TAG"<<std::endl;
               add_item_tag(0,                           // Port number
                           nitems_written(0) + (i), // Offset
                           pmt::intern("reset"),        // Key
                           pmt::intern("pll")           // Value
             );
-
+              
               first = false;
-              average_reset();
+              // average_reset();
             }
           }
           else
           {
             memset(&out[i], 0, sizeof(gr_complex) * d_size);
-            first = true;
             if (flag != NULL)
               memset(&flag[i], 0, sizeof(char) * d_size);
           }
