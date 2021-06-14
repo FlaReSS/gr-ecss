@@ -31,5 +31,6 @@ install(FILES
     ecss_nrzl_encoder.block.yml
     ecss_nrzl_encoder_subcarrier.block.yml
     ecss_modulator.block.yml
-    ecss_demodulator.block.yml DESTINATION share/gnuradio/grc/blocks
+    ecss_demodulator.block.yml
+    ecss_threshhold_to_message.block.yml DESTINATION share/gnuradio/grc/blocks
 )

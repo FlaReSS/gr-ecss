@@ -36,7 +36,7 @@ list(APPEND ecss_sources
     spl_decoder_impl.cc
     nrzl_encoder_impl.cc
     nrzl_encoder_subcarrier_impl.cc
-    )
+    threshhold_to_message_impl.cc )
 
 set(ecss_sources "${ecss_sources}" PARENT_SCOPE)
 if(NOT ecss_sources)

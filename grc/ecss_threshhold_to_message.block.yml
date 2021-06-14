@@ -1,0 +1,50 @@
+id: ecss_threshhold_to_message
+label: Threshhold to Message
+category: '[ecss]'
+
+templates:
+  imports: |-
+        import ecss
+        import pmt
+  make: ecss.threshhold_to_message(${upper_threshhold}, ${lower_threshhold}, ${upper_message}, ${lower_message}, ${init_state})
+
+parameters:
+-   id: init_state
+    label: Initial State
+    dtype: bool
+    default: False
+-   id: lower_threshhold
+    label: Lower Threshhold
+    dtype: real
+    default: 0.5
+-   id: upper_threshhold
+    label: Upper Threshhold
+    dtype: real
+    default: 0.8
+-   id: lower_message
+    label: Lower PMT Message
+    dtype: raw
+    default: pmt.intern("UNLOCK")
+-   id: upper_message
+    label: Upper PMT Message
+    dtype: raw
+    default: pmt.intern("LOCK")
+
+#  Make one 'inputs' list entry per input and one 'outputs' list entry per output.
+#  Keys include:
+#      * label (an identifier for the GUI)
+#      * domain (optional - stream or message. Default is stream)
+#      * dtype (e.g. int, float, complex, byte, short, xxx_vector, ...)
+#      * vlen (optional - data stream vector length. Default is 1)
+#      * optional (optional - set to 1 for optional inputs. Default is 0)
+inputs:
+-   domain: stream
+    dtype: float
+
+outputs:
+-   domain: message
+    id: threshhold_msg
+    optional: true
+#  'file_format' specifies the version of the GRC yml format used in the file
+#  and should usually not be changed.
+file_format: 1
