@@ -35,11 +35,17 @@ namespace gr {
     #endif
 
     std::vector<double>
-    variables_loop_filter::coefficients(float n_freq_2, float damp_2, float epsilon, int m_3, float n_freq_3, float damp_3, int samp)
+    variables_loop_filter::coefficients(float n_freq_2, float damp_2, float epsilon, int m_3, float n_freq_3, float damp_3, int samp_rate)
     {
       std::vector<double> coefficients;
 
-      double omega_2 = M_TWOPI * n_freq_2;
+      // simple second order equations 
+      double alpha = 1.414 * n_freq_2 / samp_rate;
+      double beta  = (n_freq_2 / samp_rate) * (n_freq_2 / samp_rate);
+      coefficients.push_back(alpha);
+      coefficients.push_back(beta);
+      
+      /*double omega_2 = M_TWOPI * n_freq_2;
       double denom_2 = (4.0 * (1 - epsilon) + 4.0 * (1 - epsilon) * damp_2 * (omega_2 / samp) + (1- epsilon) * (omega_2 / samp) * (omega_2 / samp));
 
       double coeff1_2 = ((-4 * epsilon) + (4 * ( 2 - epsilon) * damp_2 * (omega_2 / samp)) - (epsilon * (omega_2 / samp) * (omega_2 / samp))) / denom_2 ;
@@ -64,14 +70,18 @@ namespace gr {
       coefficients.push_back(coeff2_3);
 
       double coeff3_3 = (8 * c * (omega_3 / samp) * (omega_3 / samp) * (omega_3 / samp)) / denom_3;
-      coefficients.push_back(coeff3_3);
+      coefficients.push_back(coeff3_3);*/
 
+      for (std::vector<double>::const_iterator i = coefficients.begin(); i != coefficients.end(); ++i)
+      {
+            std::cout << *i << ' ';
+      }
       // std::cout<<"Coefficient 1 (2nd order): "<<coeff1_2<< std::endl;
       // std::cout<<"Coefficient 2 (2nd order): "<<coeff2_2<< std::endl;
-      // std::cout<<"Coefficient 4 (2nd order): "<<coeff4_2<< std::endl;
-      // std::cout<<"Coefficient 1 (3rd order): "<<coeff1_3<< std::endl;
-      // std::cout<<"Coefficient 2 (3rd order): "<<coeff2_3<< std::endl;
-      // std::cout<<"Coefficient 3 (3rd order): "<<coeff3_3<< std::endl;
+       // std::cout<<"Coefficient 4 (2nd order): "<<coeff4_2<< std::endl;
+       // std::cout<<"Coefficient 1 (3rd order): "<<coeff1_3<< std::endl;
+       // std::cout<<"Coefficient 2 (3rd order): "<<coeff2_3<< std::endl;
+       // std::cout<<"Coefficient 3 (3rd order): "<<coeff3_3<< std::endl;
 
       return coefficients;
     }
