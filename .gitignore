@@ -4,3 +4,4 @@ python/*.pyc
 *.pyc
 ecss.code-workspace
 gr-ecss.code-workspace
+examples/*.py
