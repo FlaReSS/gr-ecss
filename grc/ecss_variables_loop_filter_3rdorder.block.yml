@@ -10,16 +10,19 @@ parameters:
 -   id: index_m_3
     label: Index m (3rd order)
     dtype: int
+    default: '100'
 -   id: natural_freq_3
     label: Natural frequency (3rd order)
     dtype: real
+    default: '100'
 -   id: damping_3
     label: Damping (3rd order)
     dtype: real
+    default: '100'
 -   id: samp_rate
-    label: Sampling rate
+    label: Sampling Rate
     dtype: int
-    defaul: samp_rate
+    default: samp_rate
 value: ${ ecss.variables_loop_filter_3rdorder.coefficients(index_m_3,
     natural_freq_3, damping_3, samp_rate) }
 

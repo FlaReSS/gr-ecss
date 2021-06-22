@@ -16,9 +16,9 @@ parameters:
     dtype: real
     default: '0.707'
 -   id: samp_rate
-    label: Sampling rate
+    label: Sampling Rate
     dtype: int
-    defaul: samp_rate
+    default: samp_rate
 value: ${ ecss.variables_loop_filter_2ndorder.coefficients(natural_freq, damping, samp_rate) }
 
 templates:
