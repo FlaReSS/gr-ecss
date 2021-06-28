@@ -40,29 +40,20 @@ namespace gr {
       std::vector<double> coefficients;
 
       double alpha = 1 / (M_TWOPI * natural_freq * t2);
-      std::cout << "alpha " << alpha << std::endl;
-      
       double k = M_TWOPI * natural_freq * pow(t1/t2, 2.0);
-      std::cout << "k " << k << std::endl;
-      
       double kcrit = 1/(2*t2) * pow(t1/t2, 2.0);
-      std::cout << "kcrit " << kcrit << std::endl;
       
       // evaluate the loop stability
       if(k <= kcrit) 
       {
-            throw std::runtime_error("K is lower than the critical value");
+            std::stringstream buffer;
+            buffer << "K is lower than the critical value (" << k << " < " << kcrit << ")"<< std::endl;
+            throw std::runtime_error(buffer.str());
       }
  
       coefficients.push_back(pow(t2 / t1, 2.0) / samp_rate);
       coefficients.push_back(2 * t2 * pow(samp_rate * t1, -2.0));
       coefficients.push_back(pow(samp_rate, -3.0) / t1/ t1);
-
-std::cout << "3rd order" << std::endl;
-      for (std::vector<double>::const_iterator i = coefficients.begin(); i != coefficients.end(); ++i)
-      {
-            std::cout << *i << std::endl;
-      }
 
       return coefficients;
     }

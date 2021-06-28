@@ -21,7 +21,7 @@ options:
     run_options: prompt
     sizing_mode: fixed
     thread_safe_setters: ''
-    title: Not titled yet
+    title: PLL Order Switch Example
     window_size: ''
   states:
     bus_sink: false
@@ -37,7 +37,7 @@ blocks:
   parameters:
     comment: ''
     damping: '0.707'
-    natural_freq: '100'
+    natural_freq: '1800'
     samp_rate: samp_rate
   states:
     bus_sink: false
@@ -65,7 +65,7 @@ blocks:
   id: variable_qtgui_chooser
   parameters:
     comment: ''
-    gui_hint: 3,1
+    gui_hint: 2,1,1,1
     label: PLL Loop Order
     label0: Second Order
     label1: Third Order
@@ -107,7 +107,7 @@ blocks:
   id: variable_qtgui_range
   parameters:
     comment: ''
-    gui_hint: 1,1
+    gui_hint: 0,1,1,1
     label: frequency
     min_len: '200'
     orient: Qt.Horizontal
@@ -115,7 +115,7 @@ blocks:
     start: '-3000'
     step: '100'
     stop: '3000'
-    value: 3e3
+    value: 1.5e3
     widget: counter_slider
   states:
     bus_sink: false
@@ -128,7 +128,7 @@ blocks:
   id: variable_qtgui_range
   parameters:
     comment: ''
-    gui_hint: 2,1
+    gui_hint: 1,1,1,1
     label: SNR (dB)
     min_len: '200'
     orient: Qt.Horizontal
@@ -278,7 +278,7 @@ blocks:
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'False'
-    gui_hint: ''
+    gui_hint: 0,0,3,1
     label: Relative Gain
     label1: PLL Input
     label10: ''''''
@@ -314,76 +314,13 @@ blocks:
     width8: '1'
     width9: '1'
     wintype: firdes.WIN_BLACKMAN_hARRIS
-    ymax: '10'
-    ymin: '-140'
+    ymax: '0'
+    ymin: '-120'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
     coordinate: [832, 172.0]
-    rotation: 0
-    state: true
-- name: qtgui_number_sink_0
-  id: qtgui_number_sink
-  parameters:
-    affinity: ''
-    alias: ''
-    autoscale: 'False'
-    avg: '1'
-    color1: ("black", "black")
-    color10: ("black", "black")
-    color2: ("black", "black")
-    color3: ("black", "black")
-    color4: ("black", "black")
-    color5: ("black", "black")
-    color6: ("black", "black")
-    color7: ("black", "black")
-    color8: ("black", "black")
-    color9: ("black", "black")
-    comment: ''
-    factor1: '1'
-    factor10: '1'
-    factor2: '1'
-    factor3: '1'
-    factor4: '1'
-    factor5: '1'
-    factor6: '1'
-    factor7: '1'
-    factor8: '1'
-    factor9: '1'
-    graph_type: qtgui.NUM_GRAPH_HORIZ
-    gui_hint: ''
-    label1: ''
-    label10: ''
-    label2: ''
-    label3: ''
-    label4: ''
-    label5: ''
-    label6: ''
-    label7: ''
-    label8: ''
-    label9: ''
-    max: samp_rate
-    min: -samp_rate
-    name: Frequency
-    nconnections: '1'
-    type: float
-    unit1: ''
-    unit10: ''
-    unit2: ''
-    unit3: ''
-    unit4: ''
-    unit5: ''
-    unit6: ''
-    unit7: ''
-    unit8: ''
-    unit9: ''
-    update_time: '0.10'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1016, 280.0]
     rotation: 0
     state: true
 - name: qtgui_time_sink_x_0
@@ -415,10 +352,10 @@ blocks:
     color9: dark green
     comment: ''
     ctrlpanel: 'False'
-    entags: 'True'
+    entags: 'False'
     grid: 'False'
-    gui_hint: ''
-    label1: Signal 1
+    gui_hint: 3,0,1,1
+    label1: Phase error
     label10: Signal 10
     label2: Signal 2
     label3: Signal 3
@@ -428,7 +365,7 @@ blocks:
     label7: Signal 7
     label8: Signal 8
     label9: Signal 9
-    legend: 'True'
+    legend: 'False'
     marker1: '-1'
     marker10: '-1'
     marker2: '-1'
@@ -473,14 +410,111 @@ blocks:
     width8: '1'
     width9: '1'
     ylabel: Radians
-    ymax: samp_rate
-    ymin: -samp_rate
+    ymax: '3.2'
+    ymin: '-3.2'
     yunit: '""'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
     coordinate: [832, 344.0]
+    rotation: 0
+    state: true
+- name: qtgui_time_sink_x_0_0
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'True'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'False'
+    entags: 'False'
+    grid: 'False'
+    gui_hint: 3,1,1,1
+    label1: Signal 1
+    label10: Signal 10
+    label2: Signal 2
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'False'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: Frequency
+    nconnections: '1'
+    size: '1024'
+    srate: samp_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Hz
+    ymax: samp_rate/2
+    ymin: -samp_rate/2
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1088, 280.0]
     rotation: 0
     state: true
 
@@ -491,7 +525,7 @@ connections:
 - [blocks_add_xx_0, '0', qtgui_freq_sink_x_0, '0']
 - [blocks_throttle_0, '0', blocks_add_xx_0, '0']
 - [ecss_pll_0, '0', qtgui_freq_sink_x_0, '1']
-- [ecss_pll_0, '1', qtgui_number_sink_0, '0']
+- [ecss_pll_0, '1', qtgui_time_sink_x_0_0, '0']
 - [ecss_pll_0, '2', qtgui_time_sink_x_0, '0']
 
 metadata:

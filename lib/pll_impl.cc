@@ -287,8 +287,13 @@ namespace gr {
 
     void
     pll_impl::set_coefficients(const std::vector<double> &coefficients)
-    {
-    std::cout << "Coefficents size " << d_coefficients.size() << std::endl;
+    {    
+      if (coefficients.size() < 3)
+      {
+            // reset the third order integrator in case this is a second order filter
+            integrator_order_2_1 = 0;
+            integrator_order_2_2 = 0;
+      }
       // zero all coefficients to avoid potential errors
       for(size_t i = 0; i < d_coefficients.size(); i++)
       {
@@ -299,11 +304,6 @@ namespace gr {
       for(size_t i = 0; i < std::min(coefficients.size(), d_coefficients.size()); i++)
       {
         d_coefficients[i] = coefficients[i];      
-      }
-      std::cout << "Coefficents: " << std::endl;
-      for(size_t i = 0; i < d_coefficients.size(); i++)
-      {
-        std::cout << d_coefficients[i] << std::endl;
       }
     }
 
