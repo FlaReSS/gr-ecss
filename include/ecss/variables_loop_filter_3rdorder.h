@@ -48,7 +48,7 @@ namespace gr {
       private:
       
       public:
-        static std::vector<double> coefficients(int m_3, float n_freq_3, float damp_3, int samp);
+        static std::vector<double> coefficients(int natural_freq, float t1, float t2, int samp);
     };
   } // namespace ecss
 } // namespace gr

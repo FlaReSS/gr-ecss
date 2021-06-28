@@ -7,27 +7,27 @@ flags:
 - show_id
 
 parameters:
--   id: index_m_3
-    label: Index m (3rd order)
-    dtype: int
-    default: '100'
--   id: natural_freq_3
-    label: Natural frequency (3rd order)
+-   id: natural_freq
+    label: Natural frequency (Hz)
     dtype: real
     default: '100'
--   id: damping_3
-    label: Damping (3rd order)
+-   id: t1
+    label: Time constant 1 (s)
     dtype: real
-    default: '100'
+    default: '0.1'
+-   id: t2
+    label: Time constant 2 (s)
+    dtype: real
+    default: '0.01'
 -   id: samp_rate
     label: Sampling Rate
     dtype: int
     default: samp_rate
-value: ${ ecss.variables_loop_filter_3rdorder.coefficients(index_m_3,
-    natural_freq_3, damping_3, samp_rate) }
+value: ${ ecss.variables_loop_filter_3rdorder.coefficients(natural_freq,
+    t1, t2, samp_rate) }
 
 templates:
     imports: import ecss
-    var_make: self.${id} = ${id} = ecss.variables_loop_filter_3rdorder.coefficients(${index_m_3}, ${natural_freq_3}, ${damping_3}, ${samp_rate})
+    var_make: self.${id} = ${id} = ecss.variables_loop_filter_3rdorder.coefficients(${natural_freq}, ${t1}, ${t2}, ${samp_rate})
 
 file_format: 1
