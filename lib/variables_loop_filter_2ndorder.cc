@@ -44,13 +44,6 @@ namespace gr {
       double beta  = (natural_frequency / samp_rate) * (natural_frequency / samp_rate);
       coefficients.push_back(alpha);
       coefficients.push_back(beta);
-      
-
-std::cout << "2nd order" << std::endl;
-      for (std::vector<double>::const_iterator i = coefficients.begin(); i != coefficients.end(); ++i)
-      {
-            std::cout << *i << std::endl;
-      }
 
       return coefficients;
     }
