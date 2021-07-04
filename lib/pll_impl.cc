@@ -328,7 +328,6 @@ namespace gr {
     pll_impl::set_freq_central(float freq)
     {
       d_freq_central = freq;
-      std::cout << "set_freq_central " << freq << std::endl;
     }
 
     void
