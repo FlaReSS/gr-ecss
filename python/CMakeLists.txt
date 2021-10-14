@@ -43,6 +43,7 @@ GR_PYTHON_INSTALL(
 find_package(NumPy)
 find_package(jinja2)
 find_package(matplotlib)
+find_package(pdfkit)
 
 ########################################################################
 # Handle the unit tests

@@ -63,7 +63,7 @@ class HtmlFinalTestResult():
         self.name = "Final_Report_Tests.pdf"
         self.title = "Final report tests for gr-ecss"
         self.description= "Here are appended all the test results processed automatically"
-        self.output = "../Final Report"
+        self.output = ""
         self.class_name =""
         self.testcase_class_name= ""
         self.path_file_final = ""
@@ -163,9 +163,9 @@ class HtmlFinalTestResult():
                     self.all_html.append(complete_path)
                     status= "appended"
                 else:
-                    print("Input name file: the file does not exist!\n")
+                    print("File not found: ", complete_path)
             else:
-                print("Inputs path: wrong!\n")
+                print("Incorrect path: ", complete_path)
 
         else:
             print("CLASS NAME NOT FOUND!")
@@ -207,7 +207,7 @@ class HtmlFinalTestResult():
             'encoding': "UTF-8",
             'no-outline': None,
             'dpi':210,
-            }
+            }  
         pdfkit.from_file(self.all_html, self.path_file_final, options=options)
 
     def main_class(self):
