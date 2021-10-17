@@ -114,6 +114,7 @@ namespace gr {
 			if (tags[0].value == pmt::intern("start") && tags[0].key == pmt::intern("pll")) 
 			{
 				stop = false;
+				reset();
 			}
 			if (tags[0].value == pmt::intern("start(1e3)") && tags[0].key == pmt::intern("pll")) 
 			{
@@ -125,8 +126,8 @@ namespace gr {
 		{
 			phase_delta[i] = d_integer_phase;
 		}
-    output[i] = input[i] * gr_expj(-d_integer_phase_denormalized);
-    error = phase_detector(output[i]);
+		output[i] = input[i] * gr_expj(-d_integer_phase_denormalized);
+		error = phase_detector(output[i]);
 
 		// output the phase error, if a signal is connected to the optional port
 		if (phase_error != NULL)
@@ -191,8 +192,6 @@ namespace gr {
     void
     pll_impl::reset()
     {
-    std::cout << "Reset" << std::endl;
-    
       integrator_order_1 = 0;
       integrator_order_2_1 = 0;
       integrator_order_2_2 = 0;
@@ -207,18 +206,15 @@ namespace gr {
       //2nd order
       integrator_order_1 += d_coefficients[1] * error;
 
+      // only clip the frequency integrator if a not-null bandwidth hs been set
       if(d_bw != 0)
       {
         if(integrator_order_1 > (d_bw / d_samp_rate * M_TWOPI)/2)
         {
-              // std::cout << "CLIP UP" << std::endl;
-
           integrator_order_1 = (d_bw / d_samp_rate * M_TWOPI)/2;
         }
         else if(integrator_order_1 < -(d_bw / d_samp_rate * M_TWOPI)/2)
         {
-              // std::cout << "CLIP DOWN" << std::endl;
-
           integrator_order_1 = -(d_bw / d_samp_rate * M_TWOPI)/2;
         }
       }

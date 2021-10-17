@@ -233,7 +233,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [520, 220.0]
+    coordinate: [520, 260.0]
     rotation: 180
     state: true
 - name: analog_random_source_x_0
@@ -368,7 +368,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [256, 100.0]
+    coordinate: [200, 100.0]
     rotation: 0
     state: true
 - name: blocks_throttle_0
@@ -405,9 +405,26 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [256, 360.0]
+    coordinate: [240, 368.0]
     rotation: 0
     state: true
+- name: ecss_nrzl_encoder_0
+  id: ecss_nrzl_encoder
+  parameters:
+    affinity: ''
+    alias: ''
+    bit_rate: bit_rate
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [704, 136.0]
+    rotation: 0
+    state: disabled
 - name: ecss_nrzl_encoder_subcarrier_0
   id: ecss_nrzl_encoder_subcarrier
   parameters:
@@ -426,7 +443,7 @@ blocks:
     bus_structure: null
     coordinate: [432, 112.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: ecss_pll_0
   id: ecss_pll
   parameters:
@@ -447,6 +464,23 @@ blocks:
     coordinate: [736, 332.0]
     rotation: 0
     state: true
+- name: ecss_spl_encoder_0
+  id: ecss_spl_encoder
+  parameters:
+    affinity: ''
+    alias: ''
+    bit_rate: bit_rate
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [336, 224.0]
+    rotation: 0
+    state: enabled
 - name: qtgui_freq_sink_x_0
   id: qtgui_freq_sink_x
   parameters:
@@ -524,7 +558,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [736, 204.0]
+    coordinate: [736, 220.0]
     rotation: 0
     state: true
 - name: qtgui_time_sink_x_0
@@ -634,13 +668,17 @@ connections:
 - [blocks_add_xx_1, '0', ecss_pll_0, '0']
 - [blocks_add_xx_1, '0', qtgui_freq_sink_x_0, '0']
 - [blocks_multiply_xx_0, '0', blocks_add_xx_1, '0']
+- [blocks_selector_0, '0', ecss_nrzl_encoder_0, '0']
 - [blocks_selector_0, '0', ecss_nrzl_encoder_subcarrier_0, '0']
+- [blocks_selector_0, '0', ecss_spl_encoder_0, '0']
 - [blocks_throttle_0, '0', blocks_selector_0, '1']
 - [blocks_vco_c_0, '0', blocks_multiply_xx_0, '1']
+- [ecss_nrzl_encoder_0, '0', analog_phase_modulator_fc_0, '0']
 - [ecss_nrzl_encoder_subcarrier_0, '0', analog_phase_modulator_fc_0, '0']
 - [ecss_pll_0, '0', blocks_null_sink_0, '0']
 - [ecss_pll_0, '1', blocks_null_sink_1, '0']
 - [ecss_pll_0, '2', qtgui_time_sink_x_0, '0']
+- [ecss_spl_encoder_0, '0', analog_phase_modulator_fc_0, '0']
 
 metadata:
   file_format: 1

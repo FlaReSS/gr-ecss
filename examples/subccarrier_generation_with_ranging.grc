@@ -10,7 +10,7 @@ options:
     gen_linking: dynamic
     generate_options: qt_gui
     hier_block_src_path: '.:'
-    id: residual_carrier
+    id: subcarrier_generation_with_ranging
     max_nouts: '0'
     output_language: python
     placement: (0,0)
@@ -21,7 +21,7 @@ options:
     run_options: prompt
     sizing_mode: fixed
     thread_safe_setters: ''
-    title: Residual Carrier
+    title: Subcarrier with ranging
     window_size: ''
   states:
     bus_sink: false
@@ -32,11 +32,23 @@ options:
     state: enabled
 
 blocks:
+- name: bit_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: '16000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [176, 64.0]
+    rotation: 0
+    state: enabled
 - name: frequency
   id: variable_qtgui_range
   parameters:
     comment: ''
-    gui_hint: ''
+    gui_hint: 0,1,1,1
     label: Center frequency (Hz)
     min_len: '200'
     orient: Qt.Horizontal
@@ -50,14 +62,14 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [664, 12.0]
+    coordinate: [672, 12.0]
     rotation: 0
     state: true
 - name: modulation_coeff
   id: variable_qtgui_range
   parameters:
     comment: ''
-    gui_hint: ''
+    gui_hint: 3,1,1,1
     label: Modulation Coefficent
     min_len: '200'
     orient: Qt.Horizontal
@@ -71,14 +83,14 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1112, 28.0]
+    coordinate: [944, 12.0]
     rotation: 0
     state: true
 - name: modulation_coeff_ranging
   id: variable_qtgui_range
   parameters:
     comment: ''
-    gui_hint: ''
+    gui_hint: 4,1,1,1
     label: Ranging Modulation Coefficent
     min_len: '200'
     orient: Qt.Horizontal
@@ -99,19 +111,19 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '500000'
+    value: '800000'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [184, 12]
+    coordinate: [176, 8.0]
     rotation: 0
     state: enabled
 - name: snr
   id: variable_qtgui_range
   parameters:
     comment: ''
-    gui_hint: ''
+    gui_hint: 1,1,1,1
     label: SNR (dB)
     min_len: '200'
     orient: Qt.Horizontal
@@ -128,25 +140,34 @@ blocks:
     coordinate: [832, 12.0]
     rotation: 0
     state: true
-- name: subcarrier
-  id: variable_qtgui_range
+- name: variable_qtgui_chooser_0
+  id: variable_qtgui_chooser
   parameters:
     comment: ''
-    gui_hint: ''
-    label: Subcarrier Frequency (Hz)
-    min_len: '200'
-    orient: Qt.Horizontal
-    rangeType: float
-    start: '1000'
-    step: '1000'
-    stop: '20000'
-    value: '4000'
-    widget: counter
+    gui_hint: 2,1,1,1
+    label: Data
+    label0: 'No'
+    label1: 'Yes'
+    label2: ''
+    label3: ''
+    label4: ''
+    labels: '[]'
+    num_opts: '2'
+    option0: '0'
+    option1: '1'
+    option2: '2'
+    option3: '3'
+    option4: '4'
+    options: '[0, 1, 2]'
+    orient: Qt.QVBoxLayout
+    type: int
+    value: '0'
+    widget: combo_box
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [960, 12.0]
+    coordinate: [1104, 16.0]
     rotation: 0
     state: true
 - name: variables_loop_filter_2ndorder_0
@@ -163,6 +184,40 @@ blocks:
     coordinate: [280, 8.0]
     rotation: 0
     state: true
+- name: analog_const_source_x_0_0
+  id: analog_const_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: '0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: byte
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [16, 132.0]
+    rotation: 0
+    state: enabled
+- name: analog_const_source_x_0_0_0
+  id: analog_const_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: '0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: byte
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [40, 292.0]
+    rotation: 0
+    state: disabled
 - name: analog_noise_source_x_0
   id: analog_noise_source_x
   parameters:
@@ -179,7 +234,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [688, 136.0]
+    coordinate: [568, 368.0]
     rotation: 0
     state: true
 - name: analog_phase_modulator_fc_0
@@ -195,53 +250,49 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [480, 284.0]
-    rotation: 0
+    coordinate: [456, 316.0]
+    rotation: 180
     state: true
-- name: analog_sig_source_x_2_0
-  id: analog_sig_source_x
+- name: analog_random_source_x_0_0
+  id: analog_random_source_x
   parameters:
     affinity: ''
     alias: ''
-    amp: modulation_coeff
     comment: ''
-    freq: subcarrier
+    max: '2'
     maxoutbuf: '0'
+    min: '0'
     minoutbuf: '0'
-    offset: '0'
-    phase: '0'
-    samp_rate: samp_rate
-    type: float
-    waveform: analog.GR_SIN_WAVE
+    num_samps: '1000'
+    repeat: 'True'
+    type: byte
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [16, 148.0]
+    coordinate: [16, 184.0]
     rotation: 0
-    state: true
-- name: analog_sig_source_x_2_0_0
-  id: analog_sig_source_x
+    state: disabled
+- name: analog_random_source_x_0_0_0
+  id: analog_random_source_x
   parameters:
     affinity: ''
     alias: ''
-    amp: modulation_coeff_ranging
     comment: ''
-    freq: '48000'
+    max: '256'
     maxoutbuf: '0'
+    min: '0'
     minoutbuf: '0'
-    offset: '0'
-    phase: '0'
-    samp_rate: samp_rate
-    type: float
-    waveform: analog.GR_SIN_WAVE
+    num_samps: '1000'
+    repeat: 'True'
+    type: byte
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [16, 260.0]
+    coordinate: [56, 344.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: analog_sig_source_x_2_1
   id: analog_sig_source_x
   parameters:
@@ -261,7 +312,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [464, 140.0]
+    coordinate: [32, 436.0]
     rotation: 0
     state: true
 - name: blocks_add_xx_0
@@ -279,8 +330,8 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [352, 252.0]
-    rotation: 0
+    coordinate: [636.0, 264]
+    rotation: 270
     state: true
 - name: blocks_add_xx_1
   id: blocks_add_xx
@@ -297,7 +348,43 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [840, 228.0]
+    coordinate: [760, 404.0]
+    rotation: 0
+    state: true
+- name: blocks_multiply_const_vxx_0
+  id: blocks_multiply_const_vxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: modulation_coeff
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [788.0, 176]
+    rotation: 270
+    state: true
+- name: blocks_multiply_const_vxx_0_0
+  id: blocks_multiply_const_vxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: modulation_coeff_ranging
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [448, 236.0]
     rotation: 0
     state: true
 - name: blocks_multiply_xx_0
@@ -315,7 +402,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [664, 228.0]
+    coordinate: [456, 420.0]
     rotation: 0
     state: true
 - name: blocks_null_sink_0
@@ -332,7 +419,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1128, 276.0]
+    coordinate: [1128, 164.0]
     rotation: 0
     state: true
 - name: blocks_null_sink_1
@@ -349,10 +436,71 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1120, 348.0]
+    coordinate: [1136, 212.0]
     rotation: 0
     state: true
-- name: blocks_throttle_0
+- name: blocks_selector_0_0
+  id: blocks_selector
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    enabled: 'True'
+    input_index: variable_qtgui_chooser_0
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '2'
+    num_outputs: '1'
+    output_index: '0'
+    showports: 'True'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [368, 132.0]
+    rotation: 0
+    state: enabled
+- name: blocks_throttle_0_0_0
+  id: blocks_throttle
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    ignoretag: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samples_per_second: bit_rate
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [152, 204.0]
+    rotation: 0
+    state: true
+- name: blocks_throttle_0_0_0_0
+  id: blocks_throttle
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    ignoretag: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samples_per_second: bit_rate
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [152, 132.0]
+    rotation: 0
+    state: enabled
+- name: blocks_throttle_0_0_0_1
   id: blocks_throttle
   parameters:
     affinity: ''
@@ -362,22 +510,80 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     samples_per_second: samp_rate
-    type: float
+    type: complex
     vlen: '1'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [224, 180.0]
+    coordinate: [256, 460.0]
     rotation: 0
     state: true
+- name: blocks_vector_source_x_0
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[]'
+    type: byte
+    vector: (0, 1, 1, 0)
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [16, 248.0]
+    rotation: 0
+    state: true
+- name: ecss_nrzl_encoder_subcarrier_0_0
+  id: ecss_nrzl_encoder_subcarrier
+  parameters:
+    affinity: ''
+    alias: ''
+    bit_rate: bit_rate
+    comment: ''
+    freq_sub: '16000.0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    sine: 'True'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [560, 128.0]
+    rotation: 0
+    state: enabled
+- name: ecss_nrzl_encoder_subcarrier_0_0_0
+  id: ecss_nrzl_encoder_subcarrier
+  parameters:
+    affinity: ''
+    alias: ''
+    bit_rate: bit_rate
+    comment: ''
+    freq_sub: '196000.0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    sine: 'True'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [192, 272.0]
+    rotation: 0
+    state: enabled
 - name: ecss_pll_0
   id: ecss_pll
   parameters:
     N: '38'
     affinity: ''
     alias: ''
-    bw: '5000.0'
+    bw: '0'
     coefficients: variables_loop_filter_2ndorder_0
     comment: ''
     freq_central: '0.0'
@@ -388,7 +594,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [920, 324.0]
+    coordinate: [896, 164.0]
     rotation: 0
     state: true
 - name: qtgui_freq_sink_x_0
@@ -407,7 +613,7 @@ blocks:
     alpha8: '1.0'
     alpha9: '1.0'
     autoscale: 'False'
-    average: '1.0'
+    average: '0.1'
     axislabels: 'True'
     bw: samp_rate
     color1: '"blue"'
@@ -423,10 +629,10 @@ blocks:
     comment: ''
     ctrlpanel: 'False'
     fc: '0'
-    fftsize: '1024'
+    fftsize: '4096'
     freqhalf: 'True'
-    grid: 'False'
-    gui_hint: ''
+    grid: 'True'
+    gui_hint: 3,0,2,1
     label: Relative Gain
     label1: ''
     label10: ''''''
@@ -438,10 +644,10 @@ blocks:
     label7: ''''''
     label8: ''''''
     label9: ''''''
-    legend: 'True'
+    legend: 'False'
     maxoutbuf: '0'
     minoutbuf: '0'
-    name: '""'
+    name: IF Spectrum
     nconnections: '1'
     showports: 'False'
     tr_chan: '0'
@@ -463,12 +669,12 @@ blocks:
     width9: '1'
     wintype: firdes.WIN_BLACKMAN_hARRIS
     ymax: '10'
-    ymin: '-140'
+    ymin: '-100'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [952, 164.0]
+    coordinate: [920, 476.0]
     rotation: 0
     state: true
 - name: qtgui_freq_sink_x_0_0
@@ -487,7 +693,7 @@ blocks:
     alpha8: '1.0'
     alpha9: '1.0'
     autoscale: 'False'
-    average: '1.0'
+    average: '0.1'
     axislabels: 'True'
     bw: samp_rate
     color1: '"blue"'
@@ -505,12 +711,12 @@ blocks:
     fc: '0'
     fftsize: '1024'
     freqhalf: 'True'
-    grid: 'False'
-    gui_hint: ''
+    grid: 'True'
+    gui_hint: 0,0,3,1
     label: Relative Gain
-    label1: ''
+    label1: Input
     label10: ''''''
-    label2: ''''''
+    label2: Output
     label3: ''''''
     label4: ''''''
     label5: ''''''
@@ -521,7 +727,7 @@ blocks:
     legend: 'True'
     maxoutbuf: '0'
     minoutbuf: '0'
-    name: input
+    name: Baseband
     nconnections: '2'
     showports: 'False'
     tr_chan: '0'
@@ -548,22 +754,32 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [656, 380.0]
+    coordinate: [1120, 300.0]
     rotation: 0
     state: true
 
 connections:
+- [analog_const_source_x_0_0, '0', blocks_throttle_0_0_0_0, '0']
+- [analog_const_source_x_0_0_0, '0', ecss_nrzl_encoder_subcarrier_0_0_0, '0']
 - [analog_noise_source_x_0, '0', blocks_add_xx_1, '0']
-- [analog_phase_modulator_fc_0, '0', blocks_multiply_xx_0, '1']
-- [analog_sig_source_x_2_0, '0', blocks_throttle_0, '0']
-- [analog_sig_source_x_2_0_0, '0', blocks_add_xx_0, '1']
-- [analog_sig_source_x_2_1, '0', blocks_multiply_xx_0, '0']
+- [analog_phase_modulator_fc_0, '0', blocks_multiply_xx_0, '0']
+- [analog_random_source_x_0_0, '0', blocks_throttle_0_0_0, '0']
+- [analog_random_source_x_0_0_0, '0', ecss_nrzl_encoder_subcarrier_0_0_0, '0']
+- [analog_sig_source_x_2_1, '0', blocks_throttle_0_0_0_1, '0']
 - [blocks_add_xx_0, '0', analog_phase_modulator_fc_0, '0']
 - [blocks_add_xx_0, '0', qtgui_freq_sink_x_0_0, '1']
 - [blocks_add_xx_1, '0', ecss_pll_0, '0']
 - [blocks_add_xx_1, '0', qtgui_freq_sink_x_0, '0']
+- [blocks_multiply_const_vxx_0, '0', blocks_add_xx_0, '1']
+- [blocks_multiply_const_vxx_0_0, '0', blocks_add_xx_0, '0']
 - [blocks_multiply_xx_0, '0', blocks_add_xx_1, '1']
-- [blocks_throttle_0, '0', blocks_add_xx_0, '0']
+- [blocks_selector_0_0, '0', ecss_nrzl_encoder_subcarrier_0_0, '0']
+- [blocks_throttle_0_0_0, '0', blocks_selector_0_0, '1']
+- [blocks_throttle_0_0_0_0, '0', blocks_selector_0_0, '0']
+- [blocks_throttle_0_0_0_1, '0', blocks_multiply_xx_0, '1']
+- [blocks_vector_source_x_0, '0', blocks_throttle_0_0_0, '0']
+- [ecss_nrzl_encoder_subcarrier_0_0, '0', blocks_multiply_const_vxx_0, '0']
+- [ecss_nrzl_encoder_subcarrier_0_0_0, '0', blocks_multiply_const_vxx_0_0, '0']
 - [ecss_pll_0, '0', blocks_null_sink_0, '0']
 - [ecss_pll_0, '1', blocks_null_sink_1, '0']
 - [ecss_pll_0, '2', qtgui_freq_sink_x_0_0, '0']
