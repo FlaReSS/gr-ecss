@@ -71,13 +71,11 @@ namespace gr {
         if (in[i] >= d_upper_threshhold && d_state)
         {
           d_state = false;
-          // std::cout << "UNLOCKED" << std::endl;
           message_port_pub(d_port, d_upper_msg);
         }
         else if (in[i] < d_lower_threshhold && !d_state)
         {
           d_state = true;
-          // std::cout << "LOCKED" << std::endl;
           message_port_pub(d_port, d_lower_msg);
         }
       }
