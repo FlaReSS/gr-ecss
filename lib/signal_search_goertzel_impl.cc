@@ -70,14 +70,12 @@ namespace gr{
         if(d_state == true) //only accept 'lock' when output is actually on
         {
           d_locked = true;
-          // std::cout<< "GOERTZEL LOCK RECEIVED " << std::endl;
         }
       }
       else if(pmt::eqv(msg, pmt::mp("UNLOCK")) )
       {
         d_locked = false;
         first = true;   //next goertzel trigger will be the first one, hence reset pll
-        // std::cout<< "GOERTZEL UNLOCK RECEIVED " << std::endl;
       }
       return;
     }
@@ -152,8 +150,8 @@ namespace gr{
               std::cout<<"INSERTING PLL RESET TAG"<<std::endl;
               add_item_tag(0,                           // Port number
                           nitems_written(0) + (i), // Offset
-                          pmt::intern("reset"),        // Key
-                          pmt::intern("pll")           // Value
+                          pmt::intern("pll"),        // Key
+                          pmt::intern("reset")           // Value
             );
               
               first = false;
