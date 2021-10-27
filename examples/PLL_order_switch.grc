@@ -33,24 +33,31 @@ options:
 
 blocks:
 - name: filter_2ndorder
-  id: variables_loop_filter_2ndorder
+  id: loop_filter
   parameters:
+    alias: ''
     comment: ''
     damping: '0.707'
     natural_freq: '1800'
+    order: 2nd
     samp_rate: samp_rate
+    t1: '0.1'
+    t2: '0.01'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [784, 16.0]
+    coordinate: [792, 16.0]
     rotation: 0
     state: true
 - name: filter_3rdorder
-  id: variables_loop_filter_3rdorder
+  id: loop_filter
   parameters:
+    alias: ''
     comment: ''
+    damping: '0.707'
     natural_freq: '10'
+    order: 3rd
     samp_rate: samp_rate
     t1: '0.01'
     t2: '0.674'
@@ -58,7 +65,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [984, 20.0]
+    coordinate: [960, 20.0]
     rotation: 0
     state: true
 - name: loop_order_chooser
@@ -229,7 +236,7 @@ blocks:
     N: '38'
     affinity: ''
     alias: ''
-    bw: '1000.0'
+    bw: '10000.0'
     coefficients: loop_order_chooser
     comment: ''
     freq_central: 0.8e3
