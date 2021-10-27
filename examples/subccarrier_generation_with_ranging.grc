@@ -65,6 +65,24 @@ blocks:
     coordinate: [672, 12.0]
     rotation: 0
     state: true
+- name: loop_filter_0
+  id: loop_filter
+  parameters:
+    alias: ''
+    comment: ''
+    damping: '0.707'
+    natural_freq: '100'
+    order: 2nd
+    samp_rate: samp_rate
+    t1: '0.01'
+    t2: '0.6'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [296, 16.0]
+    rotation: 0
+    state: true
 - name: modulation_coeff
   id: variable_qtgui_range
   parameters:
@@ -168,20 +186,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [1104, 16.0]
-    rotation: 0
-    state: true
-- name: variables_loop_filter_2ndorder_0
-  id: variables_loop_filter_2ndorder
-  parameters:
-    comment: ''
-    damping: '0.707'
-    natural_freq: '100'
-    samp_rate: samp_rate
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [280, 8.0]
     rotation: 0
     state: true
 - name: analog_const_source_x_0_0
@@ -584,7 +588,7 @@ blocks:
     affinity: ''
     alias: ''
     bw: '0'
-    coefficients: variables_loop_filter_2ndorder_0
+    coefficients: loop_filter_0
     comment: ''
     freq_central: '0.0'
     maxoutbuf: '0'

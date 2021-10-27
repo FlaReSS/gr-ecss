@@ -44,6 +44,24 @@ blocks:
     coordinate: [280, 16.0]
     rotation: 0
     state: true
+- name: filter_2ndorder
+  id: loop_filter
+  parameters:
+    alias: ''
+    comment: ''
+    damping: '0.707'
+    natural_freq: '100'
+    order: 2nd
+    samp_rate: samp_rate
+    t1: '0.01'
+    t2: '0.6'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [368, 16.0]
+    rotation: 0
+    state: true
 - name: samp_rate
   id: variable
   parameters:
@@ -56,24 +74,6 @@ blocks:
     coordinate: [184, 12]
     rotation: 0
     state: enabled
-- name: variables_loop_filter_0
-  id: variables_loop_filter
-  parameters:
-    comment: ''
-    damping_2: '0.707'
-    damping_3: '0.707'
-    epsilon: '0'
-    index_m_3: '4'
-    natural_freq_2: '10'
-    natural_freq_3: '10'
-    samp_rate: samp_rate
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [392, 24.0]
-    rotation: 0
-    state: true
 - name: analog_noise_source_x_0
   id: analog_noise_source_x
   parameters:
@@ -236,7 +236,7 @@ blocks:
     affinity: ''
     alias: ''
     bw: '1000.0'
-    coefficients: '[0.00884505, 3.9303e-5]'
+    coefficients: filter_2ndorder
     comment: ''
     freq_central: 1e3
     maxoutbuf: '0'
