@@ -12,8 +12,7 @@
 #include "ecss/pll.h"
 #include "ecss/coherent_phase_modulator.h"
 #include "ecss/phase_converter.h"
-#include "ecss/variables_loop_filter_2ndorder.h"
-#include "ecss/variables_loop_filter_3rdorder.h"
+#include "ecss/loop_filter.h"
 #include "ecss/gain_phase_accumulator.h"
 #include "ecss/signal_search_goertzel.h"
 #include "ecss/signal_search_fft_v.h"
@@ -35,8 +34,7 @@ GR_SWIG_BLOCK_MAGIC2(ecss, pll);
 GR_SWIG_BLOCK_MAGIC2(ecss, coherent_phase_modulator);
 %include "ecss/phase_converter.h"
 GR_SWIG_BLOCK_MAGIC2(ecss, phase_converter);
-%include "ecss/variables_loop_filter_2ndorder.h"
-%include "ecss/variables_loop_filter_3rdorder.h"
+%include "ecss/loop_filter.h"
 
 %include "ecss/gain_phase_accumulator.h"
 GR_SWIG_BLOCK_MAGIC2(ecss, gain_phase_accumulator);

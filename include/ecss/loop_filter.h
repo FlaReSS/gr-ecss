@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef INCLUDED_ECSS_VARIABLES_LOOP_FILTER_3RDORDER_H
-#define INCLUDED_ECSS_VARIABLES_LOOP_FILTER_3RDORDER_H
+#ifndef INCLUDED_ECSS_LOOP_FILTER_H
+#define INCLUDED_ECSS_LOOP_FILTER_H
 
 #include <ecss/api.h>
 
@@ -43,14 +43,15 @@ namespace gr {
      * The ecss PLL provide in output the value of frequency (expressed in Hz) of the internal reference signal, the output of the phase detector (espressed in rad in range [-pi; pi]) and the int64 value of the internal integer accumulator (useful for the ecss coherent phase accumulator).
      * Furthermore, this block allows to reduce the accuracy (setting the number of bits N) of the mathematics in order to simulate properly a real behavior.
      */
-    class ECSS_API variables_loop_filter_3rdorder
+    class ECSS_API loop_filter
     {
       private:
       
       public:
-        static std::vector<double> coefficients(int natural_freq, float t1, float t2, int samp);
+        static std::vector<double> coefficients2ndorder(float natural_frequency, float damping, int samp_rate);
+        static std::vector<double> coefficients3rdorder(float natural_frequency, float t1, float t2, int samp_rate);
     };
   } // namespace ecss
 } // namespace gr
 
-#endif /* INCLUDED_ECSS_VARIABLES_LOOP_FILTER_3RDORDER_H */
+#endif /* INCLUDED_ECSS_LOOP_FILTER_H */

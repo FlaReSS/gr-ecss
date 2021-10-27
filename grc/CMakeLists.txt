@@ -22,8 +22,7 @@ install(FILES
     ecss_pll.block.yml
     ecss_coherent_phase_modulator.block.yml
     ecss_phase_converter.block.yml
-    ecss_variables_loop_filter_2ndorder.block.yml
-    ecss_variables_loop_filter_3rdorder.block.yml
+    ecss_loop_filter.block.yml
     ecss_gain_phase_accumulator.block.yml
     ecss_signal_search_goertzel.block.yml
     ecss_signal_search_fft_hier.block.yml

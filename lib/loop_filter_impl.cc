@@ -25,7 +25,7 @@
 
 #include <iostream>
 #include <gnuradio/io_signature.h>
-#include <ecss/variables_loop_filter_2ndorder.h>
+#include <ecss/loop_filter.h>
 
 namespace gr {
   namespace ecss {
@@ -35,7 +35,7 @@ namespace gr {
     #endif
 
     std::vector<double>
-    variables_loop_filter_2ndorder::coefficients(float natural_frequency, float damping, int samp_rate)
+    loop_filter::coefficients2ndorder(float natural_frequency, float damping, int samp_rate)
     {
       std::vector<double> coefficients;
 
@@ -48,5 +48,28 @@ namespace gr {
       return coefficients;
     }
 
+    std::vector<double>
+    loop_filter::coefficients3rdorder(float natural_freq, float t1, float t2, int samp_rate)
+    {
+      std::vector<double> coefficients;
+
+      double alpha = 1 / (M_TWOPI * natural_freq * t2);
+      double k = M_TWOPI * natural_freq * pow(t1/t2, 2.0);
+      double kcrit = 1/(2*t2) * pow(t1/t2, 2.0);
+      
+      // evaluate the loop stability
+      if(k <= kcrit) 
+      {
+            std::stringstream buffer;
+            buffer << "K is lower than the critical value (" << k << " < " << kcrit << ")"<< std::endl;
+            throw std::runtime_error(buffer.str());
+      }
+ 
+      coefficients.push_back(pow(t2 / t1, 2.0) / samp_rate);
+      coefficients.push_back(2 * t2 * pow(samp_rate * t1, -2.0));
+      coefficients.push_back(pow(samp_rate, -3.0) / t1/ t1);
+
+      return coefficients;
+    }
   } /* namespace ecss */
 } /* namespace gr */

@@ -28,8 +28,7 @@ list(APPEND ecss_sources
     pll_impl.cc
     coherent_phase_modulator_impl.cc
     phase_converter_impl.cc
-    variables_loop_filter_2ndorder.cc
-    variables_loop_filter_3rdorder.cc
+    loop_filter_impl.cc
     gain_phase_accumulator_impl.cc
     signal_search_goertzel_impl.cc
     signal_search_fft_v_impl.cc
