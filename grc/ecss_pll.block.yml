@@ -4,12 +4,11 @@ id: ecss_pll
 label: PLL
 category: '[ecss]'
 flags:
-- show_id
 
 parameters:
 -   id: samp_rate
     label: Sampling Rate
-    dtype: real
+    dtype: int
     default: samp_rate
 -   id: N
     label: N of bits

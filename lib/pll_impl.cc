@@ -41,14 +41,14 @@ namespace gr {
     #endif
 
     pll::sptr
-    pll::make(float samp_rate, int N, const std::vector<double> &coefficients, float freq_central, float bw)
+    pll::make(int samp_rate, int N, const std::vector<double> &coefficients, float freq_central, float bw)
     {
       return gnuradio::get_initial_sptr(new pll_impl(samp_rate, N, coefficients, freq_central, bw));
       }
 
     static int ios[] = {sizeof(gr_complex), sizeof(float), sizeof(float), sizeof(int64_t)};
     static std::vector<int> iosig(ios, ios+sizeof(ios)/sizeof(int));
-    pll_impl::pll_impl(float samp_rate, int N, const std::vector<double> &coefficients, float freq_central, float bw)
+    pll_impl::pll_impl(int samp_rate, int N, const std::vector<double> &coefficients, float freq_central, float bw)
         : gr::sync_block("pll",
                          gr::io_signature::make(1, 1, sizeof(gr_complex)),
                          gr::io_signature::makev(1, 4, iosig)),
