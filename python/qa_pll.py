@@ -9,7 +9,7 @@ from gnuradio import blocks, analog
 from gnuradio.fft import logpwrfft
 from collections import namedtuple
 from gnuradio.fft import window
-import ecss_swig as ecss
+import ecss as ecss
 import flaress
 import math, time, datetime, os, abc, sys, pmt
 import runner, threading
@@ -368,7 +368,11 @@ def test_sine(self, data):
     data_pll.freq = dst_pll_freq.data()
     data_pll.pe = dst_pll_pe.data()
     data_pll.pa = dst_pll_pa.data()
-    data_pll.time = np.linspace(0, (data.items * 1.0 / data.samp_rate), data.items, endpoint=False)
+    print("0 ", type(0))
+    print("(float(data.items) / float(data.samp_rate) ", type((float(data.items) / float(data.samp_rate))))
+    print("data.items ", type(data.items))
+    
+    data_pll.time = np.linspace(0, (float(data.items) / float(data.samp_rate)), data.items, endpoint=False)
 
     return data_pll
 
@@ -395,7 +399,7 @@ class qa_pll (gr_unittest.TestCase):
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 4
-        param.items = param.samp_rate / 10 * 3
+        param.items = int(param.samp_rate / 10 * 3)
         param.freq = 600
         param.noise = 0
 
@@ -403,7 +407,7 @@ class qa_pll (gr_unittest.TestCase):
         data_sine = test_sine(self, param)
         plot(self,data_sine)
 
-        param.items = param.samp_rate
+        param.items = int(param.samp_rate)
 
         # data_fft = test_fft(self, param)
         # plot_fft(self,data_fft)
@@ -450,7 +454,7 @@ class qa_pll (gr_unittest.TestCase):
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 4
-        param.items = param.samp_rate * 1.3
+        param.items = int(param.samp_rate * 1.3)
         param.freq = 749
         param.noise = 0
 
@@ -506,7 +510,7 @@ class qa_pll (gr_unittest.TestCase):
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 4
-        param.items = param.samp_rate * 1.5
+        param.items = int(param.samp_rate * 1.5)
         param.freq = 800
         param.noise = 0
 
@@ -558,7 +562,7 @@ class qa_pll (gr_unittest.TestCase):
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096 * 4
-        param.items = (param.samp_rate // 2)
+        param.items = int(param.samp_rate // 2)
         param.freq = 550
         param.noise = 0
 
@@ -625,7 +629,7 @@ class qa_pll (gr_unittest.TestCase):
         param.N = 38
         param.fft_size = 1024
         param.samp_rate = 4096
-        param.items = param.samp_rate * 6
+        param.items = int(param.samp_rate * 6)
         param.freq = 550
         param.noise = 0
 
