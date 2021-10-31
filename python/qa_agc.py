@@ -7,7 +7,7 @@
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 from collections import namedtuple
-import ecss_swig as ecss
+import ecss as ecss
 import runner
 import math, time, datetime, os, abc, sys
 import numpy as np
