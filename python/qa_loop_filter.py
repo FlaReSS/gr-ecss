@@ -111,7 +111,6 @@ class qa_loop_filter (gr_unittest.TestCase):
         self.assertEqual(loop_filter_3rd_order, reference)
 
     def test_003_t (self):
-      #with self.assertRaises(TypeError):
         """test_003_t: test 3rd order coefficient generation with unstable time constants"""
         param = namedtuple('param', 'order samp_rate natural_freq t1 t2')
 
