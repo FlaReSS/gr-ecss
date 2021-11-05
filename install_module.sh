@@ -24,7 +24,7 @@ elif [ "$1" = "-notest" ]; then
 	cd build
 	cmake -DCMAKE_INSTALL_PREFIX=~/prefix ../
 	make
-	sudo make install
+	make install
 	sudo ldconfig
 elif [ "$1" = "-all" ]; then
 	source ~/prefix/setup_env.sh
@@ -34,7 +34,7 @@ elif [ "$1" = "-all" ]; then
 	cmake -DCMAKE_INSTALL_PREFIX=~/prefix ../
 	make
 	make test
-	sudo make install
+	make install
 	sudo ldconfig
 else
 	echo Please, specify between -make, -test, -notest, -all

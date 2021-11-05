@@ -51,7 +51,6 @@ namespace gr{
           d_iir_right(M_PI * freq_cutoff / samp_rate),
           d_average(average), d_enable(enable)
     {
-      first = true;
       set_size();
       average_reset();
       coeff_eval(freq_central, bandwidth);
@@ -67,15 +66,11 @@ namespace gr{
     {
       if(pmt::eqv(msg, pmt::mp("LOCK")) )
       {
-        if(d_state == true) //only accept 'lock' when output is actually on
-        {
-          d_locked = true;
-        }
+        d_locked = true;
       }
       else if(pmt::eqv(msg, pmt::mp("UNLOCK")) )
       {
         d_locked = false;
-        first = true;   //next goertzel trigger will be the first one, hence reset pll
       }
       return;
     }
@@ -125,27 +120,11 @@ namespace gr{
             right_avg = goertzel.right;
           }
 
-          // std::cout<<"central_avg: "<<central_avg<<std::endl;
-          // std::cout<<"right_avg: "<<right_avg<<std::endl;
-          // std::cout<<"left_avg: "<<left_avg<<std::endl;
+          //std::cout<<left_avg<<","<<central_avg<<","<<right_avg<<std::endl;
           
           if ((central_avg > (left_avg * d_threshold)) && (central_avg > (right_avg * d_threshold)))
           {
-            d_state = true;
-          }
-          else
-          {
-            d_state = false;
-          }
-
-          if(d_state || d_locked) //ouptut on Goertzel hit OR if PLL is locked
-          {
-            memcpy(&out[i], &in[i], sizeof(gr_complex) * d_size);
-            if (flag != NULL)
-            {
-              memset(&flag[i], 1, sizeof(char) * d_size);
-            }
-            if (first == true)
+            if (d_state == false && d_locked == false)
             {
               std::cout<<"INSERTING PLL RESET TAG"<<std::endl;
               add_item_tag(0,                           // Port number
@@ -153,9 +132,23 @@ namespace gr{
                           pmt::intern("pll"),        // Key
                           pmt::intern("reset")           // Value
             );
-              
-              first = false;
               // average_reset();
+            }
+            d_state = true;
+          }
+          else
+          {
+            d_state = false;
+          }
+
+
+
+          if(d_state || d_locked) //ouptut on Goertzel hit OR if PLL is locked
+          {
+            memcpy(&out[i], &in[i], sizeof(gr_complex) * d_size);
+            if (flag != NULL)
+            {
+              memset(&flag[i], 1, sizeof(char) * d_size);
             }
           }
           else
