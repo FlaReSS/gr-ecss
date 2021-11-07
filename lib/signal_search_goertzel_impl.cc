@@ -43,15 +43,17 @@ namespace gr{
         : gr::block("signal_search_goertzel",
                     gr::io_signature::make(1, 1, sizeof(gr_complex)),
                     gr::io_signature::make2(1, 2, sizeof(gr_complex), sizeof(char))),
-          d_freq_central(freq_central),
-          d_bandwidth(bandwidth), d_freq_cutoff(freq_cutoff),
-          d_threshold(std::pow(10.0, (threshold / 10))), d_samp_rate(samp_rate),
-          d_iir_central(M_PI * freq_cutoff / samp_rate),
-          d_iir_left(M_PI * freq_cutoff / samp_rate),
+	  d_freq_central(freq_central),
+	  d_bandwidth(bandwidth), d_freq_cutoff(freq_cutoff),
+	  d_threshold(std::pow(10.0, (threshold / 10))), d_samp_rate(samp_rate),
+	  d_iir_central(M_PI * freq_cutoff / samp_rate),
+	  d_iir_left(M_PI * freq_cutoff / samp_rate),
           d_iir_right(M_PI * freq_cutoff / samp_rate),
           d_average(average), d_enable(enable)
     {
       first = true;
+      d_locked = false;
+      d_state = false;
       set_size();
       average_reset();
       coeff_eval(freq_central, bandwidth);
@@ -67,15 +69,12 @@ namespace gr{
     {
       if(pmt::eqv(msg, pmt::mp("LOCK")) )
       {
-        if(d_state == true) //only accept 'lock' when output is actually on
-        {
-          d_locked = true;
-        }
+        d_locked = true;
       }
       else if(pmt::eqv(msg, pmt::mp("UNLOCK")) )
       {
         d_locked = false;
-        first = true;   //next goertzel trigger will be the first one, hence reset pll
+        first = true;
       }
       return;
     }
@@ -104,13 +103,27 @@ namespace gr{
       uint out_items = 0;
       uint i = 0;
 
+      // is this the first iteration of the loop? Then add a stop tag to make sure 
+      // the pll afterwards does not wonder around
+      if (first == true)
+      {
+          std::cout<<"INSERTING PLL STOP TAG - First iteration"<<std::endl;
+          add_item_tag(0,                         // Port number
+                    nitems_written(0) + (i),      // Offset
+                    pmt::intern("pll"),           // Key
+                    pmt::intern("stop")           // Value
+                    );
+          first = false;
+      }
+      
       if(d_enable == true)
       {
-        for (i = 0; i < (noutput_items - d_size); i += d_size)
+        for (i = 0; i < (noutput_items - d_size + 1); i += d_size)
         {
           goertzel = double_goertzel_complex(&in[i]);
 
-          if (d_average == true){
+          if (d_average == true)
+          {
             d_iir_central.filter(goertzel.central);
             d_iir_left.filter(goertzel.left);
             d_iir_right.filter(goertzel.right);
@@ -119,18 +132,27 @@ namespace gr{
             left_avg = d_iir_left.prev_output();
             right_avg = d_iir_right.prev_output();
           }
-          else{
+          else
+          {
             central_avg = goertzel.central;
             left_avg = goertzel.left;
             right_avg = goertzel.right;
           }
 
-          // std::cout<<"central_avg: "<<central_avg<<std::endl;
-          // std::cout<<"right_avg: "<<right_avg<<std::endl;
-          // std::cout<<"left_avg: "<<left_avg<<std::endl;
+          //std::cout<<left_avg<<","<<central_avg<<","<<right_avg<<std::endl;
           
-          if ((central_avg > (left_avg * d_threshold)) && (central_avg > (right_avg * d_threshold)))
+          if (central_avg > ((left_avg + right_avg) * d_threshold)) 
           {
+            if (d_state == false && d_locked == false)
+            {
+              std::cout<<"INSERTING PLL START TAG"<<std::endl;
+              add_item_tag(0,                           // Port number
+                          nitems_written(0) + (i),      // Offset
+                          pmt::intern("pll"),           // Key
+                          pmt::intern("start")          // Value
+            );
+              // average_reset();
+            }
             d_state = true;
           }
           else
@@ -144,18 +166,6 @@ namespace gr{
             if (flag != NULL)
             {
               memset(&flag[i], 1, sizeof(char) * d_size);
-            }
-            if (first == true)
-            {
-              std::cout<<"INSERTING PLL RESET TAG"<<std::endl;
-              add_item_tag(0,                           // Port number
-                          nitems_written(0) + (i), // Offset
-                          pmt::intern("pll"),        // Key
-                          pmt::intern("reset")           // Value
-            );
-              
-              first = false;
-              // average_reset();
             }
           }
           else
