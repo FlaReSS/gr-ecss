@@ -160,6 +160,8 @@ namespace gr{
             d_state = false;
           }
 
+
+
           if(d_state || d_locked) //ouptut on Goertzel hit OR if PLL is locked
           {
             memcpy(&out[i], &in[i], sizeof(gr_complex) * d_size);

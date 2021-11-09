@@ -26,7 +26,8 @@
  namespace gr {
    namespace ecss {
 
-     class agc_impl : public agc
+     template <class T>
+     class agc_impl : public agc<T>
      {
       private:
         float d_settling_time;		// adjustment rate
@@ -37,7 +38,7 @@
 
       public:
        agc_impl(float settling_time, float reference, float initial_gain, float maximum_gain, float samp_rate);
-       ~agc_impl();
+//       ~agc_impl();
 
        int work(int noutput_items,
           gr_vector_const_void_star &input_items,
