@@ -29,9 +29,6 @@
 #include <gnuradio/math.h>
 #include <gnuradio/buffer.h>
 
-#include <pmt/pmt.h>
-#include <boost/bind.hpp>
-
 #include <cmath>
 
 // debug
@@ -40,86 +37,45 @@
 namespace gr {
   namespace ecss {
 
-    static const pmt::pmt_t TOKEN_KEY = pmt::string_to_symbol("token_tag");
     #ifndef M_TWOPI
     #define M_TWOPI (2.0*M_PI)
     #endif
 
     coherent_phase_modulator::sptr
-    coherent_phase_modulator::make(int N, int n_inputs)
+    coherent_phase_modulator::make(int N)
     {
       return gnuradio::get_initial_sptr
-        (new coherent_phase_modulator_impl(N, n_inputs));
+        (new coherent_phase_modulator_impl(N));
     }
 
-    coherent_phase_modulator_impl::coherent_phase_modulator_impl(int N, int n_inputs)
+    coherent_phase_modulator_impl::coherent_phase_modulator_impl(int N)
       : gr::sync_block("coherent_phase_modulator",
-              gr::io_signature::make (1, n_inputs,  sizeof(int64_t)),
+              gr::io_signature::make (1, 1,  sizeof(int64_t)),
               gr::io_signature::make(1, 1, sizeof(gr_complex))),
-              d_N(N), d_n_inputs(n_inputs)
+              d_N(N)
     {
       precision = pow(2,(- (N - 1)));
-
-      // Add async message input port to handle sporadic data transfer
-      this->message_port_register_in(pmt::mp("async_in"));
-      this->set_msg_handler(pmt::mp("async_in"), boost::bind(&coherent_phase_modulator_impl::handle_async_in, this, _1));
-      d_async_buffer = gr::make_buffer(16384*64, sizeof(int64_t));
-      d_reader = gr::buffer_add_reader(d_async_buffer, 0);
-      this->message_port_register_out(pmt::mp("token_out"));
+      // propagate tags by default
+      set_tag_propagation_policy(TPP_ALL_TO_ALL);
     }
 
     coherent_phase_modulator_impl::~coherent_phase_modulator_impl()
     {}
-
-    void coherent_phase_modulator_impl::handle_async_in(pmt::pmt_t input_msg){
-      // We expect a vector of int64_t here
-      std::vector<int64_t> my_data = pmt::s64vector_elements(input_msg);
-      if (d_async_buffer->space_available() < my_data.size()){
-          std::cout << "Panic: too little space!" << std::endl;
-          return;
-      }
-      std::memcpy(d_async_buffer->write_pointer(), &my_data[0], my_data.size() * sizeof(int64_t));
-      d_async_buffer->update_write_pointer(my_data.size());
-    }
 
     int
     coherent_phase_modulator_impl::work(int noutput_items,
         gr_vector_const_void_star &input_items,
         gr_vector_void_star &output_items)
     {
-      const int64_t *in[d_n_inputs];
+      const int64_t *input = (int64_t*)input_items[0];
       gr_complex *out = (gr_complex *) output_items[0];
 
       double integer_phase_normalized;
-      int64_t integer_phase;
       double oi, oq;
-
-      std::vector<tag_t> tags;
-      for (int n_input = 0; n_input < d_n_inputs; n_input++){
-        get_tags_in_window(tags, n_input, 0, noutput_items);
-        for (const auto &tag : tags){
-          if(pmt::equal(tag.key, TOKEN_KEY)){
-            message_port_pub(pmt::mp("token_out"), pmt::PMT_NIL);
-          }
-        }
-      }
-
-      for(int x = 0; x < d_n_inputs; x++) {
-        in[x] = (const int64_t *) input_items[x];
-      }
-
-      for(int i = 0; i < noutput_items; i++) {
-        integer_phase = 0;
-
-        for(int y = 0; y < d_n_inputs; y++) {
-          integer_phase += in[y][i];
-        }
-        if (d_reader->items_available()){
-          integer_phase += (*(int64_t*)(d_reader->read_pointer()));
-          d_reader->update_read_pointer(1);
-        }
-
-        integer_phase_normalized = NCO_denormalization(integer_phase);
+    
+      for(int i = 0; i < noutput_items; i++) 
+      {
+        integer_phase_normalized = NCO_denormalization(input[i]);
         gr::sincos(integer_phase_normalized, &oq, &oi);
         out[i] = gr_complex((float) oi, (float) oq);
       }

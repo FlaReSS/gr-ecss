@@ -81,9 +81,7 @@
                                             <!-- <button onclick="myFunction()">Show plot</button> -->
                                             <!-- <div id="myDIV" style="display: none;"> -->
                                                     {% for image in images %}
-                                                        {% if "NULL" == image %}
-                                                            no graphs generated for this test 
-                                                        {% else %}
+                                                        {% if "NULL" != image %}
                                                         <!-- <p>{{image}}</p> -->
                                                         <img style="display: block; margin-left: auto; margin-right: auto;" src="data:image/png;base64,{{image}}" alt="" width="640" height="" />
                                                             <!-- <img src={{image}} width="100%"> -->

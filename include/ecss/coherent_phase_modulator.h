@@ -49,9 +49,8 @@ namespace gr {
         * \brief Coherent Phase Modulator with int64 inputs.
         *
         * \param N number of bits.
-        * \param n_inputs number of input ports.
        */
-      static sptr make(int N, int n_inputs);
+      static sptr make(int N);
     };
 
   } // namespace ecss

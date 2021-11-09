@@ -110,11 +110,21 @@ namespace gr {
 			{
 				stop = true;
 				reset();
+				add_item_tag(3,                    // Port number
+                    nitems_written(0) + (i),       // Offset
+                    pmt::intern("modulator"),    // Key
+                    pmt::intern("reset")           // Value
+                    );
 			}
 			if (tags[0].value == pmt::intern("start") && tags[0].key == pmt::intern("pll")) 
 			{
 				stop = false;
 				reset();
+				add_item_tag(3,                    // Port number
+                    nitems_written(0) + (i),       // Offset
+                    pmt::intern("accumulator"),    // Key
+                    pmt::intern("reset")           // Value
+                    );
 			}
 			if (tags[0].value == pmt::intern("start(1e3)") && tags[0].key == pmt::intern("pll")) 
 			{
@@ -132,7 +142,15 @@ namespace gr {
 		// output the phase error, if a signal is connected to the optional port
 		if (phase_error != NULL)
 		{
-			phase_error[i] = error;
+			if (stop)
+			{
+				d_integer_phase = 0;
+				phase_error[i] = 0;
+			}
+			else
+			{
+				phase_error[i] = error;
+			}
 		}	
 		
 		// if the PLL has been stopped, force the error to zero, this makes sure 
