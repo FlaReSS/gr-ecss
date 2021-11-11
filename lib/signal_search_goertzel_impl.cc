@@ -118,6 +118,7 @@ namespace gr{
       
       if(d_enable == true)
       {
+      
         for (i = 0; i < (noutput_items - d_size + 1); i += d_size)
         {
           goertzel = double_goertzel_complex(&in[i]);
@@ -137,11 +138,9 @@ namespace gr{
             central_avg = goertzel.central;
             left_avg = goertzel.left;
             right_avg = goertzel.right;
-          }
-
-          //std::cout<<left_avg<<","<<central_avg<<","<<right_avg<<std::endl;
+          }  
           
-          if (central_avg > ((left_avg + right_avg) * d_threshold)) 
+          if (central_avg > ((left_avg + right_avg) * d_threshold / 2)) 
           {
             if (d_state == false && d_locked == false)
             {
@@ -177,6 +176,7 @@ namespace gr{
               memset(&flag[i], 0, sizeof(char) * d_size);
           }
         }
+
         consume_each(i);
         return i;
       }
@@ -267,16 +267,6 @@ namespace gr{
       outputs.central = ((real_0r - imag_0i) * (real_0r - imag_0i) + (real_0i + imag_0r) * (real_0i + imag_0r));
       outputs.right = ((real_1r - imag_1i) * (real_1r - imag_1i) + (real_1i + imag_1r) * (real_1i + imag_1r));
       outputs.left = ((real_2r - imag_2i) * (real_2r - imag_2i) + (real_2i + imag_2r) * (real_2i + imag_2r));
-
-      if (outputs.central <= d_limit){
-          outputs.central = 0.001;
-      }
-      if (outputs.right <= d_limit){
-          outputs.right = 0.001;
-      }
-      if (outputs.left <= d_limit){
-        outputs.left = 0.001;
-      }
 
       return outputs;
     }

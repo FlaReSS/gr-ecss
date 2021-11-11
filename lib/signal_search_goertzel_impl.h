@@ -33,7 +33,7 @@ namespace ecss
   {
     private:
       bool d_state = false; //false: squelch | true: passthrough
-      bool d_locked = false;
+      bool volatile d_locked;
       void handle_lockmsg(pmt::pmt_t msg);
 
       struct bins
@@ -53,7 +53,7 @@ namespace ecss
       float d_cosine_2;
       float d_sine_2;
       float d_limit;
-      bool first;
+      bool volatile first;
       bool d_average;
       bool d_enable;
       float d_samp_rate;
