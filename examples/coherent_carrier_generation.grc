@@ -32,6 +32,27 @@ options:
     state: enabled
 
 blocks:
+- name: amplitude
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: Signal Level
+    min_len: '200'
+    orient: Qt.Horizontal
+    rangeType: float
+    start: '0.001'
+    step: '0.001'
+    stop: '1'
+    value: '0.01'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [256, 68.0]
+    rotation: 0
+    state: true
 - name: coherency
   id: variable_qtgui_chooser
   parameters:
@@ -146,7 +167,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1328, 144.0]
+    coordinate: [904, 144.0]
     rotation: 0
     state: true
 - name: modulation_coeff_down
@@ -294,7 +315,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [416, 384.0]
+    coordinate: [88, 440.0]
     rotation: 0
     state: true
 - name: analog_phase_modulator_fc_0
@@ -372,24 +393,8 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [592, 292.0]
+    coordinate: [472, 388.0]
     rotation: 0
-    state: true
-- name: blocks_complex_to_float_0
-  id: blocks_complex_to_float
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1364.0, 544]
-    rotation: 270
     state: true
 - name: blocks_complex_to_float_2
   id: blocks_complex_to_float
@@ -404,25 +409,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1172.0, 344]
+    coordinate: [1316.0, 352]
     rotation: 270
     state: enabled
-- name: blocks_float_to_complex_0
-  id: blocks_float_to_complex
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1268.0, 352]
-    rotation: 90
-    state: true
 - name: blocks_message_debug_0
   id: blocks_message_debug
   parameters:
@@ -433,7 +422,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [616, 484.0]
+    coordinate: [568, 452.0]
     rotation: 180
     state: enabled
 - name: blocks_multiply_const_vxx_0
@@ -451,8 +440,26 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1160, 716.0]
+    coordinate: [1168, 676.0]
     rotation: 180
+    state: true
+- name: blocks_multiply_const_vxx_1
+  id: blocks_multiply_const_vxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: amplitude
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [576, 300.0]
+    rotation: 0
     state: true
 - name: blocks_multiply_xx_0
   id: blocks_multiply_xx
@@ -469,7 +476,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [464, 244.0]
+    coordinate: [432, 268.0]
     rotation: 0
     state: true
 - name: blocks_null_sink_0
@@ -486,7 +493,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1196.0, 176]
+    coordinate: [1340.0, 184]
     rotation: 90
     state: true
 - name: blocks_null_sink_0_0
@@ -503,44 +510,8 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1132.0, 176]
+    coordinate: [1268.0, 176]
     rotation: 90
-    state: true
-- name: blocks_null_sink_1
-  id: blocks_null_sink
-  parameters:
-    affinity: ''
-    alias: ''
-    bus_structure_sink: '[[0,],]'
-    comment: ''
-    num_inputs: '1'
-    type: float
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1396.0, 712]
-    rotation: 270
-    state: true
-- name: blocks_null_source_0
-  id: blocks_null_source
-  parameters:
-    affinity: ''
-    alias: ''
-    bus_structure_source: '[[0,],]'
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    num_outputs: '1'
-    type: float
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1216, 532.0]
-    rotation: 0
     state: true
 - name: blocks_throttle_0_0
   id: blocks_throttle
@@ -579,8 +550,8 @@ blocks:
     coordinate: [280, 328.0]
     rotation: 0
     state: true
-- name: ecss_agc_0
-  id: ecss_agc
+- name: ecss_agc_xx_0
+  id: ecss_agc_xx
   parameters:
     affinity: ''
     alias: ''
@@ -592,12 +563,34 @@ blocks:
     reference: '1.0'
     samp_rate: samp_rate
     settling_time: '10.0'
+    type: float
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1356.0, 352]
+    coordinate: [1316.0, 552]
     rotation: 270
+    state: true
+- name: ecss_agc_xx_0_0
+  id: ecss_agc_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    initial_gain: '1.0'
+    maximum_gain: '65536.0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    reference: '1.0'
+    samp_rate: samp_rate
+    settling_time: '10.0'
+    type: complex
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [928, 276.0]
+    rotation: 0
     state: true
 - name: ecss_coherent_phase_modulator_0
   id: ecss_coherent_phase_modulator
@@ -612,7 +605,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [608, 652.0]
+    coordinate: [640, 628.0]
     rotation: 180
     state: true
 - name: ecss_gain_phase_accumulator_0
@@ -621,7 +614,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    downlink: 240*coherency
+    downlink: 440*coherency
     maxoutbuf: '0'
     minoutbuf: '0'
     rst: 'False'
@@ -630,7 +623,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [976, 616.0]
+    coordinate: [1072, 568.0]
     rotation: 180
     state: enabled
 - name: ecss_phase_converter_0
@@ -646,7 +639,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [936, 700.0]
+    coordinate: [984, 660.0]
     rotation: 180
     state: true
 - name: ecss_pll_0
@@ -666,7 +659,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [936, 332.0]
+    coordinate: [1104, 252.0]
     rotation: 0
     state: enabled
 - name: ecss_signal_search_goertzel_0
@@ -688,7 +681,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [696, 272.0]
+    coordinate: [720, 280.0]
     rotation: 0
     state: enabled
 - name: ecss_threshhold_to_message_0
@@ -708,7 +701,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [784, 500.0]
+    coordinate: [784, 444.0]
     rotation: 180
     state: enabled
 - name: flaress_add_0
@@ -726,7 +719,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [832, 652.0]
+    coordinate: [872, 612.0]
     rotation: 180
     state: enabled
 - name: qtgui_freq_sink_x_0
@@ -768,7 +761,7 @@ blocks:
     label: Relative Gain
     label1: Input
     label10: ''''''
-    label2: Output Squeltch
+    label2: Output
     label3: PLL
     label4: ''''''
     label5: ''''''
@@ -780,7 +773,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     name: '""'
-    nconnections: '3'
+    nconnections: '2'
     showports: 'False'
     tr_chan: '0'
     tr_level: '0.0'
@@ -824,7 +817,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1024, 524.0]
+    coordinate: [1024, 468.0]
     rotation: 180
     state: enabled
 
@@ -833,28 +826,25 @@ connections:
 - [analog_phase_modulator_fc_0, '0', blocks_multiply_xx_0, '0']
 - [analog_sig_source_x_2_0, '0', blocks_throttle_0_0, '0']
 - [analog_sig_source_x_2_1, '0', blocks_vco_c_0, '0']
-- [blocks_add_xx_1, '0', ecss_signal_search_goertzel_0, '0']
+- [blocks_add_xx_1, '0', blocks_multiply_const_vxx_1, '0']
 - [blocks_add_xx_1, '0', qtgui_freq_sink_x_0, '0']
-- [blocks_complex_to_float_0, '0', blocks_multiply_const_vxx_0, '0']
-- [blocks_complex_to_float_0, '1', blocks_null_sink_1, '0']
 - [blocks_complex_to_float_2, '0', single_pole_iir_filter_xx_0, '0']
-- [blocks_complex_to_float_2, '1', blocks_float_to_complex_0, '0']
-- [blocks_float_to_complex_0, '0', ecss_agc_0, '0']
+- [blocks_complex_to_float_2, '1', ecss_agc_xx_0, '0']
 - [blocks_multiply_const_vxx_0, '0', ecss_phase_converter_0, '0']
+- [blocks_multiply_const_vxx_1, '0', ecss_signal_search_goertzel_0, '0']
 - [blocks_multiply_xx_0, '0', blocks_add_xx_1, '0']
-- [blocks_null_source_0, '0', blocks_float_to_complex_0, '1']
 - [blocks_throttle_0_0, '0', analog_phase_modulator_fc_0, '0']
 - [blocks_vco_c_0, '0', blocks_multiply_xx_0, '1']
-- [ecss_agc_0, '0', blocks_complex_to_float_0, '0']
-- [ecss_coherent_phase_modulator_0, '0', qtgui_freq_sink_x_0, '2']
+- [ecss_agc_xx_0, '0', blocks_multiply_const_vxx_0, '0']
+- [ecss_agc_xx_0_0, '0', ecss_pll_0, '0']
+- [ecss_coherent_phase_modulator_0, '0', qtgui_freq_sink_x_0, '1']
 - [ecss_gain_phase_accumulator_0, '0', flaress_add_0, '0']
 - [ecss_phase_converter_0, '0', flaress_add_0, '1']
 - [ecss_pll_0, '0', blocks_complex_to_float_2, '0']
 - [ecss_pll_0, '1', blocks_null_sink_0_0, '0']
 - [ecss_pll_0, '2', blocks_null_sink_0, '0']
 - [ecss_pll_0, '3', ecss_gain_phase_accumulator_0, '0']
-- [ecss_signal_search_goertzel_0, '0', ecss_pll_0, '0']
-- [ecss_signal_search_goertzel_0, '0', qtgui_freq_sink_x_0, '1']
+- [ecss_signal_search_goertzel_0, '0', ecss_agc_xx_0_0, '0']
 - [ecss_threshhold_to_message_0, threshhold_msg, blocks_message_debug_0, print]
 - [ecss_threshhold_to_message_0, threshhold_msg, ecss_signal_search_goertzel_0, lock_in]
 - [flaress_add_0, '0', ecss_coherent_phase_modulator_0, '0']
