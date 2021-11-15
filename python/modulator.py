@@ -20,9 +20,9 @@
 from gnuradio import gr
 from gnuradio import fec
 from gnuradio import filter
+from gnuradio import blocks
 from gnuradio.filter import firdes
 import ecss
-import flaress
 import sys
 
 class modulator(gr.hier_block2):
@@ -72,12 +72,12 @@ class modulator(gr.hier_block2):
         ##################################################
         # Blocks
         ##################################################
-        self.selector_convolutional_in = flaress.selector(gr.sizeof_char*1, self.sel_convolutional, 1, 2)
-        self.selector_convolutional_out = flaress.selector(gr.sizeof_char*1, self.sel_convolutional, 2, 1)
-        self.selector_srrc_in = flaress.selector(gr.sizeof_float*1, self.sel_srrc, 1, 2)
-        self.selector_srrc_out = flaress.selector(gr.sizeof_float*1, self.sel_srrc, 2, 1)
-        self.selector_encoder_in = flaress.selector(gr.sizeof_char*1, self.sel_encoder, 1, 3)
-        self.selector_encoder_out = flaress.selector(gr.sizeof_float*1, self.sel_encoder, 3, 1)
+        self.selector_convolutional_in = blocks.selector(gr.sizeof_char*1, self.sel_convolutional, 1, 2)
+        self.selector_convolutional_out = blocks.selector(gr.sizeof_char*1, self.sel_convolutional, 2, 1)
+        self.selector_srrc_in = blocks.selector(gr.sizeof_float*1, self.sel_srrc, 1, 2)
+        self.selector_srrc_out = blocks.selector(gr.sizeof_float*1, self.sel_srrc, 2, 1)
+        self.selector_encoder_in = blocks.selector(gr.sizeof_char*1, self.sel_encoder, 1, 3)
+        self.selector_encoder_out = blocks.selector(gr.sizeof_float*1, self.sel_encoder, 3, 1)
 
         self.convolutional_encoder = fec.extended_encoder(encoder_obj_list=self.encoder_variable, threading=self.threading, puncpat=self.puncpat)
         self.root_raised_cosine_filter = filter.fir_filter_fff(1, firdes.root_raised_cosine(1, self.samp_rate, self.bit_rate, self.roll_off, self.num_taps)) #symbol rate =  bit rate
