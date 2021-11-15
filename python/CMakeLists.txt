@@ -40,10 +40,12 @@ GR_PYTHON_INSTALL(
 ########################################################################
 # Find required Python packages
 ########################################################################
-find_package(NumPy)
-find_package(jinja2)
-find_package(matplotlib)
-find_package(pdfkit)
+find_package(PythonInterp REQUIRED)
+find_package(PythonLibs REQUIRED)
+find_package(numpy )
+find_package(jinja2 )
+find_package(matplotlib )
+find_package(pdfkit )
 
 ########################################################################
 # Handle the unit tests
