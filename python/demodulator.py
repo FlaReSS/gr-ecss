@@ -25,7 +25,6 @@ from gnuradio import analog
 from gnuradio import filter
 from gnuradio.filter import firdes
 import ecss
-import flaress
 import sys
 
 class demodulator(gr.hier_block2):
