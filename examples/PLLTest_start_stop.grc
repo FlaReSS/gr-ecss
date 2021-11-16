@@ -44,7 +44,7 @@ blocks:
     coordinate: [280, 16.0]
     rotation: 0
     state: true
-- name: filter_2ndorder
+- name: loop_filter_0
   id: loop_filter
   parameters:
     alias: ''
@@ -59,7 +59,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [368, 16.0]
+    coordinate: [416, 16.0]
     rotation: 0
     state: true
 - name: samp_rate
@@ -236,7 +236,7 @@ blocks:
     affinity: ''
     alias: ''
     bw: '1000.0'
-    coefficients: filter_2ndorder
+    coefficients: loop_filter_0
     comment: ''
     freq_central: 1e3
     maxoutbuf: '0'
