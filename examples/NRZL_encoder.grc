@@ -10,7 +10,7 @@ options:
     gen_linking: dynamic
     generate_options: qt_gui
     hier_block_src_path: '.:'
-    id: modulatorNRZL
+    id: NRZL_encoder
     max_nouts: '0'
     output_language: python
     placement: (0,0)
@@ -21,7 +21,7 @@ options:
     run_options: prompt
     sizing_mode: fixed
     thread_safe_setters: ''
-    title: NRZ-L Modulator
+    title: NRZ-L Encoder
     window_size: ''
   states:
     bus_sink: false
@@ -48,7 +48,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '800000'
+    value: '80000'
   states:
     bus_sink: false
     bus_source: false
@@ -62,7 +62,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    max: '1'
+    max: '255'
     maxoutbuf: '0'
     min: '0'
     minoutbuf: '0'
@@ -95,26 +95,123 @@ blocks:
     coordinate: [240, 164.0]
     rotation: 0
     state: true
-- name: ecss_nrzl_encoder_subcarrier_0
+- name: ecss_nrzl_encoder_0
+  id: ecss_nrzl_encoder
+  parameters:
+    affinity: ''
+    alias: ''
+    bit_rate: bit_rate
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [472, 152.0]
+    rotation: 0
+    state: true
+- name: ecss_nrzl_encoder_subcarrier_1
   id: ecss_nrzl_encoder_subcarrier
   parameters:
     affinity: ''
     alias: ''
     bit_rate: bit_rate
     comment: ''
-    freq_sub: '4000.0'
+    freq_sub: '16000.0'
     maxoutbuf: '0'
     minoutbuf: '0'
     samp_rate: samp_rate
-    sine: 'True'
+    sine: 'False'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [424, 144.0]
+    coordinate: [424, 248.0]
     rotation: 0
     state: true
 - name: qtgui_freq_sink_x_0
+  id: qtgui_freq_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'True'
+    average: '0.05'
+    axislabels: 'True'
+    bw: samp_rate
+    color1: '"blue"'
+    color10: '"dark blue"'
+    color2: '"red"'
+    color3: '"green"'
+    color4: '"black"'
+    color5: '"cyan"'
+    color6: '"magenta"'
+    color7: '"yellow"'
+    color8: '"dark red"'
+    color9: '"dark green"'
+    comment: ''
+    ctrlpanel: 'False'
+    fc: '0'
+    fftsize: 1024*4
+    freqhalf: 'True'
+    grid: 'False'
+    gui_hint: 0,0,1,1
+    label: Relative Gain
+    label1: ''
+    label10: ''''''
+    label2: ''''''
+    label3: ''''''
+    label4: ''''''
+    label5: ''''''
+    label6: ''''''
+    label7: ''''''
+    label8: ''''''
+    label9: ''''''
+    legend: 'False'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '"NRZ-L Encoder"'
+    nconnections: '1'
+    showports: 'False'
+    tr_chan: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_tag: '""'
+    type: float
+    units: dB
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    wintype: firdes.WIN_BLACKMAN_hARRIS
+    ymax: '10'
+    ymin: '-140'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [704, 144.0]
+    rotation: 0
+    state: true
+- name: qtgui_freq_sink_x_0_0
   id: qtgui_freq_sink_x
   parameters:
     affinity: ''
@@ -149,7 +246,7 @@ blocks:
     fftsize: 1024*4
     freqhalf: 'True'
     grid: 'False'
-    gui_hint: ''
+    gui_hint: 0,1,1,1
     label: Relative Gain
     label1: ''
     label10: ''''''
@@ -161,10 +258,10 @@ blocks:
     label7: ''''''
     label8: ''''''
     label9: ''''''
-    legend: 'True'
+    legend: 'False'
     maxoutbuf: '0'
     minoutbuf: '0'
-    name: '""'
+    name: '"NRZ-L Encoder with Sub-carrier"'
     nconnections: '1'
     showports: 'False'
     tr_chan: '0'
@@ -191,14 +288,16 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [688, 152.0]
+    coordinate: [704, 256.0]
     rotation: 0
     state: true
 
 connections:
 - [analog_random_source_x_0, '0', blocks_throttle_0, '0']
-- [blocks_throttle_0, '0', ecss_nrzl_encoder_subcarrier_0, '0']
-- [ecss_nrzl_encoder_subcarrier_0, '0', qtgui_freq_sink_x_0, '0']
+- [blocks_throttle_0, '0', ecss_nrzl_encoder_0, '0']
+- [blocks_throttle_0, '0', ecss_nrzl_encoder_subcarrier_1, '0']
+- [ecss_nrzl_encoder_0, '0', qtgui_freq_sink_x_0, '0']
+- [ecss_nrzl_encoder_subcarrier_1, '0', qtgui_freq_sink_x_0_0, '0']
 
 metadata:
   file_format: 1
