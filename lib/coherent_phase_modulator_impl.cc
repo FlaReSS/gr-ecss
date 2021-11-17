@@ -55,8 +55,6 @@ namespace gr {
               d_N(N)
     {
       precision = pow(2,(- (N - 1)));
-      // propagate tags by default
-      set_tag_propagation_policy(TPP_ALL_TO_ALL);
     }
 
     coherent_phase_modulator_impl::~coherent_phase_modulator_impl()
