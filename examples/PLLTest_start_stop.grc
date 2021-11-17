@@ -286,9 +286,9 @@ blocks:
     grid: 'False'
     gui_hint: ''
     label: Relative Gain
-    label1: ''
+    label1: PLL Input
     label10: ''''''
-    label2: ''''''
+    label2: PLL Output
     label3: ''''''
     label4: ''''''
     label5: ''''''
@@ -371,7 +371,7 @@ blocks:
     label9: ''
     max: '1'
     min: '-1'
-    name: '""'
+    name: Carrier Frequency
     nconnections: '1'
     type: float
     unit1: ''
@@ -424,7 +424,7 @@ blocks:
     entags: 'True'
     grid: 'False'
     gui_hint: ''
-    label1: Signal 1
+    label1: Phase error
     label10: Signal 10
     label2: Signal 2
     label3: Signal 3

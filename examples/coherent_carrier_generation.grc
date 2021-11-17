@@ -36,7 +36,7 @@ blocks:
   id: variable_qtgui_range
   parameters:
     comment: ''
-    gui_hint: ''
+    gui_hint: 7,1,1,1
     label: Signal Level
     min_len: '200'
     orient: Qt.Horizontal
@@ -57,7 +57,7 @@ blocks:
   id: variable_qtgui_chooser
   parameters:
     comment: ''
-    gui_hint: ''
+    gui_hint: 6,1,1,1
     label: Coherency
     label0: Open Loop
     label1: Coherent
@@ -87,7 +87,7 @@ blocks:
   id: variable_qtgui_range
   parameters:
     comment: ''
-    gui_hint: ''
+    gui_hint: 5,1,1,1
     label: Center frequency (Hz)
     min_len: '200'
     orient: Qt.Horizontal
@@ -167,14 +167,14 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [904, 144.0]
+    coordinate: [904, 128.0]
     rotation: 0
     state: true
 - name: modulation_coeff_down
   id: variable_qtgui_range
   parameters:
     comment: ''
-    gui_hint: ''
+    gui_hint: 4,1,1,1
     label: Downlink Modulation Coefficent
     min_len: '200'
     orient: Qt.Horizontal
@@ -195,7 +195,7 @@ blocks:
   id: variable_qtgui_range
   parameters:
     comment: ''
-    gui_hint: ''
+    gui_hint: 3,1,1,1
     label: Uplink Modulation Coefficent
     min_len: '200'
     orient: Qt.Horizontal
@@ -216,7 +216,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '2000000'
+    value: '250000'
   states:
     bus_sink: false
     bus_source: false
@@ -228,7 +228,7 @@ blocks:
   id: variable_qtgui_range
   parameters:
     comment: ''
-    gui_hint: ''
+    gui_hint: 2,1,1,1
     label: SNR (dB)
     min_len: '200'
     orient: Qt.Horizontal
@@ -261,7 +261,7 @@ blocks:
   id: variable_qtgui_range
   parameters:
     comment: ''
-    gui_hint: ''
+    gui_hint: 1,1,1,1
     label: Sweep Range (Hz)
     min_len: '200'
     orient: Qt.Horizontal
@@ -282,7 +282,7 @@ blocks:
   id: variable_qtgui_range
   parameters:
     comment: ''
-    gui_hint: ''
+    gui_hint: 0,1, 1, 1
     label: Sweep rate (Hz/s)
     min_len: '200'
     orient: Qt.Horizontal
@@ -757,7 +757,7 @@ blocks:
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'True'
-    gui_hint: ''
+    gui_hint: 0,0,7,1
     label: Relative Gain
     label1: Input
     label10: ''''''

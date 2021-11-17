@@ -247,7 +247,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [600, 268.0]
+    coordinate: [552, 276.0]
     rotation: 0
     state: true
 - name: qtgui_freq_sink_x_0
@@ -327,7 +327,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [832, 172.0]
+    coordinate: [776, 164.0]
     rotation: 0
     state: true
 - name: qtgui_time_sink_x_0
@@ -424,7 +424,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [832, 344.0]
+    coordinate: [792, 344.0]
     rotation: 0
     state: true
 - name: qtgui_time_sink_x_0_0
@@ -521,7 +521,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1088, 280.0]
+    coordinate: [968, 280.0]
     rotation: 0
     state: true
 
