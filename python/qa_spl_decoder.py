@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Copyright 2018 Antonio Miraglia - ISISpace .
@@ -23,7 +23,7 @@ class Pdf_class(object):
 
     def __init__(self, name_test='test'):
         current_dir = os.getcwd()
-        dir_to = os.path.join(current_dir, 'Graphs')
+        dir_to = os.path.join(current_dir, '../TestResults/Graphs')
 
         if not os.path.exists(dir_to):
             os.makedirs(dir_to)
@@ -134,6 +134,6 @@ class qa_spl_decoder (gr_unittest.TestCase):
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_spl_decoder)
-    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_3')
+    runner = runner.HTMLTestRunner(output='../TestResults', template='DEFAULT_TEMPLATE_3')
     runner.run(suite)
     #gr_unittest.TestProgram()

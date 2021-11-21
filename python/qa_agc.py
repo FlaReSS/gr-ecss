@@ -23,7 +23,7 @@ class Pdf_class(object):
 
     def __init__(self, name_test='test'):
         current_dir = os.getcwd()
-        dir_to = os.path.join(current_dir, 'Graphs')
+        dir_to = os.path.join(current_dir, '../TestResults/Graphs')
 
         if not os.path.exists(dir_to):
             os.makedirs(dir_to)
@@ -140,7 +140,7 @@ def test_sine(self, param):
 
     head = blocks.head(gr.sizeof_gr_complex, int (param.N))
 
-    agc = ecss.agc(param.settling_time, param.reference, 1.0, 65536.0, param.samp_rate)
+    agc = ecss.agc_cc(param.settling_time, param.reference, 1.0, 65536.0, param.samp_rate)
 
     tb.connect(src_square, (float_to_complex, 0))
     tb.connect(src_square, multiply_const)
@@ -682,6 +682,6 @@ class qa_agc (gr_unittest.TestCase):
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_agc)
-    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_3')
+    runner = runner.HTMLTestRunner(output='../TestResults', template='DEFAULT_TEMPLATE_3')
     runner.run(suite)
     #gr_unittest.TestProgram()

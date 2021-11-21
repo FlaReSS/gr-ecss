@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Copyright 2018 Antonio Miraglia - ISISpace .
@@ -8,8 +8,6 @@ from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 from collections import namedtuple
 import ecss as ecss
-from modulator import modulator
-from gnuradio import fec
 import runner
 import math, time, datetime, os, abc, sys
 import numpy as np
@@ -54,11 +52,6 @@ class Pdf_class(object):
             d['CreationDate'] = datetime.datetime(2018, 8, 21)
             d['ModDate'] = datetime.datetime.today()
 
-def print_parameters(data):
-    to_print = "/pr!Bit rate= %d V; f_samp= %.1f Hz/pr!" \
-        %(data.bit_rate, data.samp_rate)
-    print (to_print)
-
 def plot(self, data_out, data_src):
     """this function create a defined graph with the data inputs"""
 
@@ -79,7 +72,7 @@ def plot(self, data_out, data_src):
     ax2.grid(True)
 
     name_test = self.id().split("__main__.")[1]
-    name_test_usetex = name_test.replace('_', '\_').replace('.', ': ')
+    name_test_usetex = name_test.replace('.', ': ')
 
     fig.suptitle(name_test_usetex, fontsize=30)
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
@@ -89,35 +82,32 @@ def plot(self, data_out, data_src):
     fig.savefig(tmpfile, format='png')
     fig_encoded = base64.b64encode(tmpfile.getvalue())
     print("/im!{}/im!".format(fig_encoded.decode("utf-8")))#add in th template
-
     
     # plt.show()
     self.pdf.add_to_pdf(fig)
 
-def test_modulator(self, param):
+def test_spl(self, data_src):
     """this function run the defined test, for easier understanding"""
 
     tb = self.tb
 
-    srcdir = os.environ['srcdir']
-
-    src =  blocks.file_source(gr.sizeof_char*1, os.path.join(srcdir, "test_files", "CADU.bin"), False)
-    pack = blocks.unpack_k_bits_bb(8)
-
+    src = blocks.vector_source_f(data_src, True, 1, [])
     dst = blocks.vector_sink_b()
-    head = blocks.head(gr.sizeof_char, len(param.data_src))
-    nrzl = ecss.nrzl_encoder(param.bit_rate, param.samp_rate)
 
-    tb.connect(src, pack)
-    tb.connect(pack, dst)
+    head = blocks.head(gr.sizeof_float, len(data_src))
 
+    spl = ecss.spl_decoder()
+
+    tb.connect(src, head)
+    tb.connect(head, spl)
+    tb.connect(spl, dst)
 
     self.tb.run()
 
     out = dst.data()
     return out
 
-class qa_modulator (gr_unittest.TestCase):
+class qa_threshold_to_message (gr_unittest.TestCase):
 
     def setUp (self):
         self.tb = gr.top_block ()
@@ -127,77 +117,23 @@ class qa_modulator (gr_unittest.TestCase):
         self.tb = None
         self.pdf.finalize_pdf()
 
-
     def test_001_t (self):
-        """test_001_t: modulator check"""
-        param = namedtuple('param', 'data_src bit_rate samp_rate')
-        tb = self.tb
-
-        param.bit_rate = 1000
-        param.samp_rate = 2000
-        param.data_src = (0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1)
-
-        print_parameters(param)
-
-        encoder_variable = fec.cc_encoder_make(1, 7, 2, ([79,-109]), 0, fec.CC_STREAMING, False)
-
-        srcdir = os.environ['srcdir']
-
-        src =  blocks.file_source(gr.sizeof_char*1, os.path.join(srcdir, "test_files", "CADU_incl_ASM.bin"), False)
-        src_expected =  blocks.file_source(gr.sizeof_char*1,os.path.join(srcdir, "test_files", "Convolutionally_encoded_CADU.bin"), False)
-        pack1 = blocks.unpack_k_bits_bb(8)
-        pack2 = blocks.unpack_k_bits_bb(8)
-
-        dst = blocks.vector_sink_b()
-        dst_expected = blocks.vector_sink_b()
-        head = blocks.head(gr.sizeof_char, 2040)
-        conv = fec.extended_encoder(encoder_obj_list=encoder_variable, threading='capillary', puncpat='11')
-        # conv = fec.encoder(encoder_variable, gr.sizeof_char, gr.sizeof_char)
-
-        tb.connect(src, pack1)
-        tb.connect(pack1, conv)
-        tb.connect(conv, dst)
-        tb.connect(src_expected, pack2)
-        tb.connect(pack2, dst_expected)
-
-        self.tb.run()
-
-        data_out = dst.data()
-        expected_data = dst_expected.data()
-
-        print (len(data_out))
-
-        self.assertFloatTuplesAlmostEqual(data_out, expected_data)
-        # for i in range(len(expected_data) - len(data_out)):
-        #     count = 0
-        #     for x in range(len(data_out)):
-        #         if data_out[x] == expected_data[i + x]:
-        #             count = count + 1
-        #         if data_out[x] != expected_data[i + x]:
-        #             count = 0
-        #     if count >= 2000:
-        #         print "found", len(data_out), i, count
+        """test_001_t: without repetition"""
+        print('do you see me?')
+        data_src = (-1, 1, -1, 1, 1, -1, -1, 1, -1, 1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, -1, 1, -1, 1, -1, 1, -1, 1, 1, -1, -1, 1, 1, -1)
+        expected_data = (0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1)
 
 
-    # def test_010_t (self):
-    #     """test_010_t: with repetition of 2"""
-    #     param = namedtuple('param', 'data_src bit_rate samp_rate')
+        data_out = test_spl(self, data_src)
 
+        plot(self, data_out, data_src)
 
-    #     param.bit_rate = 1000
-    #     param.samp_rate = 2000
-    #     param.data_src = (0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1)
-
-    #     print_parameters(param)
-
-    #     data_out = test_modulator(self, param)
-
-    #     print data_out
-
+        self.assertAlmostEqual(data_out, expected_data)
+        print ("- Data correctly encoded.")
 
 
 if __name__ == '__main__':
-    suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_modulator)
+    suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_threshold_to_message)
     runner = runner.HTMLTestRunner(output='../TestResults', template='DEFAULT_TEMPLATE_3')
     runner.run(suite)
     #gr_unittest.TestProgram()

@@ -8,7 +8,7 @@ from gnuradio import blocks, analog
 from gnuradio.fft import logpwrfft
 from collections import namedtuple
 from gnuradio.fft import window
-import ecss_swig as ecss
+import ecss as ecss
 import flaress
 import math, time, datetime, os, abc, sys, pmt
 import runner, threading
@@ -25,7 +25,7 @@ class Pdf_class(object):
 
     def __init__(self, name_test='test'):
         current_dir = os.getcwd()
-        dir_to = os.path.join(current_dir, 'Graphs')
+        dir_to = os.path.join(current_dir, '../TestResults/Graphs')
 
         if not os.path.exists(dir_to):
             os.makedirs(dir_to)
@@ -195,7 +195,7 @@ def test_accumulator(self, param):
     phase = blocks.complex_to_arg(1)
 
     pc = ecss.phase_converter(param.N)
-    cpm = ecss.coherent_phase_modulator(param.N, param.inputs)
+    cpm = ecss.coherent_phase_modulator(param.N)
 
     tb.connect(src, arg)
     tb.connect(arg, head)
@@ -259,7 +259,7 @@ def test_accumulator_gain(self, param):
     phase = blocks.complex_to_arg(1)
 
     pc = ecss.phase_converter(param.N)
-    cpm = ecss.coherent_phase_modulator(param.N, param.inputs)
+    cpm = ecss.coherent_phase_modulator(param.N)
     gain = ecss.gain_phase_accumulator(False, param.uplink, param.downlink)
 
     tb.connect(src, arg)
@@ -396,6 +396,6 @@ class qa_coherent_phase_modulator (gr_unittest.TestCase):
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_coherent_phase_modulator)
-    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_3')
+    runner = runner.HTMLTestRunner(output='../TestResults', template='DEFAULT_TEMPLATE_3')
     runner.run(suite)
     # gr_unittest.TestProgram()

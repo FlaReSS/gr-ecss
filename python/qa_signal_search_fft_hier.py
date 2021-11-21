@@ -8,7 +8,7 @@ from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 from gnuradio.filter import firdes
 from collections import namedtuple
-import ecss
+import ecss as ecss
 import flaress
 import math, time, datetime, os, abc, sys, pmt
 import runner, threading
@@ -56,7 +56,7 @@ def test_sine(self, param):
 
     signal_search = ecss.signal_search_fft_hier(True, param.fft_size, param.decimation, Average, firdes.WIN_BLACKMAN_hARRIS, param.f_central, param.bw, param.average, param.threshold, param.samp_rate)
 
-    agc = ecss.agc(10, 1, 1, 65536, param.samp_rate)
+    agc = ecss.agc_cc(10, 1, 1, 65536, param.samp_rate)
 
     # ecss_signal_search_fft_v = ecss.signal_search_fft_v(param.fft_size, param.decimation, Average, firdes.WIN_BLACKMAN_hARRIS, param.f_central, param.bw, param.average, param.threshold, param.samp_rate)
     # blocks_stream_to_vector = blocks.stream_to_vector(gr.sizeof_gr_complex*1, param.fft_size * param.decimation)
@@ -195,6 +195,6 @@ class qa_signal_search_fft_hier (gr_unittest.TestCase):
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_signal_search_fft_hier)
-    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_2')
+    runner = runner.HTMLTestRunner(output='../TestResults', template='DEFAULT_TEMPLATE_2')
     runner.run(suite)
     #gr_unittest.TestProgram()

@@ -63,11 +63,11 @@ class HtmlFinalTestResult():
         self.name = "Final_Report_Tests.pdf"
         self.title = "Final report tests for gr-ecss"
         self.description= "Here are appended all the test results processed automatically"
-        self.output = ""
+        self.output = "TestResults"
         self.class_name =""
         self.testcase_class_name= ""
         self.path_file_final = ""
-        self.inputs = "Results"
+        self.inputs = "TestResults"
         self.all_html=[]
         self.tests= []
 
@@ -154,7 +154,7 @@ class HtmlFinalTestResult():
 
         if dir_found==True:
             class_dir =  "gr-" + class_name
-            test_file_folder = current_dir.split(class_dir)[0] + class_dir + "/build/python/" + self.inputs
+            test_file_folder = current_dir.split(class_dir)[0] + class_dir + "/build/" + self.inputs
             complete_name="Test_qa_{}.html".format(test_name)
             status= "not found..."
             complete_path = test_file_folder+ '/'+ complete_name

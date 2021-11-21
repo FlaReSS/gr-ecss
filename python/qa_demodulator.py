@@ -9,7 +9,7 @@ from gnuradio import blocks, analog
 from gnuradio.fft import logpwrfft
 from collections import namedtuple
 from gnuradio.fft import window
-import ecss_swig as ecss
+import ecss as ecss
 import flaress
 import math, time, datetime, os, abc, sys, pmt
 import runner, threading
@@ -27,7 +27,7 @@ class Pdf_class(object):
 
     def __init__(self, name_test='test'):
         current_dir = os.getcwd()
-        dir_to = os.path.join(current_dir, 'Graphs')
+        dir_to = os.path.join(current_dir, '../TestResults/Graphs')
 
         if not os.path.exists(dir_to):
             os.makedirs(dir_to)
@@ -140,6 +140,6 @@ class qa_demodulator (gr_unittest.TestCase):
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_demodulator)
-    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_3')
+    runner = runner.HTMLTestRunner(output='../TestResults', template='DEFAULT_TEMPLATE_3')
     runner.run(suite)
     #gr_unittest.TestProgram()

@@ -7,7 +7,7 @@
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 from collections import namedtuple
-import ecss_swig as ecss
+import ecss as ecss
 import runner
 import math, time, datetime, os, abc, sys
 import numpy as np
@@ -23,7 +23,7 @@ class Pdf_class(object):
 
     def __init__(self, name_test='test'):
         current_dir = os.getcwd()
-        dir_to = os.path.join(current_dir, 'Graphs')
+        dir_to = os.path.join(current_dir, '../TestResults/Graphs')
 
         if not os.path.exists(dir_to):
             os.makedirs(dir_to)
@@ -263,6 +263,6 @@ class qa_nrzl_encoder_subcarrier (gr_unittest.TestCase):
 
 if __name__ == '__main__':
     suite = gr_unittest.TestLoader().loadTestsFromTestCase(qa_nrzl_encoder_subcarrier)
-    runner = runner.HTMLTestRunner(output='Results', template='DEFAULT_TEMPLATE_3')
+    runner = runner.HTMLTestRunner(output='../TestResults', template='DEFAULT_TEMPLATE_3')
     runner.run(suite)
     # gr_unittest.TestProgram()
