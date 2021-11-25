@@ -120,7 +120,7 @@ class qa_loop_filter (gr_unittest.TestCase):
         param.t1 = 0.01
         param.t2 = 0.00674
 
-        to_print = "/pr!Order: %s<br> Sample Rate: %d<br> Natural Frequency: %.0f Hz<br> Timeconstant 1: %.3f s<br> Timeconstant 2: %.3f s<br>/pr!" \
+        to_print = "/pr!Order: %s<br> Sample Rate: %d<br> Natural Frequency: %.0f Hz<br> Time constant 1: %.3f s<br> Time constant 2: %.3f s<br>/pr!" \
             %(param.order, param.samp_rate, param.natural_freq, param.t1, param.t2)
         print (to_print)
         
