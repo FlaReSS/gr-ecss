@@ -199,6 +199,8 @@ class HtmlFinalTestResult():
 
     def generate_pdf(self):
         options = {
+            'enable-local-file-access': None, 
+            'quiet': '',
             'page-size': 'Letter',
             'margin-top': '0.75in',
             'margin-right': '0.75in',
