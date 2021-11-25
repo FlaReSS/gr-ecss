@@ -684,26 +684,26 @@ blocks:
     coordinate: [720, 280.0]
     rotation: 0
     state: enabled
-- name: ecss_threshhold_to_message_0
-  id: ecss_threshhold_to_message
+- name: ecss_threshold_to_message_0
+  id: ecss_threshold_to_message
   parameters:
     affinity: ''
     alias: ''
     comment: ''
     init_state: 'False'
     lower_message: pmt.intern("UNLOCK")
-    lower_threshhold: '0.5'
+    lower_threshold: '0.5'
     maxoutbuf: '0'
     minoutbuf: '0'
     upper_message: pmt.intern("LOCK")
-    upper_threshhold: '0.8'
+    upper_threshold: '0.8'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
     coordinate: [784, 444.0]
     rotation: 180
-    state: enabled
+    state: true
 - name: flaress_add_0
   id: flaress_add
   parameters:
@@ -845,10 +845,10 @@ connections:
 - [ecss_pll_0, '2', blocks_null_sink_0, '0']
 - [ecss_pll_0, '3', ecss_gain_phase_accumulator_0, '0']
 - [ecss_signal_search_goertzel_0, '0', ecss_agc_xx_0_0, '0']
-- [ecss_threshhold_to_message_0, threshhold_msg, blocks_message_debug_0, print]
-- [ecss_threshhold_to_message_0, threshhold_msg, ecss_signal_search_goertzel_0, lock_in]
+- [ecss_threshold_to_message_0, threshold_msg, blocks_message_debug_0, print]
+- [ecss_threshold_to_message_0, threshold_msg, ecss_signal_search_goertzel_0, lock_in]
 - [flaress_add_0, '0', ecss_coherent_phase_modulator_0, '0']
-- [single_pole_iir_filter_xx_0, '0', ecss_threshhold_to_message_0, '0']
+- [single_pole_iir_filter_xx_0, '0', ecss_threshold_to_message_0, '0']
 
 metadata:
   file_format: 1

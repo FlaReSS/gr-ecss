@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef INCLUDED_ECSS_threshhold_to_message_H
-#define INCLUDED_ECSS_threshhold_to_message_H
+#ifndef INCLUDED_ECSS_threshold_to_message_H
+#define INCLUDED_ECSS_threshold_to_message_H
 
 #include <ecss/api.h>
 #include <gnuradio/block.h>
@@ -30,28 +30,28 @@ namespace gr {
   namespace ecss {
 
     /*!
-     * \brief Output PMT message on threshhold trigger
+     * \brief Output PMT message on threshold trigger
      * \ingroup ecss
-     * \details This block generates a custom PMT output message when a signal reaches a higher or lower threshhold
+     * \details This block generates a custom PMT output message when a signal reaches a higher or lower threshold
      */
-    class ECSS_API threshhold_to_message : virtual public gr::block
+    class ECSS_API threshold_to_message : virtual public gr::block
     {
      public:
-      typedef boost::shared_ptr<threshhold_to_message> sptr;
+      typedef boost::shared_ptr<threshold_to_message> sptr;
 
       /*!
-       * \brief Return a shared_ptr to a new instance of ecss::threshhold_to_message.
-        * \param upper_threshhold Upper trigger threshhold
-        * \param lower_threshhold Lower trigger Threshhold
+       * \brief Return a shared_ptr to a new instance of ecss::threshold_to_message.
+        * \param upper_threshold Upper trigger threshold
+        * \param lower_threshold Lower trigger threshold
         * \param upper_message PMT Message on upper trigger
         * \param lower_message PMT Message on lower trigger
         * \param init_state Initial state of block (False : Lower | True: Upper)
        */
-      static sptr make(float upper_threshhold, float lower_threshhold, pmt::pmt_t upper_message, pmt::pmt_t lower_message, bool init_state);
+      static sptr make(float upper_threshold, float lower_threshold, pmt::pmt_t upper_message, pmt::pmt_t lower_message, bool init_state);
     };
 
   } // namespace ecss
 } // namespace gr
 
-#endif /* INCLUDED_ECSS_threshhold_to_message_H */
+#endif /* INCLUDED_ECSS_threshold_to_message_H */
 

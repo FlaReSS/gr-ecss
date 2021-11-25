@@ -20,7 +20,7 @@
 #include "ecss/spl_decoder.h"
 #include "ecss/nrzl_encoder.h"
 #include "ecss/nrzl_encoder_subcarrier.h"
-#include "ecss/threshhold_to_message.h"
+#include "ecss/threshold_to_message.h"
 %}
 
 
@@ -55,5 +55,5 @@ GR_SWIG_BLOCK_MAGIC2(ecss, nrzl_encoder);
 %include "ecss/nrzl_encoder_subcarrier.h"
 GR_SWIG_BLOCK_MAGIC2(ecss, nrzl_encoder_subcarrier);
 
-%include "ecss/threshhold_to_message.h"
-GR_SWIG_BLOCK_MAGIC2(ecss, threshhold_to_message);
+%include "ecss/threshold_to_message.h"
+GR_SWIG_BLOCK_MAGIC2(ecss, threshold_to_message);

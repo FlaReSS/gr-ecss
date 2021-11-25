@@ -96,7 +96,7 @@ def test_spl(self, data_src):
 
     head = blocks.head(gr.sizeof_float, len(data_src))
 
-    spl = ecss.spl_decoder()
+    th = ecss.threshold_to_message()
 
     tb.connect(src, head)
     tb.connect(head, spl)

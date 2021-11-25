@@ -235,19 +235,19 @@ blocks:
     coordinate: [616, 180.0]
     rotation: 0
     state: enabled
-- name: ecss_threshhold_to_message_0
-  id: ecss_threshhold_to_message
+- name: ecss_threshold_to_message_0
+  id: ecss_threshold_to_message
   parameters:
     affinity: ''
     alias: ''
     comment: ''
     init_state: 'False'
     lower_message: pmt.intern("UNLOCK")
-    lower_threshhold: '0.5'
+    lower_threshold: '0.5'
     maxoutbuf: '0'
     minoutbuf: '0'
     upper_message: pmt.intern("LOCK")
-    upper_threshhold: '0.8'
+    upper_threshold: '0.8'
   states:
     bus_sink: false
     bus_source: false
@@ -562,8 +562,8 @@ connections:
 - [ecss_pll_0, '0', qtgui_freq_sink_x_0, '1']
 - [ecss_pll_0, '1', blocks_sub_xx_0, '1']
 - [ecss_pll_0, '2', qtgui_time_sink_x_0, '0']
-- [ecss_threshhold_to_message_0, threshhold_msg, blocks_message_debug_0, print]
-- [single_pole_iir_filter_xx_0, '0', ecss_threshhold_to_message_0, '0']
+- [ecss_threshold_to_message_0, threshold_msg, blocks_message_debug_0, print]
+- [single_pole_iir_filter_xx_0, '0', ecss_threshold_to_message_0, '0']
 
 metadata:
   file_format: 1

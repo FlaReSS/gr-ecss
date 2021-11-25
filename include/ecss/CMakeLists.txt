@@ -35,5 +35,5 @@ install(FILES
     spl_decoder.h
     nrzl_encoder.h
     nrzl_encoder_subcarrier.h
-    threshhold_to_message.h DESTINATION include/ecss
+    threshold_to_message.h DESTINATION include/ecss
 )

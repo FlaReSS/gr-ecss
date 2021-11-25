@@ -18,28 +18,28 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef INCLUDED_ECSS_THRESHHOLD_TO_MESSAGE_IMPL_H
-#define INCLUDED_ECSS_THRESHHOLD_TO_MESSAGE_IMPL_H
+#ifndef INCLUDED_ECSS_threshold_TO_MESSAGE_IMPL_H
+#define INCLUDED_ECSS_threshold_TO_MESSAGE_IMPL_H
 
-#include <ecss/threshhold_to_message.h>
+#include <ecss/threshold_to_message.h>
 
 namespace gr {
   namespace ecss {
 
-    class threshhold_to_message_impl : public threshhold_to_message
+    class threshold_to_message_impl : public threshold_to_message
     {
      private:
-      float d_lower_threshhold;
-      float d_upper_threshhold;
+      float d_lower_threshold;
+      float d_upper_threshold;
       pmt::pmt_t d_lower_msg;
       pmt::pmt_t d_upper_msg;
-      const pmt::pmt_t d_port = pmt::mp("threshhold_msg");
+      const pmt::pmt_t d_port = pmt::mp("threshold_msg");
       bool d_state = false;
 
 
      public:
-      threshhold_to_message_impl(float upper_threshhold, float lower_threshhold, pmt::pmt_t upper_message, pmt::pmt_t lower_message, bool init_state);
-      ~threshhold_to_message_impl();
+      threshold_to_message_impl(float upper_threshold, float lower_threshold, pmt::pmt_t upper_message, pmt::pmt_t lower_message, bool init_state);
+      ~threshold_to_message_impl();
 
       // void forecast (int noutput_items, gr_vector_int &ninput_items_required);
 
@@ -53,5 +53,5 @@ namespace gr {
   } // namespace ecss
 } // namespace gr
 
-#endif /* INCLUDED_ECSS_THRESHHOLD_TO_MESSAGE_IMPL_H */
+#endif /* INCLUDED_ECSS_threshold_TO_MESSAGE_IMPL_H */
 
