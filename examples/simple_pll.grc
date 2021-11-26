@@ -122,7 +122,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [176, 396.0]
+    coordinate: [48, 340.0]
     rotation: 180
     state: enabled
 - name: blocks_multiply_const_vxx_0
@@ -160,6 +160,23 @@ blocks:
     coordinate: [908.0, 344]
     rotation: 90
     state: true
+- name: blocks_rms_xx_0
+  id: blocks_rms_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha: '0.0001'
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [520, 452.0]
+    rotation: 180
+    state: true
 - name: blocks_sub_xx_0
   id: blocks_sub_xx
   parameters:
@@ -176,6 +193,24 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [872, 124.0]
+    rotation: 0
+    state: true
+- name: blocks_threshold_ff_0
+  id: blocks_threshold_ff
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    high: '0.8'
+    init: '0'
+    low: '0.5'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [512, 344.0]
     rotation: 0
     state: true
 - name: blocks_throttle_0
@@ -252,7 +287,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [352, 404.0]
+    coordinate: [224, 348.0]
     rotation: 180
     state: enabled
 - name: qtgui_freq_sink_x_0
@@ -335,6 +370,69 @@ blocks:
     coordinate: [816, 12.0]
     rotation: 0
     state: enabled
+- name: qtgui_number_sink_0
+  id: qtgui_number_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    autoscale: 'False'
+    avg: '0'
+    color1: ("black", "black")
+    color10: ("black", "black")
+    color2: ("black", "black")
+    color3: ("black", "black")
+    color4: ("black", "black")
+    color5: ("black", "black")
+    color6: ("black", "black")
+    color7: ("black", "black")
+    color8: ("black", "black")
+    color9: ("black", "black")
+    comment: ''
+    factor1: '1'
+    factor10: '1'
+    factor2: '1'
+    factor3: '1'
+    factor4: '1'
+    factor5: '1'
+    factor6: '1'
+    factor7: '1'
+    factor8: '1'
+    factor9: '1'
+    graph_type: qtgui.NUM_GRAPH_HORIZ
+    gui_hint: 2,0,1,2
+    label1: ''
+    label10: ''
+    label2: ''
+    label3: ''
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    max: '1'
+    min: '0'
+    name: Lock
+    nconnections: '1'
+    type: float
+    unit1: ''
+    unit10: ''
+    unit2: ''
+    unit3: ''
+    unit4: ''
+    unit5: ''
+    unit6: ''
+    unit7: ''
+    unit8: ''
+    unit9: ''
+    update_time: '0.10'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [648, 336.0]
+    rotation: 0
+    state: true
 - name: qtgui_time_sink_x_0
   id: qtgui_time_sink_x
   parameters:
@@ -544,7 +642,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [576, 428.0]
+    coordinate: [640, 452.0]
     rotation: 180
     state: enabled
 
@@ -554,7 +652,10 @@ connections:
 - [blocks_complex_to_float_2, '0', single_pole_iir_filter_xx_0, '0']
 - [blocks_complex_to_float_2, '1', blocks_null_sink_0_0, '0']
 - [blocks_multiply_const_vxx_0, '0', blocks_sub_xx_0, '0']
+- [blocks_rms_xx_0, '0', blocks_threshold_ff_0, '0']
+- [blocks_rms_xx_0, '0', ecss_threshold_to_message_0, '0']
 - [blocks_sub_xx_0, '0', qtgui_time_sink_x_1, '0']
+- [blocks_threshold_ff_0, '0', qtgui_number_sink_0, '0']
 - [blocks_throttle_0, '0', blocks_vco_c_0, '0']
 - [blocks_vco_c_0, '0', ecss_pll_0, '0']
 - [blocks_vco_c_0, '0', qtgui_freq_sink_x_0, '0']
@@ -563,7 +664,7 @@ connections:
 - [ecss_pll_0, '1', blocks_sub_xx_0, '1']
 - [ecss_pll_0, '2', qtgui_time_sink_x_0, '0']
 - [ecss_threshold_to_message_0, threshold_msg, blocks_message_debug_0, print]
-- [single_pole_iir_filter_xx_0, '0', ecss_threshold_to_message_0, '0']
+- [single_pole_iir_filter_xx_0, '0', blocks_rms_xx_0, '0']
 
 metadata:
   file_format: 1
