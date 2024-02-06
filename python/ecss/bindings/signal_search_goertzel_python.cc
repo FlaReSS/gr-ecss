@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(signal_search_goertzel.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(52b24381942cce3fb4005192915630c5)                     */
+/* BINDTOOL_HEADER_FILE_HASH(c86326ce1e87f2aff25b870e355771ee)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -23,7 +23,7 @@
 
 namespace py = pybind11;
 
-#include <ecss/signal_search_goertzel.h>
+#include <gnuradio/ecss/signal_search_goertzel.h>
 // pydoc.h is automatically generated in the build directory
 #include <signal_search_goertzel_pydoc.h>
 

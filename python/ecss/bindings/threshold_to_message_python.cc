@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(threshold_to_message.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(6ed3ba6e65faf43bb05131c7d1cdbc4a)                     */
+/* BINDTOOL_HEADER_FILE_HASH(1792e7c5212274488c024f28c93255cc)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -23,7 +23,7 @@
 
 namespace py = pybind11;
 
-#include <ecss/threshold_to_message.h>
+#include <gnuradio/ecss/threshold_to_message.h>
 // pydoc.h is automatically generated in the build directory
 #include <threshold_to_message_pydoc.h>
 

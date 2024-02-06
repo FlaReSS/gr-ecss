@@ -4,6 +4,15 @@ id: ecss_agc_xx
 label: AGC
 category: '[ecss]'
 
+templates:
+    imports: from gnuradio import ecss
+    make: ecss.agc_${type.fcn}(${settling_time}, ${reference}, ${initial_gain}, ${maximum_gain},
+        ${samp_rate})
+    callbacks:
+    - set_settling_time(${settling_time})
+    - set_reference(${reference})
+    - set_maximum_gain(${maximum_gain})
+
 parameters:
 -   id: type
     label: Type
@@ -40,14 +49,5 @@ inputs:
 outputs:
 -   domain: stream
     dtype: ${type }
-
-templates:
-    imports: import ecss
-    make: ecss.agc_${type.fcn}(${settling_time}, ${reference}, ${initial_gain}, ${maximum_gain},
-        ${samp_rate})
-    callbacks:
-    - set_settling_time(${settling_time})
-    - set_reference(${reference})
-    - set_maximum_gain(${maximum_gain})
 
 file_format: 1

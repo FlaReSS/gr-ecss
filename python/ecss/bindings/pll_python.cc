@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(pll.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(a12bc3b6a9891b68a72159bc8b0155e4)                     */
+/* BINDTOOL_HEADER_FILE_HASH(d3c19ff7a34811143f01ae9f8574f3b2)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -23,7 +23,7 @@
 
 namespace py = pybind11;
 
-#include <ecss/pll.h>
+#include <gnuradio/ecss/pll.h>
 // pydoc.h is automatically generated in the build directory
 #include <pll_pydoc.h>
 

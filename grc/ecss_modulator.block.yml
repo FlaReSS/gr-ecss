@@ -4,6 +4,12 @@ id: ecss_modulator
 label: Modulator
 category: '[ecss]'
 
+templates:
+    imports: from gnuradio import ecss
+    make: ecss.modulator(${k}, ${rate}, ${polys}, ${state_start}, ${padding}, ${samp_rate},
+        ${bit_rate}, ${sel_convolutional}, ${sel_encoder}, ${sel_srrc}, ${roll_off},
+        ${num_taps}, ${sine}, ${freq_sub})
+
 parameters:
 -   id: sel_encoder
     label: Type Encoder
@@ -88,11 +94,5 @@ inputs:
 outputs:
 -   domain: stream
     dtype: float
-
-templates:
-    imports: import ecss
-    make: ecss.modulator(${k}, ${rate}, ${polys}, ${state_start}, ${padding}, ${samp_rate},
-        ${bit_rate}, ${sel_convolutional}, ${sel_encoder}, ${sel_srrc}, ${roll_off},
-        ${num_taps}, ${sine}, ${freq_sub})
 
 file_format: 1

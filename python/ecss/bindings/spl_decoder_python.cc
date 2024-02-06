@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(spl_decoder.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(2e0a5c099d3d1c8e04fa724a793efe47)                     */
+/* BINDTOOL_HEADER_FILE_HASH(d30549f001f1b677d1c6f576d530b31c)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -23,7 +23,7 @@
 
 namespace py = pybind11;
 
-#include <ecss/spl_decoder.h>
+#include <gnuradio/ecss/spl_decoder.h>
 // pydoc.h is automatically generated in the build directory
 #include <spl_decoder_pydoc.h>
 

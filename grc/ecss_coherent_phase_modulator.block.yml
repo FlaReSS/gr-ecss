@@ -4,6 +4,10 @@ id: ecss_coherent_phase_modulator
 label: Coherent Phase Modulator
 category: '[ecss]'
 
+templates:
+    imports: from gnuradio import ecss
+    make: ecss.coherent_phase_modulator(${N})
+
 parameters:
 -   id: N
     label: number of bits
@@ -20,9 +24,5 @@ outputs:
 
 asserts:
 - ${ N >= 1 and N <= 52 }
-
-templates:
-    imports: import ecss
-    make: ecss.coherent_phase_modulator(${N})
 
 file_format: 1

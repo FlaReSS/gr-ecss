@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(signal_search_fft_v.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(0909352ed974ba565fe0a9d9a1175e3e)                     */
+/* BINDTOOL_HEADER_FILE_HASH(4c28ff33a164f855284661d1703316de)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -23,7 +23,7 @@
 
 namespace py = pybind11;
 
-#include <ecss/signal_search_fft_v.h>
+#include <gnuradio/ecss/signal_search_fft_v.h>
 // pydoc.h is automatically generated in the build directory
 #include <signal_search_fft_v_pydoc.h>
 

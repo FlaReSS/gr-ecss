@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(loop_filter.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(aab366087c4ac0ebdfd482927e4c1204)                     */
+/* BINDTOOL_HEADER_FILE_HASH(90b2ff4a95c85357e8f7ab83070154d1)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -23,7 +23,7 @@
 
 namespace py = pybind11;
 
-#include <ecss/loop_filter.h>
+#include <gnuradio/ecss/loop_filter.h>
 // pydoc.h is automatically generated in the build directory
 #include <loop_filter_pydoc.h>
 

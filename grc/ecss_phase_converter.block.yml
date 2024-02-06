@@ -4,6 +4,10 @@ id: ecss_phase_converter
 label: Phase Converter
 category: '[ecss]'
 
+templates:
+    imports: from gnuradio import ecss
+    make: ecss.phase_converter(${N})
+
 parameters:
 -   id: N
     label: number of bits
@@ -22,9 +26,5 @@ outputs:
     optional: True
 asserts:
 - ${ N >= 1 and N <= 52 }
-
-templates:
-    imports: import ecss
-    make: ecss.phase_converter(${N})
 
 file_format: 1

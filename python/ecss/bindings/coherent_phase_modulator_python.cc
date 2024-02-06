@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(coherent_phase_modulator.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(a8f88682fb07d9be795ff8cf755c337e)                     */
+/* BINDTOOL_HEADER_FILE_HASH(921374ebd58a41adf1cf973c70167cb4)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -23,7 +23,7 @@
 
 namespace py = pybind11;
 
-#include <ecss/coherent_phase_modulator.h>
+#include <gnuradio/ecss/coherent_phase_modulator.h>
 // pydoc.h is automatically generated in the build directory
 #include <coherent_phase_modulator_pydoc.h>
 

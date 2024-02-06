@@ -4,6 +4,16 @@ id: ecss_demodulator
 label: Demodulator
 category: '[ecss]'
 
+templates:
+    imports: |-
+        from gnuradio import ecss
+        from gnuradio import digital
+        from gnuradio import filter
+    make: ecss.demodulator(${k}, ${cl_loop_bandwidth}, ${cl_order}, ${cl_freq_sub},
+        ${ss_sps}, ${ss_loop_bandwidth}, ${ss_ted_gain}, ${ss_damping}, ${ss_max_dev},
+        ${ss_out_ss}, ${ss_interpolation}, ${ss_ted_type}, ${ss_constellation}, ${ss_nfilter},
+        ${ss_pfb_mf_taps}, ${sel_costas}, ${sel_spl}, ${samp_rate})
+
 parameters:
 -   id: k
     label: K bits to unpack
@@ -107,15 +117,5 @@ inputs:
 outputs:
 -   domain: stream
     dtype: byte
-
-templates:
-    imports: |-
-        import ecss
-        from gnuradio import digital
-        from gnuradio import filter
-    make: ecss.demodulator(${k}, ${cl_loop_bandwidth}, ${cl_order}, ${cl_freq_sub},
-        ${ss_sps}, ${ss_loop_bandwidth}, ${ss_ted_gain}, ${ss_damping}, ${ss_max_dev},
-        ${ss_out_ss}, ${ss_interpolation}, ${ss_ted_type}, ${ss_constellation}, ${ss_nfilter},
-        ${ss_pfb_mf_taps}, ${sel_costas}, ${sel_spl}, ${samp_rate})
 
 file_format: 1

@@ -4,6 +4,14 @@ id: ecss_gain_phase_accumulator
 label: Gain Phase Accumulator
 category: '[ecss]'
 
+templates:
+    imports: from gnuradio import ecss
+    make: ecss.gain_phase_accumulator(${rst}, ${uplink}, ${downlink})
+    callbacks:
+    - set_reset(${rst})
+    - set_uplink(${uplink})
+    - set_downlink(${downlink})
+
 parameters:
 -   id: rst
     label: Reset
@@ -25,13 +33,5 @@ inputs:
 outputs:
 -   domain: stream
     dtype: s64
-
-templates:
-    imports: import ecss
-    make: ecss.gain_phase_accumulator(${rst}, ${uplink}, ${downlink})
-    callbacks:
-    - set_reset(${rst})
-    - set_uplink(${uplink})
-    - set_downlink(${downlink})
 
 file_format: 1

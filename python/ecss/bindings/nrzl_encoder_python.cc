@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(nrzl_encoder.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(fa628be1aa9372de1ade02ed94d896a7)                     */
+/* BINDTOOL_HEADER_FILE_HASH(52893d7f37ce74103b7ca4baa10d1f00)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -23,7 +23,7 @@
 
 namespace py = pybind11;
 
-#include <ecss/nrzl_encoder.h>
+#include <gnuradio/ecss/nrzl_encoder.h>
 // pydoc.h is automatically generated in the build directory
 #include <nrzl_encoder_pydoc.h>
 

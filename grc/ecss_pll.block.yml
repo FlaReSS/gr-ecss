@@ -5,6 +5,14 @@ label: PLL
 category: '[ecss]'
 flags:
 
+templates:
+    imports: from gnuradio import ecss
+    make: ecss.pll(${samp_rate}, ${N}, ${coefficients}, ${freq_central},${bw})
+    callbacks:
+    - set_coefficients(${coefficients})
+    - set_freq_central(${freq_central})
+    - set_bw(${bw})
+
 parameters:
 -   id: samp_rate
     label: Sampling Rate
@@ -46,15 +54,8 @@ outputs:
     domain: stream
     dtype: s64
     optional: true
+
 asserts:
 - ${ N >= 1 and N <= 52 }
-
-templates:
-    imports: import ecss
-    make: ecss.pll(${samp_rate}, ${N}, ${coefficients}, ${freq_central},${bw})
-    callbacks:
-    - set_coefficients(${coefficients})
-    - set_freq_central(${freq_central})
-    - set_bw(${bw})
 
 file_format: 1

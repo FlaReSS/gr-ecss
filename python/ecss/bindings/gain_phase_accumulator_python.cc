@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(gain_phase_accumulator.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(a7a045bd38e5e487f6bbeae5dbdfacd0)                     */
+/* BINDTOOL_HEADER_FILE_HASH(9266b307e4c546f8a014dadfb23497ff)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -23,7 +23,7 @@
 
 namespace py = pybind11;
 
-#include <ecss/gain_phase_accumulator.h>
+#include <gnuradio/ecss/gain_phase_accumulator.h>
 // pydoc.h is automatically generated in the build directory
 #include <gain_phase_accumulator_pydoc.h>
 

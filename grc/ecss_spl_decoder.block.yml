@@ -4,6 +4,10 @@ id: ecss_spl_decoder
 label: SP-L Decoder
 category: '[ecss]'
 
+templates:
+    imports: from gnuradio import ecss
+    make: ecss.spl_decoder()
+
 inputs:
 -   domain: stream
     dtype: float
@@ -11,9 +15,5 @@ inputs:
 outputs:
 -   domain: stream
     dtype: byte
-
-templates:
-    imports: import ecss
-    make: ecss.spl_decoder()
 
 file_format: 1

@@ -4,6 +4,21 @@ id: ecss_signal_search_fft_hier
 label: Signal Search FFT hier
 category: '[ecss]'
 
+templates:
+    imports: |-
+        from gnuradio import ecss
+        from gnuradio.filter import firdes
+    make: ecss.signal_search_fft_hier(${enable}, ${fftsize}, ${decimation}, ${average},
+        ${wintype}, ${freq_central}, ${bandwidth}, ${freq_cutoff}, ${threshold}, ${samp_rate})
+    callbacks:
+    - set_freq_central(${freq_central})
+    - set_bandwidth(${bandwidth})
+    - set_freq_cutoff(${freq_cutoff})
+    - set_threshold(${threshold})
+    - set_average(${average})
+    # - set_carrier(${carrier})
+    - set_enable(${enable})
+
 parameters:
 -   id: enable
     label: Enable
@@ -60,20 +75,5 @@ inputs:
 outputs:
 -   domain: stream
     dtype: complex
-
-templates:
-    imports: |-
-        import ecss
-        from gnuradio.filter import firdes
-    make: ecss.signal_search_fft_hier(${enable}, ${fftsize}, ${decimation}, ${average},
-        ${wintype}, ${freq_central}, ${bandwidth}, ${freq_cutoff}, ${threshold}, ${samp_rate})
-    callbacks:
-    - set_freq_central(${freq_central})
-    - set_bandwidth(${bandwidth})
-    - set_freq_cutoff(${freq_cutoff})
-    - set_threshold(${threshold})
-    - set_average(${average})
-    # - set_carrier(${carrier})
-    - set_enable(${enable})
 
 file_format: 1

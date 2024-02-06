@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(agc.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(3152c0ae2ae366c8827925121c920330)                     */
+/* BINDTOOL_HEADER_FILE_HASH(10356f760a2c8c914b06f43bdf63f734)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -23,7 +23,7 @@
 
 namespace py = pybind11;
 
-#include <ecss/agc.h>
+#include <gnuradio/ecss/agc.h>
 // pydoc.h is automatically generated in the build directory
 #include <agc_pydoc.h>
 

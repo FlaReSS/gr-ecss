@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(phase_converter.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(71147372c9be343a20154c18ccab41fc)                     */
+/* BINDTOOL_HEADER_FILE_HASH(921dd5808388421a02c4d1acf255f9cf)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -23,7 +23,7 @@
 
 namespace py = pybind11;
 
-#include <ecss/phase_converter.h>
+#include <gnuradio/ecss/phase_converter.h>
 // pydoc.h is automatically generated in the build directory
 #include <phase_converter_pydoc.h>
 

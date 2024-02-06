@@ -29,6 +29,19 @@ include(GrPybind)
 ########################################################################
 
 list(APPEND ecss_python_files
+    agc_python.cc
+    coherent_phase_modulator_python.cc
+    gain_phase_accumulator_python.cc
+    loop_filter_python.cc
+    nrzl_encoder_python.cc
+    nrzl_encoder_subcarrier_python.cc
+    phase_converter_python.cc
+    pll_python.cc
+#    signal_search_fft_v_python.cc
+    signal_search_goertzel_python.cc
+    spl_decoder_python.cc
+    spl_encoder_python.cc
+    threshold_to_message_python.cc
     python_bindings.cc)
 
 GR_PYBIND_MAKE_OOT(ecss
