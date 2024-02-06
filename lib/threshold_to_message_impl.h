@@ -21,7 +21,7 @@
 #ifndef INCLUDED_ECSS_threshold_TO_MESSAGE_IMPL_H
 #define INCLUDED_ECSS_threshold_TO_MESSAGE_IMPL_H
 
-#include <ecss/threshold_to_message.h>
+#include <gnuradio/ecss/threshold_to_message.h>
 
 namespace gr {
   namespace ecss {

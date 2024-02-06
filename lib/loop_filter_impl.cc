@@ -25,7 +25,7 @@
 
 #include <iostream>
 #include <gnuradio/io_signature.h>
-#include <ecss/loop_filter.h>
+#include <gnuradio/ecss/loop_filter.h>
 
 namespace gr {
   namespace ecss {

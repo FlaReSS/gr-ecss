@@ -21,7 +21,7 @@
 #ifndef INCLUDED_ECSS_PHASE_CONVERTER_IMPL_H
 #define INCLUDED_ECSS_PHASE_CONVERTER_IMPL_H
 
-#include <ecss/phase_converter.h>
+#include <gnuradio/ecss/phase_converter.h>
 
 namespace gr {
   namespace ecss {

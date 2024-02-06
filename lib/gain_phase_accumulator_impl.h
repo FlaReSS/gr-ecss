@@ -21,7 +21,7 @@
 #ifndef INCLUDED_ECSS_GAIN_PHASE_ACCUMULATOR_IMPL_H
 #define INCLUDED_ECSS_GAIN_PHASE_ACCUMULATOR_IMPL_H
 
-#include <ecss/gain_phase_accumulator.h>
+#include <gnuradio/ecss/gain_phase_accumulator.h>
 
 namespace gr {
   namespace ecss {

@@ -20,7 +20,7 @@
 #ifndef INCLUDED_ECSS_SIGNAL_SEARCH_GOERTZEL_IMPL_H
 #define INCLUDED_ECSS_SIGNAL_SEARCH_GOERTZEL_IMPL_H
 
-#include <ecss/signal_search_goertzel.h>
+#include <gnuradio/ecss/signal_search_goertzel.h>
 #include <gnuradio/filter/single_pole_iir.h>
 #include <vector>
 

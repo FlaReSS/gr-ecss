@@ -21,7 +21,7 @@
 #ifndef INCLUDED_ECSS_NRZL_ENCODER_IMPL_H
 #define INCLUDED_ECSS_NRZL_ENCODER_IMPL_H
 
-#include <ecss/nrzl_encoder.h>
+#include <gnuradio/ecss/nrzl_encoder.h>
 
 namespace gr {
   namespace ecss {

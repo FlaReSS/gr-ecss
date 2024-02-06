@@ -21,7 +21,7 @@
 #ifndef INCLUDED_ECSS_COHERENT_PHASE_MODULATOR_IMPL_H
 #define INCLUDED_ECSS_COHERENT_PHASE_MODULATOR_IMPL_H
 
-#include <ecss/coherent_phase_modulator.h>
+#include <gnuradio/ecss/coherent_phase_modulator.h>
 
 #include <gnuradio/buffer.h>
 

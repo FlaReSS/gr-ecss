@@ -21,7 +21,7 @@
 #ifndef INCLUDED_ECSS_PLL_IMPL_H
 #define INCLUDED_ECSS_PLL_IMPL_H
 
-#include <ecss/pll.h>
+#include <gnuradio/ecss/pll.h>
 #include <vector>
 
 namespace gr {

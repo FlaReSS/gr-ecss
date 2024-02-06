@@ -20,7 +20,7 @@
 #ifndef INCLUDED_ECSS_SPL_ENCODER_IMPL_H
 #define INCLUDED_ECSS_SPL_ENCODER_IMPL_H
 
-#include <ecss/spl_encoder.h>
+#include <gnuradio/ecss/spl_encoder.h>
 
 namespace gr {
   namespace ecss {

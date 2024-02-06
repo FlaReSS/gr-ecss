@@ -23,7 +23,7 @@
 #endif
 
 #include <gnuradio/io_signature.h>
-#include <gnuradio/blocks/pdu.h>
+//#include <gnuradio/blocks/pdu.h>
 #include "threshold_to_message_impl.h"
 
 namespace gr {

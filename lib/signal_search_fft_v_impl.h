@@ -21,7 +21,7 @@
 #ifndef INCLUDED_ECSS_SIGNAL_SEARCH_FFT_V_IMPL_H
 #define INCLUDED_ECSS_SIGNAL_SEARCH_FFT_V_IMPL_H
 
-#include <ecss/signal_search_fft_v.h>
+#include <gnuradio/ecss/signal_search_fft_v.h>
 #include <gnuradio/filter/single_pole_iir.h>
 #include <gnuradio/filter/firdes.h>
 #include <gnuradio/filter/pfb_arb_resampler.h>

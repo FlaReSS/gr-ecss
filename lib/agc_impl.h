@@ -18,10 +18,10 @@
  * Boston, MA 02110-1301, USA.
  */
 
- #ifndef INCLUDED_ECSS_AGC_IMPL_H
- #define INCLUDED_ECSS_AGC_IMPL_H
+#ifndef INCLUDED_ECSS_AGC_IMPL_H
+#define INCLUDED_ECSS_AGC_IMPL_H
 
- #include <ecss/agc.h>
+#include <gnuradio/ecss/agc.h>
 
  namespace gr {
    namespace ecss {
@@ -54,4 +54,4 @@
    } // namespace ecss
  } // namespace gr
 
- #endif /* INCLUDED_ECSS_AGC_IMPL_H */
+#endif /* INCLUDED_ECSS_AGC_IMPL_H */
