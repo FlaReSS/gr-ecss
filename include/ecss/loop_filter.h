@@ -21,6 +21,7 @@
 #ifndef INCLUDED_ECSS_LOOP_FILTER_H
 #define INCLUDED_ECSS_LOOP_FILTER_H
 
+#include <vector>
 #include <ecss/api.h>
 
 namespace gr {

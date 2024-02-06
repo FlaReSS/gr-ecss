@@ -46,7 +46,7 @@ namespace gr {
       /*!
       * \brief Return a shared_ptr to a new instance of ecss::nrzl_decoder.
       */
-      typedef boost::shared_ptr<nrzl_encoder_subcarrier> sptr;
+      typedef std::shared_ptr<nrzl_encoder_subcarrier> sptr;
 
        /*!
         * \brief NRZ-L encoder.

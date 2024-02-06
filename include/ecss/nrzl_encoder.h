@@ -47,7 +47,7 @@
     /*!
       * \brief Return a shared_ptr to a new instance of ecss::nrzl_encoder.
       */
-    typedef boost::shared_ptr<nrzl_encoder> sptr;
+    typedef std::shared_ptr<nrzl_encoder> sptr;
 
     /*!
       * \brief NRZ-L encoder.

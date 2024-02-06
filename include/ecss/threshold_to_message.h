@@ -37,7 +37,7 @@ namespace gr {
     class ECSS_API threshold_to_message : virtual public gr::block
     {
      public:
-      typedef boost::shared_ptr<threshold_to_message> sptr;
+      typedef std::shared_ptr<threshold_to_message> sptr;
 
       /*!
        * \brief Return a shared_ptr to a new instance of ecss::threshold_to_message.

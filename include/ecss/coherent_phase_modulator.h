@@ -43,7 +43,7 @@ namespace gr {
        /*!
         * \brief Return a shared_ptr to a new instance of ecss::coherent_phase_modulator.
         */
-      typedef boost::shared_ptr<coherent_phase_modulator> sptr;
+      typedef std::shared_ptr<coherent_phase_modulator> sptr;
 
       /*!
         * \brief Coherent Phase Modulator with int64 inputs.

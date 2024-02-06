@@ -44,7 +44,7 @@ namespace gr
           /*!
         * \brief Return a shared_ptr to a new instance of ecss::signal_search_fft_v.
         */
-        typedef boost::shared_ptr<signal_search_fft_v> sptr;
+        typedef std::shared_ptr<signal_search_fft_v> sptr;
 
         /*!
             * \brief Signal Search with Goertzel Algorithm evaluation.

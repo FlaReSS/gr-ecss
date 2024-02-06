@@ -44,7 +44,7 @@ namespace gr {
        /*!
         * \brief Return a shared_ptr to a new instance of ecss::agc.
         */
-      typedef boost::shared_ptr<agc<T>> sptr;
+      typedef std::shared_ptr<agc<T>> sptr;
 
       /*!
         * \brief Make a AGC Log-based.

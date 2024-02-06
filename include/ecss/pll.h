@@ -42,7 +42,7 @@ namespace gr {
        /*!
         * \brief Return a shared_ptr to a new instance of ecss::pll.
         */
-      typedef boost::shared_ptr<pll> sptr;
+      typedef std::shared_ptr<pll> sptr;
 
       /*!
         * \brief Make a PLL with complex mixer.

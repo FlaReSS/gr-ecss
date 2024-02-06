@@ -47,7 +47,7 @@
     /*!
       * \brief Return a shared_ptr to a new instance of ecss::spl_encoder.
       */
-    typedef boost::shared_ptr<spl_decoder> sptr;
+    typedef std::shared_ptr<spl_decoder> sptr;
 
     /*!
       * \brief SP-L encoder.

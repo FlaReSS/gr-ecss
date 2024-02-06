@@ -43,7 +43,7 @@ namespace gr {
        /*!
         * \brief Return a shared_ptr to a new instance of ecss::phase_converter.
         */
-      typedef boost::shared_ptr<phase_converter> sptr;
+      typedef std::shared_ptr<phase_converter> sptr;
 
       /*!
         * \brief Make a Phase Converter from float to int64.

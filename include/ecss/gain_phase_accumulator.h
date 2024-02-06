@@ -40,7 +40,7 @@ namespace gr {
   {
   public:
     // gr::ecss::gain_phase_accumulator::sptr
-    typedef boost::shared_ptr<gain_phase_accumulator> sptr;
+    typedef std::shared_ptr<gain_phase_accumulator> sptr;
 
     /*!
      * \brief output is the input multiplied by the turn around ratio.
