@@ -13,7 +13,7 @@
 /* If manual edits are made, the following tags should be modified accordingly.    */
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
-/* BINDTOOL_HEADER_FILE(agc.h)                                        */
+/* BINDTOOL_HEADER_FILE(agc.h)                                                     */
 /* BINDTOOL_HEADER_FILE_HASH(10356f760a2c8c914b06f43bdf63f734)                     */
 /***********************************************************************************/
 
@@ -27,19 +27,44 @@ namespace py = pybind11;
 // pydoc.h is automatically generated in the build directory
 #include <agc_pydoc.h>
 
-void bind_agc(py::module& m)
+template <typename T>
+void bind_agc_template(py::module& m, const char* classname)
 {
+    using agc = gr::ecss::agc<T>;
 
+    py::class_<agc,
+               gr::sync_block,
+               gr::block,
+               gr::basic_block,
+               std::shared_ptr<agc>>(m, classname, D(agc))
 
+        .def(py::init(&gr::ecss::agc<T>::make),
+             py::arg("settling_time") = 10.0,
+             py::arg("reference") = 1.0,
+             py::arg("initial_gain") = 1.0,
+             py::arg("maximum_gain") = 65536.0,
+             py::arg("samp_rate"),
+             D(agc, make))
 
+        .def("set_settling_time", &agc::set_settling_time, py::arg("settling_time"), D(agc, set_settling_time))
+
+        .def("set_reference", &agc::set_settling_time, py::arg("reference"), D(agc, set_reference))
+
+        .def("set_maximum_gain", &agc::set_settling_time, py::arg("maximum_gain"), D(agc, set_maximum_gain))
+
+        .def("get_settling_time", &agc::get_settling_time, D(agc, get_settling_time))
+
+        .def("get_reference", &agc::get_reference, D(agc, get_reference))
+
+        .def("get_maximum_gain", &agc::get_maximum_gain, D(agc, get_maximum_gain))
+
+        ;
 
 
 }
 
-
-
-
-
-
-
-
+void bind_agc(py::module& m)
+{
+    bind_agc_template<gr_complex>(m, "agc_cc");
+    bind_agc_template<float>(m, "agc_ff");
+}

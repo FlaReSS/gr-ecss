@@ -16,3 +16,28 @@
 
 
   
+ static const char *__doc_gr_ecss_agc = R"doc()doc";
+
+
+ static const char *__doc_gr_ecss_agc_agc = R"doc()doc";
+
+
+ static const char *__doc_gr_ecss_agc_make = R"doc()doc";
+
+
+ static const char *__doc_gr_ecss_agc_set_settling_time = R"doc()doc";
+
+
+ static const char *__doc_gr_ecss_agc_set_reference = R"doc()doc";
+
+
+ static const char *__doc_gr_ecss_agc_set_maximum_gain = R"doc()doc";
+
+
+ static const char *__doc_gr_ecss_agc_get_settling_time = R"doc()doc";
+
+
+ static const char *__doc_gr_ecss_agc_get_reference = R"doc()doc";
+
+
+ static const char *__doc_gr_ecss_agc_get_maximum_gain = R"doc()doc";
