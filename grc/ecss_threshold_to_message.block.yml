@@ -5,7 +5,7 @@ category: '[ecss]'
 templates:
   imports: |-
         from gnuradio import ecss
-        from gnuradio import pmt
+        import pmt
   make: ecss.threshold_to_message(${upper_threshold}, ${lower_threshold}, ${upper_message}, ${lower_message}, ${init_state})
 
 parameters:
