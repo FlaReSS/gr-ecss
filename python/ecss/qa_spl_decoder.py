@@ -7,7 +7,7 @@
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 from collections import namedtuple
-import ecss_swig as ecss
+from gnuradio import ecss
 import runner
 import math, time, datetime, os, abc, sys
 import numpy as np
@@ -121,7 +121,7 @@ class qa_spl_decoder (gr_unittest.TestCase):
         """test_001_t: without repetition"""
 
         data_src = (-1, 1, -1, 1, 1, -1, -1, 1, -1, 1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, -1, 1, -1, 1, -1, 1, -1, 1, 1, -1, -1, 1, 1, -1)
-        expected_data = (0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1)
+        expected_data = [0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1]
 
 
         data_out = test_spl(self, data_src)

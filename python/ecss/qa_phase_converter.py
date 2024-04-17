@@ -8,8 +8,8 @@ from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 from collections import namedtuple
 from gnuradio.fft import window
-import ecss as ecss
-import flaress
+from gnuradio import ecss
+from gnuradio import flaress
 import math, time, datetime, os, abc, sys
 import runner, threading
 import numpy as np

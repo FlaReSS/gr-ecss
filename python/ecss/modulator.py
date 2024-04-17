@@ -22,7 +22,7 @@ from gnuradio import fec
 from gnuradio import filter
 from gnuradio import blocks
 from gnuradio.filter import firdes
-import ecss
+from gnuradio import ecss
 import sys
 
 class modulator(gr.hier_block2):

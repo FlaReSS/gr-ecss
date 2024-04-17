@@ -7,7 +7,7 @@
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks, analog
 from collections import namedtuple
-import ecss as ecss
+from gnuradio import ecss
 import runner
 import math, time, datetime, os, abc, sys
 import numpy as np
@@ -85,7 +85,7 @@ class qa_loop_filter (gr_unittest.TestCase):
         
         print("Coefficents: ")
         print((loop_filter_2nd_order))
-        reference = (0.14140000939369202, 0.010000000707805157)
+        reference = [0.14140000939369202, 0.010000000707805157]
         self.assertEqual(loop_filter_2nd_order, reference)
 
     def test_002_t (self):
@@ -107,7 +107,7 @@ class qa_loop_filter (gr_unittest.TestCase):
         
         print("Coefficents: ")
         print((loop_filter_3rd_order))
-        reference = (4.542760205688479, 0.013480000495910645, 1.0000000447034852e-05)
+        reference = [4.542760205688479, 0.013480000495910645, 1.0000000447034852e-05]
         self.assertEqual(loop_filter_3rd_order, reference)
 
     def test_003_t (self):

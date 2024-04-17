@@ -18,7 +18,7 @@
 # Boston, MA 02110-1301, USA.
 #
 from gnuradio import gr
-import ecss
+from gnuradio import ecss
 import math
 from gnuradio import blocks
 
