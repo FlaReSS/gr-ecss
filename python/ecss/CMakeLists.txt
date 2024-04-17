@@ -28,14 +28,32 @@ GR_PYTHON_INSTALL(
 ########################################################################
 # Handle the unit tests
 ########################################################################
-include(GrTest)
+if(ENABLE_TESTING)
 
-set(GR_TEST_TARGET_DEPS gnuradio-ecss)
+    include(GrTest)
 
-# Create a package directory that tests can import. It includes everything
-# from `python/`.
-add_custom_target(
-  copy_module_for_tests ALL
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}
-          ${CMAKE_BINARY_DIR}/test_modules/gnuradio/ecss/
-)
+    set(GR_TEST_TARGET_DEPS gnuradio-ecss)
+
+    # Create a package directory that tests can import. It includes everything
+    # from `python/`.
+    add_custom_target(
+      copy_module_for_tests ALL
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}
+              ${CMAKE_BINARY_DIR}/test_modules/gnuradio/ecss/
+    )
+
+    file(GLOB py_qa_test_files "qa_*.py")
+
+    if(NOT SNDFILE_FOUND)
+        list(REMOVE_ITEM py_qa_test_files ${CMAKE_CURRENT_SOURCE_DIR}/qa_wavfile.py)
+    endif()
+
+    foreach(py_qa_test_file ${py_qa_test_files})
+        get_filename_component(py_qa_test_name ${py_qa_test_file} NAME_WE)
+        if(CMAKE_CROSSCOMPILING)
+            get_filename_component(py_qa_test_file ${py_qa_test_file} NAME)
+        endif(CMAKE_CROSSCOMPILING)
+        gr_add_test(${py_qa_test_name} ${QA_PYTHON_EXECUTABLE} -B ${py_qa_test_file})
+    endforeach(py_qa_test_file)
+
+endif(ENABLE_TESTING)
