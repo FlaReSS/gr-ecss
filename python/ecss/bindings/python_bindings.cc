@@ -30,7 +30,7 @@ void bind_nrzl_encoder(py::module& m);
 void bind_nrzl_encoder_subcarrier(py::module& m);
 void bind_phase_converter(py::module& m);
 void bind_pll(py::module& m);
-// void bind_signal_search_fft_v(py::module& m);
+void bind_signal_search_fft_v(py::module& m);
 void bind_signal_search_goertzel(py::module& m);
 void bind_spl_decoder(py::module& m);
 void bind_spl_encoder(py::module& m);
@@ -73,7 +73,7 @@ PYBIND11_MODULE(ecss_python, m)
     bind_nrzl_encoder_subcarrier(m);
     bind_phase_converter(m);
     bind_pll(m);
-//    bind_signal_search_fft_v(m);
+    bind_signal_search_fft_v(m);
     bind_signal_search_goertzel(m);
     bind_spl_decoder(m);
     bind_spl_encoder(m);

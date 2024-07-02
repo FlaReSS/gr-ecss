@@ -38,7 +38,7 @@ namespace gr
       private:
         bool first;
         bool d_enable;
-        bool d_carrier;
+//        bool d_carrier;
         bool d_average;
         float d_samp_rate;
         int d_decimation;
@@ -52,7 +52,8 @@ namespace gr
         int d_fftsize_half;
         int bw_items;
         int searching_first_items;
-        filter::firdes::win_type d_wintype;
+//        filter::firdes::win_type d_wintype;
+        fft::window::win_type d_wintype;
         std::vector<float> d_window;
         // filter::firdes d_firdes;
         // filter::fir_filter_ccc d_band_pass;
@@ -61,11 +62,11 @@ namespace gr
 
         filter::kernel::pfb_arb_resampler_ccf *pfb_decimator;
         // std::vector<gr_complex> d_new_taps;
-        fft::fft_complex *d_fft;
+        fft::fft_complex_fwd *d_fft;
 
         gr_complex *d_residbuf;
         double *d_magbuf;
-        double *d_pdu_magbuf;
+//        double *d_pdu_magbuf;
         float *searching_band;
         float *signal_band_acc;
         uint32_t *signal_band_max_index;
@@ -97,9 +98,9 @@ namespace gr
       float get_freq_cutoff() const;
       float get_threshold() const;
       bool get_average() const;
+      bool get_enable() const;
       int get_decimation() const;
       int get_fftsize() const;
-      bool get_enable() const;
 
       void set_freq_central(float freq_central);
       void set_bandwidth(float bandwidth);

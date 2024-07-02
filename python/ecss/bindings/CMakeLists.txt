@@ -37,7 +37,7 @@ list(APPEND ecss_python_files
     nrzl_encoder_subcarrier_python.cc
     phase_converter_python.cc
     pll_python.cc
-#    signal_search_fft_v_python.cc
+    signal_search_fft_v_python.cc
     signal_search_goertzel_python.cc
     spl_decoder_python.cc
     spl_encoder_python.cc

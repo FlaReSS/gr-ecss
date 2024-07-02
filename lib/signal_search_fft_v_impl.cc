@@ -37,11 +37,13 @@ namespace gr
       return gnuradio::get_initial_sptr(new signal_search_fft_v_impl(enable, fftsize, decimation, average, wintype, freq_central, bandwidth, freq_cutoff, threshold, samp_rate));
     }
 
+    // Public
+
     signal_search_fft_v_impl::signal_search_fft_v_impl(bool enable, int fftsize, int decimation, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
         : gr::block("signal_search_fft",
                     gr::io_signature::make(1, 1, sizeof(gr_complex) * (decimation * fftsize)),
                     gr::io_signature::make(1, 1, sizeof(gr_complex) * (decimation * fftsize))),
-          d_wintype((filter::firdes::win_type)(wintype)),
+          d_wintype((fft::window::win_type)(wintype)),
           d_fftsize(fftsize), d_freq_central(freq_central),
           d_bandwidth(bandwidth), d_freq_cutoff(freq_cutoff),
           d_threshold(threshold), d_samp_rate(samp_rate),
@@ -53,7 +55,7 @@ namespace gr
       float resamplig = (float)(1.0 / decimation);
       d_fftsize_half = (unsigned int)(floor(d_fftsize / 2.0));
 
-      d_fft = new fft::fft_complex(d_fftsize, true);
+      d_fft = new fft::fft_complex_fwd(d_fftsize, true);
 
       pfb_decimator = new filter::kernel::pfb_arb_resampler_ccf(resamplig, filter::firdes::low_pass(1, samp_rate, 5000, 100), 32);
 
@@ -65,7 +67,6 @@ namespace gr
 
     signal_search_fft_v_impl::~signal_search_fft_v_impl()
     { }
-
 
     int 
     signal_search_fft_v_impl::general_work(int noutput_items,
@@ -169,59 +170,7 @@ namespace gr
       }     
     }
 
-    void 
-    signal_search_fft_v_impl::fft(float *data_out, const gr_complex *data_in, int size)
-    {
-      if (d_window.size())
-      {
-        volk_32fc_32f_multiply_32fc(d_fft->get_inbuf(), data_in, &d_window.front(), size);
-      }
-      else
-      {
-        memcpy(d_fft->get_inbuf(), data_in, sizeof(gr_complex) * size);
-      }
-
-      d_fft->execute(); // compute the fft
-      volk_32fc_magnitude_squared_32f(data_out, d_fft->get_outbuf(), size);
-
-      // Perform shift operation
-      memcpy(d_tmpbuf, &data_out[0], sizeof(float) * (d_fftsize_half + 1));
-      memcpy(&data_out[0], &data_out[size - d_fftsize_half], sizeof(float) * (d_fftsize_half));
-      memcpy(&data_out[d_fftsize_half], d_tmpbuf, sizeof(float) * (d_fftsize_half + 1));
-    }
-
-    void 
-    signal_search_fft_v_impl::items_eval()
-    {
-      int down_samp = d_samp_rate / d_decimation;
-
-      bw_items = ceil(d_bandwidth / down_samp * d_fftsize / 2) * 2; //round up to the nearest even
-
-      if (bw_items < 0)
-      {
-        throw std::out_of_range("signal search: invalid bandwidth. It generates a negative number of bins. Please, check the values of sampling rate, decimation, fft size and bandwith");
-        bw_items = 0;
-      }
-      if (bw_items < 14)
-      {
-        throw std::out_of_range("signal search: invalid bandwidth. It generates a too small number of bins. Please, check the values of sampling rate, decimation, fft size and bandwith");
-        bw_items = 14;
-      }
-
-      searching_first_items = ((d_freq_central / down_samp) * d_fftsize) + d_fftsize_half - (bw_items / 2);
-    }
-
-    void 
-    signal_search_fft_v_impl::buildwindow()
-    {
-      d_window.clear();
-      if (d_wintype != filter::firdes::WIN_NONE)
-      {
-        d_window = filter::firdes::window(d_wintype, d_fftsize, 6.76);
-      }
-    }
-
-    float 
+    float
     signal_search_fft_v_impl::get_freq_central() const { return d_freq_central; }
 
     float 
@@ -238,7 +187,6 @@ namespace gr
 
     bool 
     signal_search_fft_v_impl::get_enable() const { return d_enable; }
-
 
     int 
     signal_search_fft_v_impl::get_decimation() const { return d_decimation; }
@@ -290,7 +238,6 @@ namespace gr
       d_threshold = std::pow(10.0, threshold / 10);
     }
 
-
     void 
     signal_search_fft_v_impl::set_average(bool average)
     {
@@ -302,6 +249,60 @@ namespace gr
     signal_search_fft_v_impl::set_enable(bool enable)
     {
       d_enable = enable;
+    }
+
+    // Private
+
+    void
+    signal_search_fft_v_impl::fft(float *data_out, const gr_complex *data_in, int size)
+    {
+      if (d_window.size())
+      {
+        volk_32fc_32f_multiply_32fc(d_fft->get_inbuf(), data_in, &d_window.front(), size);
+      }
+      else
+      {
+        memcpy(d_fft->get_inbuf(), data_in, sizeof(gr_complex) * size);
+      }
+
+      d_fft->execute(); // compute the fft
+      volk_32fc_magnitude_squared_32f(data_out, d_fft->get_outbuf(), size);
+
+      // Perform shift operation
+      memcpy(d_tmpbuf, &data_out[0], sizeof(float) * (d_fftsize_half + 1));
+      memcpy(&data_out[0], &data_out[size - d_fftsize_half], sizeof(float) * (d_fftsize_half));
+      memcpy(&data_out[d_fftsize_half], d_tmpbuf, sizeof(float) * (d_fftsize_half + 1));
+    }
+
+    void
+    signal_search_fft_v_impl::items_eval()
+    {
+      int down_samp = d_samp_rate / d_decimation;
+
+      bw_items = ceil(d_bandwidth / down_samp * d_fftsize / 2) * 2; //round up to the nearest even
+
+      if (bw_items < 0)
+      {
+        throw std::out_of_range("signal search: invalid bandwidth. It generates a negative number of bins. Please, check the values of sampling rate, decimation, fft size and bandwith");
+        bw_items = 0;
+      }
+      if (bw_items < 14)
+      {
+        throw std::out_of_range("signal search: invalid bandwidth. It generates a too small number of bins. Please, check the values of sampling rate, decimation, fft size and bandwith");
+        bw_items = 14;
+      }
+
+      searching_first_items = ((d_freq_central / down_samp) * d_fftsize) + d_fftsize_half - (bw_items / 2);
+    }
+
+    void
+    signal_search_fft_v_impl::buildwindow()
+    {
+      d_window.clear();
+      if (d_wintype != fft::window::WIN_NONE)
+      {
+        d_window = filter::firdes::window(d_wintype, d_fftsize, 6.76);
+      }
     }
 
     void 

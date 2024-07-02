@@ -47,7 +47,7 @@ namespace gr
         typedef std::shared_ptr<signal_search_fft_v> sptr;
 
         /*!
-            * \brief Signal Search with Goertzel Algorithm evaluation.
+            * \brief Signal Search with FFT Algorithm evaluation.
             *
             * \param samp_rate Sampling rate of signal;
             * \param fftsize size of fft performed for SNR evaluation;
