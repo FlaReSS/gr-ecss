@@ -3,22 +3,21 @@
 #run it in the main folder of the OOT module
 
 if [ "$1" = "-make" ]; then
-#	source ~/prefix/setup_env.sh
 	rm -r build
 	mkdir build
 	cd build
 	cmake -DCMAKE_INSTALL_PREFIX=~/prefix ../
 	make
+	cd ..
 elif [ "$1" = "-test" ]; then
-#	source ~/prefix/setup_env.sh
 	rm -r build
 	mkdir build
 	cd build
 	cmake -DCMAKE_INSTALL_PREFIX=~/prefix ../
 	make
 	make test
+	cd ..
 elif [ "$1" = "-notest" ]; then
-#	source ~/prefix/setup_env.sh
 	rm -r build
 	mkdir build
 	cd build
@@ -26,8 +25,8 @@ elif [ "$1" = "-notest" ]; then
 	make
 	make install
 	sudo ldconfig
+	cd ..
 elif [ "$1" = "-all" ]; then
-#	source ~/prefix/setup_env.sh
 	rm -r build
 	mkdir build
 	cd build
@@ -36,6 +35,7 @@ elif [ "$1" = "-all" ]; then
 	make test
 	make install
 	sudo ldconfig
+	cd ..
 else
 	echo Please, specify between -make, -test, -notest, -all
 fi
