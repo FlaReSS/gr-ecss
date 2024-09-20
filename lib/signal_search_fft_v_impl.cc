@@ -26,6 +26,9 @@
 #include "signal_search_fft_v_impl.h"
 #include <volk/volk.h>
 
+// typedef needed as on Windows is not defined- alt. solution to be identified.
+typedef unsigned int uint;
+
 namespace gr
 {
   namespace ecss

@@ -26,6 +26,10 @@
 #include <volk/volk.h>
 #include <gnuradio/sincos.h>
 #include <gnuradio/math.h>
+
+// typedef needed as on Windows is not defined- alt. solution to be identified.
+typedef unsigned int uint;
+
 namespace gr{
   namespace ecss
   {
