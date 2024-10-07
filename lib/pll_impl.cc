@@ -125,11 +125,16 @@ namespace gr {
                     pmt::intern("accumulator"),    // Key
                     pmt::intern("reset")           // Value
                     );
+        if (tags[1].key == pmt::intern("pll_start_freq")){
+          integrator_order_1 = (pmt::to_float(tags[1].value) - d_freq_central) / d_samp_rate * M_TWOPI;
+
+        }
 			}
 			if (tags[0].value == pmt::intern("start(1e3)") && tags[0].key == pmt::intern("pll")) 
 			{
 				stop = false;
 			}
+      
 		}
 
 		if (phase_delta != NULL)

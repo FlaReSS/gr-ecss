@@ -58,6 +58,7 @@ namespace ecss
       bool d_enable;
       float d_samp_rate;
       int d_size;
+      int d_count;
       float d_threshold;
       float d_bandwidth;
       float d_freq_cutoff;

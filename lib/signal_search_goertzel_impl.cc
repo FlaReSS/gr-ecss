@@ -63,6 +63,8 @@ namespace gr{
       coeff_eval(freq_central, bandwidth);
       message_port_register_in(pmt::mp("lock_in"));
       set_msg_handler(pmt::mp("lock_in"), [this](pmt::pmt_t msg) { this->handle_lockmsg(msg); });
+      srand (time(NULL));
+      d_count = 40;
     }
 
     signal_search_goertzel_impl::~signal_search_goertzel_impl()
@@ -107,17 +109,28 @@ namespace gr{
       uint out_items = 0;
       uint i = 0;
 
+      d_count++;
+      d_freq_central = d_count*1000;
+
+      coeff_eval(d_freq_central, d_bandwidth);
+
+      if (d_count == 50)
+      {
+        d_count = 0;
+      }
+
       // is this the first iteration of the loop? Then add a stop tag to make sure 
       // the pll afterwards does not wonder around
       if (first == true)
       {
           std::cout<<"INSERTING PLL STOP TAG - First iteration"<<std::endl;
           add_item_tag(0,                         // Port number
-                    nitems_written(0) + (i),      // Offset
+                    nitems_written(0) + (i),      // OffsetL
                     pmt::intern("pll"),           // Key
                     pmt::intern("stop")           // Value
                     );
           first = false;
+          
       }
       
       if(d_enable == true)
@@ -154,6 +167,10 @@ namespace gr{
                           pmt::intern("pll"),           // Key
                           pmt::intern("start")          // Value
             );
+              add_item_tag(0,
+                          nitems_written(0) + (i),
+                          pmt::intern("pll_start_freq"),
+                          pmt::from_float(d_freq_central));
               // average_reset();
             }
             d_state = true;

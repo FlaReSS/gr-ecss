@@ -75,7 +75,7 @@ blocks:
     options: '[0, 1, 2]'
     orient: Qt.QHBoxLayout
     type: int
-    value: '0'
+    value: '1'
     widget: radio_buttons
   states:
     bus_sink: false
@@ -93,10 +93,10 @@ blocks:
     min_len: '200'
     orient: QtCore.Qt.Horizontal
     rangeType: float
-    start: -20e3
+    start: -40e3
     step: '100'
-    stop: 20e3
-    value: '11000'
+    stop: 40e3
+    value: '0'
     widget: counter_slider
   states:
     bus_sink: false
@@ -631,12 +631,12 @@ blocks:
     bandwidth: '3000'
     comment: ''
     enable: 'True'
-    freq_central: '15000'
+    freq_central: '0'
     freq_cutoff: '3000'
     maxoutbuf: '0'
     minoutbuf: '0'
     samp_rate: samp_rate
-    threshold: '10'
+    threshold: '15'
   states:
     bus_sink: false
     bus_source: false
