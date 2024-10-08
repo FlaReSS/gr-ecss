@@ -36,28 +36,19 @@ namespace gr {
       double d_integer_phase_denormalized;                /*!< Integer value after to be denormalized */
       double precision;
       double integrator_order_1, integrator_order_2_1, integrator_order_2_2;
-      //double branch_3_par, branch_3, branch_2, branch_2_3;
       double d_freq_central;
       std::vector<double> d_coefficients;
 
-      double mod_2pi(double in);                          /*! Keep the value between -2pi and 2pi */
       void reset();                                       /*! Reset all the registers */
       void NCO_denormalization();
       double phase_detector(gr_complex sample);
-      double magnitude(gr_complexd sample);
-      bool stop;
+      bool pll_enabled;
 
       /*! \brief Integer phase converter
       *
       * converts the filter output into integer mathematics
       */
       int64_t integer_phase_converter(double step_phase);
-
-      /*! \brief Integer accumulator
-      *
-      * integrates the filter output (already converted) using an integer mathematics
-      */
-      void accumulator(int64_t filter_out);
 
       /*! \brief Evaluate the Loop filter output.
       *
@@ -71,32 +62,6 @@ namespace gr {
       * \returns (double) output loop filter
       */
       double advance_loop(double error);
-
-      /*! \brief Keep the phase in the range [-pi, pi).
-      *
-      * \details
-      * This function keeps the phase between -pi and pi. If the
-      * phase is greater than pi by d, it wraps around to be -pi+d;
-      * similarly if it is less than -pi by d, it wraps around to
-      * pi-d.
-      * \returns (double) new phase limited
-      */
-      double phase_wrap(double phase);
-
-      /*! \brief Keep the frequency between d_min_freq and d_max_freq.
-      *
-      * \details
-      * Specifically, this function works with the phase steps. Thus,
-      * keeps the steps of branch_2_3 (so, the integrated parts of the
-      * loop filter) between branch_2_3_max and branch_2_3_min.
-      * If the step is greater than branch_2_3_max, it
-      * is set to branch_2_3_max.  If the frequency is less than
-      * branch_2_3_min, it is set to branch_2_3_min.
-      *
-      * \param step (double) step
-      * \returns (double) new step limited
-      */
-      double frequency_limit(double step);
 
       public:
         pll_impl(int samp_rate, int N, const std::vector<double> &coefficients, float freq_central, float bw);
