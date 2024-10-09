@@ -17,6 +17,7 @@ install(FILES
     phase_converter.h
     loop_filter.h
     gain_phase_accumulator.h
+    signal_detector.h
     signal_search_goertzel.h
     signal_search_fft_v.h
     spl_encoder.h

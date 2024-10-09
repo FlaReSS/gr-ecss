@@ -25,7 +25,7 @@ install(FILES
     ecss_loop_filter.block.yml
     ecss_gain_phase_accumulator.block.yml
     ecss_signal_search_goertzel.block.yml
-    ecss_signal_search_fft_hier.block.yml
+    ecss_signal_search_fft_v.block.yml
     ecss_spl_encoder.block.yml
     ecss_spl_decoder.block.yml
     ecss_nrzl_encoder.block.yml
@@ -33,5 +33,5 @@ install(FILES
     ecss_modulator.block.yml
     ecss_demodulator.block.yml
     ecss_threshold_to_message.block.yml
-    DESTINATION share/gnuradio/grc/blocks
+    ecss_signal_detector.block.yml DESTINATION share/gnuradio/grc/blocks
 )

@@ -11,6 +11,9 @@
 ########################################################################
 include(GrPlatform) #define LIB_SUFFIX
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(FFTW3 REQUIRED fftw3)
+
 list(APPEND ecss_sources
     agc_impl.cc
     pll_impl.cc
@@ -24,7 +27,8 @@ list(APPEND ecss_sources
     spl_decoder_impl.cc
     nrzl_encoder_impl.cc
     nrzl_encoder_subcarrier_impl.cc
-    threshold_to_message_impl.cc )
+    threshold_to_message_impl.cc
+    signal_detector_impl.cc )
 
 set(ecss_sources "${ecss_sources}" PARENT_SCOPE)
 if(NOT ecss_sources)
@@ -38,7 +42,9 @@ target_link_libraries(gnuradio-ecss
     gnuradio::gnuradio-blocks
     gnuradio::gnuradio-fft
     gnuradio::gnuradio-filter
+    fftw3
 )
+
 target_include_directories(gnuradio-ecss
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
     PUBLIC $<INSTALL_INTERFACE:include>
@@ -72,6 +78,7 @@ include(GrTest)
 #include_directories()
 # List all files that contain Boost.UTF unit tests here
 list(APPEND test_ecss_sources
+qa_signal_detector.cc
 )
 # Anything we need to link to for the unit tests go here
 list(APPEND GR_TEST_TARGET_DEPS gnuradio-ecss)
