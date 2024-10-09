@@ -29,16 +29,16 @@ namespace gr {
 
     class pll_impl : public pll
     {
-      int d_N;
       int d_samp_rate;
+      int d_N;
+      std::vector<double> d_coefficients;
+      double d_freq_central;
       float d_bw;
       int64_t d_integer_phase;
       double d_integer_phase_denormalized;                /*!< Integer value after to be denormalized */
-      double precision;
-      double integrator_order_1, integrator_order_2_1, integrator_order_2_2;
-      double d_freq_central;
-      std::vector<double> d_coefficients;
 
+      double integrator_order_1, integrator_order_2_1, integrator_order_2_2;
+      double precision;
       void reset();                                       /*! Reset all the registers */
       void NCO_denormalization();
       double phase_detector(gr_complex sample);

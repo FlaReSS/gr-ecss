@@ -49,12 +49,16 @@ namespace gr {
     static int ios[] = {sizeof(gr_complex), sizeof(float), sizeof(float), sizeof(int64_t)};
     static std::vector<int> iosig(ios, ios+sizeof(ios)/sizeof(int));
     pll_impl::pll_impl(int samp_rate, int N, const std::vector<double> &coefficients, float freq_central, float bw)
-        : gr::sync_block("pll",
-                         gr::io_signature::make(1, 1, sizeof(gr_complex)),
-                         gr::io_signature::makev(1, 4, iosig)),
-          d_N(N), d_integer_phase(0), d_integer_phase_denormalized(0),          
-          d_samp_rate(samp_rate),
-          d_freq_central(freq_central), d_coefficients(3, 0.0), d_bw(bw)
+        : gr::sync_block( "pll",
+                          gr::io_signature::make(1, 1, sizeof(gr_complex)),
+                          gr::io_signature::makev(1, 4, iosig)),
+                          d_samp_rate(samp_rate),
+                          d_N(N),
+                          d_coefficients(3, 0.0),
+                          d_freq_central(freq_central),
+                          d_bw(bw),
+                          d_integer_phase(0),
+                          d_integer_phase_denormalized(0)
     {
       pll_enabled = true;
       set_tag_propagation_policy(TPP_DONT);
