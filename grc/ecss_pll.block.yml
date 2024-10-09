@@ -3,7 +3,6 @@
 id: ecss_pll
 label: PLL
 category: '[ecss]'
-flags:
 
 templates:
     imports: from gnuradio import ecss
