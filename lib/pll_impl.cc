@@ -56,7 +56,7 @@ namespace gr {
           d_samp_rate(samp_rate),
           d_freq_central(freq_central), d_coefficients(3, 0.0), d_bw(bw)
     {
-		stop = false;
+      pll_enabled = true;
       set_tag_propagation_policy(TPP_DONT);
       set_N(N);
       set_coefficients(coefficients);
@@ -71,21 +71,20 @@ namespace gr {
 
     int
     pll_impl::work (int noutput_items,
-                       gr_vector_const_void_star &input_items,
-                       gr_vector_void_star &output_items)
+                    gr_vector_const_void_star &input_items,
+                    gr_vector_void_star &output_items)
     {
-		// input stream
-		const gr_complex *input = (gr_complex*)input_items[0];
-		// output stream
-		gr_complex *output = (gr_complex*)output_items[0];
-		// optional output signals
-		float *frequency_output = output_items.size() >= 2 ? (float *)output_items[1] : NULL;
-		float *phase_error = output_items.size() >= 3 ? (float *)output_items[2] : NULL;
-		int64_t *phase_delta = output_items.size() >= 4 ? (int64_t *)output_items[3] : NULL;
+      // input stream
+      const gr_complex *input = (gr_complex*)input_items[0];
+      // output stream
+      gr_complex *output = (gr_complex*)output_items[0];
+      // optional output signals
+      float *frequency_output = output_items.size() >= 2 ? (float *)output_items[1] : NULL;
+      float *phase_error = output_items.size() >= 3 ? (float *)output_items[2] : NULL;
+      int64_t *phase_delta = output_items.size() >= 4 ? (int64_t *)output_items[3] : NULL;
 
-      double module, error;
-      double filter_out, filter_out_limited;
-      double t_imag, t_real;
+      double error;
+      double filter_out;
       int64_t integer_step_phase;
 
       std::vector<tag_t> tags;
@@ -93,106 +92,63 @@ namespace gr {
       for(int i = 0; i < noutput_items; i++) 
       {
 
-         get_tags_in_window( // Note the different method name
-             tags, // Tags will be saved here
-             0, // Port 0
-             i, // Start of range (relative to nitems_read(0))
-             (i + 1) // End of relative range
-         );
-
-		if (tags.size() > 0) 
-		{
-			if (tags[0].value == pmt::intern("reset") && tags[0].key == pmt::intern("pll")) 
-			{
-				reset();
-			}
-			if (tags[0].value == pmt::intern("stop") && tags[0].key == pmt::intern("pll")) 
-			{
-				stop = true;
-				reset();
-				add_item_tag(3,                    // Port number
-                    nitems_written(0) + (i),       // Offset
-                    pmt::intern("modulator"),    // Key
-                    pmt::intern("reset")           // Value
-                    );
-			}
-			if (tags[0].value == pmt::intern("start") && tags[0].key == pmt::intern("pll")) 
-			{
-				stop = false;
-				reset();
-				add_item_tag(3,                    // Port number
-                    nitems_written(0) + (i),       // Offset
-                    pmt::intern("accumulator"),    // Key
-                    pmt::intern("reset")           // Value
-                    );
-        if (tags[1].key == pmt::intern("pll_start_freq")){
-          integrator_order_1 = (pmt::to_float(tags[1].value) - d_freq_central) / d_samp_rate * M_TWOPI;
-
+        get_tags_in_window( // Note the different method name
+                            tags, // Tags will be saved here
+                            0, // Port 0
+                            i, // Start of range (relative to nitems_read(0))
+                            (i + 1) // End of relative range
+                          );
+        if (tags.size() > 0) 
+        {
+          if (tags[0].value == pmt::intern("stop") && tags[0].key == pmt::intern("pll")) 
+          {
+            pll_enabled = false;
+            reset();
+          }
+          if (tags[0].value == pmt::intern("start") && tags[0].key == pmt::intern("pll")) 
+          {
+            pll_enabled = true;
+            reset();
+            if (tags.size() > 1 && tags[1].key == pmt::intern("pll_start_freq"))
+            {
+              integrator_order_1 = (pmt::to_float(tags[1].value) - d_freq_central) / d_samp_rate * M_TWOPI;
+            }
+          }
         }
-			}
-			if (tags[0].value == pmt::intern("start(1e3)") && tags[0].key == pmt::intern("pll")) 
-			{
-				stop = false;
-			}
-      
-		}
 
-		if (phase_delta != NULL)
-		{
-			phase_delta[i] = d_integer_phase;
-		}
-		output[i] = input[i] * gr_expj(-d_integer_phase_denormalized);
-		error = phase_detector(output[i]);
+        // Phase detector
+        output[i] = input[i] * gr_expj(-d_integer_phase_denormalized);
+        error = phase_detector(output[i]);
+        
+        // Loop filter
+        if (pll_enabled)    // if the PLL has been stopped, force the filter output to 0
+          filter_out = advance_loop(error);
+        else
+          filter_out = 0.0;
 
-		// output the phase error, if a signal is connected to the optional port
-		if (phase_error != NULL)
-		{
-			if (stop)
-			{
-				d_integer_phase = 0;
-				phase_error[i] = 0;
-			}
-			else
-			{
-				phase_error[i] = error;
-			}
-		}	
-		
-		// if the PLL has been stopped, force the error to zero, this makes sure 
-		// the PLL remains fixed on the center frequency
-		if (stop)
-		{
-			filter_out = 0.0;
-		}
-		else
-		{
-			// output of the loop filter
-			filter_out = advance_loop(error);
-		}
+        // NCO
+        integer_step_phase = integer_phase_converter(filter_out + (d_freq_central / d_samp_rate * M_TWOPI));
+        d_integer_phase += integer_step_phase;
+        NCO_denormalization();
 
-		// output the current PLL frequency, if a signal is connected to the optional port
-		if (frequency_output != NULL)
-		{
-			frequency_output[i] = integrator_order_1 * d_samp_rate / M_TWOPI + d_freq_central;
-		}
-
-         integer_step_phase = integer_phase_converter(filter_out + (d_freq_central / d_samp_rate * M_TWOPI));
-         accumulator(integer_step_phase);
-         NCO_denormalization();
-         
+        // output the phase delta, if a signal is connected to the optional port
+        if (phase_delta != NULL)
+        {
+          phase_delta[i] = d_integer_phase;
+        }
+        // output the phase error, if a signal is connected to the optional port
+        if (phase_error != NULL)
+        {
+          phase_error[i] = error;
+        }
+        // output the current PLL frequency, if a signal is connected to the optional port
+        if (frequency_output != NULL)
+        {
+          frequency_output[i] = integrator_order_1 * d_samp_rate / M_TWOPI + d_freq_central;
+        }
+        
       }
       return noutput_items;
-    }
-
-    double
-    pll_impl::mod_2pi(double in)
-    {
-      if(in >= M_PI)
-          return in - M_TWOPI;
-      else if(in < -M_PI)
-          return in + M_TWOPI;
-      else
-          return in;
     }
 
     double
@@ -200,16 +156,7 @@ namespace gr {
     {
       double sample_phase;
       sample_phase = atan2(sample.imag(),sample.real());
-      //return mod_2pi(sample_phase);
       return sample_phase;
-    }
-
-    double
-    pll_impl::magnitude(gr_complexd sample)
-    {
-      double sample_magn;
-      sample_magn = sqrt(sample.imag()*sample.imag() + sample.real()*sample.real());
-      return sample_magn;
     }
 
     void
@@ -260,12 +207,6 @@ namespace gr {
     }
 
     void
-    pll_impl::accumulator(int64_t integer_step_phase)
-    {
-      d_integer_phase += integer_step_phase;
-    }
-
-    void
     pll_impl::NCO_denormalization()
     {
       int64_t temp_integer_phase = (d_integer_phase >> (64 - d_N));
@@ -273,22 +214,6 @@ namespace gr {
       d_integer_phase_denormalized = temp_denormalization * M_PI;
       }
 
-
-    double
-    pll_impl::phase_wrap(double phase)
-    {
-      while(phase > M_PI)
-        phase -= M_TWOPI;
-      while(phase <= -M_PI)
-        phase += M_TWOPI;
-      return phase;
-    }
-
-    double
-    pll_impl::frequency_limit(double step)
-    {
-       return 0.0;
-    }
 
     /*******************************************************************
      * SET FUNCTIONS
