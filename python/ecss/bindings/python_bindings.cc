@@ -35,7 +35,7 @@ void bind_signal_search_goertzel(py::module& m);
 void bind_spl_decoder(py::module& m);
 void bind_spl_encoder(py::module& m);
 void bind_threshold_to_message(py::module& m);
-
+void bind_signal_detector(py::module& m);
 // ) END BINDING_FUNCTION_PROTOTYPES
 
 
@@ -78,6 +78,6 @@ PYBIND11_MODULE(ecss_python, m)
     bind_spl_decoder(m);
     bind_spl_encoder(m);
     bind_threshold_to_message(m);
-
+    bind_signal_detector(m);
     // ) END BINDING_FUNCTION_CALLS
 }

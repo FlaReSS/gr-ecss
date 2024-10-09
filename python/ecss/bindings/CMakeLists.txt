@@ -42,6 +42,7 @@ list(APPEND ecss_python_files
     spl_decoder_python.cc
     spl_encoder_python.cc
     threshold_to_message_python.cc
+    signal_detector_python.cc 
     python_bindings.cc)
 
 GR_PYBIND_MAKE_OOT(ecss
