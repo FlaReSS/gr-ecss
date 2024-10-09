@@ -37,13 +37,27 @@ if(NOT ecss_sources)
 endif(NOT ecss_sources)
 
 add_library(gnuradio-ecss SHARED ${ecss_sources})
-target_link_libraries(gnuradio-ecss 
-    gnuradio::gnuradio-runtime
-    gnuradio::gnuradio-blocks
-    gnuradio::gnuradio-fft
-    gnuradio::gnuradio-filter
-    fftw3
-)
+
+if(WIN32)
+    # Use find_library on Windows to get the full path to fftw3.lib
+    find_library(FFTW3_LIB fftw3 PATHS ${FFTW3_LIBRARY_DIRS})
+    target_link_libraries(gnuradio-ecss 
+        gnuradio::gnuradio-runtime
+        gnuradio::gnuradio-blocks
+        gnuradio::gnuradio-fft
+        gnuradio::gnuradio-filter
+        ${FFTW3_LIB}  # Full path to fftw3.lib on Windows
+    )
+else()
+    # On Linux (or UNIX-like systems), use pkg-config
+    target_link_libraries(gnuradio-ecss 
+        gnuradio::gnuradio-runtime
+        gnuradio::gnuradio-blocks
+        gnuradio::gnuradio-fft
+        gnuradio::gnuradio-filter
+        fftw3	# or  ${FFTW3_LIBRARIES}
+    )
+endif()
 
 target_include_directories(gnuradio-ecss
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
