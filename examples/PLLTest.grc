@@ -222,7 +222,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [792, 52.0]
+    coordinate: [888, 44.0]
     rotation: 0
     state: true
 - name: blocks_throttle_0
@@ -275,12 +275,11 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     samp_rate: samp_rate
-    test: '250'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [808, 352.0]
+    coordinate: [864, 344.0]
     rotation: 0
     state: true
 - name: qtgui_freq_sink_x_0

@@ -102,6 +102,8 @@ namespace gr{
       // char *flag = (char *)output_items[1];
       char *flag = output_items.size() >= 2 ? (char *)output_items[1] : NULL;
 
+
+
       bins goertzel;
       float central_avg;
       float left_avg;
@@ -109,18 +111,8 @@ namespace gr{
       uint out_items = 0;
       uint i = 0;
 
-      d_count++;
-      d_freq_central = d_count*1000;
-
-      coeff_eval(d_freq_central, d_bandwidth);
-
-      if (d_count == 50)
-      {
-        d_count = 0;
-      }
-
       // is this the first iteration of the loop? Then add a stop tag to make sure 
-      // the pll afterwards does not wonder around
+      // the pll afterwards does not wander around
       if (first == true)
       {
           std::cout<<"INSERTING PLL STOP TAG - First iteration"<<std::endl;

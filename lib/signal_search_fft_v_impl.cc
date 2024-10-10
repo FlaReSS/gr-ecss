@@ -23,6 +23,7 @@
 #endif
 
 #include <gnuradio/io_signature.h>
+#include <gnuradio/sync_block.h>
 #include "signal_search_fft_v_impl.h"
 #include <volk/volk.h>
 
@@ -44,23 +45,28 @@ namespace gr
 
     signal_search_fft_v_impl::signal_search_fft_v_impl(bool enable, int fftsize, int decimation, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
         : gr::block("signal_search_fft",
-                    gr::io_signature::make(1, 1, sizeof(gr_complex) * (decimation * fftsize)),
-                    gr::io_signature::make(1, 1, sizeof(gr_complex) * (decimation * fftsize))),
+                    gr::io_signature::make(1, 1, sizeof(gr_complex)),
+                    gr::io_signature::make(1, 1, sizeof(gr_complex))),
           d_wintype((fft::window::win_type)(wintype)),
           d_fftsize(fftsize), d_freq_central(freq_central),
           d_bandwidth(bandwidth), d_freq_cutoff(freq_cutoff),
-          d_threshold(threshold), d_samp_rate(samp_rate),
+          d_samp_rate(samp_rate),
           d_iir_signal(M_PI * freq_cutoff / (samp_rate / decimation)),
           d_iir_noise(M_PI * freq_cutoff / (samp_rate / decimation)),
           d_average(average), d_decimation(decimation), d_enable(enable)
     {
       first = true;
+      say_stop = true;
+      set_tag_propagation_policy(TPP_DONT);
       float resamplig = (float)(1.0 / decimation);
       d_fftsize_half = (unsigned int)(floor(d_fftsize / 2.0));
 
       d_fft = new fft::fft_complex_fwd(d_fftsize, true);
 
       pfb_decimator = new filter::kernel::pfb_arb_resampler_ccf(resamplig, filter::firdes::low_pass(1, samp_rate, 5000, 100), 32);
+
+      set_threshold(threshold);
+
 
       items_eval();
       create_buffers();
@@ -70,6 +76,13 @@ namespace gr
 
     signal_search_fft_v_impl::~signal_search_fft_v_impl()
     { }
+
+    void
+    signal_search_fft_v_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
+    {
+      //printf("noutput_items: %d\n", ninput_items_required[0]);
+      ninput_items_required[0] =  d_fftsize*d_decimation;
+    }
 
     int 
     signal_search_fft_v_impl::general_work(int noutput_items,
@@ -84,20 +97,31 @@ namespace gr
       int temp_signal_band_max_index;
       uint out_items = 0;
       uint in_items = 0;
+      uint i = 0;
+      uint k = 0;
+   
+      if (say_stop == true)
+      {
+          std::cout<<"INSERTING PLL STOP TAG - First iteration"<<std::endl;
+          add_item_tag(0,                         // Port number
+                    nitems_written(0),            // OffsetL
+                    pmt::intern("pll"),           // Key
+                    pmt::intern("stop")           // Value
+                    );
+          say_stop = false;         
+      }
 
       if (d_enable == true) {
-        for (uint i = 0; i < noutput_items; i++)
+        for (i = 0; i < (noutput_items - d_fftsize*d_decimation + 1) ; i += d_fftsize*d_decimation)
         {
-
-          int index = i * d_fftsize * d_decimation;
-
-          int processed = pfb_decimator->filter(&in_decimated[0], &in[index], (d_decimation * d_fftsize), item_read);
+          k++;
+          int processed = pfb_decimator->filter(&in_decimated[0], &in[i], (d_decimation * d_fftsize), item_read);
 
           fft(d_fbuf, &in_decimated[0], d_fftsize);
 
           memcpy(searching_band, &d_fbuf[searching_first_items], sizeof(float) * bw_items);
 
-          volk_32f_index_max_32u(signal_band_max_index, searching_band, bw_items);
+          volk_32f_index_max_32u(signal_band_max_index, searching_band, bw_items); // find the argmax of the search band
           signal_band_p = 0;
 
           temp_signal_band_max_index = *signal_band_max_index ;
@@ -114,6 +138,8 @@ namespace gr
 
           noise_band_p = (*noise_band_acc - signal_band_p) + (7 * ((*noise_band_acc - signal_band_p) / (bw_items - 7)));
 
+          signal_band_p -= (7 * ((*noise_band_acc - signal_band_p) / (bw_items - 7)));
+
           if (d_average == true)
           {
             d_iir_signal.filter(signal_band_p);
@@ -128,46 +154,40 @@ namespace gr
             noise_band_avg = noise_band_p;
           }
 
-          if (signal_band_avg > (d_threshold * noise_band_avg))
+          if (signal_band_avg > (d_threshold * noise_band_avg)) // Check if the inband signal is larger than the threshold
           {
-            out_items++;
-            if (out_items <= noutput_items)
-            {
-              memcpy(&out[index], &in[index], sizeof(gr_complex) * d_fftsize * d_decimation);
-              if (first == true)
-              {
-                add_item_tag(0,                           // Port number
-                             nitems_written(0) + (index), // Offset
-                             pmt::intern("reset"),        // Key
-                             pmt::intern("pll")           // Value
-                );
 
-                average_reset();
-                first = false;
-              }
-            }
-            else
-            {
-              out_items--;
-            }
+            // Add tags to say that signal is detected to the pll to start
+            // add_item_tag(0, 
+            //               nitems_written(0) + (i), 
+            //               pmt::intern("pll"), 
+            //               pmt::intern("start"));
+            
+            // Add tag to say which frequency is detected
+            //add_item_tag(0, nitems_written(0) + i, pmt::intern("pll_start_freq"), pmt::from_float((d_freq_central - (d_bandwidth / 2) + (temp_signal_band_max_index * d_samp_rate / float(d_fftsize)))));
+            std::cout << "Signal detected at: " << (d_freq_central - (d_bandwidth / 2) + (temp_signal_band_max_index * d_samp_rate / float(d_fftsize))) << std::endl;
           }
           else
           {
             first = true;
           }
-          in_items = i;
         }
-
-        if (out_items > noutput_items)
+        if (i > noutput_items)
         {
           std::cout << "out_items > noutput_items: " << out_items << " > " << noutput_items << std::endl;
         }
-        consume_each(noutput_items);
-        return out_items;
+        // std::cout << "repetitions: " << k << std::endl;
+        // std::cout << "out_items: " << noutput_items << std::endl;
+        // std::cout << "i: " << i << std::endl;
+
+        // Move the data to the output buffer
+        memcpy(&out[0], &in[0],  sizeof(gr_complex) * i);
+        consume_each(i);
+        return i;
       }
       else
       {
-        memcpy(&out[0], &in[0], sizeof(gr_complex) * noutput_items * d_fftsize * d_decimation);
+        memcpy(&out[0], &in[0], sizeof(gr_complex) * noutput_items);
         consume_each(noutput_items);
         return noutput_items;
       }     
@@ -304,7 +324,7 @@ namespace gr
       d_window.clear();
       if (d_wintype != fft::window::WIN_NONE)
       {
-        d_window = filter::firdes::window(d_wintype, d_fftsize, 6.76);
+        d_window = fft::window::build(d_wintype, d_fftsize, 6.76);
       }
     }
 

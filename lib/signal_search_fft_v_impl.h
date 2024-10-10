@@ -26,6 +26,7 @@
 #include <gnuradio/filter/firdes.h>
 #include <gnuradio/filter/pfb_arb_resampler.h>
 #include <gnuradio/fft/fft.h>
+#include <gnuradio/fft/window.h>
 #include <vector>
 
 namespace gr
@@ -38,6 +39,7 @@ namespace gr
       private:
         bool first;
         bool d_enable;
+        bool say_stop;
 //        bool d_carrier;
         bool d_average;
         float d_samp_rate;
@@ -52,7 +54,7 @@ namespace gr
         int d_fftsize_half;
         int bw_items;
         int searching_first_items;
-//        filter::firdes::win_type d_wintype;
+        //filter::firdes::win_type d_wintype;
         fft::window::win_type d_wintype;
         std::vector<float> d_window;
         // filter::firdes d_firdes;
@@ -87,6 +89,9 @@ namespace gr
       public:
       signal_search_fft_v_impl(bool enable, int fftsize, int decimation, bool average, int wintype, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);
       ~signal_search_fft_v_impl();
+
+      void forecast(int noutput_items, gr_vector_int &ninput_items_required);
+    
 
       int general_work(int noutput_items,
                       gr_vector_int &ninput_items,
