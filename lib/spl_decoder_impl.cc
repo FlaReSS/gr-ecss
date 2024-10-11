@@ -26,78 +26,105 @@
 #include "spl_decoder_impl.h"
 #include <volk/volk.h>
 
-namespace gr {
-  namespace ecss {
+namespace gr
+{
+  namespace ecss
+  {
 
     spl_decoder::sptr
-    spl_decoder::make()
+    spl_decoder::make(int oversampling)
     {
-      return gnuradio::get_initial_sptr
-        (new spl_decoder_impl());
+      return gnuradio::get_initial_sptr(new spl_decoder_impl(oversampling));
     }
 
-    /*
-     * The private constructor
-     */
-    spl_decoder_impl::spl_decoder_impl()
-        : gr::sync_decimator("spl_decoder",
-                             gr::io_signature::make(1, 1, sizeof(float)),
-                             gr::io_signature::make(1, 1, sizeof(char)), 2)
+    spl_decoder_impl::spl_decoder_impl(int oversampling)
+        : gr::sync_decimator( "spl_decoder",
+                              gr::io_signature::make(1, 1, sizeof(float)),
+                              gr::io_signature::make(1, 1, sizeof(char)), oversampling * 2),
+                              d_decimation(oversampling * 2)
     {
-      d_clock = 0;
+      set_history(d_decimation);
     }
 
     spl_decoder_impl::~spl_decoder_impl()
     { }
 
+    void
+    spl_decoder_impl::forecast(int noutput_items, gr_vector_int &ninput_items_required)
+    {
+      // Needed to make sure the correlation is computed over a sufficient number of bits. 8 used now, maybe to be changed to a conf. param.
+      int min_output_items = 8;
+      ninput_items_required[0] = min_output_items * d_decimation;
+    }    
+    
     int
     spl_decoder_impl::work(int noutput_items,
         gr_vector_const_void_star &input_items,
         gr_vector_void_star &output_items)
     {
+
+      // Access the input and output buffers
       const float *in = (const float *) input_items[0];
       char *out = (char *) output_items[0];
-      int datain1;
-      int datain2;
-      int temp_data1;
-      int temp_data2;
-
-      for (size_t i = 0; i < noutput_items; i++)
-      {
-        datain1 = data_converter(in[i*2]);
-        datain2 = data_converter(in[i*2 + 1]);
-
-        if (datain1 == d_clock)
-          temp_data1 = 0;
-        else
-          temp_data1 = 1;
-        toggle_clock();
-
-        if (datain2 == d_clock)
-          temp_data2 = 0;
-        else
-          temp_data2 = 1;
-        toggle_clock();
-
-        out[i] = (char)temp_data1;
-      }
+  
+      decode_block(in, out, noutput_items);
+        
       return noutput_items;
     }
 
     void
-    spl_decoder_impl::toggle_clock(){
-      if (d_clock == 1)
-        d_clock = 0;
-      else
-        d_clock = 1;
-    }
+    spl_decoder_impl::decode_block(const float* in, char* out, int block_size)
+    {
+      int j, k;
 
-    int
-    spl_decoder_impl::data_converter(float in){
-      if(in >= 0.0)
-        return 1;
-      else
-        return 0;
+      bool clock_inv;
+      int clock_cnt;
+      float integ;
+      float accum, accum_max;
+      int offset;
+
+      std::vector<char> buffer(block_size);
+
+      accum_max = 0;
+      for (offset = 0; offset < d_decimation; offset++)
+      {
+        accum = 0;
+        clock_inv = false;
+        clock_cnt = 0;
+        integ = 0;
+        for (j = 0, k = 0; j < block_size * d_decimation; j++)
+        {
+          if (clock_inv)
+          {
+            integ = integ - in[j + offset];
+          }
+          else
+          {
+            integ = integ + in[j + offset];
+          }
+
+          clock_cnt++;
+          if (clock_cnt == int(d_decimation / 2))
+          {
+            clock_inv = true;
+          }
+          if (clock_cnt == d_decimation)
+          {
+            buffer[k] = integ >= 0 ? 1 : 0;
+            accum += fabs(integ);
+            clock_inv = false;
+            clock_cnt = 0;
+            integ = 0.0;
+            k++;
+          }
+        }
+
+        if (accum > accum_max)
+        {
+          accum_max = accum;
+          std::copy(buffer.begin(), buffer.begin() + block_size, out);
+        }
+      }
     }
 
   } /* namespace ecss */

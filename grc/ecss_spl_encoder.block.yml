@@ -6,17 +6,13 @@ category: '[ecss]'
 
 templates:
     imports: from gnuradio import ecss
-    make: ecss.spl_encoder(${bit_rate}, ${samp_rate})
+    make: ecss.spl_encoder(${oversampling})
 
 parameters:
--   id: samp_rate
-    label: Samp Rate
-    dtype: real
-    default: samp_rate
--   id: bit_rate
-    label: Bit Rate
-    dtype: real
-    default: bit_rate
+-   id: oversampling
+    label: Oversampling
+    dtype: int
+    default: oversampling
 
 inputs:
 -   domain: stream

@@ -28,14 +28,15 @@ namespace gr {
     class spl_decoder_impl : public spl_decoder
     {
       private:
-        int d_clock;
-        void toggle_clock();
-        int data_converter(float in);
+        int d_decimation;
+        void decode_block(const float* in, char* out, int block_size);
 
       public:
-        spl_decoder_impl();
+        spl_decoder_impl(int oversampling);
         ~spl_decoder_impl();
 
+        void forecast(int noutput_items, gr_vector_int &ninput_items_required);
+        
         // Where all the action really happens
         int work(int noutput_items,
             gr_vector_const_void_star &input_items,
