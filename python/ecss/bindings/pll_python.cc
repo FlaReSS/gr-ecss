@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(pll.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(d3c19ff7a34811143f01ae9f8574f3b2)                     */
+/* BINDTOOL_HEADER_FILE_HASH(e6b92c9b1a5c476caf310e0e146e0f40)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -42,11 +42,9 @@ void bind_pll(py::module& m)
            py::arg("coefficients"),
            py::arg("freq_central"),
            py::arg("bw"),
+           py::arg("sel_loop_detector"),             
            D(pll,make)
         )
-        
-
-
 
 
         

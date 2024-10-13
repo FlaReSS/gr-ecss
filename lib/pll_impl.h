@@ -27,29 +27,31 @@
 namespace gr {
   namespace ecss {
 
-    class pll_impl : public pll
-    {
+    class pll_impl : public pll {
+      // Private member variables
       int d_samp_rate;
-      int d_N;
       std::vector<double> d_coefficients;
       double d_freq_central;
       float d_bw;
+      std::string d_sel_loop_detector;
+      
       int64_t d_integer_phase;
-      double d_integer_phase_denormalized;                /*!< Integer value after to be denormalized */
+      bool d_enabled;
+      bool d_locked;
+      bool d_ext_lock;
+
+      int d_N;
+      double d_precision;
 
       double integrator_order_1, integrator_order_2_1, integrator_order_2_2;
-      double precision;
-      void reset();                                       /*! Reset all the registers */
-      void NCO_denormalization();
+
+      const pmt::pmt_t d_lock_out_port = pmt::mp("lock_out_msg");
+      const pmt::pmt_t d_lock_in_port  = pmt::mp("lock_in_msg");
+
+      // Private methods
       double phase_detector(gr_complex sample);
-      bool pll_enabled;
-
-      /*! \brief Integer phase converter
-      *
-      * converts the filter output into integer mathematics
-      */
-      int64_t integer_phase_converter(double step_phase);
-
+      bool lock_detector(gr_complex sample);
+      void reset();                                       
       /*! \brief Evaluate the Loop filter output.
       *
       * \details
@@ -61,28 +63,43 @@ namespace gr {
       * d_Coeff2_2, d_Coeff1_2 to evaluate the output in according with the order of the filter.
       * \returns (double) output loop filter
       */
-      double advance_loop(double error);
+      double advance_loop(double error);                   
+      double phase_denormalize(int64_t phase) const;                          
+      /*! \brief Integer phase converter
+      *
+      * converts the filter output into integer mathematics
+      */
+      int64_t phase_normalize(double phase) const;  
 
-      public:
-        pll_impl(int samp_rate, int N, const std::vector<double> &coefficients, float freq_central, float bw);
-        ~pll_impl();
+    public:
+      // Public methods
+      pll_impl( int samp_rate,
+                int N,
+                const std::vector<double> &coefficients,
+                float freq_central,
+                float bw,
+                std::string sel_loop_detector);
 
-        int work(int noutput_items,
-                 gr_vector_const_void_star &input_items,
-                 gr_vector_void_star &output_items);
+      ~pll_impl();
 
-        void set_N(int N);     
-        void set_coefficients(const std::vector<double> &coefficients);      
-        void set_frequency(float freq);        
-        void set_phase(float phase);       
-        void set_freq_central(float freq);       
-        void set_bw(float bw);
-        std::vector<double> get_coefficients() const;
-        float get_frequency() const;      
-        float get_phase() const;       
-        float get_freq_central() const;
-        float get_bw() const;
-      };
+      void handle_lock_in_msg(pmt::pmt_t msg);
+      int work(int noutput_items, gr_vector_const_void_star& input_items, gr_vector_void_star& output_items);
+
+      // Set functions
+      void set_N(int N);      
+      void set_coefficients(const std::vector<double>& coefficients);     
+      void set_frequency(float freq);        
+      void set_phase(float phase);       
+      void set_freq_central(float freq);       
+      void set_bw(float bw);                 
+
+      // Get functions
+      std::vector<double> get_coefficients() const;
+      float get_frequency() const;      
+      float get_phase() const;       
+      float get_freq_central() const;
+      float get_bw() const;
+    };
 
   } // namespace ecss
 } // namespace gr

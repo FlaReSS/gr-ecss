@@ -59,7 +59,12 @@ namespace gr {
         * \param freq_central central value of frequency that PLL can catch.
         * \param bw bandwidth of frequency that PLL can catchl.
        */
-      static sptr make(int samp_rate, int N, const std::vector<double> &coefficients, float freq_central, float bw);
+      static sptr make( int samp_rate,
+                        int N,
+                        const std::vector<double> &coefficients,
+                        float freq_central,
+                        float bw,
+                        std::string sel_loop_detector);
 
 
       /*******************************************************************
