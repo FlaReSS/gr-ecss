@@ -44,7 +44,7 @@ public:
    * creating new instances.
    */
   //
-  static sptr make(int modulation, int samp_rate, int fft_size, float threshold, int decimation, float search_bandwidth);
+  static sptr make(int modulation, int samp_rate, int fft_size, int wintype, float threshold, int decimation, float search_bandwidth);
 
           /*******************************************************************
         * GET FUNCTIONS
