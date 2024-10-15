@@ -85,10 +85,12 @@ namespace gr {
       
       if (sel_lock_detector == "ext")
       {
+        std::cout<<"Selected external lock detector"<<std::endl;
         lock_detector = std::make_unique<ExternalLockDetector>();
       }
       else if (sel_lock_detector == "int")
       {
+        std::cout<<"Selected internal lock detector"<<std::endl;
         lock_detector = std::make_unique<InternalLockDetector>();
       }
       else
@@ -106,9 +108,15 @@ namespace gr {
     void 
     pll_impl::handle_lock_in_msg(pmt::pmt_t msg)
     {
-      pmt::pmt_t lock_status = pmt::dict_ref(msg, pmt::intern("LOCK"), pmt::PMT_NIL);
-      if (lock_status != pmt::PMT_NIL)
-        lock_detector->set_ext_lock(pmt::to_bool(lock_status));
+      if (pmt::is_pair(msg))
+      {
+        pmt::pmt_t key = pmt::car(msg);
+        pmt::pmt_t value = pmt::cdr(msg);
+        if ((key == pmt::intern("LOCK")) && (pmt::is_bool(value)))
+        {
+          lock_detector->set_ext_lock(pmt::to_bool(value));
+        }
+      }
     }
     
     int
@@ -145,7 +153,7 @@ namespace gr {
           if (tags[0].value == pmt::intern("stop") && tags[0].key == pmt::intern("pll")) 
           {
             d_enabled = false;
-            reset();
+//            reset();
           }
           if (tags[0].value == pmt::intern("start") && tags[0].key == pmt::intern("pll")) 
           {
@@ -193,8 +201,7 @@ namespace gr {
         if (lock_detector->process(output[i]) != d_locked)
         {
           d_locked = !d_locked;
-          pmt::pmt_t msg = pmt::make_dict();
-          msg = pmt::dict_add(msg, pmt::intern("LOCK"), pmt::from_bool(d_locked));
+          pmt::pmt_t msg = pmt::cons(pmt::intern("LOCK"), pmt::from_bool(d_locked));
           message_port_pub(d_lock_out_port, msg);
         }
 

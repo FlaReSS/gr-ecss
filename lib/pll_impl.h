@@ -110,7 +110,7 @@ namespace gr {
     class LockDetector
     {
       public:
-        void set_ext_lock(bool lock_status) {};
+        virtual void set_ext_lock(bool lock_status) {};
         
         virtual ~LockDetector() = default;
         virtual bool process(gr_complex input) const = 0;
@@ -122,7 +122,7 @@ namespace gr {
         bool ext_lock;
 
       public:
-        void set_ext_lock(bool lock_status) {ext_lock = lock_status;}
+        void set_ext_lock(bool lock_status) override {ext_lock = lock_status;};
         
         bool process(gr_complex input) const override;
     };
