@@ -28,15 +28,15 @@ namespace gr {
   // using output_type = float;
 
   signal_detector::sptr 
-  signal_detector::make(int modulation, int samp_rate, int fft_size, float threshold, int decimation, float search_bandwidth) 
+  signal_detector::make(int modulation, int samp_rate, int fft_size, int wintype, float threshold, int decimation, float search_bandwidth) 
   {
-      return gnuradio::get_initial_sptr(new signal_detector_impl(modulation, samp_rate, fft_size, threshold, decimation, search_bandwidth));
+      return gnuradio::get_initial_sptr(new signal_detector_impl(modulation, samp_rate, fft_size, wintype, threshold, decimation, search_bandwidth));
   }
 
   /*
   * The private constructor
   */
-  signal_detector_impl::signal_detector_impl(int modulation, int samp_rate, int fft_size, float threshold, int decimation, float search_bandwidth)
+  signal_detector_impl::signal_detector_impl(int modulation, int samp_rate, int fft_size, int wintype, float threshold, int decimation, float search_bandwidth)
       : gr::sync_decimator(
             "signal_detector",
             gr::io_signature::make(1 , 1,
@@ -49,20 +49,28 @@ namespace gr {
           d_fft_size(fft_size),
           d_samp_rate(samp_rate),
           d_threshold(std::pow(10.0, threshold / 10)),
-          d_search_bandwidth(search_bandwidth)
+          d_search_bandwidth(search_bandwidth),
+          d_wintype((fft::window::win_type) wintype)
           // Constructor
           {
               // FFTW plan and memory initialization
               d_fft_in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * d_fft_size);
               d_fft_out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * d_fft_size);
+
               d_fft_plan = fftw_plan_dft_1d(d_fft_size, d_fft_in, d_fft_out, FFTW_FORWARD, FFTW_ESTIMATE);
 
               d_locked = false;
               d_prev_max_index = 0;
               d_side_indexs = 2;
 
-              set_tag_propagation_policy(TPP_DONT);
+              // Intialize the window and calculate the coefficients
+              d_window = (float*) volk_malloc(d_fft_size*sizeof(float), volk_get_alignment());//fft::window::build(d_wintype, d_fft_size, 6.76);
+              std::vector<float> im = fft::window::build(d_wintype, d_fft_size, 6.76);
+              for (int i = 0; i < d_fft_size; i++) {
+                  d_window[i] = (float) im[i];
+              }
 
+              set_tag_propagation_policy(TPP_DONT);
 
               message_port_register_in(pmt::mp("locked")); // Register the message port
               set_msg_handler(pmt::mp("locked"), [this](pmt::pmt_t msg) { this->handle_lockmsg(msg);}); // Set the message handler
@@ -115,25 +123,23 @@ namespace gr {
     // Copy the input to the output signal according the amount of FFT's
     memcpy(out, in, sizeof(gr_complex) * (noutput_items/d_fft_size) * d_fft_size);
 
-    if (d_decimation > 1){
-      // Decimate the signal
-
-      in_decimated = (gr_complex*) malloc(sizeof(gr_complex) * noutput_items/d_decimation);
-
-      for (int i = 0; i < noutput_items/d_decimation; i++) {
-        in_decimated[i] = in[i*d_decimation];
-      }
-    }
 
     uint32_t  max_index;
 
     // Perform the signal detection by FFT
     for (processed_items = 0 ; processed_items <= (noutput_items - d_fft_size*d_decimation); processed_items += d_fft_size*d_decimation) {
 
+      // Perform the windowing of the input signal
       for (int i = 0; i < d_fft_size; i++) {
+        in[i] = in[processed_items + i]*d_window[i];
+      }
+
+      for (int i = 0; i < d_fft_size; d_decimation*i++) {
         d_fft_in[i][0] = in[processed_items + i].real();  // Real part
         d_fft_in[i][1] = in[processed_items + i].imag();  // Imaginary part
       }
+
+      
 
       // Perform the FFT
       fftw_execute(d_fft_plan);
@@ -148,6 +154,8 @@ namespace gr {
       d_fft_data[i] = real_part * real_part + imag_part * imag_part;
       }
       
+      
+
       // Use volk to search for the maximum arg val
       volk_32f_index_max_32u(&max_index, d_fft_data, d_fft_size);
 

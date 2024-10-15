@@ -18,6 +18,7 @@
 
 #include <gnuradio/ecss/signal_detector.h>
 #include <fftw3.h>
+#include <gnuradio/fft/window.h>
 
 
 namespace gr {
@@ -36,7 +37,7 @@ private:
   int d_prev_max_index;
   float d_threshold;
   float d_search_bandwidth;
-  float d_fft_data[4096];
+  float d_fft_data[8192];
 
   float d_signal_power;
   float d_noise_power;
@@ -47,13 +48,16 @@ private:
   fftw_complex *d_fft_out;
   fftw_plan d_fft_plan;
 
+  fft::window::win_type d_wintype;
+  float * d_window;
+
 
   // Private functions
   void handle_lockmsg(pmt::pmt_t msg);
 
 
 public: 
-  signal_detector_impl(int modulation, int samp_rate, int fft_size, float threshold, int decimation, float search_bandwidth);
+  signal_detector_impl(int modulation, int samp_rate, int fft_size, int wintype, float threshold, int decimation, float search_bandwidth);
   ~signal_detector_impl();
 
 

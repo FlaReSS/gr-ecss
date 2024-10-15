@@ -9,7 +9,8 @@ category: '[ecss]'
 templates:
     imports: |-
         from gnuradio import ecss
-    make: ecss.signal_detector(${modulation},${samp_rate}, ${fft_size}, ${threshold}, ${decimation}, ${search_bandwidth})
+        from gnuradio.fft import window
+    make: ecss.signal_detector(${modulation},${samp_rate}, ${fft_size}, ${wintype}, ${threshold}, ${decimation}, ${search_bandwidth})
     callbacks:
     - set_samp_rate(${samp_rate})
     - set_fft_size(${fft_size})
@@ -41,6 +42,14 @@ parameters:
   label: FFT Size
   dtype: int
   default: 1024
+-   id: wintype
+    label: Window Type
+    dtype: enum
+    default: window.WIN_BLACKMAN_hARRIS
+    options: [window.WIN_BLACKMAN_hARRIS, window.WIN_HAMMING, window.WIN_HANN, window.WIN_BLACKMAN,
+        window.WIN_RECTANGULAR, window.WIN_KAISER, window.WIN_FLATTOP]
+    option_labels: [Blackman-harris, Hamming, Hann, Blackman, Rectangular, Kaiser,
+        Flat-top]
 - id: threshold
   label: Threshold [dB]
   dtype: float

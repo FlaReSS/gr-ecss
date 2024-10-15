@@ -41,6 +41,7 @@ void bind_signal_detector(py::module& m)
             py::arg("modulation"),
             py::arg("samp_rate"),
             py::arg("fft_size"),
+            py::arg("wintype"),
             py::arg("threshold"),
             py::arg("decimation"),
             py::arg("search_bandwidth"),
