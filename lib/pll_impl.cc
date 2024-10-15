@@ -46,9 +46,9 @@ namespace gr {
                const std::vector<double> &coefficients,
                float freq_central,
                float bw,
-               std::string sel_loop_detector)
+               std::string sel_lock_detector)
     {
-      return gnuradio::get_initial_sptr(new pll_impl(samp_rate, N, coefficients, freq_central, bw, sel_loop_detector));
+      return gnuradio::get_initial_sptr(new pll_impl(samp_rate, N, coefficients, freq_central, bw, sel_lock_detector));
     }
 
 //    static int ios[] = {sizeof(gr_complex), sizeof(float), sizeof(float), sizeof(int64_t)};
@@ -60,7 +60,7 @@ namespace gr {
                         const std::vector<double> &coefficients,
                         float freq_central,
                         float bw,
-                        std::string sel_loop_detector)
+                        std::string sel_lock_detector)
         : gr::sync_block( "pll",
                           gr::io_signature::make(1, 1, sizeof(gr_complex)),
                           gr::io_signature::makev(1, 4, iosig)),
@@ -68,11 +68,9 @@ namespace gr {
                           d_coefficients(3, 0.0),
                           d_freq_central(freq_central),
                           d_bw(bw),
-                          d_sel_loop_detector(sel_loop_detector),
                           d_integer_phase(0),
                           d_enabled(true),
-                          d_locked(false),
-                          d_ext_lock(false)
+                          d_locked(false)
     {
       set_tag_propagation_policy(TPP_DONT);
 
@@ -84,6 +82,19 @@ namespace gr {
       set_N(N);
       set_coefficients(coefficients);
       reset();
+      
+      if (sel_lock_detector == "ext")
+      {
+        lock_detector = std::make_unique<ExternalLockDetector>();
+      }
+      else if (sel_lock_detector == "int")
+      {
+        lock_detector = std::make_unique<InternalLockDetector>();
+      }
+      else
+      {
+        throw std::runtime_error("Invalid value for sel_lock_detector");
+      }      
     }
 
     /*
@@ -97,7 +108,7 @@ namespace gr {
     {
       pmt::pmt_t lock_status = pmt::dict_ref(msg, pmt::intern("LOCK"), pmt::PMT_NIL);
       if (lock_status != pmt::PMT_NIL)
-        d_ext_lock = pmt::to_bool(lock_status);
+        lock_detector->set_ext_lock(pmt::to_bool(lock_status));
     }
     
     int
@@ -179,7 +190,7 @@ namespace gr {
         }
 
         //Check lock detector status and send message when lock status changes
-        if (lock_detector(output[i]) != d_locked)
+        if (lock_detector->process(output[i]) != d_locked)
         {
           d_locked = !d_locked;
           pmt::pmt_t msg = pmt::make_dict();
@@ -199,20 +210,6 @@ namespace gr {
       return sample_phase;
     }
 
-    bool
-    pll_impl::lock_detector(gr_complex sample)
-    {
-      if (d_sel_loop_detector == "ext")
-      {
-        return d_ext_lock;
-      }
-      if (d_sel_loop_detector == "int")
-      {
-        return false; //// TO BE IMPLEMENTED
-      }
-      return false;
-    }    
-    
     void
     pll_impl::reset()
     {
@@ -332,7 +329,6 @@ namespace gr {
      * GET FUNCTIONS
      *******************************************************************/
 
-
     std::vector<double>
     pll_impl::get_coefficients() const
     {
@@ -363,5 +359,20 @@ namespace gr {
       return 0;
     }
 
+    /*******************************************************************
+     * LOCK DETECTORS
+     *******************************************************************/
+    
+    bool ExternalLockDetector::process(gr_complex input) const
+    {
+      return ext_lock;
+    }
+
+    // Internal Loop Detector implementation
+    bool InternalLockDetector::process(gr_complex input) const
+    {
+      return false; //// TO BE IMPLEMENTED
+    }      
+    
   } /* namespace ecss */
 } /* namespace gr */

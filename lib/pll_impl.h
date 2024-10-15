@@ -27,21 +27,26 @@
 namespace gr {
   namespace ecss {
 
+    // Forward declaration of LockDetector
+    class LockDetector;
+
+    // -----------------------------------------------------------------------------------------
+    
     class pll_impl : public pll {
       // Private member variables
       int d_samp_rate;
       std::vector<double> d_coefficients;
       double d_freq_central;
       float d_bw;
-      std::string d_sel_loop_detector;
       
       int64_t d_integer_phase;
       bool d_enabled;
       bool d_locked;
-      bool d_ext_lock;
 
       int d_N;
       double d_precision;
+
+      std::unique_ptr<LockDetector> lock_detector;  // Store selected loop detector
 
       double integrator_order_1, integrator_order_2_1, integrator_order_2_2;
 
@@ -50,7 +55,6 @@ namespace gr {
 
       // Private methods
       double phase_detector(gr_complex sample);
-      bool lock_detector(gr_complex sample);
       void reset();                                       
       /*! \brief Evaluate the Loop filter output.
       *
@@ -101,6 +105,34 @@ namespace gr {
       float get_bw() const;
     };
 
+    // -----------------------------------------------------------------------------------------
+    
+    class LockDetector
+    {
+      public:
+        void set_ext_lock(bool lock_status) {};
+        
+        virtual ~LockDetector() = default;
+        virtual bool process(gr_complex input) const = 0;
+    };
+
+    class ExternalLockDetector : public LockDetector 
+    {
+      private:      
+        bool ext_lock;
+
+      public:
+        void set_ext_lock(bool lock_status) {ext_lock = lock_status;}
+        
+        bool process(gr_complex input) const override;
+    };
+
+    class InternalLockDetector : public LockDetector
+    {
+      public:
+        bool process(gr_complex input) const override;
+    };    
+    
   } // namespace ecss
 } // namespace gr
 
