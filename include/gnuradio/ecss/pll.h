@@ -57,14 +57,17 @@ namespace gr {
         * [4]= the Integral arm of the third order Loop Filter;
         * [5]= the Double Integral arm of the third order Loop Filter.
         * \param freq_central central value of frequency that PLL can catch.
-        * \param bw bandwidth of frequency that PLL can catchl.
+        * \param bw bandwidth of frequency that PLL can catch.
+        * \param sel_loop_detector selected type of loop detector.
+        * \param params_loop_detector vectors of parameters to be passed to the loop detectorl.
        */
       static sptr make( int samp_rate,
                         int N,
                         const std::vector<double> &coefficients,
                         float freq_central,
                         float bw,
-                        std::string sel_loop_detector);
+                        std::string sel_loop_detector,
+                        const std::vector<float> &params_loop_detector);
 
 
       /*******************************************************************

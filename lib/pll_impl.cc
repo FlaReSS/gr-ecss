@@ -46,9 +46,10 @@ namespace gr {
                const std::vector<double> &coefficients,
                float freq_central,
                float bw,
-               std::string sel_lock_detector)
+               std::string sel_lock_detector,
+               const std::vector<float> &params_loop_detector)
     {
-      return gnuradio::get_initial_sptr(new pll_impl(samp_rate, N, coefficients, freq_central, bw, sel_lock_detector));
+      return gnuradio::get_initial_sptr(new pll_impl(samp_rate, N, coefficients, freq_central, bw, sel_lock_detector, params_loop_detector));
     }
 
 //    static int ios[] = {sizeof(gr_complex), sizeof(float), sizeof(float), sizeof(int64_t)};
@@ -60,12 +61,13 @@ namespace gr {
                         const std::vector<double> &coefficients,
                         float freq_central,
                         float bw,
-                        std::string sel_lock_detector)
+                        std::string sel_lock_detector,
+                        const std::vector<float> &params_loop_detector)
         : gr::sync_block( "pll",
                           gr::io_signature::make(1, 1, sizeof(gr_complex)),
                           gr::io_signature::makev(1, 4, iosig)),
                           d_samp_rate(samp_rate),
-                          d_coefficients(3, 0.0),
+                          d_coefficients(3, 0.0),                          
                           d_freq_central(freq_central),
                           d_bw(bw),
                           d_integer_phase(0),
@@ -90,8 +92,8 @@ namespace gr {
       }
       else if (sel_lock_detector == "int")
       {
+        lock_detector = std::make_unique<InternalLockDetector>(params_loop_detector);
         std::cout<<"Selected internal lock detector"<<std::endl;
-        lock_detector = std::make_unique<InternalLockDetector>();
       }
       else
       {
@@ -114,7 +116,7 @@ namespace gr {
         pmt::pmt_t value = pmt::cdr(msg);
         if ((key == pmt::intern("LOCK")) && (pmt::is_bool(value)))
         {
-          lock_detector->set_ext_lock(pmt::to_bool(value));
+          lock_detector->set_lock_status(pmt::to_bool(value));
         }
       }
     }
@@ -170,12 +172,16 @@ namespace gr {
         // Phase detector
         output[i] = input[i] * gr_expj(-phase_denormalize(d_integer_phase));
         error = phase_detector(output[i]);
-        
+
         // Loop filter
         if (d_enabled || d_locked)   // if the PLL is enabled by the detector or is locked keep the loop closed, otherwise open the loop
+        {
           filter_out = advance_loop(error);
+        }
         else
+        {
           filter_out = 0.0;
+        }
 
         // NCO
         integer_step_phase = phase_normalize(filter_out + (d_freq_central / d_samp_rate * M_TWOPI));
@@ -196,15 +202,15 @@ namespace gr {
         {
           frequency_output[i] = integrator_order_1 * d_samp_rate / M_TWOPI + d_freq_central;
         }
-
+        
         //Check lock detector status and send message when lock status changes
-        if (lock_detector->process(output[i]) != d_locked)
+        if (lock_detector->get_lock_status(output[i]) != d_locked)
         {
           d_locked = !d_locked;
           pmt::pmt_t msg = pmt::cons(pmt::intern("LOCK"), pmt::from_bool(d_locked));
           message_port_pub(d_lock_out_port, msg);
         }
-
+        
       }
       return noutput_items;
     }
@@ -233,7 +239,7 @@ namespace gr {
     {
       //2nd order
       integrator_order_1 += d_coefficients[1] * error;
-
+      
       // only clip the frequency integrator if a not-null bandwidth hs been set
       if(d_bw != 0)
       {
@@ -369,16 +375,45 @@ namespace gr {
     /*******************************************************************
      * LOCK DETECTORS
      *******************************************************************/
-    
-    bool ExternalLockDetector::process(gr_complex input) const
+
+    // External Lock Detector implementation
+
+    void ExternalLockDetector::set_lock_status(bool lock_status)
+    {
+      ext_lock = lock_status;
+    }
+
+    bool ExternalLockDetector::get_lock_status(gr_complex input)
     {
       return ext_lock;
     }
 
-    // Internal Loop Detector implementation
-    bool InternalLockDetector::process(gr_complex input) const
+    // Internal Lock Detector implementation
+
+    InternalLockDetector::InternalLockDetector(const std::vector<float>& parameters)
     {
-      return false; //// TO BE IMPLEMENTED
+      if (parameters.size() != 3)
+      {
+        throw std::runtime_error("Invalid numbers of parameters for internal lock_detector");
+      }
+      alpha = parameters[0];
+      thr_l = parameters[1];
+      thr_h = parameters[2];
+      beta = 1.0f - alpha;
+      out_avg = 0;
+      out_rms = 0;
+      thr = thr_h;
+    }
+    
+    bool InternalLockDetector::get_lock_status(gr_complex input)
+    {
+      out_avg = out_avg * beta + input.real() * alpha;
+      
+      bool lock_status = (out_avg > thr);
+
+      thr = lock_status ? thr_l : thr_h;
+      
+      return lock_status;
     }      
     
   } /* namespace ecss */

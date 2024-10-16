@@ -82,7 +82,8 @@ namespace gr {
                 const std::vector<double> &coefficients,
                 float freq_central,
                 float bw,
-                std::string sel_loop_detector);
+                std::string sel_loop_detector,
+                const std::vector<float> &params_loop_detector);
 
       ~pll_impl();
 
@@ -110,10 +111,10 @@ namespace gr {
     class LockDetector
     {
       public:
-        virtual void set_ext_lock(bool lock_status) {};
-        
         virtual ~LockDetector() = default;
-        virtual bool process(gr_complex input) const = 0;
+
+        virtual void set_lock_status(bool lock_status) {};
+        virtual bool get_lock_status(gr_complex input) = 0;
     };
 
     class ExternalLockDetector : public LockDetector 
@@ -122,15 +123,24 @@ namespace gr {
         bool ext_lock;
 
       public:
-        void set_ext_lock(bool lock_status) override {ext_lock = lock_status;};
-        
-        bool process(gr_complex input) const override;
+        void set_lock_status(bool lock_status) override;
+        bool get_lock_status(gr_complex input) override;
     };
 
     class InternalLockDetector : public LockDetector
     {
+      private:      
+        float alpha;
+        float beta;
+        float thr_h;
+        float thr_l;  
+        float thr;
+        float out_avg;
+        float out_rms;
+
       public:
-        bool process(gr_complex input) const override;
+        InternalLockDetector(const std::vector<float>& parameters);  // Constructor        
+        bool get_lock_status(gr_complex input) override;
     };    
     
   } // namespace ecss

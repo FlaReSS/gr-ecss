@@ -6,7 +6,7 @@ category: '[ecss]'
 
 templates:
     imports: from gnuradio import ecss
-    make: ecss.pll(${samp_rate}, ${N}, ${coefficients}, ${freq_central},${bw}, ${sel_loop_detector})
+    make: ecss.pll(${samp_rate}, ${N}, ${coefficients}, ${freq_central},${bw}, ${sel_loop_detector}, ${params_loop_detector})
     callbacks:
     - set_coefficients(${coefficients})
     - set_freq_central(${freq_central})
@@ -22,7 +22,7 @@ parameters:
     dtype: int
     default: '38'
 -   id: coefficients
-    label: Coefficients
+    label: PLL Coefficients
     dtype: float_vector
     default: coefficients
 -   id: freq_central
@@ -39,7 +39,11 @@ parameters:
     default: 'External'
     options: ['ext', 'int']
     option_labels: [ 'External', 'Internal' ]
-
+-   id: params_loop_detector
+    label: Loop Detector Parameters
+    dtype: float_vector
+    default: ''
+    
 inputs:
 -   domain: stream
     dtype: complex
