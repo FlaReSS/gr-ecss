@@ -28,8 +28,6 @@ set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "")
 
 # Make sure our local CMake Modules path comes first
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
-# Find gnuradio to get access to the cmake modules
-find_package(Gnuradio "3.10" REQUIRED COMPONENTS blocks fft filter)
 
 # Set the version information here
 set(VERSION_MAJOR 1)
@@ -42,21 +40,49 @@ cmake_policy(SET CMP0011 NEW)
 # Enable generation of compile_commands.json for code completion engines
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-########################################################################
-# Minimum Version Requirements
-########################################################################
+# Add warnings
+if (MSVC)
+    # warning level 4 and all warnings as errors
+    add_compile_options(/W4)
+else()
+    # lots of warnings and all warnings as errors
+    add_compile_options(-Wall -Wextra -Wno-unused-parameter)
+endif()
 
-include(GrMinReq)
-
 ########################################################################
-# Compiler settings
+# Compiler specific setup
 ########################################################################
+if((CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR
+    CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    AND NOT WIN32)
+    #http://gcc.gnu.org/wiki/Visibility
+    add_definitions(-fvisibility=hidden)
+endif()
 
-include(GrCompilerSettings)
+IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    SET(CMAKE_CXX_STANDARD 14)
+ELSEIF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    SET(CMAKE_CXX_STANDARD 14)
+ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    SET(CMAKE_CXX_STANDARD 14)
+ELSE()
+    message(WARNING "C++ standard could not be set because compiler is not GNU, Clang or MSVC.")
+ENDIF()
+
+IF(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    SET(CMAKE_C_STANDARD 11)
+ELSEIF(CMAKE_C_COMPILER_ID MATCHES "Clang")
+    SET(CMAKE_C_STANDARD 11)
+ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+    SET(CMAKE_C_STANDARD 11)
+ELSE()
+    message(WARNING "C standard could not be set because compiler is not GNU, Clang or MSVC.")
+ENDIF()
 
 ########################################################################
 # Install directories
 ########################################################################
+find_package(Gnuradio "3.10" REQUIRED COMPONENTS blocks fft filter)
 include(GrVersion)
 
 include(GrPlatform) #define LIB_SUFFIX
@@ -98,6 +124,16 @@ endif(APPLE)
 find_package(Doxygen)
 
 ########################################################################
+# PyBind11 Related
+########################################################################
+
+find_package(pybind11 REQUIRED)
+execute_process(
+    COMMAND "${PYTHON_EXECUTABLE}" -c
+    "try:\n import numpy\n import os\n inc_path = numpy.get_include()\n if os.path.exists(os.path.join(inc_path, 'numpy', 'arrayobject.h')):\n  print(inc_path, end='')\nexcept:\n pass"
+    OUTPUT_VARIABLE PYTHON_NUMPY_INCLUDE_DIR)
+
+########################################################################
 # Setup doxygen option
 ########################################################################
 if(DOXYGEN_FOUND)
@@ -117,6 +153,7 @@ configure_file(
 add_custom_target(uninstall
     ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
     )
+
 
 ########################################################################
 # Add subdirectories
