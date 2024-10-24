@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(signal_detector.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(1cd24ef75fe91f50e33f333a017f687d)                     */
+/* BINDTOOL_HEADER_FILE_HASH(b6bf4bba0d5fb389ee51890c68b1500e)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
