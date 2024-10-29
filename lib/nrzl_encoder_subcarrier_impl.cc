@@ -89,7 +89,7 @@ namespace gr {
     {
       double phase = 0;
       double delta_phase;
-      float t_imag, t_real;
+//      float t_imag, t_real;
 
       delta_phase = (double)(M_TWOPI * freq) / samp_rate;
 

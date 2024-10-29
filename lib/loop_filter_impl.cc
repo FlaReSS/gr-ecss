@@ -53,7 +53,7 @@ namespace gr {
     {
       std::vector<double> coefficients;
 
-      double alpha = 1 / (M_TWOPI * natural_freq * t2);
+      //double alpha = 1 / (M_TWOPI * natural_freq * t2);
       double k = M_TWOPI * natural_freq * pow(t1/t2, 2.0);
       double kcrit = 1/(2*t2) * pow(t1/t2, 2.0);
       

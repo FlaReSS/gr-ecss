@@ -49,11 +49,11 @@ namespace gr {
       /*!
         * \brief Make a AGC Log-based.
         *
-        * \param samp_rate Sampling rate of signal.
+        * \param settling_time is the expected attack/settling time of the AGC.
         * \param reference rms expected value of the output.
         * \param initial_gain initial gain of the AGC.
         * \param maximum_gain maximum gain of the AGC.
-        * \param settling_time is the expected attack/settling time of the AGC.
+        * \param samp_rate Sampling rate of signal.
        */
       static sptr make(float settling_time, float reference, float initial_gain, float maximum_gain, float samp_rate);
 

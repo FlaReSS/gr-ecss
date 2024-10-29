@@ -44,12 +44,16 @@ namespace gr {
       : gr::block("threshold_to_message",
               gr::io_signature::make(1, 1, sizeof(float)),
               gr::io_signature::make(0, 1, sizeof(float))),
-      d_upper_threshold(upper_threshold), d_lower_threshold(lower_threshold), d_lower_msg(lower_message), d_upper_msg(upper_message), d_state(init_state)
+              d_lower_threshold(lower_threshold),
+              d_upper_threshold(upper_threshold),
+              d_lower_msg(lower_message),
+              d_upper_msg(upper_message),
+              d_state(init_state)
     {
       gr::basic_block::message_port_register_out(d_port);
     }
 
-    /*
+     /*
      * Our virtual destructor.
      */
     threshold_to_message_impl::~threshold_to_message_impl()

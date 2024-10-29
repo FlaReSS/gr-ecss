@@ -120,7 +120,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1264, 268.0]
+    coordinate: [1160, 224.0]
     rotation: 0
     state: true
 - name: loop_filter_3rd_order
@@ -138,7 +138,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1448, 252.0]
+    coordinate: [1352, 208.0]
     rotation: 0
     state: true
 - name: loop_order_chooser
@@ -168,7 +168,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1352, 92.0]
+    coordinate: [1240, 20.0]
     rotation: 0
     state: true
 - name: modulation_coeff_down
@@ -317,7 +317,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [880, 388.0]
+    coordinate: [768, 384.0]
     rotation: 0
     state: true
 - name: analog_frequency_modulator_fc_0
@@ -333,7 +333,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [456, 396.0]
+    coordinate: [456, 392.0]
     rotation: 0
     state: true
 - name: analog_noise_source_x_0
@@ -374,7 +374,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [200, 356.0]
+    coordinate: [200, 352.0]
     rotation: 0
     state: true
 - name: blocks_add_xx_1
@@ -440,7 +440,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1424, 932.0]
+    coordinate: [1464, 928.0]
     rotation: 180
     state: true
 - name: blocks_null_sink_0
@@ -491,7 +491,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1328, 684.0]
+    coordinate: [1328, 680.0]
     rotation: 180
     state: true
 - name: blocks_threshold_ff_0
@@ -565,7 +565,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [808, 900.0]
+    coordinate: [808, 896.0]
     rotation: 180
     state: true
 - name: ecss_gain_phase_accumulator_0
@@ -614,12 +614,14 @@ blocks:
     freq_central: '15000'
     maxoutbuf: '0'
     minoutbuf: '0'
+    params_loop_detector: '[0.0001, 0.5, 0.8]'
     samp_rate: samp_rate
+    sel_loop_detector: int
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1376, 368.0]
+    coordinate: [1280, 368.0]
     rotation: 0
     state: enabled
 - name: ecss_signal_search_goertzel_0
@@ -641,7 +643,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1096, 380.0]
+    coordinate: [968, 372.0]
     rotation: 0
     state: enabled
 - name: ecss_threshold_to_message_0
@@ -651,17 +653,17 @@ blocks:
     alias: ''
     comment: ''
     init_state: 'False'
-    lower_message: pmt.intern("UNLOCK")
+    lower_message: pmt.cons(pmt.intern("LOCK"), pmt.from_bool(False))
     lower_threshold: '0.5'
     maxoutbuf: '0'
     minoutbuf: '0'
-    upper_message: pmt.intern("LOCK")
+    upper_message: pmt.cons(pmt.intern("LOCK"), pmt.from_bool(True))
     upper_threshold: '0.8'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1056, 652.0]
+    coordinate: [1056, 648.0]
     rotation: 180
     state: true
 - name: flaress_add_0
@@ -760,7 +762,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [536, 868.0]
+    coordinate: [536, 864.0]
     rotation: 180
     state: enabled
 - name: qtgui_number_sink_0
@@ -841,7 +843,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1472, 684.0]
+    coordinate: [1472, 680.0]
     rotation: 180
     state: enabled
 
@@ -867,9 +869,9 @@ connections:
 - [ecss_pll_0, '1', blocks_null_sink_0_0, '0']
 - [ecss_pll_0, '2', blocks_null_sink_0, '0']
 - [ecss_pll_0, '3', ecss_gain_phase_accumulator_0, '0']
+- [ecss_pll_0, lock_out_msg, blocks_message_debug_0, print]
+- [ecss_pll_0, lock_out_msg, ecss_signal_search_goertzel_0, lock_in]
 - [ecss_signal_search_goertzel_0, '0', ecss_pll_0, '0']
-- [ecss_threshold_to_message_0, threshold_msg, blocks_message_debug_0, print]
-- [ecss_threshold_to_message_0, threshold_msg, ecss_signal_search_goertzel_0, lock_in]
 - [flaress_add_0, '0', ecss_coherent_phase_modulator_0, '0']
 - [single_pole_iir_filter_xx_0, '0', blocks_rms_xx_0, '0']
 

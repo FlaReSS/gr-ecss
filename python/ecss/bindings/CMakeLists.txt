@@ -49,12 +49,20 @@ GR_PYBIND_MAKE_OOT(ecss
    gr::ecss
    "${ecss_python_files}")
 
-# copy in bindings .so file for use in QA test module
+   
+# Set platform-specific copy command with the correct extension and paths
+if (WIN32)
+  set(COPY_COMMAND cmd.exe /C "copy \"${CMAKE_CURRENT_BINARY_DIR}\\*.pyd\" \"${CMAKE_BINARY_DIR}\\test_modules\\gnuradio\\ecss\\\"")
+else()
+  set(COPY_COMMAND /bin/sh -c "cp ${CMAKE_CURRENT_BINARY_DIR}/*.so ${CMAKE_BINARY_DIR}/test_modules/gnuradio/ecss/")
+endif()
+
+# Define a custom target to copy the binding shared library for QA test module
 add_custom_target(
   copy_bindings_for_tests ALL
-  COMMAND
-    ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/*.so"
-    ${CMAKE_BINARY_DIR}/test_modules/gnuradio/ecss/
-  DEPENDS ecss_python)
-
+  COMMAND ${COPY_COMMAND}
+  COMMENT "Copying generated Python bindings to test directory"
+  DEPENDS ecss_python
+)  
+  
 install(TARGETS ecss_python DESTINATION ${GR_PYTHON_DIR}/gnuradio/ecss COMPONENT pythonapi)

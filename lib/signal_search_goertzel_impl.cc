@@ -71,16 +71,15 @@ namespace gr{
     void 
     signal_search_goertzel_impl::handle_lockmsg(pmt::pmt_t msg)
     {
-      if(pmt::eqv(msg, pmt::mp("LOCK")) )
+      if (pmt::is_pair(msg))
       {
-        d_locked = true;
+        pmt::pmt_t key = pmt::car(msg);
+        pmt::pmt_t value = pmt::cdr(msg);
+        if ((key == pmt::intern("LOCK")) && (pmt::is_bool(value)))
+        {
+          d_locked = pmt::to_bool(value);
+        }
       }
-      else if(pmt::eqv(msg, pmt::mp("UNLOCK")) )
-      {
-        d_locked = false;
-        first = true;
-      }
-      return;
     }
 
     void

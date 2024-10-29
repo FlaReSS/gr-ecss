@@ -51,10 +51,9 @@ namespace gr {
     /*!
       * \brief SP-L encoder.
       *
-      * \param samp_rate Sampling rate of the output signal.
-      * \param bit_rate Bit rate of the input signal.
+      * \param oversampling Oversampling factor.
       */
-    static sptr make(float bit_rate, float samp_rate);
+    static sptr make(int oversampling);
     };
 
   } // namespace ecss

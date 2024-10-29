@@ -24,11 +24,11 @@
 #include <gnuradio/ecss/api.h>
 #include <gnuradio/sync_decimator.h>
 
-    namespace gr {
+namespace gr {
   namespace ecss {
 
   /*!
-     * \brief SP-L (or Manchester) encoder.
+     * \brief SP-L (or Manchester) decoder.
      *
      * \ingroup ecss
      *
@@ -50,9 +50,11 @@
     typedef std::shared_ptr<spl_decoder> sptr;
 
     /*!
-      * \brief SP-L encoder.
+      * \brief SP-L decoder.
+      *
+      * \param oversampling Oversampling factor.
       */
-    static sptr make();
+    static sptr make(int oversampling);
     };
 
   } // namespace ecss

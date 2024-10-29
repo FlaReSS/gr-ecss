@@ -28,12 +28,12 @@ namespace gr {
     class spl_encoder_impl : public spl_encoder
     {
       private:
-        float *rising_edge;
-        float *falling_edge;
+        float *symbol_0;
+        float *symbol_1;
         int d_interpolation;
 
       public:
-        spl_encoder_impl(float bit_rate, float samp_rate);
+        spl_encoder_impl(int oversampling);
         ~spl_encoder_impl();
 
         // Where all the action really happens

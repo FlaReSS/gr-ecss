@@ -6,8 +6,14 @@ category: '[ecss]'
 
 templates:
     imports: from gnuradio import ecss
-    make: ecss.spl_decoder()
+    make: ecss.spl_decoder(${oversampling})
 
+parameters:
+-   id: oversampling
+    label: Oversampling
+    dtype: int
+    default: oversampling    
+    
 inputs:
 -   domain: stream
     dtype: float

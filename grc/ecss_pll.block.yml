@@ -3,11 +3,10 @@
 id: ecss_pll
 label: PLL
 category: '[ecss]'
-flags:
 
 templates:
     imports: from gnuradio import ecss
-    make: ecss.pll(${samp_rate}, ${N}, ${coefficients}, ${freq_central},${bw})
+    make: ecss.pll(${samp_rate}, ${N}, ${coefficients}, ${freq_central},${bw}, ${sel_loop_detector}, ${params_loop_detector})
     callbacks:
     - set_coefficients(${coefficients})
     - set_freq_central(${freq_central})
@@ -23,7 +22,7 @@ parameters:
     dtype: int
     default: '38'
 -   id: coefficients
-    label: Coefficients
+    label: PLL Coefficients
     dtype: float_vector
     default: coefficients
 -   id: freq_central
@@ -34,10 +33,23 @@ parameters:
     label: Bandwidth
     dtype: real
     default: '1000.0'
-
+-   id: sel_loop_detector
+    label: Loop Detector
+    dtype: string
+    default: 'External'
+    options: ['ext', 'int']
+    option_labels: [ 'External', 'Internal' ]
+-   id: params_loop_detector
+    label: Loop Detector Parameters
+    dtype: float_vector
+    default: ''
+    
 inputs:
 -   domain: stream
     dtype: complex
+-   domain: message
+    id: lock_in_msg
+    optional: true
 
 outputs:
 -   domain: stream
@@ -53,6 +65,9 @@ outputs:
 -   label: phase delta
     domain: stream
     dtype: s64
+    optional: true
+-   domain: message
+    id: lock_out_msg
     optional: true
 
 asserts:

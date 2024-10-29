@@ -32,36 +32,30 @@ namespace gr
   {
 
     spl_encoder::sptr
-    spl_encoder::make(float bit_rate, float samp_rate)
+    spl_encoder::make(int oversampling)
     {
-      return gnuradio::get_initial_sptr(new spl_encoder_impl(bit_rate, samp_rate));
+      return gnuradio::get_initial_sptr(new spl_encoder_impl(oversampling));
     }
 
-    spl_encoder_impl::spl_encoder_impl(float bit_rate, float samp_rate)
+    spl_encoder_impl::spl_encoder_impl(int oversampling)
         : gr::sync_interpolator("spl_encoder",
               gr::io_signature::make(1, 1, sizeof(char)),
-              gr::io_signature::make(1, 1, sizeof(float)), (int)(samp_rate / bit_rate)),
-              d_interpolation((int) samp_rate / bit_rate)
+              gr::io_signature::make(1, 1, sizeof(float)), oversampling * 2),
+              d_interpolation(oversampling * 2)
     {
-      if (d_interpolation % 2 != 0)
-      {
-        throw std::out_of_range("spl encoder: the ratio samp rate on bit rate must to be integer and multiple of 2.");
-      }
-      rising_edge = (float *)volk_malloc(d_interpolation * sizeof(float), volk_get_alignment());
-
-      falling_edge = (float *)volk_malloc(d_interpolation * sizeof(float), volk_get_alignment());
-
+      symbol_0 = (float *)volk_malloc(d_interpolation * sizeof(float), volk_get_alignment());
+      symbol_1 = (float *)volk_malloc(d_interpolation * sizeof(float), volk_get_alignment());
       for (size_t i = 0; i < d_interpolation; i++)
       {
         if (i < (d_interpolation / 2))
         {
-          rising_edge[i] = -1;
-          falling_edge[i] = +1;
+          symbol_0[i] = -1;
+          symbol_1[i] = +1;
         }
         else
         {
-          rising_edge[i] = +1;
-          falling_edge[i] = -1;
+          symbol_0[i] = +1;
+          symbol_1[i] = -1;
         }
       }
     }
@@ -74,18 +68,22 @@ namespace gr
         gr_vector_const_void_star &input_items,
         gr_vector_void_star &output_items)
     {
+
+      // Access the input and output buffers
       const char *in = (const char *) input_items[0];
       float *out = (float *) output_items[0];
+
       int index_interpolation = 0;
+
       for (size_t i = 0; i < noutput_items; i += d_interpolation)
       {
         if (in[index_interpolation] > 0)
         {
-          memcpy(&out[i], falling_edge, (d_interpolation * sizeof(float)));
+          memcpy(&out[i], symbol_1, (d_interpolation * sizeof(float)));
         }
         else
         {
-          memcpy(&out[i], rising_edge, (d_interpolation * sizeof(float)));
+          memcpy(&out[i], symbol_0, (d_interpolation * sizeof(float)));
         }
         index_interpolation ++;
       }

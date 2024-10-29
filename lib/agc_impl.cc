@@ -48,8 +48,8 @@ namespace gr {
                        d_settling_time(settling_time),
                        d_reference(reference),
                        d_gain(std::log(initial_gain)),
-                       d_samp_rate(samp_rate),
-                       d_maximum_gain(std::log(maximum_gain))
+                       d_maximum_gain(std::log(maximum_gain)),
+                       d_samp_rate(samp_rate)
     {}
 
     template <>
@@ -86,8 +86,8 @@ namespace gr {
                         d_settling_time(settling_time),
                         d_reference(reference),
                         d_gain(std::log(initial_gain)),
-                        d_samp_rate(samp_rate),
-                        d_maximum_gain(std::log(maximum_gain))
+                        d_maximum_gain(std::log(maximum_gain)),
+                        d_samp_rate(samp_rate)
     {}
 
     template <>

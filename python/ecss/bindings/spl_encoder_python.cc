@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(spl_encoder.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(0c802322f7c2e3243e1876c87e5feb49)                     */
+/* BINDTOOL_HEADER_FILE_HASH(36c237487c615df55957e3a61168553f)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -37,8 +37,7 @@ void bind_spl_encoder(py::module& m)
         std::shared_ptr<spl_encoder>>(m, "spl_encoder", D(spl_encoder))
 
         .def(py::init(&spl_encoder::make),
-           py::arg("bit_rate"),
-           py::arg("samp_rate"),
+           py::arg("oversampling"),
            D(spl_encoder,make)
         )
         

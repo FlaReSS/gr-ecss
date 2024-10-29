@@ -27,38 +27,35 @@
 namespace gr {
   namespace ecss {
 
-    class pll_impl : public pll
-    {
-      int d_N;
+    // Forward declaration of LockDetector
+    class LockDetector;
+
+    // -----------------------------------------------------------------------------------------
+    
+    class pll_impl : public pll {
+      // Private member variables
       int d_samp_rate;
-      float d_bw;
-      int64_t d_integer_phase;
-      double d_integer_phase_denormalized;                /*!< Integer value after to be denormalized */
-      double precision;
-      double integrator_order_1, integrator_order_2_1, integrator_order_2_2;
-      //double branch_3_par, branch_3, branch_2, branch_2_3;
-      double d_freq_central;
       std::vector<double> d_coefficients;
+      double d_freq_central;
+      float d_bw;
+      
+      int64_t d_integer_phase;
+      bool d_enabled;
+      bool d_locked;
 
-      double mod_2pi(double in);                          /*! Keep the value between -2pi and 2pi */
-      void reset();                                       /*! Reset all the registers */
-      void NCO_denormalization();
+      int d_N;
+      double d_precision;
+
+      std::unique_ptr<LockDetector> lock_detector;  // Store selected loop detector
+
+      double integrator_order_1, integrator_order_2_1, integrator_order_2_2;
+
+      const pmt::pmt_t d_lock_out_port = pmt::mp("lock_out_msg");
+      const pmt::pmt_t d_lock_in_port  = pmt::mp("lock_in_msg");
+
+      // Private methods
       double phase_detector(gr_complex sample);
-      double magnitude(gr_complexd sample);
-      bool stop;
-
-      /*! \brief Integer phase converter
-      *
-      * converts the filter output into integer mathematics
-      */
-      int64_t integer_phase_converter(double step_phase);
-
-      /*! \brief Integer accumulator
-      *
-      * integrates the filter output (already converted) using an integer mathematics
-      */
-      void accumulator(int64_t filter_out);
-
+      void reset();                                       
       /*! \brief Evaluate the Loop filter output.
       *
       * \details
@@ -70,55 +67,82 @@ namespace gr {
       * d_Coeff2_2, d_Coeff1_2 to evaluate the output in according with the order of the filter.
       * \returns (double) output loop filter
       */
-      double advance_loop(double error);
-
-      /*! \brief Keep the phase in the range [-pi, pi).
+      double advance_loop(double error);                   
+      double phase_denormalize(int64_t phase) const;                          
+      /*! \brief Integer phase converter
       *
-      * \details
-      * This function keeps the phase between -pi and pi. If the
-      * phase is greater than pi by d, it wraps around to be -pi+d;
-      * similarly if it is less than -pi by d, it wraps around to
-      * pi-d.
-      * \returns (double) new phase limited
+      * converts the filter output into integer mathematics
       */
-      double phase_wrap(double phase);
+      int64_t phase_normalize(double phase) const;  
 
-      /*! \brief Keep the frequency between d_min_freq and d_max_freq.
-      *
-      * \details
-      * Specifically, this function works with the phase steps. Thus,
-      * keeps the steps of branch_2_3 (so, the integrated parts of the
-      * loop filter) between branch_2_3_max and branch_2_3_min.
-      * If the step is greater than branch_2_3_max, it
-      * is set to branch_2_3_max.  If the frequency is less than
-      * branch_2_3_min, it is set to branch_2_3_min.
-      *
-      * \param step (double) step
-      * \returns (double) new step limited
-      */
-      double frequency_limit(double step);
+    public:
+      // Public methods
+      pll_impl( int samp_rate,
+                int N,
+                const std::vector<double> &coefficients,
+                float freq_central,
+                float bw,
+                std::string sel_loop_detector,
+                const std::vector<float> &params_loop_detector);
+
+      ~pll_impl();
+
+      void handle_lock_in_msg(pmt::pmt_t msg);
+      int work(int noutput_items, gr_vector_const_void_star& input_items, gr_vector_void_star& output_items);
+
+      // Set functions
+      void set_N(int N);      
+      void set_coefficients(const std::vector<double>& coefficients);     
+      void set_frequency(float freq);        
+      void set_phase(float phase);       
+      void set_freq_central(float freq);       
+      void set_bw(float bw);                 
+
+      // Get functions
+      std::vector<double> get_coefficients() const;
+      float get_frequency() const;      
+      float get_phase() const;       
+      float get_freq_central() const;
+      float get_bw() const;
+    };
+
+    // -----------------------------------------------------------------------------------------
+    
+    class LockDetector
+    {
+      public:
+        virtual ~LockDetector() = default;
+
+        virtual void set_lock_status(bool lock_status) {};
+        virtual bool get_lock_status(gr_complex input) = 0;
+    };
+
+    class ExternalLockDetector : public LockDetector 
+    {
+      private:      
+        bool ext_lock;
 
       public:
-        pll_impl(int samp_rate, int N, const std::vector<double> &coefficients, float freq_central, float bw);
-        ~pll_impl();
+        void set_lock_status(bool lock_status) override;
+        bool get_lock_status(gr_complex input) override;
+    };
 
-        int work(int noutput_items,
-                 gr_vector_const_void_star &input_items,
-                 gr_vector_void_star &output_items);
+    class InternalLockDetector : public LockDetector
+    {
+      private:      
+        float alpha;
+        float beta;
+        float thr_h;
+        float thr_l;  
+        float thr;
+        float out_avg;
+        float out_rms;
 
-        void set_N(int N);     
-        void set_coefficients(const std::vector<double> &coefficients);      
-        void set_frequency(float freq);        
-        void set_phase(float phase);       
-        void set_freq_central(float freq);       
-        void set_bw(float bw);
-        std::vector<double> get_coefficients() const;
-        float get_frequency() const;      
-        float get_phase() const;       
-        float get_freq_central() const;
-        float get_bw() const;
-      };
-
+      public:
+        InternalLockDetector(const std::vector<float>& parameters);  // Constructor        
+        bool get_lock_status(gr_complex input) override;
+    };    
+    
   } // namespace ecss
 } // namespace gr
 

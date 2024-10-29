@@ -41,26 +41,64 @@ namespace gr {
     #endif
 
     pll::sptr
-    pll::make(int samp_rate, int N, const std::vector<double> &coefficients, float freq_central, float bw)
+    pll::make( int samp_rate,
+               int N,
+               const std::vector<double> &coefficients,
+               float freq_central,
+               float bw,
+               std::string sel_lock_detector,
+               const std::vector<float> &params_loop_detector)
     {
-      return gnuradio::get_initial_sptr(new pll_impl(samp_rate, N, coefficients, freq_central, bw));
-      }
+      return gnuradio::get_initial_sptr(new pll_impl(samp_rate, N, coefficients, freq_central, bw, sel_lock_detector, params_loop_detector));
+    }
 
-    static int ios[] = {sizeof(gr_complex), sizeof(float), sizeof(float), sizeof(int64_t)};
-    static std::vector<int> iosig(ios, ios+sizeof(ios)/sizeof(int));
-    pll_impl::pll_impl(int samp_rate, int N, const std::vector<double> &coefficients, float freq_central, float bw)
-        : gr::sync_block("pll",
-                         gr::io_signature::make(1, 1, sizeof(gr_complex)),
-                         gr::io_signature::makev(1, 4, iosig)),
-          d_N(N), d_integer_phase(0), d_integer_phase_denormalized(0),          
-          d_samp_rate(samp_rate),
-          d_freq_central(freq_central), d_coefficients(3, 0.0), d_bw(bw)
+//    static int ios[] = {sizeof(gr_complex), sizeof(float), sizeof(float), sizeof(int64_t)};
+//    static std::vector<int> iosig(ios, ios+sizeof(ios)/sizeof(int));
+    std::vector<int> iosig = {sizeof(gr_complex), sizeof(float), sizeof(float), sizeof(int64_t)};
+
+    pll_impl::pll_impl( int samp_rate,
+                        int N,
+                        const std::vector<double> &coefficients,
+                        float freq_central,
+                        float bw,
+                        std::string sel_lock_detector,
+                        const std::vector<float> &params_loop_detector)
+        : gr::sync_block( "pll",
+                          gr::io_signature::make(1, 1, sizeof(gr_complex)),
+                          gr::io_signature::makev(1, 4, iosig)),
+                          d_samp_rate(samp_rate),
+                          d_coefficients(3, 0.0),                          
+                          d_freq_central(freq_central),
+                          d_bw(bw),
+                          d_integer_phase(0),
+                          d_enabled(true),
+                          d_locked(false)
     {
-		stop = false;
       set_tag_propagation_policy(TPP_DONT);
+
+      message_port_register_in(d_lock_in_port);
+      set_msg_handler(d_lock_in_port, [this](pmt::pmt_t msg) { this->handle_lock_in_msg(msg); });
+      
+      message_port_register_out(d_lock_out_port);
+
       set_N(N);
       set_coefficients(coefficients);
       reset();
+      
+      if (sel_lock_detector == "ext")
+      {
+        std::cout<<"Selected external lock detector"<<std::endl;
+        lock_detector = std::make_unique<ExternalLockDetector>();
+      }
+      else if (sel_lock_detector == "int")
+      {
+        lock_detector = std::make_unique<InternalLockDetector>(params_loop_detector);
+        std::cout<<"Selected internal lock detector"<<std::endl;
+      }
+      else
+      {
+        throw std::runtime_error("Invalid value for sel_lock_detector");
+      }      
     }
 
     /*
@@ -69,23 +107,36 @@ namespace gr {
     pll_impl::~pll_impl()
     {}
 
+    void 
+    pll_impl::handle_lock_in_msg(pmt::pmt_t msg)
+    {
+      if (pmt::is_pair(msg))
+      {
+        pmt::pmt_t key = pmt::car(msg);
+        pmt::pmt_t value = pmt::cdr(msg);
+        if ((key == pmt::intern("LOCK")) && (pmt::is_bool(value)))
+        {
+          lock_detector->set_lock_status(pmt::to_bool(value));
+        }
+      }
+    }
+    
     int
     pll_impl::work (int noutput_items,
-                       gr_vector_const_void_star &input_items,
-                       gr_vector_void_star &output_items)
+                    gr_vector_const_void_star &input_items,
+                    gr_vector_void_star &output_items)
     {
-		// input stream
-		const gr_complex *input = (gr_complex*)input_items[0];
-		// output stream
-		gr_complex *output = (gr_complex*)output_items[0];
-		// optional output signals
-		float *frequency_output = output_items.size() >= 2 ? (float *)output_items[1] : NULL;
-		float *phase_error = output_items.size() >= 3 ? (float *)output_items[2] : NULL;
-		int64_t *phase_delta = output_items.size() >= 4 ? (int64_t *)output_items[3] : NULL;
+      // input stream
+      const gr_complex *input = (gr_complex*)input_items[0];
+      // output stream
+      gr_complex *output = (gr_complex*)output_items[0];
+      // optional output signals
+      float *frequency_output = output_items.size() >= 2 ? (float *)output_items[1] : NULL;
+      float *phase_error = output_items.size() >= 3 ? (float *)output_items[2] : NULL;
+      int64_t *phase_delta = output_items.size() >= 4 ? (int64_t *)output_items[3] : NULL;
 
-      double module, error;
-      double filter_out, filter_out_limited;
-      double t_imag, t_real;
+      double error;
+      double filter_out;
       int64_t integer_step_phase;
 
       std::vector<tag_t> tags;
@@ -93,101 +144,75 @@ namespace gr {
       for(int i = 0; i < noutput_items; i++) 
       {
 
-         get_tags_in_window( // Note the different method name
-             tags, // Tags will be saved here
-             0, // Port 0
-             i, // Start of range (relative to nitems_read(0))
-             (i + 1) // End of relative range
-         );
+        get_tags_in_window( // Note the different method name
+                            tags, // Tags will be saved here
+                            0, // Port 0
+                            i, // Start of range (relative to nitems_read(0))
+                            (i + 1) // End of relative range
+                          );
+        if (tags.size() > 0) 
+        {
+          if (tags[0].value == pmt::intern("stop") && tags[0].key == pmt::intern("pll")) 
+          {
+            d_enabled = false;
+//            reset();
+          }
+          if (tags[0].value == pmt::intern("start") && tags[0].key == pmt::intern("pll")) 
+          {
+            d_enabled = true;
+            reset();
+            if (tags.size() > 1 && tags[1].key == pmt::intern("pll_start_freq"))
+            {
+              set_frequency(pmt::to_float(tags[1].value));
+//              integrator_order_1 = (pmt::to_float(tags[1].value) - d_freq_central) / d_samp_rate * M_TWOPI;
+            }
+          }
+        }
 
-		if (tags.size() > 0) 
-		{
-			if (tags[0].value == pmt::intern("reset") && tags[0].key == pmt::intern("pll")) 
-			{
-				reset();
-			}
-			if (tags[0].value == pmt::intern("stop") && tags[0].key == pmt::intern("pll")) 
-			{
-				stop = true;
-				reset();
-				add_item_tag(3,                    // Port number
-                    nitems_written(0) + (i),       // Offset
-                    pmt::intern("modulator"),    // Key
-                    pmt::intern("reset")           // Value
-                    );
-			}
-			if (tags[0].value == pmt::intern("start") && tags[0].key == pmt::intern("pll")) 
-			{
-				stop = false;
-				reset();
-				add_item_tag(3,                    // Port number
-                    nitems_written(0) + (i),       // Offset
-                    pmt::intern("accumulator"),    // Key
-                    pmt::intern("reset")           // Value
-                    );
-			}
-			if (tags[0].value == pmt::intern("start(1e3)") && tags[0].key == pmt::intern("pll")) 
-			{
-				stop = false;
-			}
-		}
+        // Phase detector
+        output[i] = input[i] * gr_expj(-phase_denormalize(d_integer_phase));
+        error = phase_detector(output[i]);
 
-		if (phase_delta != NULL)
-		{
-			phase_delta[i] = d_integer_phase;
-		}
-		output[i] = input[i] * gr_expj(-d_integer_phase_denormalized);
-		error = phase_detector(output[i]);
+        // Loop filter
+        if (d_enabled || d_locked)   // if the PLL is enabled by the detector or is locked keep the loop closed, otherwise open the loop
+        {
+          filter_out = advance_loop(error);
+        }
+        else
+        {
+          filter_out = 0.0;
+        }
 
-		// output the phase error, if a signal is connected to the optional port
-		if (phase_error != NULL)
-		{
-			if (stop)
-			{
-				d_integer_phase = 0;
-				phase_error[i] = 0;
-			}
-			else
-			{
-				phase_error[i] = error;
-			}
-		}	
-		
-		// if the PLL has been stopped, force the error to zero, this makes sure 
-		// the PLL remains fixed on the center frequency
-		if (stop)
-		{
-			filter_out = 0.0;
-		}
-		else
-		{
-			// output of the loop filter
-			filter_out = advance_loop(error);
-		}
+        // NCO
+        integer_step_phase = phase_normalize(filter_out + (d_freq_central / d_samp_rate * M_TWOPI));
+        d_integer_phase += integer_step_phase;
 
-		// output the current PLL frequency, if a signal is connected to the optional port
-		if (frequency_output != NULL)
-		{
-			frequency_output[i] = integrator_order_1 * d_samp_rate / M_TWOPI + d_freq_central;
-		}
-
-         integer_step_phase = integer_phase_converter(filter_out + (d_freq_central / d_samp_rate * M_TWOPI));
-         accumulator(integer_step_phase);
-         NCO_denormalization();
-         
+        // output the phase delta, if a signal is connected to the optional port
+        if (phase_delta != NULL)
+        {
+          phase_delta[i] = d_integer_phase;
+        }
+        // output the phase error, if a signal is connected to the optional port
+        if (phase_error != NULL)
+        {
+          phase_error[i] = error;
+        }
+        // output the current PLL frequency, if a signal is connected to the optional port
+        if (frequency_output != NULL)
+        {
+          frequency_output[i] = integrator_order_1 * d_samp_rate / M_TWOPI + d_freq_central;
+        }
+        
+        //Check lock detector status and send message when lock status changes
+        if (lock_detector->get_lock_status(output[i]) != d_locked)
+        {
+          d_locked = !d_locked;
+          pmt::pmt_t msg = pmt::cons(pmt::intern("LOCK"), pmt::from_bool(d_locked));
+          message_port_pub(d_lock_out_port, msg);
+        }
+        
       }
       return noutput_items;
-    }
-
-    double
-    pll_impl::mod_2pi(double in)
-    {
-      if(in >= M_PI)
-          return in - M_TWOPI;
-      else if(in < -M_PI)
-          return in + M_TWOPI;
-      else
-          return in;
     }
 
     double
@@ -195,16 +220,7 @@ namespace gr {
     {
       double sample_phase;
       sample_phase = atan2(sample.imag(),sample.real());
-      //return mod_2pi(sample_phase);
       return sample_phase;
-    }
-
-    double
-    pll_impl::magnitude(gr_complexd sample)
-    {
-      double sample_magn;
-      sample_magn = sqrt(sample.imag()*sample.imag() + sample.real()*sample.real());
-      return sample_magn;
     }
 
     void
@@ -214,8 +230,8 @@ namespace gr {
       integrator_order_2_1 = 0;
       integrator_order_2_2 = 0;
 
-      d_integer_phase_denormalized = 0;
-      d_integer_phase = 0;
+//      This may not be needed when resetting the PLL. To be checked.
+//      d_integer_phase = 0;
     }
 
     double
@@ -223,7 +239,7 @@ namespace gr {
     {
       //2nd order
       integrator_order_1 += d_coefficients[1] * error;
-
+      
       // only clip the frequency integrator if a not-null bandwidth hs been set
       if(d_bw != 0)
       {
@@ -247,43 +263,19 @@ namespace gr {
     }
 
     int64_t
-    pll_impl::integer_phase_converter(double step_phase)
+    pll_impl::phase_normalize(double phase) const
     {
-      double filter_out_norm = step_phase / M_PI;
-      int64_t temp_integer_phase = (int64_t)round(filter_out_norm / precision);
-      return (temp_integer_phase << (64 - d_N)) ;
+      int64_t temp = (int64_t)round(phase / M_PI / d_precision);
+      return (temp << (64 - d_N));
     }
 
-    void
-    pll_impl::accumulator(int64_t integer_step_phase)
+    double
+    pll_impl::phase_denormalize(int64_t phase) const
     {
-      d_integer_phase += integer_step_phase;
-    }
-
-    void
-    pll_impl::NCO_denormalization()
-    {
-      int64_t temp_integer_phase = (d_integer_phase >> (64 - d_N));
-      double temp_denormalization = (double)(temp_integer_phase * precision);
-      d_integer_phase_denormalized = temp_denormalization * M_PI;
+      int64_t temp = (phase >> (64 - d_N));
+      return ((double)(temp * d_precision * M_PI));
       }
 
-
-    double
-    pll_impl::phase_wrap(double phase)
-    {
-      while(phase > M_PI)
-        phase -= M_TWOPI;
-      while(phase <= -M_PI)
-        phase += M_TWOPI;
-      return phase;
-    }
-
-    double
-    pll_impl::frequency_limit(double step)
-    {
-       return 0.0;
-    }
 
     /*******************************************************************
      * SET FUNCTIONS
@@ -296,7 +288,7 @@ namespace gr {
         throw std::out_of_range ("pll: invalid number of bits. Must be in [0, 52].");
       }
       d_N = N;
-      precision = pow(2,(- (N - 1)));
+      d_precision = pow(2,(- (N - 1)));
     }
 
     void
@@ -331,11 +323,7 @@ namespace gr {
     void
     pll_impl::set_phase(float phase)
     {
-      d_integer_phase_denormalized = (double) phase;
-      while(d_integer_phase_denormalized>=M_PI)
-        d_integer_phase_denormalized -= M_PI;
-      while(d_integer_phase_denormalized<-M_PI)
-        d_integer_phase_denormalized += M_TWOPI;
+      d_integer_phase = phase_normalize((double)phase);
     }
 
     void
@@ -347,13 +335,12 @@ namespace gr {
     void
     pll_impl::set_bw(float bw)
     {
-
+      d_bw = bw;
     }
 
     /*******************************************************************
      * GET FUNCTIONS
      *******************************************************************/
-
 
     std::vector<double>
     pll_impl::get_coefficients() const
@@ -370,7 +357,7 @@ namespace gr {
     float
     pll_impl::get_phase() const
     {
-      return (float)d_integer_phase_denormalized;
+      return (float)phase_denormalize(d_integer_phase);
     }
 
     float
@@ -385,5 +372,49 @@ namespace gr {
       return 0;
     }
 
+    /*******************************************************************
+     * LOCK DETECTORS
+     *******************************************************************/
+
+    // External Lock Detector implementation
+
+    void ExternalLockDetector::set_lock_status(bool lock_status)
+    {
+      ext_lock = lock_status;
+    }
+
+    bool ExternalLockDetector::get_lock_status(gr_complex input)
+    {
+      return ext_lock;
+    }
+
+    // Internal Lock Detector implementation
+
+    InternalLockDetector::InternalLockDetector(const std::vector<float>& parameters)
+    {
+      if (parameters.size() != 3)
+      {
+        throw std::runtime_error("Invalid numbers of parameters for internal lock_detector");
+      }
+      alpha = parameters[0];
+      thr_l = parameters[1];
+      thr_h = parameters[2];
+      beta = 1.0f - alpha;
+      out_avg = 0;
+      out_rms = 0;
+      thr = thr_h;
+    }
+    
+    bool InternalLockDetector::get_lock_status(gr_complex input)
+    {
+      out_avg = out_avg * beta + input.real() * alpha;
+      
+      bool lock_status = (out_avg > thr);
+
+      thr = lock_status ? thr_l : thr_h;
+      
+      return lock_status;
+    }      
+    
   } /* namespace ecss */
 } /* namespace gr */
