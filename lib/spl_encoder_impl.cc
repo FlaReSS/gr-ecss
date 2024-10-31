@@ -45,7 +45,7 @@ namespace gr
     {
       symbol_0 = (float *)volk_malloc(d_interpolation * sizeof(float), volk_get_alignment());
       symbol_1 = (float *)volk_malloc(d_interpolation * sizeof(float), volk_get_alignment());
-      for (size_t i = 0; i < d_interpolation; i++)
+      for (int i = 0; i < d_interpolation; i++)
       {
         if (i < (d_interpolation / 2))
         {
@@ -74,8 +74,7 @@ namespace gr
       float *out = (float *) output_items[0];
 
       int index_interpolation = 0;
-
-      for (size_t i = 0; i < noutput_items; i += d_interpolation)
+      for (int i = 0; i < noutput_items; i += d_interpolation)
       {
         if (in[index_interpolation] > 0)
         {

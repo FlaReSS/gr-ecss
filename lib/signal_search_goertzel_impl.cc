@@ -103,8 +103,7 @@ namespace gr{
       float central_avg;
       float left_avg;
       float right_avg;
-      uint out_items = 0;
-      uint i = 0;
+      int i = 0;
 
       // is this the first iteration of the loop? Then add a stop tag to make sure 
       // the pll afterwards does not wonder around
@@ -182,7 +181,7 @@ namespace gr{
     signal_search_goertzel_impl::bins
     signal_search_goertzel_impl::double_goertzel_complex(gr_complex *in)
     {
-
+//
       float Q0_0r, Q0_0i, Q0_1r, Q0_1i, Q0_2r, Q0_2i;
       float Q1_0r, Q1_0i, Q1_1r, Q1_1i, Q1_2r, Q1_2i;
       float Q2_0r, Q2_0i, Q2_1r, Q2_1i, Q2_2r, Q2_2i;

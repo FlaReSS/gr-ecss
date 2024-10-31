@@ -69,7 +69,7 @@ namespace gr {
       const char *in = (const char *)input_items[0];
       float *out = (float *)output_items[0];
       int index_interpolation = 0;
-      for (size_t i = 0; i < noutput_items; i += d_interpolation)
+      for (int i = 0; i < noutput_items; i += d_interpolation)
       {
         if (in[index_interpolation] > 0)
         {
