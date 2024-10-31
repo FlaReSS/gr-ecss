@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(signal_search_goertzel.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(c86326ce1e87f2aff25b870e355771ee)                     */
+/* BINDTOOL_HEADER_FILE_HASH(fffa59493f7b4fd5e02e7a1ce6b050df)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -37,7 +37,6 @@ void bind_signal_search_goertzel(py::module& m)
         std::shared_ptr<signal_search_goertzel>>(m, "signal_search_goertzel", D(signal_search_goertzel))
 
         .def(py::init(&signal_search_goertzel::make),
-           py::arg("enable"),
            py::arg("average"),
            py::arg("freq_central"),
            py::arg("bandwidth"),
@@ -82,12 +81,6 @@ void bind_signal_search_goertzel(py::module& m)
 
 
         
-        .def("get_enable",&signal_search_goertzel::get_enable,       
-            D(signal_search_goertzel,get_enable)
-        )
-
-
-        
         .def("get_size",&signal_search_goertzel::get_size,       
             D(signal_search_goertzel,get_size)
         )
@@ -127,12 +120,6 @@ void bind_signal_search_goertzel(py::module& m)
             D(signal_search_goertzel,set_average)
         )
 
-
-        
-        .def("set_enable",&signal_search_goertzel::set_enable,       
-            py::arg("enable"),
-            D(signal_search_goertzel,set_enable)
-        )
 
         ;
 

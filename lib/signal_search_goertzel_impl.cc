@@ -38,22 +38,24 @@ namespace gr{
     #endif
 
   signal_search_goertzel::sptr
-  signal_search_goertzel::make(bool enable, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
+  signal_search_goertzel::make(bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
   {
-    return gnuradio::get_initial_sptr(new signal_search_goertzel_impl(enable, average, freq_central, bandwidth, freq_cutoff, threshold, samp_rate));
+    return gnuradio::get_initial_sptr(new signal_search_goertzel_impl(average, freq_central, bandwidth, freq_cutoff, threshold, samp_rate));
     }
 
-    signal_search_goertzel_impl::signal_search_goertzel_impl(bool enable, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
+    signal_search_goertzel_impl::signal_search_goertzel_impl(bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate)
         : gr::block("signal_search_goertzel",
                     gr::io_signature::make(1, 1, sizeof(gr_complex)),
                     gr::io_signature::make2(1, 2, sizeof(gr_complex), sizeof(char))),
-	  d_freq_central(freq_central),
-	  d_bandwidth(bandwidth), d_freq_cutoff(freq_cutoff),
-	  d_threshold(std::pow(10.0, (threshold / 10))), d_samp_rate(samp_rate),
-	  d_iir_central(M_PI * freq_cutoff / samp_rate),
-	  d_iir_left(M_PI * freq_cutoff / samp_rate),
-          d_iir_right(M_PI * freq_cutoff / samp_rate),
-          d_average(average), d_enable(enable)
+          d_freq_central(freq_central),
+          d_bandwidth(bandwidth),
+          d_freq_cutoff(freq_cutoff),
+          d_threshold(std::pow(10.0, (threshold / 10))),
+          d_samp_rate(samp_rate),
+          d_average(average),
+          d_iir_central(M_PI * freq_cutoff / samp_rate),
+          d_iir_left(M_PI * freq_cutoff / samp_rate),
+          d_iir_right(M_PI * freq_cutoff / samp_rate)
     {
       first = true;
       d_locked = false;
@@ -96,8 +98,6 @@ namespace gr{
     {
       gr_complex *in = (gr_complex *) input_items[0];
       gr_complex *out = (gr_complex *)output_items[0];
-      // char *flag = (char *)output_items[1];
-      char *flag = output_items.size() >= 2 ? (char *)output_items[1] : NULL;
 
       bins goertzel;
       float central_avg;
@@ -119,7 +119,7 @@ namespace gr{
           first = false;
       }
       
-      if(d_enable == true)
+      if(d_locked == false)
       {
       
         for (i = 0; i < (noutput_items - d_size + 1); i += d_size)
@@ -145,52 +145,38 @@ namespace gr{
           
           if (central_avg > ((left_avg + right_avg) * d_threshold / 2)) 
           {
-            if (d_state == false && d_locked == false)
+            if (d_state == false)
             {
-              std::cout<<"INSERTING PLL START TAG"<<std::endl;
+//              std::cout<<"INSERTING PLL START TAG"<<std::endl;
               add_item_tag(0,                           // Port number
                           nitems_written(0) + (i),      // Offset
                           pmt::intern("pll"),           // Key
                           pmt::intern("start")          // Value
-            );
+              );
               // average_reset();
+              d_state = true;
             }
-            d_state = true;
           }
           else
           {
-            d_state = false;
-          }
-
-
-
-          if(d_state || d_locked) //ouptut on Goertzel hit OR if PLL is locked
-          {
-            memcpy(&out[i], &in[i], sizeof(gr_complex) * d_size);
-            if (flag != NULL)
+            if (d_state == true)
             {
-              memset(&flag[i], 1, sizeof(char) * d_size);
+//              std::cout<<"INSERTING PLL STOP TAG"<<std::endl;
+              add_item_tag(0,                           // Port number
+                          nitems_written(0) + (i),      // Offset
+                          pmt::intern("pll"),           // Key
+                          pmt::intern("stop")           // Value
+              );
+              // average_reset();
+              d_state = false;
             }
-          }
-          else
-          {
-            memset(&out[i], 0, sizeof(gr_complex) * d_size);
-            if (flag != NULL)
-              memset(&flag[i], 0, sizeof(char) * d_size);
           }
         }
+      }  // if(d_locked == false)
 
-        consume_each(i);
-        return i;
-      }
-      else
-      {
-        memcpy(&out[0], &in[0], sizeof(gr_complex) * noutput_items);
-        consume_each(noutput_items);
-        if (flag != NULL)
-          memset(flag, 1, sizeof(char) * noutput_items);
-        return noutput_items;
-      }
+      memcpy(&out[0], &in[0], sizeof(gr_complex) * noutput_items);
+      consume_each(noutput_items);
+      return noutput_items;
     }
 
     signal_search_goertzel_impl::bins
@@ -311,9 +297,6 @@ namespace gr{
     bool
     signal_search_goertzel_impl::get_average() const { return d_average; }
 
-    bool
-    signal_search_goertzel_impl::get_enable() const { return d_enable; }
-
     int
     signal_search_goertzel_impl::get_size() const { return d_size; }
 
@@ -354,11 +337,6 @@ namespace gr{
     signal_search_goertzel_impl::set_average(bool average){
       d_average = average;
       average_reset();
-    }
-
-    void 
-    signal_search_goertzel_impl::set_enable(bool enable){
-      d_enable = enable;
     }
 
     void 

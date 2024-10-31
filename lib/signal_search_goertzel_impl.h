@@ -32,8 +32,17 @@ namespace ecss
   class signal_search_goertzel_impl : public signal_search_goertzel
   {
     private:
-      bool d_state = false; //false: squelch | true: passthrough
+      float d_freq_central;
+      float d_bandwidth;
+      float d_freq_cutoff;
+      float d_threshold;
+      float d_samp_rate;
+      bool d_average;
+
+      bool volatile first;
       bool volatile d_locked;
+      bool d_state = false; //false: squelch | true: passthrough
+
       void handle_lockmsg(pmt::pmt_t msg);
 
       struct bins
@@ -53,15 +62,8 @@ namespace ecss
       float d_cosine_2;
       float d_sine_2;
       float d_limit;
-      bool volatile first;
-      bool d_average;
-      bool d_enable;
-      float d_samp_rate;
       int d_size;
-      float d_threshold;
-      float d_bandwidth;
-      float d_freq_cutoff;
-      float d_freq_central;
+
       double central_band_p, central_band_avg;
       double left_band_p, left_band_avg;
       double right_band_p, right_band_avg;
@@ -79,7 +81,7 @@ namespace ecss
       void set_size();
 
     public:
-      signal_search_goertzel_impl(bool enable, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);
+      signal_search_goertzel_impl(bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);
       ~signal_search_goertzel_impl();
 
       // Where all the action really happens
@@ -96,7 +98,6 @@ namespace ecss
       float get_freq_cutoff() const;
       float get_threshold() const;
       bool get_average() const;
-      bool get_enable() const;
       int get_size() const;
 
       void set_freq_central(float freq_central);
@@ -104,7 +105,6 @@ namespace ecss
       void set_freq_cutoff(float freq_cutoff);
       void set_threshold(float threshold);
       void set_average(bool average);
-      void set_enable(bool enable);
     };
   } // namespace ecss
 } // namespace gr

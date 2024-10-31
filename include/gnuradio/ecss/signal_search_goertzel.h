@@ -52,7 +52,6 @@ namespace gr {
             * \brief Signal Search with Goertzel Algorithm evaluation.
             *
             * \param samp_rate Sampling rate of signal;
-            * \param enable if disabeld, the block becomes transparent;
             * \param average if average (with IIR Filters) at the output of FFT is applied or not
             * \param freq_central this is the centre of the bandwidth where the signal is searched, 
             * it must be an integer multiple of the sampling frequency (samp rate).
@@ -60,7 +59,7 @@ namespace gr {
             * \param freq_cutoff value of cut-off frequency of the internal IIR used to filer the output of the internal bandwidth.
             * \param threshold it is the minimum difference that must to be between the central band and the lateral ones in order to discriminate if there is
         */
-        static sptr make(bool enable, bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);
+        static sptr make(bool average, float freq_central, float bandwidth, float freq_cutoff, float threshold, float samp_rate);
 
         /*******************************************************************
         * GET FUNCTIONS
@@ -90,11 +89,6 @@ namespace gr {
          * \brief Returns the set average policy (if enabled or not).
          */
         virtual bool get_average() const = 0;
-
-        /*!
-         * \brief Returns the set block policy (if enabled or not).
-         */
-        virtual bool get_enable() const = 0;
 
         /*!
          * \brief Returns the set fft size.
@@ -140,12 +134,6 @@ namespace gr {
          */
         virtual void set_average(bool average) = 0;
 
-        /*!
-         * \brief Set block enable (to enable or not)
-         *
-         * \param enable    (bool) new enable
-         */
-        virtual void set_enable(bool enable) = 0;
     };
   } // namespace ecss
 } // namespace gr
