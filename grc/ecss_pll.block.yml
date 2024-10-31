@@ -6,7 +6,7 @@ category: '[ecss]'
 
 templates:
     imports: from gnuradio import ecss
-    make: ecss.pll(${samp_rate}, ${N}, ${coefficients}, ${freq_central},${bw}, ${sel_loop_detector}, ${params_loop_detector})
+    make: ecss.pll(${samp_rate}, ${N}, ${coefficients}, ${freq_central},${bw}, ${sel_lock_detector}, ${params_lock_detector})
     callbacks:
     - set_coefficients(${coefficients})
     - set_freq_central(${freq_central})
@@ -33,14 +33,14 @@ parameters:
     label: Bandwidth
     dtype: real
     default: '1000.0'
--   id: sel_loop_detector
-    label: Loop Detector
+-   id: sel_lock_detector
+    label: Lock Detector
     dtype: string
     default: 'External'
     options: ['ext', 'int']
     option_labels: [ 'External', 'Internal' ]
--   id: params_loop_detector
-    label: Loop Detector Parameters
+-   id: params_lock_detector
+    label: Lock Detector Parameters
     dtype: float_vector
     default: ''
     

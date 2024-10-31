@@ -46,7 +46,7 @@ namespace gr {
       int d_N;
       double d_precision;
 
-      std::unique_ptr<LockDetector> lock_detector;  // Store selected loop detector
+      std::unique_ptr<LockDetector> lock_detector;  // Store selected lock detector
 
       double integrator_order_1, integrator_order_2_1, integrator_order_2_2;
 
@@ -82,8 +82,8 @@ namespace gr {
                 const std::vector<double> &coefficients,
                 float freq_central,
                 float bw,
-                std::string sel_loop_detector,
-                const std::vector<float> &params_loop_detector);
+                std::string sel_lock_detector,
+                const std::vector<float> &params_lock_detector);
 
       ~pll_impl();
 

@@ -47,9 +47,9 @@ namespace gr {
                float freq_central,
                float bw,
                std::string sel_lock_detector,
-               const std::vector<float> &params_loop_detector)
+               const std::vector<float> &params_lock_detector)
     {
-      return gnuradio::get_initial_sptr(new pll_impl(samp_rate, N, coefficients, freq_central, bw, sel_lock_detector, params_loop_detector));
+      return gnuradio::get_initial_sptr(new pll_impl(samp_rate, N, coefficients, freq_central, bw, sel_lock_detector, params_lock_detector));
     }
 
 //    static int ios[] = {sizeof(gr_complex), sizeof(float), sizeof(float), sizeof(int64_t)};
@@ -62,7 +62,7 @@ namespace gr {
                         float freq_central,
                         float bw,
                         std::string sel_lock_detector,
-                        const std::vector<float> &params_loop_detector)
+                        const std::vector<float> &params_lock_detector)
         : gr::sync_block( "pll",
                           gr::io_signature::make(1, 1, sizeof(gr_complex)),
                           gr::io_signature::makev(1, 4, iosig)),
@@ -92,7 +92,7 @@ namespace gr {
       }
       else if (sel_lock_detector == "int")
       {
-        lock_detector = std::make_unique<InternalLockDetector>(params_loop_detector);
+        lock_detector = std::make_unique<InternalLockDetector>(params_lock_detector);
         std::cout<<"Selected internal lock detector"<<std::endl;
       }
       else
