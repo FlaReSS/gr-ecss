@@ -99,7 +99,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1448, 88.0]
+    coordinate: [1464, 96.0]
     rotation: 0
     state: true
 - name: loop_filter_3rd_order
@@ -117,14 +117,14 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1440, 208.0]
+    coordinate: [1464, 208.0]
     rotation: 0
     state: true
 - name: loop_order_chooser
   id: variable_qtgui_chooser
   parameters:
     comment: ''
-    gui_hint: ''
+    gui_hint: 7,1,1,1
     label: PLL Loop Order
     label0: Second Order
     label1: Third Order
@@ -401,7 +401,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [776, 528.0]
+    coordinate: [776, 544.0]
     rotation: 180
     state: enabled
 - name: blocks_multiply_const_vxx_0
@@ -595,9 +595,9 @@ blocks:
     freq_central: '15000'
     maxoutbuf: '0'
     minoutbuf: '0'
-    params_loop_detector: '[0]'
+    params_lock_detector: '[]'
     samp_rate: samp_rate
-    sel_loop_detector: ext
+    sel_lock_detector: ext
   states:
     bus_sink: false
     bus_source: false
@@ -773,9 +773,9 @@ blocks:
     factor7: '1'
     factor8: '1'
     factor9: '1'
-    graph_type: qtgui.NUM_GRAPH_HORIZ
-    gui_hint: ''
-    label1: ''
+    graph_type: qtgui.NUM_GRAPH_NONE
+    gui_hint: 7,0,1,1
+    label1: Lock Status
     label10: ''
     label2: ''
     label3: ''
@@ -787,7 +787,7 @@ blocks:
     label9: ''
     max: '1'
     min: '0'
-    name: Lock
+    name: ''
     nconnections: '1'
     type: float
     unit1: ''
