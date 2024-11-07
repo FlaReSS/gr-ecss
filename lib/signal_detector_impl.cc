@@ -64,10 +64,10 @@ namespace gr {
               d_side_indexs = 2;
 
               // Intialize the window and calculate the coefficients
-              d_window = (float*) volk_malloc(d_fft_size*sizeof(float), volk_get_alignment());//fft::window::build(d_wintype, d_fft_size, 6.76);
+              d_window = (gr_complex*) volk_malloc(d_fft_size*sizeof(gr_complex), volk_get_alignment());//fft::window::build(d_wintype, d_fft_size, 6.76);
               std::vector<float> im = fft::window::build(d_wintype, d_fft_size, 6.76);
               for (int i = 0; i < d_fft_size; i++) {
-                  d_window[i] = (float) im[i];
+                  d_window[i] = std::complex<float>(im[i],0);
               }
 
               set_tag_propagation_policy(TPP_DONT);
@@ -129,9 +129,15 @@ namespace gr {
     // Perform the signal detection by FFT
     for (processed_items = 0 ; processed_items <= (noutput_items - d_fft_size*d_decimation); processed_items += d_fft_size*d_decimation) {
 
-      // Perform the windowing of the input signal
+
+      if (d_decimation > 0){
+      //Perform the windowing of the input signal
       for (int i = 0; i < d_fft_size; i++) {
         in[i] = in[processed_items + i]*d_window[i];
+      }
+      }
+      else{ 
+        volk_32fc_x2_multiply_32fc(&in[processed_items], d_window, &in[processed_items], d_fft_size); // Doesnt allow for decimation
       }
 
       for (int i = 0; i < d_fft_size; d_decimation*i++) {

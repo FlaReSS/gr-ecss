@@ -49,7 +49,9 @@ private:
   fftw_plan d_fft_plan;
 
   fft::window::win_type d_wintype;
-  float * d_window;
+  gr_complex * d_window;
+
+  gr_complex input_volk[8192];
 
 
   // Private functions
